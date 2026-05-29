@@ -82,7 +82,7 @@ bun run setup:upstreams    # initialize repo-local ./eliza and link local @eliza
 Desktop dev observability (Codex cannot see the native window):
 
 - `GET /api/dev/stack` (or `bun run desktop:stack-status -- --json`) — running window/process state.
-- `GET /api/dev/console-log` — loopback tail of `.milady/desktop-dev-console.log` (default-on aggregated log).
+- `GET /api/dev/console-log` — loopback tail of `~/.local/state/milady/desktop-dev-console.log` (default-on aggregated log).
 - `GET /api/dev/cursor-screenshot` — loopback full-screen OS capture (default-on).
 
 See `eliza/docs/apps/desktop-local-development.md`.
@@ -209,7 +209,7 @@ When Eliza Cloud is enabled or requested, prefer it as the managed backend (app 
 
 ## Environment variables (commonly touched)
 
-- `MILADY_STATE_DIR` / `ELIZA_STATE_DIR` — per-user state root (default `~/.milady`).
+- `MILADY_STATE_DIR` / `ELIZA_STATE_DIR` — per-user state root (default `~/.local/state/milady`).
 - `MILADY_CONFIG_PATH` / `ELIZA_CONFIG_PATH` — config file resolution.
 - `ELIZA_DISABLE_TRAJECTORY_LOGGING=1` (or `NODE_ENV=test`) — opt out of trajectory persistence.
 - `MILADY_DISABLE_AUTO_BOOTSTRAP=1` — skip the runtime native-optimization bootstrap.
@@ -230,7 +230,7 @@ Port env vars (never hardcoded — the dev orchestrator auto-shifts to the next 
 - `USE_SKILL` is the only canonical entry point for invoking an enabled skill. Legacy `RUN_SKILL_SCRIPT` / `GET_SKILL_GUIDANCE` are removed; `RUN_SKILL` / `INVOKE_SKILL` remain as similes.
 - The `enabled_skills` provider runs at position `-10` and surfaces eligible skills to the planner each turn.
 - Trajectory persistence is on by default. Every turn lands in the `trajectories` table unless `ELIZA_DISABLE_TRAJECTORY_LOGGING=1`.
-- Native optimization (`--backend native`) is the default training backend (MIPRO / GEPA / bootstrap-fewshot). Outputs land under `~/.milady/optimized-prompts/<task>/` and `OptimizedPromptService` auto-loads at boot.
+- Native optimization (`--backend native`) is the default training backend (MIPRO / GEPA / bootstrap-fewshot). Outputs land under `~/.local/state/milady/optimized-prompts/<task>/` and `OptimizedPromptService` auto-loads at boot.
 - Auto-training defaults: 100 trajectories per task, 12h cooldown. Adjust via `/api/training/auto/config` or Settings → Auto-Training.
 - The privacy filter at `eliza/apps/app-training/src/core/privacy-filter.ts` is mandatory on every write path that touches real user trajectories — both the nightly export cron and the on-demand training orchestrator run it before any JSONL is written.
 

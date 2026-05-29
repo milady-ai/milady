@@ -47,14 +47,14 @@ Talk mode uses your system microphone and Milady's speech-to-text pipeline. Firs
 
 ## Where does the conversation live?
 
-Right on your machine, in a local database under `~/.milady/` (Windows: `%USERPROFILE%\.milady\`).
+Right on your machine, in a local database under `~/.local/state/milady/` (Windows: `%USERPROFILE%\.local\state\milady\`).
 
 That means:
 
 - You can close Milady and reopen it later — the conversation is still there.
 - Your messages aren't synced to a Milady-owned cloud. There isn't one.
 - If you're using a cloud language model (like OpenAI), the message gets sent to them *during inference*, but the transcript is stored with you, not them.
-- Backups and migrations are your responsibility. If you want to move Milady to a new machine, copy the `~/.milady/` directory and you're done.
+- Backups and migrations are your responsibility. If you want to move Milady to a new machine, copy the `~/.local/state/milady/` directory and you're done.
 
 ## Starting a new conversation
 

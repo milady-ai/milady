@@ -1,0 +1,347 @@
+{
+  "batchIndex": 143,
+  "nodes": [
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts",
+      "type": "file",
+      "name": "capacitor-sqlite.ts",
+      "filePath": "eliza/packages/app-core/src/connectors/capacitor-sqlite.ts",
+      "summary": "capacitor-sqlite.ts is a typescript source file in the Milady codebase. It contains 5 functions, 1 class.",
+      "languageNotes": "typescript; code; 170 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts:rejectStringConcat",
+      "type": "function",
+      "name": "rejectStringConcat",
+      "filePath": "eliza/packages/app-core/src/connectors/capacitor-sqlite.ts",
+      "summary": "rejectStringConcat is a function defined in eliza/packages/app-core/src/connectors/capacitor-sqlite.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts:getCapacitorHost",
+      "type": "function",
+      "name": "getCapacitorHost",
+      "filePath": "eliza/packages/app-core/src/connectors/capacitor-sqlite.ts",
+      "summary": "getCapacitorHost is a function defined in eliza/packages/app-core/src/connectors/capacitor-sqlite.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts:isCommunitySqlitePluginRegistered",
+      "type": "function",
+      "name": "isCommunitySqlitePluginRegistered",
+      "filePath": "eliza/packages/app-core/src/connectors/capacitor-sqlite.ts",
+      "summary": "isCommunitySqlitePluginRegistered is a function defined in eliza/packages/app-core/src/connectors/capacitor-sqlite.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts:openDatabase",
+      "type": "function",
+      "name": "openDatabase",
+      "filePath": "eliza/packages/app-core/src/connectors/capacitor-sqlite.ts",
+      "summary": "openDatabase is a function defined in eliza/packages/app-core/src/connectors/capacitor-sqlite.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts:isSqliteAvailable",
+      "type": "function",
+      "name": "isSqliteAvailable",
+      "filePath": "eliza/packages/app-core/src/connectors/capacitor-sqlite.ts",
+      "summary": "isSqliteAvailable is a function defined in eliza/packages/app-core/src/connectors/capacitor-sqlite.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts:SqliteDatabaseImpl",
+      "type": "class",
+      "name": "SqliteDatabaseImpl",
+      "filePath": "eliza/packages/app-core/src/connectors/capacitor-sqlite.ts",
+      "summary": "SqliteDatabaseImpl is a class or type declared in eliza/packages/app-core/src/connectors/capacitor-sqlite.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/services/persistence.test.ts",
+      "type": "file",
+      "name": "persistence.test.ts",
+      "filePath": "eliza/packages/app-core/src/services/persistence.test.ts",
+      "summary": "persistence.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "typescript; code; 77 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/services/persistence.test.ts:fakeSqliteAdapter",
+      "type": "function",
+      "name": "fakeSqliteAdapter",
+      "filePath": "eliza/packages/app-core/src/services/persistence.test.ts",
+      "summary": "fakeSqliteAdapter is a function defined in eliza/packages/app-core/src/services/persistence.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/services/persistence.test.ts:fakePreferencesAdapter",
+      "type": "function",
+      "name": "fakePreferencesAdapter",
+      "filePath": "eliza/packages/app-core/src/services/persistence.test.ts",
+      "summary": "fakePreferencesAdapter is a function defined in eliza/packages/app-core/src/services/persistence.test.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/services/persistence.ts",
+      "type": "file",
+      "name": "persistence.ts",
+      "filePath": "eliza/packages/app-core/src/services/persistence.ts",
+      "summary": "persistence.ts is a typescript source file in the Milady codebase. It contains 4 functions, 2 classes, 1 imports.",
+      "languageNotes": "typescript; code; 180 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/services/persistence.ts:openSqliteAdapter",
+      "type": "function",
+      "name": "openSqliteAdapter",
+      "filePath": "eliza/packages/app-core/src/services/persistence.ts",
+      "summary": "openSqliteAdapter is a function defined in eliza/packages/app-core/src/services/persistence.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/services/persistence.ts:resolvePreferencesAdapter",
+      "type": "function",
+      "name": "resolvePreferencesAdapter",
+      "filePath": "eliza/packages/app-core/src/services/persistence.ts",
+      "summary": "resolvePreferencesAdapter is a function defined in eliza/packages/app-core/src/services/persistence.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/services/persistence.ts:resolveIosPersistenceAdapter",
+      "type": "function",
+      "name": "resolveIosPersistenceAdapter",
+      "filePath": "eliza/packages/app-core/src/services/persistence.ts",
+      "summary": "resolveIosPersistenceAdapter is a function defined in eliza/packages/app-core/src/services/persistence.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/services/persistence.ts:migratePreferencesToSqlite",
+      "type": "function",
+      "name": "migratePreferencesToSqlite",
+      "filePath": "eliza/packages/app-core/src/services/persistence.ts",
+      "summary": "migratePreferencesToSqlite is a function defined in eliza/packages/app-core/src/services/persistence.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/src/services/persistence.ts:IosPreferencesAdapter",
+      "type": "class",
+      "name": "IosPreferencesAdapter",
+      "filePath": "eliza/packages/app-core/src/services/persistence.ts",
+      "summary": "IosPreferencesAdapter is a class or type declared in eliza/packages/app-core/src/services/persistence.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/src/services/persistence.ts:IosSqliteAdapter",
+      "type": "class",
+      "name": "IosSqliteAdapter",
+      "filePath": "eliza/packages/app-core/src/services/persistence.ts",
+      "summary": "IosSqliteAdapter is a class or type declared in eliza/packages/app-core/src/services/persistence.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts",
+      "target": "function:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts:rejectStringConcat",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts",
+      "target": "function:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts:getCapacitorHost",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts",
+      "target": "function:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts:isCommunitySqlitePluginRegistered",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts",
+      "target": "function:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts:openDatabase",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts",
+      "target": "function:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts:isSqliteAvailable",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts",
+      "target": "class:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts:SqliteDatabaseImpl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts:isCommunitySqlitePluginRegistered",
+      "target": "function:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts:getCapacitorHost",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts:openDatabase",
+      "target": "function:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts:isCommunitySqlitePluginRegistered",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts:isSqliteAvailable",
+      "target": "function:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts:isCommunitySqlitePluginRegistered",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/persistence.test.ts",
+      "target": "function:eliza/packages/app-core/src/services/persistence.test.ts:fakeSqliteAdapter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/persistence.test.ts",
+      "target": "function:eliza/packages/app-core/src/services/persistence.test.ts:fakePreferencesAdapter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/persistence.ts",
+      "target": "function:eliza/packages/app-core/src/services/persistence.ts:openSqliteAdapter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/persistence.ts",
+      "target": "function:eliza/packages/app-core/src/services/persistence.ts:resolvePreferencesAdapter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/persistence.ts",
+      "target": "function:eliza/packages/app-core/src/services/persistence.ts:resolveIosPersistenceAdapter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/persistence.ts",
+      "target": "function:eliza/packages/app-core/src/services/persistence.ts:migratePreferencesToSqlite",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/persistence.ts",
+      "target": "class:eliza/packages/app-core/src/services/persistence.ts:IosPreferencesAdapter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/persistence.ts",
+      "target": "class:eliza/packages/app-core/src/services/persistence.ts:IosSqliteAdapter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/persistence.test.ts",
+      "target": "file:eliza/packages/app-core/src/services/persistence.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/persistence.ts",
+      "target": "file:eliza/packages/app-core/src/connectors/capacitor-sqlite.ts",
+      "type": "imports"
+    }
+  ]
+}

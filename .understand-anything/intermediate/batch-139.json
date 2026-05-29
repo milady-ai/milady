@@ -1,0 +1,317 @@
+{
+  "batchIndex": 139,
+  "nodes": [
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/__init__.py",
+      "summary": "__init__.py is a python source file in the Milady codebase. It contains 3 imports.",
+      "languageNotes": "python; code; 29 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py",
+      "type": "file",
+      "name": "config.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py",
+      "summary": "config.py is a python source file in the Milady codebase. It contains 3 functions, 1 class.",
+      "languageNotes": "python; code; 172 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py:_select_model_size",
+      "type": "function",
+      "name": "_select_model_size",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py",
+      "summary": "_select_model_size is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py:_epochs_from_steps",
+      "type": "function",
+      "name": "_epochs_from_steps",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py",
+      "summary": "_epochs_from_steps is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py:build_vendor_config",
+      "type": "function",
+      "name": "build_vendor_config",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py",
+      "summary": "build_vendor_config is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py:VendorConfigPlan",
+      "type": "class",
+      "name": "VendorConfigPlan",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py",
+      "summary": "VendorConfigPlan is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/environment.py",
+      "type": "file",
+      "name": "environment.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/environment.py",
+      "summary": "environment.py is a python source file in the Milady codebase. It contains 1 function, 1 class.",
+      "languageNotes": "python; code; 77 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/environment.py:probe_vendor_environment",
+      "type": "function",
+      "name": "probe_vendor_environment",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/environment.py",
+      "summary": "probe_vendor_environment is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/environment.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/environment.py:VendorEnvironment",
+      "type": "class",
+      "name": "VendorEnvironment",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/environment.py",
+      "summary": "VendorEnvironment is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/environment.py."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py",
+      "type": "file",
+      "name": "runner.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py",
+      "summary": "runner.py is a python source file in the Milady codebase. It contains 4 functions, 2 imports.",
+      "languageNotes": "python; code; 261 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py:_ensure_vendor_on_path",
+      "type": "function",
+      "name": "_ensure_vendor_on_path",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py",
+      "summary": "_ensure_vendor_on_path is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py:_replace_optimizer_with_apollo",
+      "type": "function",
+      "name": "_replace_optimizer_with_apollo",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py",
+      "summary": "_replace_optimizer_with_apollo is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py:run_full_finetune",
+      "type": "function",
+      "name": "run_full_finetune",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py",
+      "summary": "run_full_finetune is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py:smoke_full_finetune",
+      "type": "function",
+      "name": "smoke_full_finetune",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py",
+      "summary": "smoke_full_finetune is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py:_select_model_size",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py:_epochs_from_steps",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py:build_vendor_config",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py:VendorConfigPlan",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py:build_vendor_config",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py:_epochs_from_steps",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/environment.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/environment.py:probe_vendor_environment",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/environment.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/environment.py:VendorEnvironment",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py:_ensure_vendor_on_path",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py:_replace_optimizer_with_apollo",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py:run_full_finetune",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py:smoke_full_finetune",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py:run_full_finetune",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py:_ensure_vendor_on_path",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py:run_full_finetune",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py:_replace_optimizer_with_apollo",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py:smoke_full_finetune",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py:_ensure_vendor_on_path",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/__init__.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/__init__.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/environment.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/__init__.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/config.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/runner.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/eliza_adapter/environment.py",
+      "type": "imports"
+    }
+  ]
+}

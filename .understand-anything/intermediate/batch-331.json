@@ -1,0 +1,812 @@
+{
+  "batchIndex": 331,
+  "nodes": [
+    {
+      "tags": [
+        "api"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/api/client-types-experience.ts",
+      "type": "file",
+      "name": "client-types-experience.ts",
+      "filePath": "eliza/packages/ui/src/api/client-types-experience.ts",
+      "summary": "client-types-experience.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 103 lines"
+    },
+    {
+      "tags": [
+        "api",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/api/cloud-setup.ts",
+      "type": "file",
+      "name": "cloud-setup.ts",
+      "filePath": "eliza/packages/ui/src/api/cloud-setup.ts",
+      "summary": "cloud-setup.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 208 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/api/cloud-setup.ts:useCloudSetupSession",
+      "type": "function",
+      "name": "useCloudSetupSession",
+      "filePath": "eliza/packages/ui/src/api/cloud-setup.ts",
+      "summary": "useCloudSetupSession is a function defined in eliza/packages/ui/src/api/cloud-setup.ts."
+    },
+    {
+      "tags": [
+        "api",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/api/response.ts",
+      "type": "file",
+      "name": "response.ts",
+      "filePath": "eliza/packages/ui/src/api/response.ts",
+      "summary": "response.ts is a typescript source file in the Milady codebase. It contains 3 functions.",
+      "languageNotes": "typescript; code; 47 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/api/response.ts:scrubStackFields",
+      "type": "function",
+      "name": "scrubStackFields",
+      "filePath": "eliza/packages/ui/src/api/response.ts",
+      "summary": "scrubStackFields is a function defined in eliza/packages/ui/src/api/response.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/api/response.ts:sendJson",
+      "type": "function",
+      "name": "sendJson",
+      "filePath": "eliza/packages/ui/src/api/response.ts",
+      "summary": "sendJson is a function defined in eliza/packages/ui/src/api/response.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/api/response.ts:sendJsonError",
+      "type": "function",
+      "name": "sendJsonError",
+      "filePath": "eliza/packages/ui/src/api/response.ts",
+      "summary": "sendJsonError is a function defined in eliza/packages/ui/src/api/response.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/browser.ts",
+      "type": "file",
+      "name": "browser.ts",
+      "filePath": "eliza/packages/ui/src/browser.ts",
+      "summary": "browser.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 171 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/accordion.tsx",
+      "type": "file",
+      "name": "accordion.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/accordion.tsx",
+      "summary": "accordion.tsx is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/ai-elements/canvas.tsx",
+      "type": "file",
+      "name": "canvas.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/ai-elements/canvas.tsx",
+      "summary": "canvas.tsx is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 21 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/ai-elements/canvas.tsx:Canvas",
+      "type": "function",
+      "name": "Canvas",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/ai-elements/canvas.tsx",
+      "summary": "Canvas is a function defined in eliza/packages/ui/src/cloud-ui/components/ai-elements/canvas.tsx."
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/ai-elements/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/ai-elements/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 28 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/alert.tsx",
+      "type": "file",
+      "name": "alert.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/alert.tsx",
+      "summary": "alert.tsx is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/analytics/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/analytics/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 15 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/animated-tabs.tsx",
+      "type": "file",
+      "name": "animated-tabs.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/animated-tabs.tsx",
+      "summary": "animated-tabs.tsx is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 126 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/animated-tabs.tsx:AnimatedTabs",
+      "type": "function",
+      "name": "AnimatedTabs",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/animated-tabs.tsx",
+      "summary": "AnimatedTabs is a function defined in eliza/packages/ui/src/cloud-ui/components/animated-tabs.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/brand/cloud-sky-background.tsx",
+      "type": "file",
+      "name": "cloud-sky-background.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/brand/cloud-sky-background.tsx",
+      "summary": "cloud-sky-background.tsx is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 387 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/brand/cloud-sky-background.tsx:CloudSkyBackground",
+      "type": "function",
+      "name": "CloudSkyBackground",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/brand/cloud-sky-background.tsx",
+      "summary": "CloudSkyBackground is a function defined in eliza/packages/ui/src/cloud-ui/components/brand/cloud-sky-background.tsx."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/calendar.tsx",
+      "type": "file",
+      "name": "calendar.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/calendar.tsx",
+      "summary": "calendar.tsx is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/chart.tsx",
+      "type": "file",
+      "name": "chart.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/chart.tsx",
+      "summary": "chart.tsx is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/checkbox.tsx",
+      "type": "file",
+      "name": "checkbox.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/checkbox.tsx",
+      "summary": "checkbox.tsx is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/code/json-syntax-highlighter.tsx",
+      "type": "file",
+      "name": "json-syntax-highlighter.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/code/json-syntax-highlighter.tsx",
+      "summary": "json-syntax-highlighter.tsx is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 103 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/code/json-syntax-highlighter.tsx:JsonSyntaxHighlighter",
+      "type": "function",
+      "name": "JsonSyntaxHighlighter",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/code/json-syntax-highlighter.tsx",
+      "summary": "JsonSyntaxHighlighter is a function defined in eliza/packages/ui/src/cloud-ui/components/code/json-syntax-highlighter.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/code/monaco-editor-skeleton.tsx",
+      "type": "file",
+      "name": "monaco-editor-skeleton.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/code/monaco-editor-skeleton.tsx",
+      "summary": "monaco-editor-skeleton.tsx is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 28 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/code/monaco-editor-skeleton.tsx:MonacoEditorSkeleton",
+      "type": "function",
+      "name": "MonacoEditorSkeleton",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/code/monaco-editor-skeleton.tsx",
+      "summary": "MonacoEditorSkeleton is a function defined in eliza/packages/ui/src/cloud-ui/components/code/monaco-editor-skeleton.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/dashboard/dashboard-route-error.tsx",
+      "type": "file",
+      "name": "dashboard-route-error.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/dashboard/dashboard-route-error.tsx",
+      "summary": "dashboard-route-error.tsx is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 55 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/dashboard/dashboard-route-error.tsx:formatDashboardRouteErrorMessage",
+      "type": "function",
+      "name": "formatDashboardRouteErrorMessage",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/dashboard/dashboard-route-error.tsx",
+      "summary": "formatDashboardRouteErrorMessage is a function defined in eliza/packages/ui/src/cloud-ui/components/dashboard/dashboard-route-error.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/dashboard/dashboard-route-error.tsx:DashboardRouteError",
+      "type": "function",
+      "name": "DashboardRouteError",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/dashboard/dashboard-route-error.tsx",
+      "summary": "DashboardRouteError is a function defined in eliza/packages/ui/src/cloud-ui/components/dashboard/dashboard-route-error.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/dashboard/route-placeholders.tsx",
+      "type": "file",
+      "name": "route-placeholders.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/dashboard/route-placeholders.tsx",
+      "summary": "route-placeholders.tsx is a typescript source file in the Milady codebase. It contains 4 functions.",
+      "languageNotes": "typescript; code; 71 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/dashboard/route-placeholders.tsx:SkeletonBlock",
+      "type": "function",
+      "name": "SkeletonBlock",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/dashboard/route-placeholders.tsx",
+      "summary": "SkeletonBlock is a function defined in eliza/packages/ui/src/cloud-ui/components/dashboard/route-placeholders.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/dashboard/route-placeholders.tsx:DashboardLoadingState",
+      "type": "function",
+      "name": "DashboardLoadingState",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/dashboard/route-placeholders.tsx",
+      "summary": "DashboardLoadingState is a function defined in eliza/packages/ui/src/cloud-ui/components/dashboard/route-placeholders.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/dashboard/route-placeholders.tsx:DashboardEndpointPending",
+      "type": "function",
+      "name": "DashboardEndpointPending",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/dashboard/route-placeholders.tsx",
+      "summary": "DashboardEndpointPending is a function defined in eliza/packages/ui/src/cloud-ui/components/dashboard/route-placeholders.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/dashboard/route-placeholders.tsx:DashboardErrorState",
+      "type": "function",
+      "name": "DashboardErrorState",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/dashboard/route-placeholders.tsx",
+      "summary": "DashboardErrorState is a function defined in eliza/packages/ui/src/cloud-ui/components/dashboard/route-placeholders.tsx."
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/data-list/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/data-list/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 55 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/dialog.tsx",
+      "type": "file",
+      "name": "dialog.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/dialog.tsx",
+      "summary": "dialog.tsx is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/docs/docs-layout.tsx",
+      "type": "file",
+      "name": "docs-layout.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/docs-layout.tsx",
+      "summary": "docs-layout.tsx is a typescript source file in the Milady codebase. It contains 3 functions, 1 imports.",
+      "languageNotes": "typescript; code; 78 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/docs/docs-layout.tsx:isActivePath",
+      "type": "function",
+      "name": "isActivePath",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/docs-layout.tsx",
+      "summary": "isActivePath is a function defined in eliza/packages/ui/src/cloud-ui/components/docs/docs-layout.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/docs/docs-layout.tsx:NavItems",
+      "type": "function",
+      "name": "NavItems",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/docs-layout.tsx",
+      "summary": "NavItems is a function defined in eliza/packages/ui/src/cloud-ui/components/docs/docs-layout.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/docs/docs-layout.tsx:DocsLayout",
+      "type": "function",
+      "name": "DocsLayout",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/docs-layout.tsx",
+      "summary": "DocsLayout is a function defined in eliza/packages/ui/src/cloud-ui/components/docs/docs-layout.tsx."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/docs/docs-types.ts",
+      "type": "file",
+      "name": "docs-types.ts",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/docs-types.ts",
+      "summary": "docs-types.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 22 lines"
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/docs/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 25 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/docs/llms-txt-badge.tsx",
+      "type": "file",
+      "name": "llms-txt-badge.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/llms-txt-badge.tsx",
+      "summary": "llms-txt-badge.tsx is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 51 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/docs/llms-txt-badge.tsx:LlmsTxtBadge",
+      "type": "function",
+      "name": "LlmsTxtBadge",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/llms-txt-badge.tsx",
+      "summary": "LlmsTxtBadge is a function defined in eliza/packages/ui/src/cloud-ui/components/docs/llms-txt-badge.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx",
+      "type": "file",
+      "name": "mdx-components.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx",
+      "summary": "mdx-components.tsx is a typescript source file in the Milady codebase. It contains 6 functions.",
+      "languageNotes": "typescript; code; 90 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx:Callout",
+      "type": "function",
+      "name": "Callout",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx",
+      "summary": "Callout is a function defined in eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx:CardsCard",
+      "type": "function",
+      "name": "CardsCard",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx",
+      "summary": "CardsCard is a function defined in eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx:Cards",
+      "type": "function",
+      "name": "Cards",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx",
+      "summary": "Cards is a function defined in eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx:Steps",
+      "type": "function",
+      "name": "Steps",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx",
+      "summary": "Steps is a function defined in eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx:TabsTab",
+      "type": "function",
+      "name": "TabsTab",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx",
+      "summary": "TabsTab is a function defined in eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx:Tabs",
+      "type": "function",
+      "name": "Tabs",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx",
+      "summary": "Tabs is a function defined in eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/api/cloud-setup.ts",
+      "target": "function:eliza/packages/ui/src/api/cloud-setup.ts:useCloudSetupSession",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/api/response.ts",
+      "target": "function:eliza/packages/ui/src/api/response.ts:scrubStackFields",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/api/response.ts",
+      "target": "function:eliza/packages/ui/src/api/response.ts:sendJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/api/response.ts",
+      "target": "function:eliza/packages/ui/src/api/response.ts:sendJsonError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/api/response.ts:sendJson",
+      "target": "function:eliza/packages/ui/src/api/response.ts:scrubStackFields",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/api/response.ts:sendJsonError",
+      "target": "function:eliza/packages/ui/src/api/response.ts:sendJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/ai-elements/canvas.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/ai-elements/canvas.tsx:Canvas",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/animated-tabs.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/animated-tabs.tsx:AnimatedTabs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/brand/cloud-sky-background.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/brand/cloud-sky-background.tsx:CloudSkyBackground",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/code/json-syntax-highlighter.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/code/json-syntax-highlighter.tsx:JsonSyntaxHighlighter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/code/monaco-editor-skeleton.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/code/monaco-editor-skeleton.tsx:MonacoEditorSkeleton",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/dashboard/dashboard-route-error.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/dashboard/dashboard-route-error.tsx:formatDashboardRouteErrorMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/dashboard/dashboard-route-error.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/dashboard/dashboard-route-error.tsx:DashboardRouteError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/dashboard/route-placeholders.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/dashboard/route-placeholders.tsx:SkeletonBlock",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/dashboard/route-placeholders.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/dashboard/route-placeholders.tsx:DashboardLoadingState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/dashboard/route-placeholders.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/dashboard/route-placeholders.tsx:DashboardEndpointPending",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/dashboard/route-placeholders.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/dashboard/route-placeholders.tsx:DashboardErrorState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/docs-layout.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/docs-layout.tsx:isActivePath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/docs-layout.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/docs-layout.tsx:NavItems",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/docs-layout.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/docs-layout.tsx:DocsLayout",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/cloud-ui/components/docs/docs-layout.tsx:NavItems",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/docs-layout.tsx:isActivePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/llms-txt-badge.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/llms-txt-badge.tsx:LlmsTxtBadge",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx:Callout",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx:CardsCard",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx:Cards",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx:Steps",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx:TabsTab",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/mdx-components.tsx:Tabs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/docs-layout.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/docs/docs-types.ts",
+      "type": "imports"
+    }
+  ]
+}

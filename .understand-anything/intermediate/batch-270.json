@@ -1,0 +1,957 @@
+{
+  "batchIndex": 270,
+  "nodes": [
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/app/src/ambient-eliza-apps.d.ts",
+      "type": "file",
+      "name": "ambient-eliza-apps.d.ts",
+      "filePath": "apps/app/src/ambient-eliza-apps.d.ts",
+      "summary": "ambient-eliza-apps.d.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 20 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/app/src/capacitor-plugin-modules.d.ts",
+      "type": "file",
+      "name": "capacitor-plugin-modules.d.ts",
+      "filePath": "apps/app/src/capacitor-plugin-modules.d.ts",
+      "summary": "capacitor-plugin-modules.d.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 10 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:apps/app/src/elizaos-app-core-shim.d.ts",
+      "type": "file",
+      "name": "elizaos-app-core-shim.d.ts",
+      "filePath": "apps/app/src/elizaos-app-core-shim.d.ts",
+      "summary": "elizaos-app-core-shim.d.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 272 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/app/src/secure-store/audit.ts",
+      "type": "file",
+      "name": "audit.ts",
+      "filePath": "apps/app/src/secure-store/audit.ts",
+      "summary": "audit.ts is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 58 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/src/secure-store/audit.ts:setClientAuditEmitter",
+      "type": "function",
+      "name": "setClientAuditEmitter",
+      "filePath": "apps/app/src/secure-store/audit.ts",
+      "summary": "setClientAuditEmitter is a function defined in apps/app/src/secure-store/audit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/src/secure-store/audit.ts:emitClientAudit",
+      "type": "function",
+      "name": "emitClientAudit",
+      "filePath": "apps/app/src/secure-store/audit.ts",
+      "summary": "emitClientAudit is a function defined in apps/app/src/secure-store/audit.ts."
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/app/src/secure-store/capacitor-backend.ts",
+      "type": "file",
+      "name": "capacitor-backend.ts",
+      "filePath": "apps/app/src/secure-store/capacitor-backend.ts",
+      "summary": "capacitor-backend.ts is a typescript source file in the Milady codebase. It contains 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 49 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:apps/app/src/secure-store/capacitor-backend.ts:CapacitorSecureStore",
+      "type": "class",
+      "name": "CapacitorSecureStore",
+      "filePath": "apps/app/src/secure-store/capacitor-backend.ts",
+      "summary": "CapacitorSecureStore is a class or type declared in apps/app/src/secure-store/capacitor-backend.ts."
+    },
+    {
+      "tags": [
+        "desktop",
+        "class",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/app/src/secure-store/electrobun-backend.ts",
+      "type": "file",
+      "name": "electrobun-backend.ts",
+      "filePath": "apps/app/src/secure-store/electrobun-backend.ts",
+      "summary": "electrobun-backend.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 63 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/src/secure-store/electrobun-backend.ts:detectElectrobunKeychain",
+      "type": "function",
+      "name": "detectElectrobunKeychain",
+      "filePath": "apps/app/src/secure-store/electrobun-backend.ts",
+      "summary": "detectElectrobunKeychain is a function defined in apps/app/src/secure-store/electrobun-backend.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:apps/app/src/secure-store/electrobun-backend.ts:ElectrobunSecureStore",
+      "type": "class",
+      "name": "ElectrobunSecureStore",
+      "filePath": "apps/app/src/secure-store/electrobun-backend.ts",
+      "summary": "ElectrobunSecureStore is a class or type declared in apps/app/src/secure-store/electrobun-backend.ts."
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/app/src/secure-store/memory-backend.ts",
+      "type": "file",
+      "name": "memory-backend.ts",
+      "filePath": "apps/app/src/secure-store/memory-backend.ts",
+      "summary": "memory-backend.ts is a typescript source file in the Milady codebase. It contains 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 24 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:apps/app/src/secure-store/memory-backend.ts:MemorySecureStore",
+      "type": "class",
+      "name": "MemorySecureStore",
+      "filePath": "apps/app/src/secure-store/memory-backend.ts",
+      "summary": "MemorySecureStore is a class or type declared in apps/app/src/secure-store/memory-backend.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/app/src/secure-store/migration.ts",
+      "type": "file",
+      "name": "migration.ts",
+      "filePath": "apps/app/src/secure-store/migration.ts",
+      "summary": "migration.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 58 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/src/secure-store/migration.ts:migrateLegacyLocalStorage",
+      "type": "function",
+      "name": "migrateLegacyLocalStorage",
+      "filePath": "apps/app/src/secure-store/migration.ts",
+      "summary": "migrateLegacyLocalStorage is a function defined in apps/app/src/secure-store/migration.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/src/secure-store/migration.ts:_resetMigrationSentinelForTests",
+      "type": "function",
+      "name": "_resetMigrationSentinelForTests",
+      "filePath": "apps/app/src/secure-store/migration.ts",
+      "summary": "_resetMigrationSentinelForTests is a function defined in apps/app/src/secure-store/migration.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/app/src/secure-store/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "apps/app/src/secure-store/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 48 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/src/secure-store/types.ts:isSensitiveKey",
+      "type": "function",
+      "name": "isSensitiveKey",
+      "filePath": "apps/app/src/secure-store/types.ts",
+      "summary": "isSensitiveKey is a function defined in apps/app/src/secure-store/types.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/app/src/secure-store/webcrypto-backend.ts",
+      "type": "file",
+      "name": "webcrypto-backend.ts",
+      "filePath": "apps/app/src/secure-store/webcrypto-backend.ts",
+      "summary": "webcrypto-backend.ts is a typescript source file in the Milady codebase. It contains 3 functions, 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 141 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/src/secure-store/webcrypto-backend.ts:toBase64",
+      "type": "function",
+      "name": "toBase64",
+      "filePath": "apps/app/src/secure-store/webcrypto-backend.ts",
+      "summary": "toBase64 is a function defined in apps/app/src/secure-store/webcrypto-backend.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/src/secure-store/webcrypto-backend.ts:fromBase64",
+      "type": "function",
+      "name": "fromBase64",
+      "filePath": "apps/app/src/secure-store/webcrypto-backend.ts",
+      "summary": "fromBase64 is a function defined in apps/app/src/secure-store/webcrypto-backend.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/src/secure-store/webcrypto-backend.ts:deriveKey",
+      "type": "function",
+      "name": "deriveKey",
+      "filePath": "apps/app/src/secure-store/webcrypto-backend.ts",
+      "summary": "deriveKey is a function defined in apps/app/src/secure-store/webcrypto-backend.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:apps/app/src/secure-store/webcrypto-backend.ts:WebCryptoSecureStore",
+      "type": "class",
+      "name": "WebCryptoSecureStore",
+      "filePath": "apps/app/src/secure-store/webcrypto-backend.ts",
+      "summary": "WebCryptoSecureStore is a class or type declared in apps/app/src/secure-store/webcrypto-backend.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/app/src/security/release-trust-anchor.ts",
+      "type": "file",
+      "name": "release-trust-anchor.ts",
+      "filePath": "apps/app/src/security/release-trust-anchor.ts",
+      "summary": "release-trust-anchor.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 50 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/src/security/release-trust-anchor.ts:isPlaceholderPublicKey",
+      "type": "function",
+      "name": "isPlaceholderPublicKey",
+      "filePath": "apps/app/src/security/release-trust-anchor.ts",
+      "summary": "isPlaceholderPublicKey is a function defined in apps/app/src/security/release-trust-anchor.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/app/src/security/SecurityConsent.tsx",
+      "type": "file",
+      "name": "SecurityConsent.tsx",
+      "filePath": "apps/app/src/security/SecurityConsent.tsx",
+      "summary": "SecurityConsent.tsx is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 102 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/src/security/SecurityConsent.tsx:SecurityConsent",
+      "type": "function",
+      "name": "SecurityConsent",
+      "filePath": "apps/app/src/security/SecurityConsent.tsx",
+      "summary": "SecurityConsent is a function defined in apps/app/src/security/SecurityConsent.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/app/src/security/update-verifier.ts",
+      "type": "file",
+      "name": "update-verifier.ts",
+      "filePath": "apps/app/src/security/update-verifier.ts",
+      "summary": "update-verifier.ts is a typescript source file in the Milady codebase. It contains 3 functions, 2 imports.",
+      "languageNotes": "typescript; code; 192 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/src/security/update-verifier.ts:systemKeyId",
+      "type": "function",
+      "name": "systemKeyId",
+      "filePath": "apps/app/src/security/update-verifier.ts",
+      "summary": "systemKeyId is a function defined in apps/app/src/security/update-verifier.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:apps/app/src/security/update-verifier.ts:createUpdateVerifier",
+      "type": "function",
+      "name": "createUpdateVerifier",
+      "filePath": "apps/app/src/security/update-verifier.ts",
+      "summary": "createUpdateVerifier is a function defined in apps/app/src/security/update-verifier.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/src/security/update-verifier.ts:bumpFailure",
+      "type": "function",
+      "name": "bumpFailure",
+      "filePath": "apps/app/src/security/update-verifier.ts",
+      "summary": "bumpFailure is a function defined in apps/app/src/security/update-verifier.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/app/src/security/vision-consent.ts",
+      "type": "file",
+      "name": "vision-consent.ts",
+      "filePath": "apps/app/src/security/vision-consent.ts",
+      "summary": "vision-consent.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 103 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/src/security/vision-consent.ts:createVisionConsentStore",
+      "type": "function",
+      "name": "createVisionConsentStore",
+      "filePath": "apps/app/src/security/vision-consent.ts",
+      "summary": "createVisionConsentStore is a function defined in apps/app/src/security/vision-consent.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/app/test/package-mode-aliases.test.ts",
+      "type": "file",
+      "name": "package-mode-aliases.test.ts",
+      "filePath": "apps/app/test/package-mode-aliases.test.ts",
+      "summary": "package-mode-aliases.test.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 108 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/app/test/stubs/app-core-bridge.ts",
+      "type": "file",
+      "name": "app-core-bridge.ts",
+      "filePath": "apps/app/test/stubs/app-core-bridge.ts",
+      "summary": "app-core-bridge.ts is a typescript source file in the Milady codebase. It contains 11 functions.",
+      "languageNotes": "typescript; code; 120 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/stubs/app-core-bridge.ts:getRuntimeWindow",
+      "type": "function",
+      "name": "getRuntimeWindow",
+      "filePath": "apps/app/test/stubs/app-core-bridge.ts",
+      "summary": "getRuntimeWindow is a function defined in apps/app/test/stubs/app-core-bridge.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/stubs/app-core-bridge.ts:getElectrobunRendererRpc",
+      "type": "function",
+      "name": "getElectrobunRendererRpc",
+      "filePath": "apps/app/test/stubs/app-core-bridge.ts",
+      "summary": "getElectrobunRendererRpc is a function defined in apps/app/test/stubs/app-core-bridge.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/stubs/app-core-bridge.ts:hasElectrobunRendererBridge",
+      "type": "function",
+      "name": "hasElectrobunRendererBridge",
+      "filePath": "apps/app/test/stubs/app-core-bridge.ts",
+      "summary": "hasElectrobunRendererBridge is a function defined in apps/app/test/stubs/app-core-bridge.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/stubs/app-core-bridge.ts:isElectrobunRuntime",
+      "type": "function",
+      "name": "isElectrobunRuntime",
+      "filePath": "apps/app/test/stubs/app-core-bridge.ts",
+      "summary": "isElectrobunRuntime is a function defined in apps/app/test/stubs/app-core-bridge.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/stubs/app-core-bridge.ts:getBackendStartupTimeoutMs",
+      "type": "function",
+      "name": "getBackendStartupTimeoutMs",
+      "filePath": "apps/app/test/stubs/app-core-bridge.ts",
+      "summary": "getBackendStartupTimeoutMs is a function defined in apps/app/test/stubs/app-core-bridge.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/stubs/app-core-bridge.ts:invokeDesktopBridgeRequest",
+      "type": "function",
+      "name": "invokeDesktopBridgeRequest",
+      "filePath": "apps/app/test/stubs/app-core-bridge.ts",
+      "summary": "invokeDesktopBridgeRequest is a function defined in apps/app/test/stubs/app-core-bridge.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/stubs/app-core-bridge.ts:invokeDesktopBridgeRequestWithTimeout",
+      "type": "function",
+      "name": "invokeDesktopBridgeRequestWithTimeout",
+      "filePath": "apps/app/test/stubs/app-core-bridge.ts",
+      "summary": "invokeDesktopBridgeRequestWithTimeout is a function defined in apps/app/test/stubs/app-core-bridge.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/stubs/app-core-bridge.ts:subscribeDesktopBridgeEvent",
+      "type": "function",
+      "name": "subscribeDesktopBridgeEvent",
+      "filePath": "apps/app/test/stubs/app-core-bridge.ts",
+      "summary": "subscribeDesktopBridgeEvent is a function defined in apps/app/test/stubs/app-core-bridge.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/stubs/app-core-bridge.ts:initializeCapacitorBridge",
+      "type": "function",
+      "name": "initializeCapacitorBridge",
+      "filePath": "apps/app/test/stubs/app-core-bridge.ts",
+      "summary": "initializeCapacitorBridge is a function defined in apps/app/test/stubs/app-core-bridge.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/stubs/app-core-bridge.ts:initializeStorageBridge",
+      "type": "function",
+      "name": "initializeStorageBridge",
+      "filePath": "apps/app/test/stubs/app-core-bridge.ts",
+      "summary": "initializeStorageBridge is a function defined in apps/app/test/stubs/app-core-bridge.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/stubs/app-core-bridge.ts:scanProviderCredentials",
+      "type": "function",
+      "name": "scanProviderCredentials",
+      "filePath": "apps/app/test/stubs/app-core-bridge.ts",
+      "summary": "scanProviderCredentials is a function defined in apps/app/test/stubs/app-core-bridge.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/app/test/utils/get-free-port.mjs",
+      "type": "file",
+      "name": "get-free-port.mjs",
+      "filePath": "apps/app/test/utils/get-free-port.mjs",
+      "summary": "get-free-port.mjs is a javascript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "javascript; code; 18 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/utils/get-free-port.mjs:getFreePort",
+      "type": "function",
+      "name": "getFreePort",
+      "filePath": "apps/app/test/utils/get-free-port.mjs",
+      "summary": "getFreePort is a function defined in apps/app/test/utils/get-free-port.mjs."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/app/test/vite/ui-source-aliases.test.ts",
+      "type": "file",
+      "name": "ui-source-aliases.test.ts",
+      "filePath": "apps/app/test/vite/ui-source-aliases.test.ts",
+      "summary": "ui-source-aliases.test.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 20 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/app/vitest.config.ts",
+      "type": "file",
+      "name": "vitest.config.ts",
+      "filePath": "apps/app/vitest.config.ts",
+      "summary": "vitest.config.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 72 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/app/vitest.e2e.config.ts",
+      "type": "file",
+      "name": "vitest.e2e.config.ts",
+      "filePath": "apps/app/vitest.e2e.config.ts",
+      "summary": "vitest.e2e.config.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 12 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/homepage/playwright.config.ts",
+      "type": "file",
+      "name": "playwright.config.ts",
+      "filePath": "apps/homepage/playwright.config.ts",
+      "summary": "playwright.config.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 40 lines"
+    },
+    {
+      "tags": [
+        "frontend"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/homepage/public/404.html",
+      "type": "file",
+      "name": "404.html",
+      "filePath": "apps/homepage/public/404.html",
+      "summary": "404.html is a html source file in the Milady codebase.",
+      "languageNotes": "html; markup; 27 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/homepage/public/animations/idle.glb",
+      "type": "file",
+      "name": "idle.glb",
+      "filePath": "apps/homepage/public/animations/idle.glb",
+      "summary": "idle.glb is a glb source file in the Milady codebase.",
+      "languageNotes": "glb; code; 3 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/homepage/public/CNAME",
+      "type": "file",
+      "name": "CNAME",
+      "filePath": "apps/homepage/public/CNAME",
+      "summary": "CNAME is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 1 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/homepage/public/site.webmanifest",
+      "type": "file",
+      "name": "site.webmanifest",
+      "filePath": "apps/homepage/public/site.webmanifest",
+      "summary": "site.webmanifest is a webmanifest source file in the Milady codebase.",
+      "languageNotes": "webmanifest; code; 26 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/src/secure-store/audit.ts",
+      "target": "function:apps/app/src/secure-store/audit.ts:setClientAuditEmitter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/src/secure-store/audit.ts",
+      "target": "function:apps/app/src/secure-store/audit.ts:emitClientAudit",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/src/secure-store/capacitor-backend.ts",
+      "target": "class:apps/app/src/secure-store/capacitor-backend.ts:CapacitorSecureStore",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/src/secure-store/electrobun-backend.ts",
+      "target": "function:apps/app/src/secure-store/electrobun-backend.ts:detectElectrobunKeychain",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/src/secure-store/electrobun-backend.ts",
+      "target": "class:apps/app/src/secure-store/electrobun-backend.ts:ElectrobunSecureStore",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/src/secure-store/memory-backend.ts",
+      "target": "class:apps/app/src/secure-store/memory-backend.ts:MemorySecureStore",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/src/secure-store/migration.ts",
+      "target": "function:apps/app/src/secure-store/migration.ts:migrateLegacyLocalStorage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/src/secure-store/migration.ts",
+      "target": "function:apps/app/src/secure-store/migration.ts:_resetMigrationSentinelForTests",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/src/secure-store/types.ts",
+      "target": "function:apps/app/src/secure-store/types.ts:isSensitiveKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/src/secure-store/webcrypto-backend.ts",
+      "target": "function:apps/app/src/secure-store/webcrypto-backend.ts:toBase64",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/src/secure-store/webcrypto-backend.ts",
+      "target": "function:apps/app/src/secure-store/webcrypto-backend.ts:fromBase64",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/src/secure-store/webcrypto-backend.ts",
+      "target": "function:apps/app/src/secure-store/webcrypto-backend.ts:deriveKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/src/secure-store/webcrypto-backend.ts",
+      "target": "class:apps/app/src/secure-store/webcrypto-backend.ts:WebCryptoSecureStore",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/src/security/release-trust-anchor.ts",
+      "target": "function:apps/app/src/security/release-trust-anchor.ts:isPlaceholderPublicKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/src/security/SecurityConsent.tsx",
+      "target": "function:apps/app/src/security/SecurityConsent.tsx:SecurityConsent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/src/security/update-verifier.ts",
+      "target": "function:apps/app/src/security/update-verifier.ts:systemKeyId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/src/security/update-verifier.ts",
+      "target": "function:apps/app/src/security/update-verifier.ts:createUpdateVerifier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/src/security/update-verifier.ts",
+      "target": "function:apps/app/src/security/update-verifier.ts:bumpFailure",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/src/security/vision-consent.ts",
+      "target": "function:apps/app/src/security/vision-consent.ts:createVisionConsentStore",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/stubs/app-core-bridge.ts",
+      "target": "function:apps/app/test/stubs/app-core-bridge.ts:getRuntimeWindow",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/stubs/app-core-bridge.ts",
+      "target": "function:apps/app/test/stubs/app-core-bridge.ts:getElectrobunRendererRpc",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/stubs/app-core-bridge.ts",
+      "target": "function:apps/app/test/stubs/app-core-bridge.ts:hasElectrobunRendererBridge",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/stubs/app-core-bridge.ts",
+      "target": "function:apps/app/test/stubs/app-core-bridge.ts:isElectrobunRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/stubs/app-core-bridge.ts",
+      "target": "function:apps/app/test/stubs/app-core-bridge.ts:getBackendStartupTimeoutMs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/stubs/app-core-bridge.ts",
+      "target": "function:apps/app/test/stubs/app-core-bridge.ts:invokeDesktopBridgeRequest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/stubs/app-core-bridge.ts",
+      "target": "function:apps/app/test/stubs/app-core-bridge.ts:invokeDesktopBridgeRequestWithTimeout",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/stubs/app-core-bridge.ts",
+      "target": "function:apps/app/test/stubs/app-core-bridge.ts:subscribeDesktopBridgeEvent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/stubs/app-core-bridge.ts",
+      "target": "function:apps/app/test/stubs/app-core-bridge.ts:initializeCapacitorBridge",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/stubs/app-core-bridge.ts",
+      "target": "function:apps/app/test/stubs/app-core-bridge.ts:initializeStorageBridge",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/stubs/app-core-bridge.ts",
+      "target": "function:apps/app/test/stubs/app-core-bridge.ts:scanProviderCredentials",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/stubs/app-core-bridge.ts:getElectrobunRendererRpc",
+      "target": "function:apps/app/test/stubs/app-core-bridge.ts:getRuntimeWindow",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/stubs/app-core-bridge.ts:hasElectrobunRendererBridge",
+      "target": "function:apps/app/test/stubs/app-core-bridge.ts:getElectrobunRendererRpc",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/stubs/app-core-bridge.ts:isElectrobunRuntime",
+      "target": "function:apps/app/test/stubs/app-core-bridge.ts:getRuntimeWindow",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/stubs/app-core-bridge.ts:isElectrobunRuntime",
+      "target": "function:apps/app/test/stubs/app-core-bridge.ts:hasElectrobunRendererBridge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/stubs/app-core-bridge.ts:getBackendStartupTimeoutMs",
+      "target": "function:apps/app/test/stubs/app-core-bridge.ts:isElectrobunRuntime",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/stubs/app-core-bridge.ts:invokeDesktopBridgeRequest",
+      "target": "function:apps/app/test/stubs/app-core-bridge.ts:getElectrobunRendererRpc",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/stubs/app-core-bridge.ts:invokeDesktopBridgeRequestWithTimeout",
+      "target": "function:apps/app/test/stubs/app-core-bridge.ts:getElectrobunRendererRpc",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/stubs/app-core-bridge.ts:subscribeDesktopBridgeEvent",
+      "target": "function:apps/app/test/stubs/app-core-bridge.ts:getElectrobunRendererRpc",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/utils/get-free-port.mjs",
+      "target": "function:apps/app/test/utils/get-free-port.mjs:getFreePort",
+      "type": "contains"
+    }
+  ]
+}

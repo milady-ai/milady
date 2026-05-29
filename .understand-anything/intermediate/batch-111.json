@@ -1,0 +1,2276 @@
+{
+  "batchIndex": 111,
+  "nodes": [
+    {
+      "tags": [
+        "desktop",
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts",
+      "type": "file",
+      "name": "download-state.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts",
+      "summary": "download-state.ts is a typescript source file in the Milady codebase. It contains 6 functions, 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 110 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeDownloadJobs",
+      "type": "function",
+      "name": "normalizeDownloadJobs",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts",
+      "summary": "normalizeDownloadJobs is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeDownloadJob",
+      "type": "function",
+      "name": "normalizeDownloadJob",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts",
+      "summary": "normalizeDownloadJob is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeState",
+      "type": "function",
+      "name": "normalizeState",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts",
+      "summary": "normalizeState is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:stringField",
+      "type": "function",
+      "name": "stringField",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts",
+      "summary": "stringField is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:numberField",
+      "type": "function",
+      "name": "numberField",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts",
+      "summary": "numberField is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:isRecord",
+      "type": "function",
+      "name": "isRecord",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts",
+      "summary": "isRecord is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:DownloadStateTracker",
+      "type": "class",
+      "name": "DownloadStateTracker",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts",
+      "summary": "DownloadStateTracker is a class or type declared in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts."
+    },
+    {
+      "tags": [
+        "desktop",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts",
+      "type": "file",
+      "name": "eliza1-catalog.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts",
+      "summary": "eliza1-catalog.ts is a typescript source file in the Milady codebase. It contains 5 functions, 1 imports.",
+      "languageNotes": "typescript; code; 421 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts:getEliza1CatalogSource",
+      "type": "function",
+      "name": "getEliza1CatalogSource",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts",
+      "summary": "getEliza1CatalogSource is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts:getEliza1BundleTiers",
+      "type": "function",
+      "name": "getEliza1BundleTiers",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts",
+      "summary": "getEliza1BundleTiers is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts:getEliza1VoiceComponents",
+      "type": "function",
+      "name": "getEliza1VoiceComponents",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts",
+      "summary": "getEliza1VoiceComponents is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts:getEliza1Catalog",
+      "type": "function",
+      "name": "getEliza1Catalog",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts",
+      "summary": "getEliza1Catalog is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts:resolveLocalCatalogPath",
+      "type": "function",
+      "name": "resolveLocalCatalogPath",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts",
+      "summary": "resolveLocalCatalogPath is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts."
+    },
+    {
+      "tags": [
+        "desktop",
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts",
+      "type": "file",
+      "name": "errors.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts",
+      "summary": "errors.ts is a typescript source file in the Milady codebase. It contains 4 functions, 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 79 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts:createModelError",
+      "type": "function",
+      "name": "createModelError",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts",
+      "summary": "createModelError is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts:throwModelError",
+      "type": "function",
+      "name": "throwModelError",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts",
+      "summary": "throwModelError is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts:isModelRemoteError",
+      "type": "function",
+      "name": "isModelRemoteError",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts",
+      "summary": "isModelRemoteError is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts:serializeError",
+      "type": "function",
+      "name": "serializeError",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts",
+      "summary": "serializeError is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts:ModelRemoteException",
+      "type": "class",
+      "name": "ModelRemoteException",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts",
+      "summary": "ModelRemoteException is a class or type declared in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts."
+    },
+    {
+      "tags": [
+        "desktop",
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts",
+      "type": "file",
+      "name": "hf-eliza1-client.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts",
+      "summary": "hf-eliza1-client.ts is a typescript source file in the Milady codebase. It contains 5 functions, 1 class, 2 imports.",
+      "languageNotes": "typescript; code; 166 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts:networkDisabled",
+      "type": "function",
+      "name": "networkDisabled",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts",
+      "summary": "networkDisabled is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts:snapshotSummary",
+      "type": "function",
+      "name": "snapshotSummary",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts",
+      "summary": "snapshotSummary is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts:snapshotMetadata",
+      "type": "function",
+      "name": "snapshotMetadata",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts",
+      "summary": "snapshotMetadata is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts:extractTreePaths",
+      "type": "function",
+      "name": "extractTreePaths",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts",
+      "summary": "extractTreePaths is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts:errorMessage",
+      "type": "function",
+      "name": "errorMessage",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts",
+      "summary": "errorMessage is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts:HuggingFaceEliza1Client",
+      "type": "class",
+      "name": "HuggingFaceEliza1Client",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts",
+      "summary": "HuggingFaceEliza1Client is a class or type declared in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts."
+    },
+    {
+      "tags": [
+        "desktop",
+        "local-inference",
+        "api",
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts",
+      "type": "file",
+      "name": "local-inference-api-client.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts",
+      "summary": "local-inference-api-client.ts is a typescript source file in the Milady codebase. It contains 5 functions, 1 class, 2 imports.",
+      "languageNotes": "typescript; code; 237 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts:routeErrorCode",
+      "type": "function",
+      "name": "routeErrorCode",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts",
+      "summary": "routeErrorCode is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts:parsePayload",
+      "type": "function",
+      "name": "parsePayload",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts",
+      "summary": "parsePayload is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts:isRecord",
+      "type": "function",
+      "name": "isRecord",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts",
+      "summary": "isRecord is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts:isModelExceptionLike",
+      "type": "function",
+      "name": "isModelExceptionLike",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts",
+      "summary": "isModelExceptionLike is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts:errorMessage",
+      "type": "function",
+      "name": "errorMessage",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts",
+      "summary": "errorMessage is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts:LocalInferenceApiClient",
+      "type": "class",
+      "name": "LocalInferenceApiClient",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts",
+      "summary": "LocalInferenceApiClient is a class or type declared in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts."
+    },
+    {
+      "tags": [
+        "desktop",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "type": "file",
+      "name": "model-service.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "summary": "model-service.ts is a typescript source file in the Milady codebase. It contains 16 functions, 1 class, 6 imports.",
+      "languageNotes": "typescript; code; 464 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:mergeCatalog",
+      "type": "function",
+      "name": "mergeCatalog",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "summary": "mergeCatalog is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:runtimeCatalog",
+      "type": "function",
+      "name": "runtimeCatalog",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "summary": "runtimeCatalog is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeRuntimeCatalogEntry",
+      "type": "function",
+      "name": "normalizeRuntimeCatalogEntry",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "summary": "normalizeRuntimeCatalogEntry is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeInstalledFromHub",
+      "type": "function",
+      "name": "normalizeInstalledFromHub",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "summary": "normalizeInstalledFromHub is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeInstalled",
+      "type": "function",
+      "name": "normalizeInstalled",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "summary": "normalizeInstalled is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeInstalledEntry",
+      "type": "function",
+      "name": "normalizeInstalledEntry",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "summary": "normalizeInstalledEntry is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeActiveFromHub",
+      "type": "function",
+      "name": "normalizeActiveFromHub",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "summary": "normalizeActiveFromHub is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeActive",
+      "type": "function",
+      "name": "normalizeActive",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "summary": "normalizeActive is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeHardwareFromHub",
+      "type": "function",
+      "name": "normalizeHardwareFromHub",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "summary": "normalizeHardwareFromHub is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeHardware",
+      "type": "function",
+      "name": "normalizeHardware",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "summary": "normalizeHardware is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:downloadsFromHub",
+      "type": "function",
+      "name": "downloadsFromHub",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "summary": "downloadsFromHub is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeAssignments",
+      "type": "function",
+      "name": "normalizeAssignments",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "summary": "normalizeAssignments is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringRecord",
+      "type": "function",
+      "name": "stringRecord",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "summary": "stringRecord is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "function",
+      "name": "stringField",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "summary": "stringField is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:numberField",
+      "type": "function",
+      "name": "numberField",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "summary": "numberField is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:isRecord",
+      "type": "function",
+      "name": "isRecord",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "summary": "isRecord is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:ModelRemoteService",
+      "type": "class",
+      "name": "ModelRemoteService",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "summary": "ModelRemoteService is a class or type declared in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts."
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/protocol.ts",
+      "type": "file",
+      "name": "protocol.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/protocol.ts",
+      "summary": "protocol.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 301 lines"
+    },
+    {
+      "tags": [
+        "desktop",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "type": "file",
+      "name": "worker.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "summary": "worker.ts is a typescript source file in the Milady codebase. It contains 11 functions, 3 imports.",
+      "languageNotes": "typescript; code; 240 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:post",
+      "type": "function",
+      "name": "post",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "summary": "post is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:isRecord",
+      "type": "function",
+      "name": "isRecord",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "summary": "isRecord is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:isModelMethod",
+      "type": "function",
+      "name": "isModelMethod",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "summary": "isModelMethod is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:parseRequest",
+      "type": "function",
+      "name": "parseRequest",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "summary": "parseRequest is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:dispatch",
+      "type": "function",
+      "name": "dispatch",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "summary": "dispatch is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:optionalObject",
+      "type": "function",
+      "name": "optionalObject",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "summary": "optionalObject is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:modelIdParams",
+      "type": "function",
+      "name": "modelIdParams",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "summary": "modelIdParams is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:assignmentParams",
+      "type": "function",
+      "name": "assignmentParams",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "summary": "assignmentParams is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:routingParams",
+      "type": "function",
+      "name": "routingParams",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "summary": "routingParams is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:generateParams",
+      "type": "function",
+      "name": "generateParams",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "summary": "generateParams is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:embeddingParams",
+      "type": "function",
+      "name": "embeddingParams",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "summary": "embeddingParams is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts."
+    },
+    {
+      "tags": [
+        "desktop",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts",
+      "type": "file",
+      "name": "phase8-smoke.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts",
+      "summary": "phase8-smoke.ts is a typescript source file in the Milady codebase. It contains 4 functions, 2 imports.",
+      "languageNotes": "typescript; code; 111 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts",
+      "summary": "main is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:expectUnavailable",
+      "type": "function",
+      "name": "expectUnavailable",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts",
+      "summary": "expectUnavailable is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:assert",
+      "type": "function",
+      "name": "assert",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts",
+      "summary": "assert is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:writeJson",
+      "type": "function",
+      "name": "writeJson",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts",
+      "summary": "writeJson is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeDownloadJobs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeDownloadJob",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:stringField",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:numberField",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:isRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts",
+      "target": "class:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:DownloadStateTracker",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeDownloadJobs",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeDownloadJob",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeDownloadJobs",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeDownloadJobs",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeDownloadJob",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeDownloadJobs",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeDownloadJobs",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeDownloadJobs",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeDownloadJob",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeDownloadJob",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeDownloadJob",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeDownloadJob",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeDownloadJob",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeDownloadJob",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeDownloadJob",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:numberField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeDownloadJob",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:numberField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeDownloadJob",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:numberField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeDownloadJob",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeDownloadJob",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:normalizeDownloadJob",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts:getEliza1CatalogSource",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts:getEliza1BundleTiers",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts:getEliza1VoiceComponents",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts:getEliza1Catalog",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts:resolveLocalCatalogPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts:getEliza1BundleTiers",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts:getEliza1CatalogSource",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts:getEliza1Catalog",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts:getEliza1CatalogSource",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts:createModelError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts:throwModelError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts:isModelRemoteError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts:serializeError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts",
+      "target": "class:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts:ModelRemoteException",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts:throwModelError",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts:createModelError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts:serializeError",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts:isModelRemoteError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts:serializeError",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts:createModelError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts:serializeError",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts:createModelError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts:serializeError",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts:createModelError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts:networkDisabled",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts:snapshotSummary",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts:snapshotMetadata",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts:extractTreePaths",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts:errorMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts",
+      "target": "class:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts:HuggingFaceEliza1Client",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts:snapshotMetadata",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts:snapshotSummary",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts:routeErrorCode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts:parsePayload",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts:isRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts:isModelExceptionLike",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts:errorMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts",
+      "target": "class:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts:LocalInferenceApiClient",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:mergeCatalog",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:runtimeCatalog",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeRuntimeCatalogEntry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeInstalledFromHub",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeInstalled",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeInstalledEntry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeActiveFromHub",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeActive",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeHardwareFromHub",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeHardware",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:downloadsFromHub",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeAssignments",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:numberField",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:isRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "target": "class:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:ModelRemoteService",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:runtimeCatalog",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:runtimeCatalog",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:runtimeCatalog",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeRuntimeCatalogEntry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeRuntimeCatalogEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeRuntimeCatalogEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeRuntimeCatalogEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeRuntimeCatalogEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeRuntimeCatalogEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeRuntimeCatalogEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeRuntimeCatalogEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeRuntimeCatalogEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:numberField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeRuntimeCatalogEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:numberField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeRuntimeCatalogEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:numberField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeRuntimeCatalogEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeInstalledFromHub",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeInstalledFromHub",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeInstalled",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeInstalled",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeInstalled",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeInstalledEntry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeInstalledEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeInstalledEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeInstalledEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeInstalledEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeInstalledEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:numberField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeInstalledEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeInstalledEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeInstalledEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeInstalledEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeInstalledEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeActiveFromHub",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeActiveFromHub",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeActiveFromHub",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeActive",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeActive",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeActive",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeActive",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeActive",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeActive",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeHardwareFromHub",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeHardwareFromHub",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeHardwareFromHub",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeHardware",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeHardware",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeHardware",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:numberField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeHardware",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:numberField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeHardware",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:numberField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeHardware",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeHardware",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeHardware",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeHardware",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeHardware",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:downloadsFromHub",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeAssignments",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeAssignments",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:normalizeAssignments",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts:stringRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:post",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:isRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:isModelMethod",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:parseRequest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:dispatch",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:optionalObject",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:modelIdParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:assignmentParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:routingParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:generateParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:embeddingParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:parseRequest",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:parseRequest",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:isModelMethod",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:optionalObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:optionalObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:optionalObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:optionalObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:optionalObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:optionalObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:modelIdParams",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:modelIdParams",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:optionalObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:optionalObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:modelIdParams",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:optionalObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:optionalObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:assignmentParams",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:optionalObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:routingParams",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:optionalObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:optionalObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:generateParams",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:embeddingParams",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:optionalObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:optionalObject",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:modelIdParams",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:optionalObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:modelIdParams",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:assignmentParams",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:optionalObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:assignmentParams",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:routingParams",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:optionalObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:routingParams",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:generateParams",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:optionalObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:generateParams",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:embeddingParams",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:optionalObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:embeddingParams",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:expectUnavailable",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:assert",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:writeJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:assert",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:assert",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:assert",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:assert",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:assert",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:assert",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:assert",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:assert",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:assert",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:expectUnavailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:assert",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts:writeJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/protocol.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/protocol.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/protocol.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/protocol.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/protocol.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/download-state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/eliza1-catalog.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/hf-eliza1-client.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/local-inference-api-client.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/protocol.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/worker.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/protocol.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/errors.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/dev/phase8-smoke.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/local-model/src/bun/model-service.ts",
+      "type": "imports"
+    }
+  ]
+}

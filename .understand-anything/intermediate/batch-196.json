@@ -1,0 +1,66 @@
+{
+  "batchIndex": 196,
+  "nodes": [
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/android/app/src/main/res/values/android_app_actions.xml",
+      "type": "config",
+      "name": "android_app_actions.xml",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/res/values/android_app_actions.xml",
+      "summary": "android_app_actions.xml configures xml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "xml; config; 44 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/android/app/src/main/res/values/colors.xml",
+      "type": "config",
+      "name": "colors.xml",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/res/values/colors.xml",
+      "summary": "colors.xml configures xml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "xml; config; 8 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/android/app/src/main/res/values/ic_launcher_background.xml",
+      "type": "config",
+      "name": "ic_launcher_background.xml",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/res/values/ic_launcher_background.xml",
+      "summary": "ic_launcher_background.xml configures xml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "xml; config; 4 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/android/app/src/main/res/values/strings.xml",
+      "type": "config",
+      "name": "strings.xml",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/res/values/strings.xml",
+      "summary": "strings.xml configures xml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "xml; config; 7 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/android/app/src/main/res/values/styles.xml",
+      "type": "config",
+      "name": "styles.xml",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/res/values/styles.xml",
+      "summary": "styles.xml configures xml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "xml; config; 26 lines"
+    }
+  ],
+  "edges": []
+}

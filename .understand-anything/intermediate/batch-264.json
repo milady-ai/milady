@@ -1,0 +1,42 @@
+{
+  "batchIndex": 264,
+  "nodes": [
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/build-monetized-app/references/failure-modes.md",
+      "type": "document",
+      "name": "failure-modes.md",
+      "filePath": "skills/.defaults/build-monetized-app/references/failure-modes.md",
+      "summary": "failure-modes.md documents skills/.defaults/build-monetized-app/references with 71 lines of reference material.",
+      "languageNotes": "markdown; docs; 71 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:skills/.defaults/build-monetized-app/references/sdk-flow.md",
+      "type": "document",
+      "name": "sdk-flow.md",
+      "filePath": "skills/.defaults/build-monetized-app/references/sdk-flow.md",
+      "summary": "sdk-flow.md documents skills/.defaults/build-monetized-app/references with 188 lines of reference material.",
+      "languageNotes": "markdown; docs; 188 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/build-monetized-app/references/survival-economics.md",
+      "type": "document",
+      "name": "survival-economics.md",
+      "filePath": "skills/.defaults/build-monetized-app/references/survival-economics.md",
+      "summary": "survival-economics.md documents skills/.defaults/build-monetized-app/references with 64 lines of reference material.",
+      "languageNotes": "markdown; docs; 64 lines"
+    }
+  ],
+  "edges": []
+}

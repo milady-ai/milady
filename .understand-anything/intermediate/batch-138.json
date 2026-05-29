@@ -1,0 +1,1826 @@
+{
+  "batchIndex": 138,
+  "nodes": [
+    {
+      "tags": [
+        "plugin",
+        "api",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "type": "file",
+      "name": "skill-discovery-helpers.ts",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "summary": "skill-discovery-helpers.ts is a typescript source file in the Milady codebase. It contains 12 functions, 1 imports.",
+      "languageNotes": "typescript; code; 489 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:isAgentSkillsServiceLike",
+      "type": "function",
+      "name": "isAgentSkillsServiceLike",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "summary": "isAgentSkillsServiceLike is a function defined in eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:loadSkillPreferences",
+      "type": "function",
+      "name": "loadSkillPreferences",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "summary": "loadSkillPreferences is a function defined in eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:saveSkillPreferences",
+      "type": "function",
+      "name": "saveSkillPreferences",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "summary": "saveSkillPreferences is a function defined in eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:loadSkillAcknowledgments",
+      "type": "function",
+      "name": "loadSkillAcknowledgments",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "summary": "loadSkillAcknowledgments is a function defined in eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:saveSkillAcknowledgments",
+      "type": "function",
+      "name": "saveSkillAcknowledgments",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "summary": "saveSkillAcknowledgments is a function defined in eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:loadScanReportFromDisk",
+      "type": "function",
+      "name": "loadScanReportFromDisk",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "summary": "loadScanReportFromDisk is a function defined in eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:resolveSkillEnabled",
+      "type": "function",
+      "name": "resolveSkillEnabled",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "summary": "resolveSkillEnabled is a function defined in eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:parseSkillDirsSetting",
+      "type": "function",
+      "name": "parseSkillDirsSetting",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "summary": "parseSkillDirsSetting is a function defined in eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:shouldExposeBinanceSkillId",
+      "type": "function",
+      "name": "shouldExposeBinanceSkillId",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "summary": "shouldExposeBinanceSkillId is a function defined in eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:shouldExposeBinanceSkillRecord",
+      "type": "function",
+      "name": "shouldExposeBinanceSkillRecord",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "summary": "shouldExposeBinanceSkillRecord is a function defined in eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:discoverSkills",
+      "type": "function",
+      "name": "discoverSkills",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "summary": "discoverSkills is a function defined in eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:scanSkillsDir",
+      "type": "function",
+      "name": "scanSkillsDir",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "summary": "scanSkillsDir is a function defined in eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "api"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-agent-skills/src/api/skill-scaffold.ts",
+      "type": "file",
+      "name": "skill-scaffold.ts",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skill-scaffold.ts",
+      "summary": "skill-scaffold.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 26 lines"
+    },
+    {
+      "tags": [
+        "plugin",
+        "api",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "type": "file",
+      "name": "skills-routes.ts",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "summary": "skills-routes.ts is a typescript source file in the Milady codebase. It contains 12 functions, 2 imports.",
+      "languageNotes": "typescript; code; 1586 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveUserPath",
+      "type": "function",
+      "name": "resolveUserPath",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "summary": "resolveUserPath is a function defined in eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:shouldUseRuntimeCwdWorkspace",
+      "type": "function",
+      "name": "shouldUseRuntimeCwdWorkspace",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "summary": "shouldUseRuntimeCwdWorkspace is a function defined in eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveDefaultAgentWorkspaceDir",
+      "type": "function",
+      "name": "resolveDefaultAgentWorkspaceDir",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "summary": "resolveDefaultAgentWorkspaceDir is a function defined in eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:validateSkillId",
+      "type": "function",
+      "name": "validateSkillId",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "summary": "validateSkillId is a function defined in eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:shouldExposeBinanceSkillId",
+      "type": "function",
+      "name": "shouldExposeBinanceSkillId",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "summary": "shouldExposeBinanceSkillId is a function defined in eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:shouldExposeBinanceSkillRecord",
+      "type": "function",
+      "name": "shouldExposeBinanceSkillRecord",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "summary": "shouldExposeBinanceSkillRecord is a function defined in eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:loadSkillPreferences",
+      "type": "function",
+      "name": "loadSkillPreferences",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "summary": "loadSkillPreferences is a function defined in eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:saveSkillPreferences",
+      "type": "function",
+      "name": "saveSkillPreferences",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "summary": "saveSkillPreferences is a function defined in eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:loadSkillAcknowledgments",
+      "type": "function",
+      "name": "loadSkillAcknowledgments",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "summary": "loadSkillAcknowledgments is a function defined in eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:saveSkillAcknowledgments",
+      "type": "function",
+      "name": "saveSkillAcknowledgments",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "summary": "saveSkillAcknowledgments is a function defined in eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:loadScanReportFromDisk",
+      "type": "function",
+      "name": "loadScanReportFromDisk",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "summary": "loadScanReportFromDisk is a function defined in eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "type": "function",
+      "name": "handleSkillsRoutes",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "summary": "handleSkillsRoutes is a function defined in eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "type": "file",
+      "name": "skill-marketplace.ts",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "skill-marketplace.ts is a typescript source file in the Milady codebase. It contains 28 functions.",
+      "languageNotes": "typescript; code; 935 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:createIntegrationTelemetrySpan",
+      "type": "function",
+      "name": "createIntegrationTelemetrySpan",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "createIntegrationTelemetrySpan is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:runSkillSecurityScan",
+      "type": "function",
+      "name": "runSkillSecurityScan",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "runSkillSecurityScan is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:stateDirBase",
+      "type": "function",
+      "name": "stateDirBase",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "stateDirBase is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:safeName",
+      "type": "function",
+      "name": "safeName",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "safeName is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:validateGitRef",
+      "type": "function",
+      "name": "validateGitRef",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "validateGitRef is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:sanitizeSkillPath",
+      "type": "function",
+      "name": "sanitizeSkillPath",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "sanitizeSkillPath is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:assertPathWithinRoot",
+      "type": "function",
+      "name": "assertPathWithinRoot",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "assertPathWithinRoot is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:normalizeRepo",
+      "type": "function",
+      "name": "normalizeRepo",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "normalizeRepo is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:parseGithubUrl",
+      "type": "function",
+      "name": "parseGithubUrl",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "parseGithubUrl is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:installationRoot",
+      "type": "function",
+      "name": "installationRoot",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "installationRoot is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:installsRecordPath",
+      "type": "function",
+      "name": "installsRecordPath",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "installsRecordPath is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:ensureInstallDirs",
+      "type": "function",
+      "name": "ensureInstallDirs",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "ensureInstallDirs is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:readInstallRecords",
+      "type": "function",
+      "name": "readInstallRecords",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "readInstallRecords is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:writeInstallRecords",
+      "type": "function",
+      "name": "writeInstallRecords",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "writeInstallRecords is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:normalizeTags",
+      "type": "function",
+      "name": "normalizeTags",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "normalizeTags is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:inferRepository",
+      "type": "function",
+      "name": "inferRepository",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "inferRepository is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:inferPath",
+      "type": "function",
+      "name": "inferPath",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "inferPath is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:inferName",
+      "type": "function",
+      "name": "inferName",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "inferName is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:inferDescription",
+      "type": "function",
+      "name": "inferDescription",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "inferDescription is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:resolveMarketplaceBaseUrl",
+      "type": "function",
+      "name": "resolveMarketplaceBaseUrl",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "resolveMarketplaceBaseUrl is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:isLegacySkillsmp",
+      "type": "function",
+      "name": "isLegacySkillsmp",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "isLegacySkillsmp is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:searchSkillsMarketplace",
+      "type": "function",
+      "name": "searchSkillsMarketplace",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "searchSkillsMarketplace is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:runGitCloneSubset",
+      "type": "function",
+      "name": "runGitCloneSubset",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "runGitCloneSubset is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:resolveSkillPathInRepo",
+      "type": "function",
+      "name": "resolveSkillPathInRepo",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "resolveSkillPathInRepo is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:withTemporarySparseCheckout",
+      "type": "function",
+      "name": "withTemporarySparseCheckout",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "withTemporarySparseCheckout is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:installMarketplaceSkill",
+      "type": "function",
+      "name": "installMarketplaceSkill",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "installMarketplaceSkill is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:listInstalledMarketplaceSkills",
+      "type": "function",
+      "name": "listInstalledMarketplaceSkills",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "listInstalledMarketplaceSkills is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:uninstallMarketplaceSkill",
+      "type": "function",
+      "name": "uninstallMarketplaceSkill",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "summary": "uninstallMarketplaceSkill is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:isAgentSkillsServiceLike",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:loadSkillPreferences",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:saveSkillPreferences",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:loadSkillAcknowledgments",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:saveSkillAcknowledgments",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:loadScanReportFromDisk",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:resolveSkillEnabled",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:parseSkillDirsSetting",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:shouldExposeBinanceSkillId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:shouldExposeBinanceSkillRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:discoverSkills",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:scanSkillsDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:shouldExposeBinanceSkillRecord",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:shouldExposeBinanceSkillId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:shouldExposeBinanceSkillRecord",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:shouldExposeBinanceSkillId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:discoverSkills",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:loadSkillPreferences",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:discoverSkills",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:isAgentSkillsServiceLike",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:discoverSkills",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:shouldExposeBinanceSkillId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:discoverSkills",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:resolveSkillEnabled",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:discoverSkills",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:parseSkillDirsSetting",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:discoverSkills",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:parseSkillDirsSetting",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:discoverSkills",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:parseSkillDirsSetting",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:discoverSkills",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:scanSkillsDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:discoverSkills",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:shouldExposeBinanceSkillId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:scanSkillsDir",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts:resolveSkillEnabled",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveUserPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:shouldUseRuntimeCwdWorkspace",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveDefaultAgentWorkspaceDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:validateSkillId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:shouldExposeBinanceSkillId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:shouldExposeBinanceSkillRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:loadSkillPreferences",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:saveSkillPreferences",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:loadSkillAcknowledgments",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:saveSkillAcknowledgments",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:loadScanReportFromDisk",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:shouldUseRuntimeCwdWorkspace",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveUserPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveDefaultAgentWorkspaceDir",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveUserPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveDefaultAgentWorkspaceDir",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveUserPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveDefaultAgentWorkspaceDir",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:shouldUseRuntimeCwdWorkspace",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveDefaultAgentWorkspaceDir",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveUserPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveDefaultAgentWorkspaceDir",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveUserPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:shouldExposeBinanceSkillRecord",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:shouldExposeBinanceSkillId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:shouldExposeBinanceSkillRecord",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:shouldExposeBinanceSkillId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:shouldExposeBinanceSkillRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:shouldExposeBinanceSkillId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:shouldExposeBinanceSkillRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:shouldExposeBinanceSkillId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveDefaultAgentWorkspaceDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveDefaultAgentWorkspaceDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveDefaultAgentWorkspaceDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:validateSkillId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveDefaultAgentWorkspaceDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:loadScanReportFromDisk",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:loadSkillAcknowledgments",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:validateSkillId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveDefaultAgentWorkspaceDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:loadScanReportFromDisk",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:loadSkillAcknowledgments",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:saveSkillAcknowledgments",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:loadSkillPreferences",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:saveSkillPreferences",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveDefaultAgentWorkspaceDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:validateSkillId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveDefaultAgentWorkspaceDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:validateSkillId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveDefaultAgentWorkspaceDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:validateSkillId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveDefaultAgentWorkspaceDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:loadScanReportFromDisk",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:loadSkillAcknowledgments",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:loadSkillPreferences",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:saveSkillPreferences",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:validateSkillId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:loadSkillPreferences",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:saveSkillPreferences",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:validateSkillId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveDefaultAgentWorkspaceDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:validateSkillId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveDefaultAgentWorkspaceDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:loadSkillPreferences",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:saveSkillPreferences",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:loadSkillAcknowledgments",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:saveSkillAcknowledgments",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:shouldExposeBinanceSkillRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveDefaultAgentWorkspaceDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveDefaultAgentWorkspaceDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:validateSkillId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:handleSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts:resolveDefaultAgentWorkspaceDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:createIntegrationTelemetrySpan",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:runSkillSecurityScan",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:stateDirBase",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:safeName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:validateGitRef",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:sanitizeSkillPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:assertPathWithinRoot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:normalizeRepo",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:parseGithubUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:installationRoot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:installsRecordPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:ensureInstallDirs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:readInstallRecords",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:writeInstallRecords",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:normalizeTags",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:inferRepository",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:inferPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:inferName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:inferDescription",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:resolveMarketplaceBaseUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:isLegacySkillsmp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:searchSkillsMarketplace",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:runGitCloneSubset",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:resolveSkillPathInRepo",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:withTemporarySparseCheckout",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:installMarketplaceSkill",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:listInstalledMarketplaceSkills",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:uninstallMarketplaceSkill",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:parseGithubUrl",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:normalizeRepo",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:parseGithubUrl",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:validateGitRef",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:parseGithubUrl",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:sanitizeSkillPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:ensureInstallDirs",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:installationRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:ensureInstallDirs",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:installsRecordPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:readInstallRecords",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:installsRecordPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:writeInstallRecords",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:ensureInstallDirs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:writeInstallRecords",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:installsRecordPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:inferRepository",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:normalizeRepo",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:inferRepository",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:normalizeRepo",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:searchSkillsMarketplace",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:resolveMarketplaceBaseUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:searchSkillsMarketplace",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:isLegacySkillsmp",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:searchSkillsMarketplace",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:createIntegrationTelemetrySpan",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:searchSkillsMarketplace",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:inferRepository",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:searchSkillsMarketplace",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:inferName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:searchSkillsMarketplace",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:inferDescription",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:searchSkillsMarketplace",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:inferPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:searchSkillsMarketplace",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:normalizeTags",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:runGitCloneSubset",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:validateGitRef",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:runGitCloneSubset",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:sanitizeSkillPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:runGitCloneSubset",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:withTemporarySparseCheckout",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:runGitCloneSubset",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:assertPathWithinRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:resolveSkillPathInRepo",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:validateGitRef",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:resolveSkillPathInRepo",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:sanitizeSkillPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:resolveSkillPathInRepo",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:stateDirBase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:resolveSkillPathInRepo",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:sanitizeSkillPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:withTemporarySparseCheckout",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:stateDirBase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:installMarketplaceSkill",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:ensureInstallDirs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:installMarketplaceSkill",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:normalizeRepo",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:installMarketplaceSkill",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:sanitizeSkillPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:installMarketplaceSkill",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:parseGithubUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:installMarketplaceSkill",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:resolveSkillPathInRepo",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:installMarketplaceSkill",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:safeName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:installMarketplaceSkill",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:installationRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:installMarketplaceSkill",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:runGitCloneSubset",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:installMarketplaceSkill",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:runSkillSecurityScan",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:installMarketplaceSkill",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:readInstallRecords",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:installMarketplaceSkill",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:writeInstallRecords",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:listInstalledMarketplaceSkills",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:readInstallRecords",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:uninstallMarketplaceSkill",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:safeName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:uninstallMarketplaceSkill",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:readInstallRecords",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:uninstallMarketplaceSkill",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:installationRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:uninstallMarketplaceSkill",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts:writeInstallRecords",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skill-discovery-helpers.ts",
+      "target": "file:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "target": "file:eliza/plugins/plugin-agent-skills/src/api/skill-scaffold.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/skills-routes.ts",
+      "target": "file:eliza/plugins/plugin-agent-skills/src/services/skill-marketplace.ts",
+      "type": "imports"
+    }
+  ]
+}

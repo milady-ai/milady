@@ -1,0 +1,4366 @@
+{
+  "batchIndex": 28,
+  "nodes": [
+    {
+      "tags": [
+        "first-run",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "type": "file",
+      "name": "mobile-runtime-mode.ts",
+      "filePath": "eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "summary": "mobile-runtime-mode.ts is a typescript source file in the Milady codebase. It contains 9 functions, 2 imports.",
+      "languageNotes": "typescript; code; 233 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:isMobileLocalAgentIpcUrl",
+      "type": "function",
+      "name": "isMobileLocalAgentIpcUrl",
+      "filePath": "eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "summary": "isMobileLocalAgentIpcUrl is a function defined in eliza/packages/ui/src/first-run/mobile-runtime-mode.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:mobileLocalAgentPathFromUrl",
+      "type": "function",
+      "name": "mobileLocalAgentPathFromUrl",
+      "filePath": "eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "summary": "mobileLocalAgentPathFromUrl is a function defined in eliza/packages/ui/src/first-run/mobile-runtime-mode.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:isMobileLocalAgentUrl",
+      "type": "function",
+      "name": "isMobileLocalAgentUrl",
+      "filePath": "eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "summary": "isMobileLocalAgentUrl is a function defined in eliza/packages/ui/src/first-run/mobile-runtime-mode.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:normalizeMobileRuntimeMode",
+      "type": "function",
+      "name": "normalizeMobileRuntimeMode",
+      "filePath": "eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "summary": "normalizeMobileRuntimeMode is a function defined in eliza/packages/ui/src/first-run/mobile-runtime-mode.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:mobileRuntimeModeForServerTarget",
+      "type": "function",
+      "name": "mobileRuntimeModeForServerTarget",
+      "filePath": "eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "summary": "mobileRuntimeModeForServerTarget is a function defined in eliza/packages/ui/src/first-run/mobile-runtime-mode.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:readPersistedMobileRuntimeMode",
+      "type": "function",
+      "name": "readPersistedMobileRuntimeMode",
+      "filePath": "eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "summary": "readPersistedMobileRuntimeMode is a function defined in eliza/packages/ui/src/first-run/mobile-runtime-mode.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:isElizaCloudRuntimeLocked",
+      "type": "function",
+      "name": "isElizaCloudRuntimeLocked",
+      "filePath": "eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "summary": "isElizaCloudRuntimeLocked is a function defined in eliza/packages/ui/src/first-run/mobile-runtime-mode.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:persistNativeMobileRuntimeMode",
+      "type": "function",
+      "name": "persistNativeMobileRuntimeMode",
+      "filePath": "eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "summary": "persistNativeMobileRuntimeMode is a function defined in eliza/packages/ui/src/first-run/mobile-runtime-mode.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:persistMobileRuntimeModeForServerTarget",
+      "type": "function",
+      "name": "persistMobileRuntimeModeForServerTarget",
+      "filePath": "eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "summary": "persistMobileRuntimeModeForServerTarget is a function defined in eliza/packages/ui/src/first-run/mobile-runtime-mode.ts."
+    },
+    {
+      "tags": [
+        "first-run",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts",
+      "type": "file",
+      "name": "pre-seed-local-runtime.ts",
+      "filePath": "eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts",
+      "summary": "pre-seed-local-runtime.ts is a typescript source file in the Milady codebase. It contains 4 functions, 2 imports.",
+      "languageNotes": "typescript; code; 70 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts:hasPersistedActiveServer",
+      "type": "function",
+      "name": "hasPersistedActiveServer",
+      "filePath": "eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts",
+      "summary": "hasPersistedActiveServer is a function defined in eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts:writeLocalAgentActiveServer",
+      "type": "function",
+      "name": "writeLocalAgentActiveServer",
+      "filePath": "eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts",
+      "summary": "writeLocalAgentActiveServer is a function defined in eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts:isBrandedAndroidDevice",
+      "type": "function",
+      "name": "isBrandedAndroidDevice",
+      "filePath": "eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts",
+      "summary": "isBrandedAndroidDevice is a function defined in eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts:preSeedAndroidLocalRuntimeIfFresh",
+      "type": "function",
+      "name": "preSeedAndroidLocalRuntimeIfFresh",
+      "filePath": "eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts",
+      "summary": "preSeedAndroidLocalRuntimeIfFresh is a function defined in eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "first-run"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/first-run/probe-local-agent.test.ts",
+      "type": "file",
+      "name": "probe-local-agent.test.ts",
+      "filePath": "eliza/packages/ui/src/first-run/probe-local-agent.test.ts",
+      "summary": "probe-local-agent.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 132 lines"
+    },
+    {
+      "tags": [
+        "first-run",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/first-run/probe-local-agent.ts",
+      "type": "file",
+      "name": "probe-local-agent.ts",
+      "filePath": "eliza/packages/ui/src/first-run/probe-local-agent.ts",
+      "summary": "probe-local-agent.ts is a typescript source file in the Milady codebase. It contains 10 functions, 1 imports.",
+      "languageNotes": "typescript; code; 269 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:toNativeAgentProbePlugin",
+      "type": "function",
+      "name": "toNativeAgentProbePlugin",
+      "filePath": "eliza/packages/ui/src/first-run/probe-local-agent.ts",
+      "summary": "toNativeAgentProbePlugin is a function defined in eliza/packages/ui/src/first-run/probe-local-agent.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:isNativeAndroid",
+      "type": "function",
+      "name": "isNativeAndroid",
+      "filePath": "eliza/packages/ui/src/first-run/probe-local-agent.ts",
+      "summary": "isNativeAndroid is a function defined in eliza/packages/ui/src/first-run/probe-local-agent.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:isNativeIos",
+      "type": "function",
+      "name": "isNativeIos",
+      "filePath": "eliza/packages/ui/src/first-run/probe-local-agent.ts",
+      "summary": "isNativeIos is a function defined in eliza/packages/ui/src/first-run/probe-local-agent.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:resolveNativeAgentPlugin",
+      "type": "function",
+      "name": "resolveNativeAgentPlugin",
+      "filePath": "eliza/packages/ui/src/first-run/probe-local-agent.ts",
+      "summary": "resolveNativeAgentPlugin is a function defined in eliza/packages/ui/src/first-run/probe-local-agent.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:clearLocalAgentProbeCache",
+      "type": "function",
+      "name": "clearLocalAgentProbeCache",
+      "filePath": "eliza/packages/ui/src/first-run/probe-local-agent.ts",
+      "summary": "clearLocalAgentProbeCache is a function defined in eliza/packages/ui/src/first-run/probe-local-agent.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:shouldShowLocalOption",
+      "type": "function",
+      "name": "shouldShowLocalOption",
+      "filePath": "eliza/packages/ui/src/first-run/probe-local-agent.ts",
+      "summary": "shouldShowLocalOption is a function defined in eliza/packages/ui/src/first-run/probe-local-agent.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:isHealthyBody",
+      "type": "function",
+      "name": "isHealthyBody",
+      "filePath": "eliza/packages/ui/src/first-run/probe-local-agent.ts",
+      "summary": "isHealthyBody is a function defined in eliza/packages/ui/src/first-run/probe-local-agent.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:runNativeAndroidProbe",
+      "type": "function",
+      "name": "runNativeAndroidProbe",
+      "filePath": "eliza/packages/ui/src/first-run/probe-local-agent.ts",
+      "summary": "runNativeAndroidProbe is a function defined in eliza/packages/ui/src/first-run/probe-local-agent.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:runProbe",
+      "type": "function",
+      "name": "runProbe",
+      "filePath": "eliza/packages/ui/src/first-run/probe-local-agent.ts",
+      "summary": "runProbe is a function defined in eliza/packages/ui/src/first-run/probe-local-agent.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:probeLocalAgent",
+      "type": "function",
+      "name": "probeLocalAgent",
+      "filePath": "eliza/packages/ui/src/first-run/probe-local-agent.ts",
+      "summary": "probeLocalAgent is a function defined in eliza/packages/ui/src/first-run/probe-local-agent.ts."
+    },
+    {
+      "tags": [
+        "first-run",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/first-run/reload-into-first-run-runtime.ts",
+      "type": "file",
+      "name": "reload-into-first-run-runtime.ts",
+      "filePath": "eliza/packages/ui/src/first-run/reload-into-first-run-runtime.ts",
+      "summary": "reload-into-first-run-runtime.ts is a typescript source file in the Milady codebase. It contains 3 functions, 1 imports.",
+      "languageNotes": "typescript; code; 59 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/reload-into-first-run-runtime.ts:isFirstRunReloadTarget",
+      "type": "function",
+      "name": "isFirstRunReloadTarget",
+      "filePath": "eliza/packages/ui/src/first-run/reload-into-first-run-runtime.ts",
+      "summary": "isFirstRunReloadTarget is a function defined in eliza/packages/ui/src/first-run/reload-into-first-run-runtime.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/reload-into-first-run-runtime.ts:readFirstRunRuntimeTarget",
+      "type": "function",
+      "name": "readFirstRunRuntimeTarget",
+      "filePath": "eliza/packages/ui/src/first-run/reload-into-first-run-runtime.ts",
+      "summary": "readFirstRunRuntimeTarget is a function defined in eliza/packages/ui/src/first-run/reload-into-first-run-runtime.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/reload-into-first-run-runtime.ts:reloadIntoFirstRunRuntime",
+      "type": "function",
+      "name": "reloadIntoFirstRunRuntime",
+      "filePath": "eliza/packages/ui/src/first-run/reload-into-first-run-runtime.ts",
+      "summary": "reloadIntoFirstRunRuntime is a function defined in eliza/packages/ui/src/first-run/reload-into-first-run-runtime.ts."
+    },
+    {
+      "tags": [
+        "first-run",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/first-run/runtime-target.ts",
+      "type": "file",
+      "name": "runtime-target.ts",
+      "filePath": "eliza/packages/ui/src/first-run/runtime-target.ts",
+      "summary": "runtime-target.ts is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 25 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/runtime-target.ts:isElizaCloudFirstRunTarget",
+      "type": "function",
+      "name": "isElizaCloudFirstRunTarget",
+      "filePath": "eliza/packages/ui/src/first-run/runtime-target.ts",
+      "summary": "isElizaCloudFirstRunTarget is a function defined in eliza/packages/ui/src/first-run/runtime-target.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/runtime-target.ts:activeServerKindToFirstRunRuntimeTarget",
+      "type": "function",
+      "name": "activeServerKindToFirstRunRuntimeTarget",
+      "filePath": "eliza/packages/ui/src/first-run/runtime-target.ts",
+      "summary": "activeServerKindToFirstRunRuntimeTarget is a function defined in eliza/packages/ui/src/first-run/runtime-target.ts."
+    },
+    {
+      "tags": [
+        "first-run",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/first-run/setup-steps.ts",
+      "type": "file",
+      "name": "setup-steps.ts",
+      "filePath": "eliza/packages/ui/src/first-run/setup-steps.ts",
+      "summary": "setup-steps.ts is a typescript source file in the Milady codebase. It contains 9 functions, 2 imports.",
+      "languageNotes": "typescript; code; 88 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/setup-steps.ts:getSetupStepOrder",
+      "type": "function",
+      "name": "getSetupStepOrder",
+      "filePath": "eliza/packages/ui/src/first-run/setup-steps.ts",
+      "summary": "getSetupStepOrder is a function defined in eliza/packages/ui/src/first-run/setup-steps.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/setup-steps.ts:getSetupStepIndex",
+      "type": "function",
+      "name": "getSetupStepIndex",
+      "filePath": "eliza/packages/ui/src/first-run/setup-steps.ts",
+      "summary": "getSetupStepIndex is a function defined in eliza/packages/ui/src/first-run/setup-steps.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/setup-steps.ts:resolveSetupNextStep",
+      "type": "function",
+      "name": "resolveSetupNextStep",
+      "filePath": "eliza/packages/ui/src/first-run/setup-steps.ts",
+      "summary": "resolveSetupNextStep is a function defined in eliza/packages/ui/src/first-run/setup-steps.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/setup-steps.ts:resolveSetupPreviousStep",
+      "type": "function",
+      "name": "resolveSetupPreviousStep",
+      "filePath": "eliza/packages/ui/src/first-run/setup-steps.ts",
+      "summary": "resolveSetupPreviousStep is a function defined in eliza/packages/ui/src/first-run/setup-steps.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/setup-steps.ts:canRevertSetupTo",
+      "type": "function",
+      "name": "canRevertSetupTo",
+      "filePath": "eliza/packages/ui/src/first-run/setup-steps.ts",
+      "summary": "canRevertSetupTo is a function defined in eliza/packages/ui/src/first-run/setup-steps.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/setup-steps.ts:getSetupNavMetas",
+      "type": "function",
+      "name": "getSetupNavMetas",
+      "filePath": "eliza/packages/ui/src/first-run/setup-steps.ts",
+      "summary": "getSetupNavMetas is a function defined in eliza/packages/ui/src/first-run/setup-steps.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/setup-steps.ts:shouldSkipConnectionStepsForCloudProvisionedContainer",
+      "type": "function",
+      "name": "shouldSkipConnectionStepsForCloudProvisionedContainer",
+      "filePath": "eliza/packages/ui/src/first-run/setup-steps.ts",
+      "summary": "shouldSkipConnectionStepsForCloudProvisionedContainer is a function defined in eliza/packages/ui/src/first-run/setup-steps.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/setup-steps.ts:shouldUseCloudSetupFastTrack",
+      "type": "function",
+      "name": "shouldUseCloudSetupFastTrack",
+      "filePath": "eliza/packages/ui/src/first-run/setup-steps.ts",
+      "summary": "shouldUseCloudSetupFastTrack is a function defined in eliza/packages/ui/src/first-run/setup-steps.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/setup-steps.ts:getFlaminaTopicForSetupStep",
+      "type": "function",
+      "name": "getFlaminaTopicForSetupStep",
+      "filePath": "eliza/packages/ui/src/first-run/setup-steps.ts",
+      "summary": "getFlaminaTopicForSetupStep is a function defined in eliza/packages/ui/src/first-run/setup-steps.ts."
+    },
+    {
+      "tags": [
+        "first-run",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "type": "file",
+      "name": "use-first-run-controller.ts",
+      "filePath": "eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "summary": "use-first-run-controller.ts is a typescript source file in the Milady codebase. It contains 12 functions, 13 imports.",
+      "languageNotes": "typescript; code; 830 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:isFirstRunBrowserSpeechRecognitionSupported",
+      "type": "function",
+      "name": "isFirstRunBrowserSpeechRecognitionSupported",
+      "filePath": "eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "summary": "isFirstRunBrowserSpeechRecognitionSupported is a function defined in eliza/packages/ui/src/first-run/use-first-run-controller.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:resolveFirstRunAsrProvider",
+      "type": "function",
+      "name": "resolveFirstRunAsrProvider",
+      "filePath": "eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "summary": "resolveFirstRunAsrProvider is a function defined in eliza/packages/ui/src/first-run/use-first-run-controller.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:isFirstRunVoiceInputSupported",
+      "type": "function",
+      "name": "isFirstRunVoiceInputSupported",
+      "filePath": "eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "summary": "isFirstRunVoiceInputSupported is a function defined in eliza/packages/ui/src/first-run/use-first-run-controller.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:isFirstRunVoiceOutputSupported",
+      "type": "function",
+      "name": "isFirstRunVoiceOutputSupported",
+      "filePath": "eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "summary": "isFirstRunVoiceOutputSupported is a function defined in eliza/packages/ui/src/first-run/use-first-run-controller.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:resolveFirstRunVoiceLocale",
+      "type": "function",
+      "name": "resolveFirstRunVoiceLocale",
+      "filePath": "eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "summary": "resolveFirstRunVoiceLocale is a function defined in eliza/packages/ui/src/first-run/use-first-run-controller.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:formatFirstRunVoiceError",
+      "type": "function",
+      "name": "formatFirstRunVoiceError",
+      "filePath": "eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "summary": "formatFirstRunVoiceError is a function defined in eliza/packages/ui/src/first-run/use-first-run-controller.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:readSyncOnDeviceAgentBearer",
+      "type": "function",
+      "name": "readSyncOnDeviceAgentBearer",
+      "filePath": "eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "summary": "readSyncOnDeviceAgentBearer is a function defined in eliza/packages/ui/src/first-run/use-first-run-controller.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:startMobileLocalAgent",
+      "type": "function",
+      "name": "startMobileLocalAgent",
+      "filePath": "eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "summary": "startMobileLocalAgent is a function defined in eliza/packages/ui/src/first-run/use-first-run-controller.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:startLocalRuntime",
+      "type": "function",
+      "name": "startLocalRuntime",
+      "filePath": "eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "summary": "startLocalRuntime is a function defined in eliza/packages/ui/src/first-run/use-first-run-controller.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:waitForAgentApi",
+      "type": "function",
+      "name": "waitForAgentApi",
+      "filePath": "eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "summary": "waitForAgentApi is a function defined in eliza/packages/ui/src/first-run/use-first-run-controller.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:normalizeRemoteTarget",
+      "type": "function",
+      "name": "normalizeRemoteTarget",
+      "filePath": "eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "summary": "normalizeRemoteTarget is a function defined in eliza/packages/ui/src/first-run/use-first-run-controller.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:useFirstRunController",
+      "type": "function",
+      "name": "useFirstRunController",
+      "filePath": "eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "summary": "useFirstRunController is a function defined in eliza/packages/ui/src/first-run/use-first-run-controller.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "first-run",
+        "voice",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/first-run/voice-readiness.test.ts",
+      "type": "file",
+      "name": "voice-readiness.test.ts",
+      "filePath": "eliza/packages/ui/src/first-run/voice-readiness.test.ts",
+      "summary": "voice-readiness.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 147 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/voice-readiness.test.ts:hubSnapshot",
+      "type": "function",
+      "name": "hubSnapshot",
+      "filePath": "eliza/packages/ui/src/first-run/voice-readiness.test.ts",
+      "summary": "hubSnapshot is a function defined in eliza/packages/ui/src/first-run/voice-readiness.test.ts."
+    },
+    {
+      "tags": [
+        "first-run",
+        "voice",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/first-run/voice-readiness.ts",
+      "type": "file",
+      "name": "voice-readiness.ts",
+      "filePath": "eliza/packages/ui/src/first-run/voice-readiness.ts",
+      "summary": "voice-readiness.ts is a typescript source file in the Milady codebase. It contains 3 functions, 6 imports.",
+      "languageNotes": "typescript; code; 100 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/voice-readiness.ts:resolveFirstRunLocalAgentApiBase",
+      "type": "function",
+      "name": "resolveFirstRunLocalAgentApiBase",
+      "filePath": "eliza/packages/ui/src/first-run/voice-readiness.ts",
+      "summary": "resolveFirstRunLocalAgentApiBase is a function defined in eliza/packages/ui/src/first-run/voice-readiness.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/voice-readiness.ts:hasPackagedLocalAsrRuntime",
+      "type": "function",
+      "name": "hasPackagedLocalAsrRuntime",
+      "filePath": "eliza/packages/ui/src/first-run/voice-readiness.ts",
+      "summary": "hasPackagedLocalAsrRuntime is a function defined in eliza/packages/ui/src/first-run/voice-readiness.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/first-run/voice-readiness.ts:prepareFirstRunVoiceAndTranscription",
+      "type": "function",
+      "name": "prepareFirstRunVoiceAndTranscription",
+      "filePath": "eliza/packages/ui/src/first-run/voice-readiness.ts",
+      "summary": "prepareFirstRunVoiceAndTranscription is a function defined in eliza/packages/ui/src/first-run/voice-readiness.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/hooks/useAvailableViews.test.tsx",
+      "type": "file",
+      "name": "useAvailableViews.test.tsx",
+      "filePath": "eliza/packages/ui/src/hooks/useAvailableViews.test.tsx",
+      "summary": "useAvailableViews.test.tsx is a typescript source file in the Milady codebase. It contains 3 functions, 1 imports.",
+      "languageNotes": "typescript; code; 250 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useAvailableViews.test.tsx:response",
+      "type": "function",
+      "name": "response",
+      "filePath": "eliza/packages/ui/src/hooks/useAvailableViews.test.tsx",
+      "summary": "response is a function defined in eliza/packages/ui/src/hooks/useAvailableViews.test.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useAvailableViews.test.tsx:deferredResponse",
+      "type": "function",
+      "name": "deferredResponse",
+      "filePath": "eliza/packages/ui/src/hooks/useAvailableViews.test.tsx",
+      "summary": "deferredResponse is a function defined in eliza/packages/ui/src/hooks/useAvailableViews.test.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useAvailableViews.test.tsx:view",
+      "type": "function",
+      "name": "view",
+      "filePath": "eliza/packages/ui/src/hooks/useAvailableViews.test.tsx",
+      "summary": "view is a function defined in eliza/packages/ui/src/hooks/useAvailableViews.test.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/hooks/useAvailableViews.ts",
+      "type": "file",
+      "name": "useAvailableViews.ts",
+      "filePath": "eliza/packages/ui/src/hooks/useAvailableViews.ts",
+      "summary": "useAvailableViews.ts is a typescript source file in the Milady codebase. It contains 3 functions, 2 imports.",
+      "languageNotes": "typescript; code; 172 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useAvailableViews.ts:fetchViewList",
+      "type": "function",
+      "name": "fetchViewList",
+      "filePath": "eliza/packages/ui/src/hooks/useAvailableViews.ts",
+      "summary": "fetchViewList is a function defined in eliza/packages/ui/src/hooks/useAvailableViews.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useAvailableViews.ts:fetchViews",
+      "type": "function",
+      "name": "fetchViews",
+      "filePath": "eliza/packages/ui/src/hooks/useAvailableViews.ts",
+      "summary": "fetchViews is a function defined in eliza/packages/ui/src/hooks/useAvailableViews.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useAvailableViews.ts:useAvailableViews",
+      "type": "function",
+      "name": "useAvailableViews",
+      "filePath": "eliza/packages/ui/src/hooks/useAvailableViews.ts",
+      "summary": "useAvailableViews is a function defined in eliza/packages/ui/src/hooks/useAvailableViews.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/hooks/useChatAvatarVoiceBridge.ts",
+      "type": "file",
+      "name": "useChatAvatarVoiceBridge.ts",
+      "filePath": "eliza/packages/ui/src/hooks/useChatAvatarVoiceBridge.ts",
+      "summary": "useChatAvatarVoiceBridge.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 39 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useChatAvatarVoiceBridge.ts:useChatAvatarVoiceBridge",
+      "type": "function",
+      "name": "useChatAvatarVoiceBridge",
+      "filePath": "eliza/packages/ui/src/hooks/useChatAvatarVoiceBridge.ts",
+      "summary": "useChatAvatarVoiceBridge is a function defined in eliza/packages/ui/src/hooks/useChatAvatarVoiceBridge.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/hooks/useContextMenu.ts",
+      "type": "file",
+      "name": "useContextMenu.ts",
+      "filePath": "eliza/packages/ui/src/hooks/useContextMenu.ts",
+      "summary": "useContextMenu.ts is a typescript source file in the Milady codebase. It contains 3 functions, 4 imports.",
+      "languageNotes": "typescript; code; 183 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useContextMenu.ts:loadCustomCommands",
+      "type": "function",
+      "name": "loadCustomCommands",
+      "filePath": "eliza/packages/ui/src/hooks/useContextMenu.ts",
+      "summary": "loadCustomCommands is a function defined in eliza/packages/ui/src/hooks/useContextMenu.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useContextMenu.ts:getSelectedText",
+      "type": "function",
+      "name": "getSelectedText",
+      "filePath": "eliza/packages/ui/src/hooks/useContextMenu.ts",
+      "summary": "getSelectedText is a function defined in eliza/packages/ui/src/hooks/useContextMenu.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/hooks/useContextMenu.ts:useContextMenu",
+      "type": "function",
+      "name": "useContextMenu",
+      "filePath": "eliza/packages/ui/src/hooks/useContextMenu.ts",
+      "summary": "useContextMenu is a function defined in eliza/packages/ui/src/hooks/useContextMenu.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/hooks/useContinuousChat.test.tsx",
+      "type": "file",
+      "name": "useContinuousChat.test.tsx",
+      "filePath": "eliza/packages/ui/src/hooks/useContinuousChat.test.tsx",
+      "summary": "useContinuousChat.test.tsx is a typescript source file in the Milady codebase. It contains 2 functions, 3 imports.",
+      "languageNotes": "typescript; code; 147 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useContinuousChat.test.tsx:makeVoiceState",
+      "type": "function",
+      "name": "makeVoiceState",
+      "filePath": "eliza/packages/ui/src/hooks/useContinuousChat.test.tsx",
+      "summary": "makeVoiceState is a function defined in eliza/packages/ui/src/hooks/useContinuousChat.test.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useContinuousChat.test.tsx:ToggleHarness",
+      "type": "function",
+      "name": "ToggleHarness",
+      "filePath": "eliza/packages/ui/src/hooks/useContinuousChat.test.tsx",
+      "summary": "ToggleHarness is a function defined in eliza/packages/ui/src/hooks/useContinuousChat.test.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/hooks/useContinuousChat.ts",
+      "type": "file",
+      "name": "useContinuousChat.ts",
+      "filePath": "eliza/packages/ui/src/hooks/useContinuousChat.ts",
+      "summary": "useContinuousChat.ts is a typescript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "typescript; code; 308 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useContinuousChat.ts:makeCancellationToken",
+      "type": "function",
+      "name": "makeCancellationToken",
+      "filePath": "eliza/packages/ui/src/hooks/useContinuousChat.ts",
+      "summary": "makeCancellationToken is a function defined in eliza/packages/ui/src/hooks/useContinuousChat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/hooks/useContinuousChat.ts:useContinuousChat",
+      "type": "function",
+      "name": "useContinuousChat",
+      "filePath": "eliza/packages/ui/src/hooks/useContinuousChat.ts",
+      "summary": "useContinuousChat is a function defined in eliza/packages/ui/src/hooks/useContinuousChat.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/hooks/useDefaultProviderPresets.test.tsx",
+      "type": "file",
+      "name": "useDefaultProviderPresets.test.tsx",
+      "filePath": "eliza/packages/ui/src/hooks/useDefaultProviderPresets.test.tsx",
+      "summary": "useDefaultProviderPresets.test.tsx is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 181 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useDefaultProviderPresets.test.tsx:HookProbe",
+      "type": "function",
+      "name": "HookProbe",
+      "filePath": "eliza/packages/ui/src/hooks/useDefaultProviderPresets.test.tsx",
+      "summary": "HookProbe is a function defined in eliza/packages/ui/src/hooks/useDefaultProviderPresets.test.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/hooks/useDefaultProviderPresets.ts",
+      "type": "file",
+      "name": "useDefaultProviderPresets.ts",
+      "filePath": "eliza/packages/ui/src/hooks/useDefaultProviderPresets.ts",
+      "summary": "useDefaultProviderPresets.ts is a typescript source file in the Milady codebase. It contains 2 functions, 3 imports.",
+      "languageNotes": "typescript; code; 97 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useDefaultProviderPresets.ts:detectPlatform",
+      "type": "function",
+      "name": "detectPlatform",
+      "filePath": "eliza/packages/ui/src/hooks/useDefaultProviderPresets.ts",
+      "summary": "detectPlatform is a function defined in eliza/packages/ui/src/hooks/useDefaultProviderPresets.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useDefaultProviderPresets.ts:useDefaultProviderPresets",
+      "type": "function",
+      "name": "useDefaultProviderPresets",
+      "filePath": "eliza/packages/ui/src/hooks/useDefaultProviderPresets.ts",
+      "summary": "useDefaultProviderPresets is a function defined in eliza/packages/ui/src/hooks/useDefaultProviderPresets.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/hooks/useDesktopTabs.test.tsx",
+      "type": "file",
+      "name": "useDesktopTabs.test.tsx",
+      "filePath": "eliza/packages/ui/src/hooks/useDesktopTabs.test.tsx",
+      "summary": "useDesktopTabs.test.tsx is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 182 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useDesktopTabs.test.tsx:view",
+      "type": "function",
+      "name": "view",
+      "filePath": "eliza/packages/ui/src/hooks/useDesktopTabs.test.tsx",
+      "summary": "view is a function defined in eliza/packages/ui/src/hooks/useDesktopTabs.test.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/hooks/useDesktopTabs.ts",
+      "type": "file",
+      "name": "useDesktopTabs.ts",
+      "filePath": "eliza/packages/ui/src/hooks/useDesktopTabs.ts",
+      "summary": "useDesktopTabs.ts is a typescript source file in the Milady codebase. It contains 4 functions, 2 imports.",
+      "languageNotes": "typescript; code; 121 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useDesktopTabs.ts:loadPersistedTabs",
+      "type": "function",
+      "name": "loadPersistedTabs",
+      "filePath": "eliza/packages/ui/src/hooks/useDesktopTabs.ts",
+      "summary": "loadPersistedTabs is a function defined in eliza/packages/ui/src/hooks/useDesktopTabs.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useDesktopTabs.ts:persistPinnedTabs",
+      "type": "function",
+      "name": "persistPinnedTabs",
+      "filePath": "eliza/packages/ui/src/hooks/useDesktopTabs.ts",
+      "summary": "persistPinnedTabs is a function defined in eliza/packages/ui/src/hooks/useDesktopTabs.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useDesktopTabs.ts:tabFromView",
+      "type": "function",
+      "name": "tabFromView",
+      "filePath": "eliza/packages/ui/src/hooks/useDesktopTabs.ts",
+      "summary": "tabFromView is a function defined in eliza/packages/ui/src/hooks/useDesktopTabs.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useDesktopTabs.ts:useDesktopTabs",
+      "type": "function",
+      "name": "useDesktopTabs",
+      "filePath": "eliza/packages/ui/src/hooks/useDesktopTabs.ts",
+      "summary": "useDesktopTabs is a function defined in eliza/packages/ui/src/hooks/useDesktopTabs.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/hooks/useRuntimeMode.test.tsx",
+      "type": "file",
+      "name": "useRuntimeMode.test.tsx",
+      "filePath": "eliza/packages/ui/src/hooks/useRuntimeMode.test.tsx",
+      "summary": "useRuntimeMode.test.tsx is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 135 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useRuntimeMode.test.tsx:HookProbe",
+      "type": "function",
+      "name": "HookProbe",
+      "filePath": "eliza/packages/ui/src/hooks/useRuntimeMode.test.tsx",
+      "summary": "HookProbe is a function defined in eliza/packages/ui/src/hooks/useRuntimeMode.test.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/hooks/useRuntimeMode.ts",
+      "type": "file",
+      "name": "useRuntimeMode.ts",
+      "filePath": "eliza/packages/ui/src/hooks/useRuntimeMode.ts",
+      "summary": "useRuntimeMode.ts is a typescript source file in the Milady codebase. It contains 4 functions, 1 imports.",
+      "languageNotes": "typescript; code; 108 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useRuntimeMode.ts:publish",
+      "type": "function",
+      "name": "publish",
+      "filePath": "eliza/packages/ui/src/hooks/useRuntimeMode.ts",
+      "summary": "publish is a function defined in eliza/packages/ui/src/hooks/useRuntimeMode.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useRuntimeMode.ts:refresh",
+      "type": "function",
+      "name": "refresh",
+      "filePath": "eliza/packages/ui/src/hooks/useRuntimeMode.ts",
+      "summary": "refresh is a function defined in eliza/packages/ui/src/hooks/useRuntimeMode.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useRuntimeMode.ts:__resetRuntimeModeCacheForTests",
+      "type": "function",
+      "name": "__resetRuntimeModeCacheForTests",
+      "filePath": "eliza/packages/ui/src/hooks/useRuntimeMode.ts",
+      "summary": "__resetRuntimeModeCacheForTests is a function defined in eliza/packages/ui/src/hooks/useRuntimeMode.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useRuntimeMode.ts:useRuntimeMode",
+      "type": "function",
+      "name": "useRuntimeMode",
+      "filePath": "eliza/packages/ui/src/hooks/useRuntimeMode.ts",
+      "summary": "useRuntimeMode is a function defined in eliza/packages/ui/src/hooks/useRuntimeMode.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/hooks/useSignalPairing.ts",
+      "type": "file",
+      "name": "useSignalPairing.ts",
+      "filePath": "eliza/packages/ui/src/hooks/useSignalPairing.ts",
+      "summary": "useSignalPairing.ts is a typescript source file in the Milady codebase. It contains 3 functions, 3 imports.",
+      "languageNotes": "typescript; code; 163 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useSignalPairing.ts:stateFromStatusResponse",
+      "type": "function",
+      "name": "stateFromStatusResponse",
+      "filePath": "eliza/packages/ui/src/hooks/useSignalPairing.ts",
+      "summary": "stateFromStatusResponse is a function defined in eliza/packages/ui/src/hooks/useSignalPairing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useSignalPairing.ts:toSignalPairingErrorState",
+      "type": "function",
+      "name": "toSignalPairingErrorState",
+      "filePath": "eliza/packages/ui/src/hooks/useSignalPairing.ts",
+      "summary": "toSignalPairingErrorState is a function defined in eliza/packages/ui/src/hooks/useSignalPairing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/hooks/useSignalPairing.ts:useSignalPairing",
+      "type": "function",
+      "name": "useSignalPairing",
+      "filePath": "eliza/packages/ui/src/hooks/useSignalPairing.ts",
+      "summary": "useSignalPairing is a function defined in eliza/packages/ui/src/hooks/useSignalPairing.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/hooks/useViewEvent.ts",
+      "type": "file",
+      "name": "useViewEvent.ts",
+      "filePath": "eliza/packages/ui/src/hooks/useViewEvent.ts",
+      "summary": "useViewEvent.ts is a typescript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "typescript; code; 60 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useViewEvent.ts:useViewEvent",
+      "type": "function",
+      "name": "useViewEvent",
+      "filePath": "eliza/packages/ui/src/hooks/useViewEvent.ts",
+      "summary": "useViewEvent is a function defined in eliza/packages/ui/src/hooks/useViewEvent.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useViewEvent.ts:useEmitViewEvent",
+      "type": "function",
+      "name": "useEmitViewEvent",
+      "filePath": "eliza/packages/ui/src/hooks/useViewEvent.ts",
+      "summary": "useEmitViewEvent is a function defined in eliza/packages/ui/src/hooks/useViewEvent.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/hooks/useVoiceChat.bidirectional.test.tsx",
+      "type": "file",
+      "name": "useVoiceChat.bidirectional.test.tsx",
+      "filePath": "eliza/packages/ui/src/hooks/useVoiceChat.bidirectional.test.tsx",
+      "summary": "useVoiceChat.bidirectional.test.tsx is a typescript source file in the Milady codebase. It contains 1 function, 2 classes, 1 imports.",
+      "languageNotes": "typescript; code; 370 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useVoiceChat.bidirectional.test.tsx:installVoiceBrowserMocks",
+      "type": "function",
+      "name": "installVoiceBrowserMocks",
+      "filePath": "eliza/packages/ui/src/hooks/useVoiceChat.bidirectional.test.tsx",
+      "summary": "installVoiceBrowserMocks is a function defined in eliza/packages/ui/src/hooks/useVoiceChat.bidirectional.test.tsx."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/ui/src/hooks/useVoiceChat.bidirectional.test.tsx:FakeSpeechRecognition",
+      "type": "class",
+      "name": "FakeSpeechRecognition",
+      "filePath": "eliza/packages/ui/src/hooks/useVoiceChat.bidirectional.test.tsx",
+      "summary": "FakeSpeechRecognition is a class or type declared in eliza/packages/ui/src/hooks/useVoiceChat.bidirectional.test.tsx."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/ui/src/hooks/useVoiceChat.bidirectional.test.tsx:FakeSpeechSynthesisUtterance",
+      "type": "class",
+      "name": "FakeSpeechSynthesisUtterance",
+      "filePath": "eliza/packages/ui/src/hooks/useVoiceChat.bidirectional.test.tsx",
+      "summary": "FakeSpeechSynthesisUtterance is a class or type declared in eliza/packages/ui/src/hooks/useVoiceChat.bidirectional.test.tsx."
+    },
+    {
+      "tags": [
+        "test",
+        "voice"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/hooks/useVoiceChat.local-asr.test.tsx",
+      "type": "file",
+      "name": "useVoiceChat.local-asr.test.tsx",
+      "filePath": "eliza/packages/ui/src/hooks/useVoiceChat.local-asr.test.tsx",
+      "summary": "useVoiceChat.local-asr.test.tsx is a typescript source file in the Milady codebase. It contains 3 imports.",
+      "languageNotes": "typescript; code; 111 lines"
+    },
+    {
+      "tags": [
+        "voice",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "type": "file",
+      "name": "useVoiceChat.ts",
+      "filePath": "eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "summary": "useVoiceChat.ts is a typescript source file in the Milady codebase. It contains 7 functions, 13 imports.",
+      "languageNotes": "typescript; code; 2117 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:resumeAudioContextForPlayback",
+      "type": "function",
+      "name": "resumeAudioContextForPlayback",
+      "filePath": "eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "summary": "resumeAudioContextForPlayback is a function defined in eliza/packages/ui/src/hooks/useVoiceChat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:shouldPreferNativeTalkMode",
+      "type": "function",
+      "name": "shouldPreferNativeTalkMode",
+      "filePath": "eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "summary": "shouldPreferNativeTalkMode is a function defined in eliza/packages/ui/src/hooks/useVoiceChat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:isWindowsElectrobunRenderer",
+      "type": "function",
+      "name": "isWindowsElectrobunRenderer",
+      "filePath": "eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "summary": "isWindowsElectrobunRenderer is a function defined in eliza/packages/ui/src/hooks/useVoiceChat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:shouldAutoRestartBrowserRecognition",
+      "type": "function",
+      "name": "shouldAutoRestartBrowserRecognition",
+      "filePath": "eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "summary": "shouldAutoRestartBrowserRecognition is a function defined in eliza/packages/ui/src/hooks/useVoiceChat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:shouldUseLocalInferenceAsr",
+      "type": "function",
+      "name": "shouldUseLocalInferenceAsr",
+      "filePath": "eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "summary": "shouldUseLocalInferenceAsr is a function defined in eliza/packages/ui/src/hooks/useVoiceChat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:normalizeActiveVoiceSessionMode",
+      "type": "function",
+      "name": "normalizeActiveVoiceSessionMode",
+      "filePath": "eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "summary": "normalizeActiveVoiceSessionMode is a function defined in eliza/packages/ui/src/hooks/useVoiceChat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:useVoiceChat",
+      "type": "function",
+      "name": "useVoiceChat",
+      "filePath": "eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "summary": "useVoiceChat is a function defined in eliza/packages/ui/src/hooks/useVoiceChat.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/hooks/useWhatsAppPairing.ts",
+      "type": "file",
+      "name": "useWhatsAppPairing.ts",
+      "filePath": "eliza/packages/ui/src/hooks/useWhatsAppPairing.ts",
+      "summary": "useWhatsAppPairing.ts is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 119 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/hooks/useWhatsAppPairing.ts:useWhatsAppPairing",
+      "type": "function",
+      "name": "useWhatsAppPairing",
+      "filePath": "eliza/packages/ui/src/hooks/useWhatsAppPairing.ts",
+      "summary": "useWhatsAppPairing is a function defined in eliza/packages/ui/src/hooks/useWhatsAppPairing.ts."
+    },
+    {
+      "tags": [
+        "entry-point",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/i18n/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/ui/src/i18n/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase. It contains 5 functions, 1 imports.",
+      "languageNotes": "typescript; code; 84 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/i18n/index.ts:interpolate",
+      "type": "function",
+      "name": "interpolate",
+      "filePath": "eliza/packages/ui/src/i18n/index.ts",
+      "summary": "interpolate is a function defined in eliza/packages/ui/src/i18n/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/i18n/index.ts:normalizeLanguage",
+      "type": "function",
+      "name": "normalizeLanguage",
+      "filePath": "eliza/packages/ui/src/i18n/index.ts",
+      "summary": "normalizeLanguage is a function defined in eliza/packages/ui/src/i18n/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/i18n/index.ts:messageForLanguage",
+      "type": "function",
+      "name": "messageForLanguage",
+      "filePath": "eliza/packages/ui/src/i18n/index.ts",
+      "summary": "messageForLanguage is a function defined in eliza/packages/ui/src/i18n/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/i18n/index.ts:t",
+      "type": "function",
+      "name": "t",
+      "filePath": "eliza/packages/ui/src/i18n/index.ts",
+      "summary": "t is a function defined in eliza/packages/ui/src/i18n/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/i18n/index.ts:createTranslator",
+      "type": "function",
+      "name": "createTranslator",
+      "filePath": "eliza/packages/ui/src/i18n/index.ts",
+      "summary": "createTranslator is a function defined in eliza/packages/ui/src/i18n/index.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/i18n/messages.test.ts",
+      "type": "file",
+      "name": "messages.test.ts",
+      "filePath": "eliza/packages/ui/src/i18n/messages.test.ts",
+      "summary": "messages.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 24 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/i18n/messages.ts",
+      "type": "file",
+      "name": "messages.ts",
+      "filePath": "eliza/packages/ui/src/i18n/messages.ts",
+      "summary": "messages.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 74 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/i18n/messages.ts:ensureLanguageLoaded",
+      "type": "function",
+      "name": "ensureLanguageLoaded",
+      "filePath": "eliza/packages/ui/src/i18n/messages.ts",
+      "summary": "ensureLanguageLoaded is a function defined in eliza/packages/ui/src/i18n/messages.ts."
+    },
+    {
+      "tags": [
+        "entry-point",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/navigation/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/ui/src/navigation/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase. It contains 19 functions, 1 imports.",
+      "languageNotes": "typescript; code; 598 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/navigation/index.ts:viteEnvFlagEnabled",
+      "type": "function",
+      "name": "viteEnvFlagEnabled",
+      "filePath": "eliza/packages/ui/src/navigation/index.ts",
+      "summary": "viteEnvFlagEnabled is a function defined in eliza/packages/ui/src/navigation/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/navigation/index.ts:isAppsToolTab",
+      "type": "function",
+      "name": "isAppsToolTab",
+      "filePath": "eliza/packages/ui/src/navigation/index.ts",
+      "summary": "isAppsToolTab is a function defined in eliza/packages/ui/src/navigation/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/navigation/index.ts:hasAndroidTestFlag",
+      "type": "function",
+      "name": "hasAndroidTestFlag",
+      "filePath": "eliza/packages/ui/src/navigation/index.ts",
+      "summary": "hasAndroidTestFlag is a function defined in eliza/packages/ui/src/navigation/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/navigation/index.ts:isAndroidPhoneSurfaceEnabled",
+      "type": "function",
+      "name": "isAndroidPhoneSurfaceEnabled",
+      "filePath": "eliza/packages/ui/src/navigation/index.ts",
+      "summary": "isAndroidPhoneSurfaceEnabled is a function defined in eliza/packages/ui/src/navigation/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/navigation/index.ts:getWindowNavigationLocation",
+      "type": "function",
+      "name": "getWindowNavigationLocation",
+      "filePath": "eliza/packages/ui/src/navigation/index.ts",
+      "summary": "getWindowNavigationLocation is a function defined in eliza/packages/ui/src/navigation/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/navigation/index.ts:isAppWindowRoute",
+      "type": "function",
+      "name": "isAppWindowRoute",
+      "filePath": "eliza/packages/ui/src/navigation/index.ts",
+      "summary": "isAppWindowRoute is a function defined in eliza/packages/ui/src/navigation/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/navigation/index.ts:shouldUseHashNavigation",
+      "type": "function",
+      "name": "shouldUseHashNavigation",
+      "filePath": "eliza/packages/ui/src/navigation/index.ts",
+      "summary": "shouldUseHashNavigation is a function defined in eliza/packages/ui/src/navigation/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/navigation/index.ts:getWindowNavigationPath",
+      "type": "function",
+      "name": "getWindowNavigationPath",
+      "filePath": "eliza/packages/ui/src/navigation/index.ts",
+      "summary": "getWindowNavigationPath is a function defined in eliza/packages/ui/src/navigation/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/navigation/index.ts:getTabGroups",
+      "type": "function",
+      "name": "getTabGroups",
+      "filePath": "eliza/packages/ui/src/navigation/index.ts",
+      "summary": "getTabGroups is a function defined in eliza/packages/ui/src/navigation/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/navigation/index.ts:normalizePathForLookup",
+      "type": "function",
+      "name": "normalizePathForLookup",
+      "filePath": "eliza/packages/ui/src/navigation/index.ts",
+      "summary": "normalizePathForLookup is a function defined in eliza/packages/ui/src/navigation/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/navigation/index.ts:pathForTab",
+      "type": "function",
+      "name": "pathForTab",
+      "filePath": "eliza/packages/ui/src/navigation/index.ts",
+      "summary": "pathForTab is a function defined in eliza/packages/ui/src/navigation/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/navigation/index.ts:canonicalPathForPath",
+      "type": "function",
+      "name": "canonicalPathForPath",
+      "filePath": "eliza/packages/ui/src/navigation/index.ts",
+      "summary": "canonicalPathForPath is a function defined in eliza/packages/ui/src/navigation/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/navigation/index.ts:isRouteRootPath",
+      "type": "function",
+      "name": "isRouteRootPath",
+      "filePath": "eliza/packages/ui/src/navigation/index.ts",
+      "summary": "isRouteRootPath is a function defined in eliza/packages/ui/src/navigation/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/navigation/index.ts:resolveInitialTabForPath",
+      "type": "function",
+      "name": "resolveInitialTabForPath",
+      "filePath": "eliza/packages/ui/src/navigation/index.ts",
+      "summary": "resolveInitialTabForPath is a function defined in eliza/packages/ui/src/navigation/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/navigation/index.ts:tabFromPath",
+      "type": "function",
+      "name": "tabFromPath",
+      "filePath": "eliza/packages/ui/src/navigation/index.ts",
+      "summary": "tabFromPath is a function defined in eliza/packages/ui/src/navigation/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/navigation/index.ts:normalizeBasePath",
+      "type": "function",
+      "name": "normalizeBasePath",
+      "filePath": "eliza/packages/ui/src/navigation/index.ts",
+      "summary": "normalizeBasePath is a function defined in eliza/packages/ui/src/navigation/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/navigation/index.ts:normalizePath",
+      "type": "function",
+      "name": "normalizePath",
+      "filePath": "eliza/packages/ui/src/navigation/index.ts",
+      "summary": "normalizePath is a function defined in eliza/packages/ui/src/navigation/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/navigation/index.ts:getAppSlugFromPath",
+      "type": "function",
+      "name": "getAppSlugFromPath",
+      "filePath": "eliza/packages/ui/src/navigation/index.ts",
+      "summary": "getAppSlugFromPath is a function defined in eliza/packages/ui/src/navigation/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/navigation/index.ts:titleForTab",
+      "type": "function",
+      "name": "titleForTab",
+      "filePath": "eliza/packages/ui/src/navigation/index.ts",
+      "summary": "titleForTab is a function defined in eliza/packages/ui/src/navigation/index.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/platform/aosp-user-agent.ts",
+      "type": "file",
+      "name": "aosp-user-agent.ts",
+      "filePath": "eliza/packages/ui/src/platform/aosp-user-agent.ts",
+      "summary": "aosp-user-agent.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 15 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/platform/aosp-user-agent.ts:userAgentHasElizaOSMarker",
+      "type": "function",
+      "name": "userAgentHasElizaOSMarker",
+      "filePath": "eliza/packages/ui/src/platform/aosp-user-agent.ts",
+      "summary": "userAgentHasElizaOSMarker is a function defined in eliza/packages/ui/src/platform/aosp-user-agent.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/platform/browser-launch.test.ts",
+      "type": "file",
+      "name": "browser-launch.test.ts",
+      "filePath": "eliza/packages/ui/src/platform/browser-launch.test.ts",
+      "summary": "browser-launch.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 155 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/platform/browser-launch.ts",
+      "type": "file",
+      "name": "browser-launch.ts",
+      "filePath": "eliza/packages/ui/src/platform/browser-launch.ts",
+      "summary": "browser-launch.ts is a typescript source file in the Milady codebase. It contains 11 functions, 3 imports.",
+      "languageNotes": "typescript; code; 254 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/platform/browser-launch.ts:getSearchParams",
+      "type": "function",
+      "name": "getSearchParams",
+      "filePath": "eliza/packages/ui/src/platform/browser-launch.ts",
+      "summary": "getSearchParams is a function defined in eliza/packages/ui/src/platform/browser-launch.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/platform/browser-launch.ts:isAllowedHttpHost",
+      "type": "function",
+      "name": "isAllowedHttpHost",
+      "filePath": "eliza/packages/ui/src/platform/browser-launch.ts",
+      "summary": "isAllowedHttpHost is a function defined in eliza/packages/ui/src/platform/browser-launch.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/platform/browser-launch.ts:isCurrentHost",
+      "type": "function",
+      "name": "isCurrentHost",
+      "filePath": "eliza/packages/ui/src/platform/browser-launch.ts",
+      "summary": "isCurrentHost is a function defined in eliza/packages/ui/src/platform/browser-launch.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/platform/browser-launch.ts:isConfiguredCloudHost",
+      "type": "function",
+      "name": "isConfiguredCloudHost",
+      "filePath": "eliza/packages/ui/src/platform/browser-launch.ts",
+      "summary": "isConfiguredCloudHost is a function defined in eliza/packages/ui/src/platform/browser-launch.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/platform/browser-launch.ts:isTrustedCloudLaunchHost",
+      "type": "function",
+      "name": "isTrustedCloudLaunchHost",
+      "filePath": "eliza/packages/ui/src/platform/browser-launch.ts",
+      "summary": "isTrustedCloudLaunchHost is a function defined in eliza/packages/ui/src/platform/browser-launch.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/platform/browser-launch.ts:normalizeLaunchApiBase",
+      "type": "function",
+      "name": "normalizeLaunchApiBase",
+      "filePath": "eliza/packages/ui/src/platform/browser-launch.ts",
+      "summary": "normalizeLaunchApiBase is a function defined in eliza/packages/ui/src/platform/browser-launch.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/platform/browser-launch.ts:normalizeLaunchBaseUrl",
+      "type": "function",
+      "name": "normalizeLaunchBaseUrl",
+      "filePath": "eliza/packages/ui/src/platform/browser-launch.ts",
+      "summary": "normalizeLaunchBaseUrl is a function defined in eliza/packages/ui/src/platform/browser-launch.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/platform/browser-launch.ts:stripLaunchParams",
+      "type": "function",
+      "name": "stripLaunchParams",
+      "filePath": "eliza/packages/ui/src/platform/browser-launch.ts",
+      "summary": "stripLaunchParams is a function defined in eliza/packages/ui/src/platform/browser-launch.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/platform/browser-launch.ts:exchangeCloudLaunchSession",
+      "type": "function",
+      "name": "exchangeCloudLaunchSession",
+      "filePath": "eliza/packages/ui/src/platform/browser-launch.ts",
+      "summary": "exchangeCloudLaunchSession is a function defined in eliza/packages/ui/src/platform/browser-launch.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/platform/browser-launch.ts:applyLaunchConnection",
+      "type": "function",
+      "name": "applyLaunchConnection",
+      "filePath": "eliza/packages/ui/src/platform/browser-launch.ts",
+      "summary": "applyLaunchConnection is a function defined in eliza/packages/ui/src/platform/browser-launch.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/platform/browser-launch.ts:applyLaunchConnectionFromUrl",
+      "type": "function",
+      "name": "applyLaunchConnectionFromUrl",
+      "filePath": "eliza/packages/ui/src/platform/browser-launch.ts",
+      "summary": "applyLaunchConnectionFromUrl is a function defined in eliza/packages/ui/src/platform/browser-launch.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "target": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:isMobileLocalAgentIpcUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "target": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:mobileLocalAgentPathFromUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "target": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:isMobileLocalAgentUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "target": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:normalizeMobileRuntimeMode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "target": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:mobileRuntimeModeForServerTarget",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "target": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:readPersistedMobileRuntimeMode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "target": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:isElizaCloudRuntimeLocked",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "target": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:persistNativeMobileRuntimeMode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "target": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:persistMobileRuntimeModeForServerTarget",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:isMobileLocalAgentUrl",
+      "target": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:isMobileLocalAgentIpcUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:readPersistedMobileRuntimeMode",
+      "target": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:normalizeMobileRuntimeMode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:isElizaCloudRuntimeLocked",
+      "target": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:readPersistedMobileRuntimeMode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:persistMobileRuntimeModeForServerTarget",
+      "target": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:mobileRuntimeModeForServerTarget",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:persistMobileRuntimeModeForServerTarget",
+      "target": "function:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts:persistNativeMobileRuntimeMode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts",
+      "target": "function:eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts:hasPersistedActiveServer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts",
+      "target": "function:eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts:writeLocalAgentActiveServer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts",
+      "target": "function:eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts:isBrandedAndroidDevice",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts",
+      "target": "function:eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts:preSeedAndroidLocalRuntimeIfFresh",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts:preSeedAndroidLocalRuntimeIfFresh",
+      "target": "function:eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts:isBrandedAndroidDevice",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts:preSeedAndroidLocalRuntimeIfFresh",
+      "target": "function:eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts:hasPersistedActiveServer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts:preSeedAndroidLocalRuntimeIfFresh",
+      "target": "function:eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts:writeLocalAgentActiveServer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/probe-local-agent.ts",
+      "target": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:toNativeAgentProbePlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/probe-local-agent.ts",
+      "target": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:isNativeAndroid",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/probe-local-agent.ts",
+      "target": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:isNativeIos",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/probe-local-agent.ts",
+      "target": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:resolveNativeAgentPlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/probe-local-agent.ts",
+      "target": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:clearLocalAgentProbeCache",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/probe-local-agent.ts",
+      "target": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:shouldShowLocalOption",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/probe-local-agent.ts",
+      "target": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:isHealthyBody",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/probe-local-agent.ts",
+      "target": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:runNativeAndroidProbe",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/probe-local-agent.ts",
+      "target": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:runProbe",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/probe-local-agent.ts",
+      "target": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:probeLocalAgent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:resolveNativeAgentPlugin",
+      "target": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:toNativeAgentProbePlugin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:shouldShowLocalOption",
+      "target": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:isNativeIos",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:shouldShowLocalOption",
+      "target": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:probeLocalAgent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:runNativeAndroidProbe",
+      "target": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:isNativeAndroid",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:runNativeAndroidProbe",
+      "target": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:resolveNativeAgentPlugin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:runNativeAndroidProbe",
+      "target": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:isHealthyBody",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:runProbe",
+      "target": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:runNativeAndroidProbe",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:runProbe",
+      "target": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:isHealthyBody",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:probeLocalAgent",
+      "target": "function:eliza/packages/ui/src/first-run/probe-local-agent.ts:runProbe",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/reload-into-first-run-runtime.ts",
+      "target": "function:eliza/packages/ui/src/first-run/reload-into-first-run-runtime.ts:isFirstRunReloadTarget",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/reload-into-first-run-runtime.ts",
+      "target": "function:eliza/packages/ui/src/first-run/reload-into-first-run-runtime.ts:readFirstRunRuntimeTarget",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/reload-into-first-run-runtime.ts",
+      "target": "function:eliza/packages/ui/src/first-run/reload-into-first-run-runtime.ts:reloadIntoFirstRunRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/reload-into-first-run-runtime.ts:readFirstRunRuntimeTarget",
+      "target": "function:eliza/packages/ui/src/first-run/reload-into-first-run-runtime.ts:isFirstRunReloadTarget",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/runtime-target.ts",
+      "target": "function:eliza/packages/ui/src/first-run/runtime-target.ts:isElizaCloudFirstRunTarget",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/runtime-target.ts",
+      "target": "function:eliza/packages/ui/src/first-run/runtime-target.ts:activeServerKindToFirstRunRuntimeTarget",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/setup-steps.ts",
+      "target": "function:eliza/packages/ui/src/first-run/setup-steps.ts:getSetupStepOrder",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/setup-steps.ts",
+      "target": "function:eliza/packages/ui/src/first-run/setup-steps.ts:getSetupStepIndex",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/setup-steps.ts",
+      "target": "function:eliza/packages/ui/src/first-run/setup-steps.ts:resolveSetupNextStep",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/setup-steps.ts",
+      "target": "function:eliza/packages/ui/src/first-run/setup-steps.ts:resolveSetupPreviousStep",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/setup-steps.ts",
+      "target": "function:eliza/packages/ui/src/first-run/setup-steps.ts:canRevertSetupTo",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/setup-steps.ts",
+      "target": "function:eliza/packages/ui/src/first-run/setup-steps.ts:getSetupNavMetas",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/setup-steps.ts",
+      "target": "function:eliza/packages/ui/src/first-run/setup-steps.ts:shouldSkipConnectionStepsForCloudProvisionedContainer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/setup-steps.ts",
+      "target": "function:eliza/packages/ui/src/first-run/setup-steps.ts:shouldUseCloudSetupFastTrack",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/setup-steps.ts",
+      "target": "function:eliza/packages/ui/src/first-run/setup-steps.ts:getFlaminaTopicForSetupStep",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/setup-steps.ts:getSetupStepIndex",
+      "target": "function:eliza/packages/ui/src/first-run/setup-steps.ts:getSetupStepOrder",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/setup-steps.ts:resolveSetupNextStep",
+      "target": "function:eliza/packages/ui/src/first-run/setup-steps.ts:getSetupStepOrder",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/setup-steps.ts:resolveSetupPreviousStep",
+      "target": "function:eliza/packages/ui/src/first-run/setup-steps.ts:getSetupStepOrder",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/setup-steps.ts:canRevertSetupTo",
+      "target": "function:eliza/packages/ui/src/first-run/setup-steps.ts:getSetupStepIndex",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/setup-steps.ts:canRevertSetupTo",
+      "target": "function:eliza/packages/ui/src/first-run/setup-steps.ts:getSetupStepIndex",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:isFirstRunBrowserSpeechRecognitionSupported",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:resolveFirstRunAsrProvider",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:isFirstRunVoiceInputSupported",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:isFirstRunVoiceOutputSupported",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:resolveFirstRunVoiceLocale",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:formatFirstRunVoiceError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:readSyncOnDeviceAgentBearer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:startMobileLocalAgent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:startLocalRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:waitForAgentApi",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:normalizeRemoteTarget",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:useFirstRunController",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:resolveFirstRunAsrProvider",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:isFirstRunBrowserSpeechRecognitionSupported",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:isFirstRunVoiceInputSupported",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:resolveFirstRunAsrProvider",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:startLocalRuntime",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:startMobileLocalAgent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:useFirstRunController",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:isFirstRunVoiceInputSupported",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:useFirstRunController",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:isFirstRunVoiceOutputSupported",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:useFirstRunController",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:isFirstRunVoiceInputSupported",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:useFirstRunController",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:readSyncOnDeviceAgentBearer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:useFirstRunController",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:startLocalRuntime",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:useFirstRunController",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:waitForAgentApi",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:useFirstRunController",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:normalizeRemoteTarget",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:useFirstRunController",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:formatFirstRunVoiceError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:useFirstRunController",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:resolveFirstRunAsrProvider",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:useFirstRunController",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:isFirstRunVoiceOutputSupported",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:useFirstRunController",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:resolveFirstRunVoiceLocale",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:useFirstRunController",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:formatFirstRunVoiceError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:useFirstRunController",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:formatFirstRunVoiceError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:useFirstRunController",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:isFirstRunVoiceInputSupported",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:useFirstRunController",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:isFirstRunVoiceOutputSupported",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:useFirstRunController",
+      "target": "function:eliza/packages/ui/src/first-run/use-first-run-controller.ts:resolveFirstRunVoiceLocale",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/voice-readiness.test.ts",
+      "target": "function:eliza/packages/ui/src/first-run/voice-readiness.test.ts:hubSnapshot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/voice-readiness.ts",
+      "target": "function:eliza/packages/ui/src/first-run/voice-readiness.ts:resolveFirstRunLocalAgentApiBase",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/voice-readiness.ts",
+      "target": "function:eliza/packages/ui/src/first-run/voice-readiness.ts:hasPackagedLocalAsrRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/first-run/voice-readiness.ts",
+      "target": "function:eliza/packages/ui/src/first-run/voice-readiness.ts:prepareFirstRunVoiceAndTranscription",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/first-run/voice-readiness.ts:prepareFirstRunVoiceAndTranscription",
+      "target": "function:eliza/packages/ui/src/first-run/voice-readiness.ts:hasPackagedLocalAsrRuntime",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useAvailableViews.test.tsx",
+      "target": "function:eliza/packages/ui/src/hooks/useAvailableViews.test.tsx:response",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useAvailableViews.test.tsx",
+      "target": "function:eliza/packages/ui/src/hooks/useAvailableViews.test.tsx:deferredResponse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useAvailableViews.test.tsx",
+      "target": "function:eliza/packages/ui/src/hooks/useAvailableViews.test.tsx:view",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useAvailableViews.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useAvailableViews.ts:fetchViewList",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useAvailableViews.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useAvailableViews.ts:fetchViews",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useAvailableViews.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useAvailableViews.ts:useAvailableViews",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useAvailableViews.ts:fetchViews",
+      "target": "function:eliza/packages/ui/src/hooks/useAvailableViews.ts:fetchViewList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useAvailableViews.ts:fetchViews",
+      "target": "function:eliza/packages/ui/src/hooks/useAvailableViews.ts:fetchViewList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useAvailableViews.ts:useAvailableViews",
+      "target": "function:eliza/packages/ui/src/hooks/useAvailableViews.ts:fetchViews",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useChatAvatarVoiceBridge.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useChatAvatarVoiceBridge.ts:useChatAvatarVoiceBridge",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useContextMenu.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useContextMenu.ts:loadCustomCommands",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useContextMenu.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useContextMenu.ts:getSelectedText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useContextMenu.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useContextMenu.ts:useContextMenu",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useContextMenu.ts:useContextMenu",
+      "target": "function:eliza/packages/ui/src/hooks/useContextMenu.ts:loadCustomCommands",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useContinuousChat.test.tsx",
+      "target": "function:eliza/packages/ui/src/hooks/useContinuousChat.test.tsx:makeVoiceState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useContinuousChat.test.tsx",
+      "target": "function:eliza/packages/ui/src/hooks/useContinuousChat.test.tsx:ToggleHarness",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useContinuousChat.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useContinuousChat.ts:makeCancellationToken",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useContinuousChat.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useContinuousChat.ts:useContinuousChat",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useContinuousChat.ts:useContinuousChat",
+      "target": "function:eliza/packages/ui/src/hooks/useContinuousChat.ts:makeCancellationToken",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useDefaultProviderPresets.test.tsx",
+      "target": "function:eliza/packages/ui/src/hooks/useDefaultProviderPresets.test.tsx:HookProbe",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useDefaultProviderPresets.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useDefaultProviderPresets.ts:detectPlatform",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useDefaultProviderPresets.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useDefaultProviderPresets.ts:useDefaultProviderPresets",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useDefaultProviderPresets.ts:useDefaultProviderPresets",
+      "target": "function:eliza/packages/ui/src/hooks/useDefaultProviderPresets.ts:detectPlatform",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useDesktopTabs.test.tsx",
+      "target": "function:eliza/packages/ui/src/hooks/useDesktopTabs.test.tsx:view",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useDesktopTabs.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useDesktopTabs.ts:loadPersistedTabs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useDesktopTabs.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useDesktopTabs.ts:persistPinnedTabs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useDesktopTabs.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useDesktopTabs.ts:tabFromView",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useDesktopTabs.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useDesktopTabs.ts:useDesktopTabs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useDesktopTabs.ts:useDesktopTabs",
+      "target": "function:eliza/packages/ui/src/hooks/useDesktopTabs.ts:loadPersistedTabs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useDesktopTabs.ts:useDesktopTabs",
+      "target": "function:eliza/packages/ui/src/hooks/useDesktopTabs.ts:persistPinnedTabs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useDesktopTabs.ts:useDesktopTabs",
+      "target": "function:eliza/packages/ui/src/hooks/useDesktopTabs.ts:tabFromView",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useDesktopTabs.ts:useDesktopTabs",
+      "target": "function:eliza/packages/ui/src/hooks/useDesktopTabs.ts:tabFromView",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useRuntimeMode.test.tsx",
+      "target": "function:eliza/packages/ui/src/hooks/useRuntimeMode.test.tsx:HookProbe",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useRuntimeMode.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useRuntimeMode.ts:publish",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useRuntimeMode.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useRuntimeMode.ts:refresh",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useRuntimeMode.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useRuntimeMode.ts:__resetRuntimeModeCacheForTests",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useRuntimeMode.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useRuntimeMode.ts:useRuntimeMode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useRuntimeMode.ts:refresh",
+      "target": "function:eliza/packages/ui/src/hooks/useRuntimeMode.ts:publish",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useRuntimeMode.ts:useRuntimeMode",
+      "target": "function:eliza/packages/ui/src/hooks/useRuntimeMode.ts:refresh",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useRuntimeMode.ts:useRuntimeMode",
+      "target": "function:eliza/packages/ui/src/hooks/useRuntimeMode.ts:refresh",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useSignalPairing.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useSignalPairing.ts:stateFromStatusResponse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useSignalPairing.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useSignalPairing.ts:toSignalPairingErrorState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useSignalPairing.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useSignalPairing.ts:useSignalPairing",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useSignalPairing.ts:useSignalPairing",
+      "target": "function:eliza/packages/ui/src/hooks/useSignalPairing.ts:stateFromStatusResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useSignalPairing.ts:useSignalPairing",
+      "target": "function:eliza/packages/ui/src/hooks/useSignalPairing.ts:toSignalPairingErrorState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useSignalPairing.ts:useSignalPairing",
+      "target": "function:eliza/packages/ui/src/hooks/useSignalPairing.ts:toSignalPairingErrorState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useSignalPairing.ts:useSignalPairing",
+      "target": "function:eliza/packages/ui/src/hooks/useSignalPairing.ts:toSignalPairingErrorState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useViewEvent.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useViewEvent.ts:useViewEvent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useViewEvent.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useViewEvent.ts:useEmitViewEvent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.bidirectional.test.tsx",
+      "target": "function:eliza/packages/ui/src/hooks/useVoiceChat.bidirectional.test.tsx:installVoiceBrowserMocks",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.bidirectional.test.tsx",
+      "target": "class:eliza/packages/ui/src/hooks/useVoiceChat.bidirectional.test.tsx:FakeSpeechRecognition",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.bidirectional.test.tsx",
+      "target": "class:eliza/packages/ui/src/hooks/useVoiceChat.bidirectional.test.tsx:FakeSpeechSynthesisUtterance",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:resumeAudioContextForPlayback",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:shouldPreferNativeTalkMode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:isWindowsElectrobunRenderer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:shouldAutoRestartBrowserRecognition",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:shouldUseLocalInferenceAsr",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:normalizeActiveVoiceSessionMode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:useVoiceChat",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:shouldAutoRestartBrowserRecognition",
+      "target": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:isWindowsElectrobunRenderer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:useVoiceChat",
+      "target": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:normalizeActiveVoiceSessionMode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:useVoiceChat",
+      "target": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:shouldUseLocalInferenceAsr",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:useVoiceChat",
+      "target": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:shouldAutoRestartBrowserRecognition",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:useVoiceChat",
+      "target": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:shouldPreferNativeTalkMode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:useVoiceChat",
+      "target": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:normalizeActiveVoiceSessionMode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:useVoiceChat",
+      "target": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:shouldPreferNativeTalkMode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:useVoiceChat",
+      "target": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:normalizeActiveVoiceSessionMode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:useVoiceChat",
+      "target": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:normalizeActiveVoiceSessionMode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:useVoiceChat",
+      "target": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:resumeAudioContextForPlayback",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:useVoiceChat",
+      "target": "function:eliza/packages/ui/src/hooks/useVoiceChat.ts:resumeAudioContextForPlayback",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/hooks/useWhatsAppPairing.ts",
+      "target": "function:eliza/packages/ui/src/hooks/useWhatsAppPairing.ts:useWhatsAppPairing",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/i18n/index.ts",
+      "target": "function:eliza/packages/ui/src/i18n/index.ts:interpolate",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/i18n/index.ts",
+      "target": "function:eliza/packages/ui/src/i18n/index.ts:normalizeLanguage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/i18n/index.ts",
+      "target": "function:eliza/packages/ui/src/i18n/index.ts:messageForLanguage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/i18n/index.ts",
+      "target": "function:eliza/packages/ui/src/i18n/index.ts:t",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/i18n/index.ts",
+      "target": "function:eliza/packages/ui/src/i18n/index.ts:createTranslator",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/i18n/index.ts:t",
+      "target": "function:eliza/packages/ui/src/i18n/index.ts:normalizeLanguage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/i18n/index.ts:t",
+      "target": "function:eliza/packages/ui/src/i18n/index.ts:messageForLanguage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/i18n/index.ts:t",
+      "target": "function:eliza/packages/ui/src/i18n/index.ts:messageForLanguage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/i18n/index.ts:t",
+      "target": "function:eliza/packages/ui/src/i18n/index.ts:interpolate",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/i18n/index.ts:createTranslator",
+      "target": "function:eliza/packages/ui/src/i18n/index.ts:normalizeLanguage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/i18n/index.ts:createTranslator",
+      "target": "function:eliza/packages/ui/src/i18n/index.ts:t",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/i18n/messages.ts",
+      "target": "function:eliza/packages/ui/src/i18n/messages.ts:ensureLanguageLoaded",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/navigation/index.ts",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:viteEnvFlagEnabled",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/navigation/index.ts",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:isAppsToolTab",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/navigation/index.ts",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:hasAndroidTestFlag",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/navigation/index.ts",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:isAndroidPhoneSurfaceEnabled",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/navigation/index.ts",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:getWindowNavigationLocation",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/navigation/index.ts",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:isAppWindowRoute",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/navigation/index.ts",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:shouldUseHashNavigation",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/navigation/index.ts",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:getWindowNavigationPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/navigation/index.ts",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:getTabGroups",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/navigation/index.ts",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:normalizePathForLookup",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/navigation/index.ts",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:pathForTab",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/navigation/index.ts",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:canonicalPathForPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/navigation/index.ts",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:isRouteRootPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/navigation/index.ts",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:resolveInitialTabForPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/navigation/index.ts",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:tabFromPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/navigation/index.ts",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:normalizeBasePath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/navigation/index.ts",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:normalizePath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/navigation/index.ts",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:getAppSlugFromPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/navigation/index.ts",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:titleForTab",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/navigation/index.ts:isAndroidPhoneSurfaceEnabled",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:hasAndroidTestFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/navigation/index.ts:isAppWindowRoute",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:getWindowNavigationLocation",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/navigation/index.ts:shouldUseHashNavigation",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:getWindowNavigationLocation",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/navigation/index.ts:shouldUseHashNavigation",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:isAppWindowRoute",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/navigation/index.ts:getWindowNavigationPath",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:getWindowNavigationLocation",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/navigation/index.ts:getWindowNavigationPath",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:shouldUseHashNavigation",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/navigation/index.ts:getTabGroups",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:isAndroidPhoneSurfaceEnabled",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/navigation/index.ts:normalizePathForLookup",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:normalizeBasePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/navigation/index.ts:normalizePathForLookup",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:normalizePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/navigation/index.ts:pathForTab",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:normalizeBasePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/navigation/index.ts:isRouteRootPath",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:normalizePathForLookup",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/navigation/index.ts:resolveInitialTabForPath",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:isRouteRootPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/navigation/index.ts:resolveInitialTabForPath",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:tabFromPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/navigation/index.ts:tabFromPath",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:normalizePathForLookup",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/navigation/index.ts:getAppSlugFromPath",
+      "target": "function:eliza/packages/ui/src/navigation/index.ts:normalizePathForLookup",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/platform/aosp-user-agent.ts",
+      "target": "function:eliza/packages/ui/src/platform/aosp-user-agent.ts:userAgentHasElizaOSMarker",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/platform/browser-launch.ts",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:getSearchParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/platform/browser-launch.ts",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:isAllowedHttpHost",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/platform/browser-launch.ts",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:isCurrentHost",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/platform/browser-launch.ts",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:isConfiguredCloudHost",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/platform/browser-launch.ts",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:isTrustedCloudLaunchHost",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/platform/browser-launch.ts",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:normalizeLaunchApiBase",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/platform/browser-launch.ts",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:normalizeLaunchBaseUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/platform/browser-launch.ts",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:stripLaunchParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/platform/browser-launch.ts",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:exchangeCloudLaunchSession",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/platform/browser-launch.ts",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:applyLaunchConnection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/platform/browser-launch.ts",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:applyLaunchConnectionFromUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/platform/browser-launch.ts:isTrustedCloudLaunchHost",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:isConfiguredCloudHost",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/platform/browser-launch.ts:normalizeLaunchApiBase",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:isAllowedHttpHost",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/platform/browser-launch.ts:normalizeLaunchApiBase",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:isConfiguredCloudHost",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/platform/browser-launch.ts:normalizeLaunchApiBase",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:isCurrentHost",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/platform/browser-launch.ts:normalizeLaunchApiBase",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:isAllowedHttpHost",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/platform/browser-launch.ts:normalizeLaunchBaseUrl",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:isAllowedHttpHost",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/platform/browser-launch.ts:normalizeLaunchBaseUrl",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:isCurrentHost",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/platform/browser-launch.ts:normalizeLaunchBaseUrl",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:isTrustedCloudLaunchHost",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/platform/browser-launch.ts:normalizeLaunchBaseUrl",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:isAllowedHttpHost",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/platform/browser-launch.ts:exchangeCloudLaunchSession",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:normalizeLaunchApiBase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/platform/browser-launch.ts:applyLaunchConnection",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:normalizeLaunchApiBase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/platform/browser-launch.ts:applyLaunchConnectionFromUrl",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:getSearchParams",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/platform/browser-launch.ts:applyLaunchConnectionFromUrl",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:exchangeCloudLaunchSession",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/platform/browser-launch.ts:applyLaunchConnectionFromUrl",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:normalizeLaunchBaseUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/platform/browser-launch.ts:applyLaunchConnectionFromUrl",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:applyLaunchConnection",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/platform/browser-launch.ts:applyLaunchConnectionFromUrl",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:stripLaunchParams",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/platform/browser-launch.ts:applyLaunchConnectionFromUrl",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:stripLaunchParams",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/platform/browser-launch.ts:applyLaunchConnectionFromUrl",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:applyLaunchConnection",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/platform/browser-launch.ts:applyLaunchConnectionFromUrl",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:normalizeLaunchApiBase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/platform/browser-launch.ts:applyLaunchConnectionFromUrl",
+      "target": "function:eliza/packages/ui/src/platform/browser-launch.ts:stripLaunchParams",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "target": "file:eliza/packages/ui/src/events/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "target": "file:eliza/packages/ui/src/first-run/runtime-target.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts",
+      "target": "file:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/pre-seed-local-runtime.ts",
+      "target": "file:eliza/packages/ui/src/platform/aosp-user-agent.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/probe-local-agent.test.ts",
+      "target": "file:eliza/packages/ui/src/first-run/probe-local-agent.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/probe-local-agent.ts",
+      "target": "file:eliza/packages/ui/src/first-run/local-agent-token.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/reload-into-first-run-runtime.ts",
+      "target": "file:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/setup-steps.ts",
+      "target": "file:eliza/packages/ui/src/platform/init.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/setup-steps.ts",
+      "target": "file:eliza/packages/ui/src/state/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "file:eliza/packages/ui/src/api/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "file:eliza/packages/ui/src/bridge/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "file:eliza/packages/ui/src/config/boot-config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "file:eliza/packages/ui/src/first-run/auto-download-recommended.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "file:eliza/packages/ui/src/first-run/first-run.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "file:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "file:eliza/packages/ui/src/first-run/reload-into-first-run-runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "file:eliza/packages/ui/src/first-run/voice-readiness.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "file:eliza/packages/ui/src/platform/init.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "file:eliza/packages/ui/src/state/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "file:eliza/packages/ui/src/utils/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "file:eliza/packages/ui/src/voice/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "target": "file:eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/voice-readiness.test.ts",
+      "target": "file:eliza/packages/ui/src/first-run/voice-readiness.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/voice-readiness.ts",
+      "target": "file:eliza/packages/ui/src/api/csrf-client.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/voice-readiness.ts",
+      "target": "file:eliza/packages/ui/src/api/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/voice-readiness.ts",
+      "target": "file:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/voice-readiness.ts",
+      "target": "file:eliza/packages/ui/src/platform/init.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/voice-readiness.ts",
+      "target": "file:eliza/packages/ui/src/utils/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/first-run/voice-readiness.ts",
+      "target": "file:eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useAvailableViews.test.tsx",
+      "target": "file:eliza/packages/ui/src/hooks/useAvailableViews.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useAvailableViews.ts",
+      "target": "file:eliza/packages/ui/src/api/csrf-client.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useAvailableViews.ts",
+      "target": "file:eliza/packages/ui/src/platform/platform-guards.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useChatAvatarVoiceBridge.ts",
+      "target": "file:eliza/packages/ui/src/events/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useContextMenu.ts",
+      "target": "file:eliza/packages/ui/src/bridge/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useContextMenu.ts",
+      "target": "file:eliza/packages/ui/src/chat/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useContextMenu.ts",
+      "target": "file:eliza/packages/ui/src/state/ChatComposerContext.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useContextMenu.ts",
+      "target": "file:eliza/packages/ui/src/state/useApp.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useContinuousChat.test.tsx",
+      "target": "file:eliza/packages/ui/src/components/composites/chat/ContinuousChatToggle.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useContinuousChat.test.tsx",
+      "target": "file:eliza/packages/ui/src/hooks/useContinuousChat.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useContinuousChat.test.tsx",
+      "target": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useContinuousChat.ts",
+      "target": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useDefaultProviderPresets.test.tsx",
+      "target": "file:eliza/packages/ui/src/api/runtime-mode-client.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useDefaultProviderPresets.test.tsx",
+      "target": "file:eliza/packages/ui/src/hooks/useDefaultProviderPresets.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useDefaultProviderPresets.test.tsx",
+      "target": "file:eliza/packages/ui/src/hooks/useRuntimeMode.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useDefaultProviderPresets.ts",
+      "target": "file:eliza/packages/ui/src/hooks/useRuntimeMode.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useDefaultProviderPresets.ts",
+      "target": "file:eliza/packages/ui/src/platform/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useDefaultProviderPresets.ts",
+      "target": "file:eliza/packages/ui/src/voice/voice-provider-defaults.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useDesktopTabs.test.tsx",
+      "target": "file:eliza/packages/ui/src/hooks/useAvailableViews.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useDesktopTabs.test.tsx",
+      "target": "file:eliza/packages/ui/src/hooks/useDesktopTabs.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useDesktopTabs.ts",
+      "target": "file:eliza/packages/ui/src/bridge/electrobun-runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useDesktopTabs.ts",
+      "target": "file:eliza/packages/ui/src/hooks/useAvailableViews.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useRuntimeMode.test.tsx",
+      "target": "file:eliza/packages/ui/src/api/runtime-mode-client.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useRuntimeMode.test.tsx",
+      "target": "file:eliza/packages/ui/src/hooks/useRuntimeMode.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useRuntimeMode.ts",
+      "target": "file:eliza/packages/ui/src/api/runtime-mode-client.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useSignalPairing.ts",
+      "target": "file:eliza/packages/ui/src/api/client-types-core.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useSignalPairing.ts",
+      "target": "file:eliza/packages/ui/src/api/client.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useSignalPairing.ts",
+      "target": "file:eliza/packages/ui/src/hooks/useConnectorAccounts.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useViewEvent.ts",
+      "target": "file:eliza/packages/ui/src/views/view-event-bus.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.bidirectional.test.tsx",
+      "target": "file:eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.local-asr.test.tsx",
+      "target": "file:eliza/packages/ui/src/api/csrf-client.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.local-asr.test.tsx",
+      "target": "file:eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.local-asr.test.tsx",
+      "target": "file:eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "target": "file:eliza/packages/ui/src/api/client.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "target": "file:eliza/packages/ui/src/api/csrf-client.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "target": "file:eliza/packages/ui/src/bridge/electrobun-rpc.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "target": "file:eliza/packages/ui/src/bridge/native-plugins.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "target": "file:eliza/packages/ui/src/utils/eliza-globals.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "target": "file:eliza/packages/ui/src/utils/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "target": "file:eliza/packages/ui/src/utils/tts-debug.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "target": "file:eliza/packages/ui/src/voice/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "target": "file:eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "target": "file:eliza/packages/ui/src/voice/local-asr-transcribe.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "target": "file:eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "target": "file:eliza/packages/ui/src/voice/voice-chat-recording.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useVoiceChat.ts",
+      "target": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useWhatsAppPairing.ts",
+      "target": "file:eliza/packages/ui/src/api/client-types-core.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useWhatsAppPairing.ts",
+      "target": "file:eliza/packages/ui/src/api/client.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/hooks/useWhatsAppPairing.ts",
+      "target": "file:eliza/packages/ui/src/hooks/useConnectorAccounts.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/i18n/index.ts",
+      "target": "file:eliza/packages/ui/src/i18n/messages.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/i18n/messages.test.ts",
+      "target": "file:eliza/packages/ui/src/i18n/messages.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/i18n/messages.ts",
+      "target": "config:eliza/packages/ui/src/i18n/locales/en.json",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/navigation/index.ts",
+      "target": "file:eliza/packages/ui/src/navigation/main-tab.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/platform/browser-launch.test.ts",
+      "target": "file:eliza/packages/ui/src/platform/browser-launch.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/platform/browser-launch.ts",
+      "target": "file:eliza/packages/ui/src/api/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/platform/browser-launch.ts",
+      "target": "file:eliza/packages/ui/src/config/boot-config-store.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/platform/browser-launch.ts",
+      "target": "file:eliza/packages/ui/src/state/persistence.ts",
+      "type": "imports"
+    }
+  ]
+}

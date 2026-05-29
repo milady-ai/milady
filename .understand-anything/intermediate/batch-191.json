@@ -1,0 +1,90 @@
+{
+  "batchIndex": 191,
+  "nodes": [
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/packages/app-core/README.md",
+      "summary": "README.md documents eliza/packages/app-core with 22 lines of reference material.",
+      "languageNotes": "markdown; docs; 22 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/biome.json",
+      "type": "config",
+      "name": "biome.json",
+      "filePath": "eliza/packages/app-core/biome.json",
+      "summary": "biome.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 8 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/knip.json",
+      "type": "config",
+      "name": "knip.json",
+      "filePath": "eliza/packages/app-core/knip.json",
+      "summary": "knip.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 74 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "complex",
+      "id": "config:eliza/packages/app-core/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "eliza/packages/app-core/package.json",
+      "summary": "package.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 266 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/tsconfig.build.json",
+      "type": "config",
+      "name": "tsconfig.build.json",
+      "filePath": "eliza/packages/app-core/tsconfig.build.json",
+      "summary": "tsconfig.build.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 54 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/tsconfig.json",
+      "type": "config",
+      "name": "tsconfig.json",
+      "filePath": "eliza/packages/app-core/tsconfig.json",
+      "summary": "tsconfig.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 120 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/tsconfig.typecheck.json",
+      "type": "config",
+      "name": "tsconfig.typecheck.json",
+      "filePath": "eliza/packages/app-core/tsconfig.typecheck.json",
+      "summary": "tsconfig.typecheck.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 9 lines"
+    }
+  ],
+  "edges": []
+}

@@ -1,0 +1,125 @@
+{
+  "batchIndex": 225,
+  "nodes": [
+    {
+      "tags": [
+        "test",
+        "script"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/scripts/release/workflow/check-upgradeable.sh",
+      "type": "file",
+      "name": "check-upgradeable.sh",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/scripts/release/workflow/check-upgradeable.sh",
+      "summary": "check-upgradeable.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 27 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "script"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/scripts/release/workflow/exit-prerelease.sh",
+      "type": "file",
+      "name": "exit-prerelease.sh",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/scripts/release/workflow/exit-prerelease.sh",
+      "summary": "exit-prerelease.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 8 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "script"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/scripts/release/workflow/integrity-check.sh",
+      "type": "file",
+      "name": "integrity-check.sh",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/scripts/release/workflow/integrity-check.sh",
+      "summary": "integrity-check.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 20 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "script",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/scripts/release/workflow/pack.sh",
+      "type": "file",
+      "name": "pack.sh",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/scripts/release/workflow/pack.sh",
+      "summary": "pack.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 26 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/scripts/release/workflow/pack.sh:dist_tag",
+      "type": "function",
+      "name": "dist_tag",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/scripts/release/workflow/pack.sh",
+      "summary": "dist_tag is a function defined in eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/scripts/release/workflow/pack.sh."
+    },
+    {
+      "tags": [
+        "test",
+        "script",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/scripts/release/workflow/publish.sh",
+      "type": "file",
+      "name": "publish.sh",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/scripts/release/workflow/publish.sh",
+      "summary": "publish.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 26 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/scripts/release/workflow/publish.sh:delete_tag",
+      "type": "function",
+      "name": "delete_tag",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/scripts/release/workflow/publish.sh",
+      "summary": "delete_tag is a function defined in eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/scripts/release/workflow/publish.sh."
+    },
+    {
+      "tags": [
+        "test",
+        "script"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/scripts/release/workflow/start.sh",
+      "type": "file",
+      "name": "start.sh",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/scripts/release/workflow/start.sh",
+      "summary": "start.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 35 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/scripts/release/workflow/pack.sh",
+      "target": "function:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/scripts/release/workflow/pack.sh:dist_tag",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/scripts/release/workflow/publish.sh",
+      "target": "function:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/scripts/release/workflow/publish.sh:delete_tag",
+      "type": "contains"
+    }
+  ]
+}

@@ -1,0 +1,1312 @@
+{
+  "batchIndex": 296,
+  "nodes": [
+    {
+      "tags": [
+        "test",
+        "voice"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/services/voice-profiles/__tests__/nickname-evaluator.test.ts",
+      "type": "file",
+      "name": "nickname-evaluator.test.ts",
+      "filePath": "eliza/packages/app-core/src/services/voice-profiles/__tests__/nickname-evaluator.test.ts",
+      "summary": "nickname-evaluator.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 52 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "voice"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/src/services/voice-profiles/IMPL_NOTES.md",
+      "type": "document",
+      "name": "IMPL_NOTES.md",
+      "filePath": "eliza/packages/app-core/src/services/voice-profiles/IMPL_NOTES.md",
+      "summary": "IMPL_NOTES.md documents eliza/packages/app-core/src/services/voice-profiles with 50 lines of reference material.",
+      "languageNotes": "markdown; docs; 50 lines"
+    },
+    {
+      "tags": [
+        "entry-point",
+        "voice"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/services/voice-profiles/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/app-core/src/services/voice-profiles/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 24 lines"
+    },
+    {
+      "tags": [
+        "voice",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/services/voice-profiles/nickname-evaluator.ts",
+      "type": "file",
+      "name": "nickname-evaluator.ts",
+      "filePath": "eliza/packages/app-core/src/services/voice-profiles/nickname-evaluator.ts",
+      "summary": "nickname-evaluator.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 67 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/services/voice-profiles/nickname-evaluator.ts:trimNickname",
+      "type": "function",
+      "name": "trimNickname",
+      "filePath": "eliza/packages/app-core/src/services/voice-profiles/nickname-evaluator.ts",
+      "summary": "trimNickname is a function defined in eliza/packages/app-core/src/services/voice-profiles/nickname-evaluator.ts."
+    },
+    {
+      "tags": [
+        "frontend",
+        "desktop"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/styles/electrobun-mac-window-drag.css",
+      "type": "file",
+      "name": "electrobun-mac-window-drag.css",
+      "filePath": "eliza/packages/app-core/src/styles/electrobun-mac-window-drag.css",
+      "summary": "electrobun-mac-window-drag.css is a css source file in the Milady codebase.",
+      "languageNotes": "css; markup; 66 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "type": "file",
+      "name": "test-helpers.ts",
+      "filePath": "eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "summary": "test-helpers.ts is a typescript source file in the Milady codebase. It contains 21 functions.",
+      "languageNotes": "typescript; code; 573 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:createEnvSandbox",
+      "type": "function",
+      "name": "createEnvSandbox",
+      "filePath": "eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "summary": "createEnvSandbox is a function defined in eliza/packages/app-core/src/test-support/test-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:looksLikePlugin",
+      "type": "function",
+      "name": "looksLikePlugin",
+      "filePath": "eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "summary": "looksLikePlugin is a function defined in eliza/packages/app-core/src/test-support/test-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:extractPlugin",
+      "type": "function",
+      "name": "extractPlugin",
+      "filePath": "eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "summary": "extractPlugin is a function defined in eliza/packages/app-core/src/test-support/test-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:isPackageImportResolvable",
+      "type": "function",
+      "name": "isPackageImportResolvable",
+      "filePath": "eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "summary": "isPackageImportResolvable is a function defined in eliza/packages/app-core/src/test-support/test-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:isWorkspaceDependency",
+      "type": "function",
+      "name": "isWorkspaceDependency",
+      "filePath": "eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "summary": "isWorkspaceDependency is a function defined in eliza/packages/app-core/src/test-support/test-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveDiscordPluginImportSpecifier",
+      "type": "function",
+      "name": "resolveDiscordPluginImportSpecifier",
+      "filePath": "eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "summary": "resolveDiscordPluginImportSpecifier is a function defined in eliza/packages/app-core/src/test-support/test-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveTelegramPluginImportSpecifier",
+      "type": "function",
+      "name": "resolveTelegramPluginImportSpecifier",
+      "filePath": "eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "summary": "resolveTelegramPluginImportSpecifier is a function defined in eliza/packages/app-core/src/test-support/test-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveLensPluginImportSpecifier",
+      "type": "function",
+      "name": "resolveLensPluginImportSpecifier",
+      "filePath": "eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "summary": "resolveLensPluginImportSpecifier is a function defined in eliza/packages/app-core/src/test-support/test-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveFarcasterPluginImportSpecifier",
+      "type": "function",
+      "name": "resolveFarcasterPluginImportSpecifier",
+      "filePath": "eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "summary": "resolveFarcasterPluginImportSpecifier is a function defined in eliza/packages/app-core/src/test-support/test-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveNostrPluginImportSpecifier",
+      "type": "function",
+      "name": "resolveNostrPluginImportSpecifier",
+      "filePath": "eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "summary": "resolveNostrPluginImportSpecifier is a function defined in eliza/packages/app-core/src/test-support/test-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveMatrixPluginImportSpecifier",
+      "type": "function",
+      "name": "resolveMatrixPluginImportSpecifier",
+      "filePath": "eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "summary": "resolveMatrixPluginImportSpecifier is a function defined in eliza/packages/app-core/src/test-support/test-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveFeishuPluginImportSpecifier",
+      "type": "function",
+      "name": "resolveFeishuPluginImportSpecifier",
+      "filePath": "eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "summary": "resolveFeishuPluginImportSpecifier is a function defined in eliza/packages/app-core/src/test-support/test-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveWechatPluginImportSpecifier",
+      "type": "function",
+      "name": "resolveWechatPluginImportSpecifier",
+      "filePath": "eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "summary": "resolveWechatPluginImportSpecifier is a function defined in eliza/packages/app-core/src/test-support/test-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:buildMockUpdateCheckResult",
+      "type": "function",
+      "name": "buildMockUpdateCheckResult",
+      "filePath": "eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "summary": "buildMockUpdateCheckResult is a function defined in eliza/packages/app-core/src/test-support/test-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:waitMs",
+      "type": "function",
+      "name": "waitMs",
+      "filePath": "eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "summary": "waitMs is a function defined in eliza/packages/app-core/src/test-support/test-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:createMockHttpResponse",
+      "type": "function",
+      "name": "createMockHttpResponse",
+      "filePath": "eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "summary": "createMockHttpResponse is a function defined in eliza/packages/app-core/src/test-support/test-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:createMockHeadersRequest",
+      "type": "function",
+      "name": "createMockHeadersRequest",
+      "filePath": "eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "summary": "createMockHeadersRequest is a function defined in eliza/packages/app-core/src/test-support/test-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:createMockIncomingMessage",
+      "type": "function",
+      "name": "createMockIncomingMessage",
+      "filePath": "eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "summary": "createMockIncomingMessage is a function defined in eliza/packages/app-core/src/test-support/test-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:createMockJsonRequest",
+      "type": "function",
+      "name": "createMockJsonRequest",
+      "filePath": "eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "summary": "createMockJsonRequest is a function defined in eliza/packages/app-core/src/test-support/test-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:isOptionalImportError",
+      "type": "function",
+      "name": "isOptionalImportError",
+      "filePath": "eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "summary": "isOptionalImportError is a function defined in eliza/packages/app-core/src/test-support/test-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:tryOptionalDynamicImport",
+      "type": "function",
+      "name": "tryOptionalDynamicImport",
+      "filePath": "eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "summary": "tryOptionalDynamicImport is a function defined in eliza/packages/app-core/src/test-support/test-helpers.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/ui-compat.ts",
+      "type": "file",
+      "name": "ui-compat.ts",
+      "filePath": "eliza/packages/app-core/src/ui-compat.ts",
+      "summary": "ui-compat.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 40 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/utils/eliza-root.ts",
+      "type": "file",
+      "name": "eliza-root.ts",
+      "filePath": "eliza/packages/app-core/src/utils/eliza-root.ts",
+      "summary": "eliza-root.ts is a typescript source file in the Milady codebase. It contains 9 functions.",
+      "languageNotes": "typescript; code; 128 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/utils/eliza-root.ts:readPackageName",
+      "type": "function",
+      "name": "readPackageName",
+      "filePath": "eliza/packages/app-core/src/utils/eliza-root.ts",
+      "summary": "readPackageName is a function defined in eliza/packages/app-core/src/utils/eliza-root.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/utils/eliza-root.ts:readPackageNameSync",
+      "type": "function",
+      "name": "readPackageNameSync",
+      "filePath": "eliza/packages/app-core/src/utils/eliza-root.ts",
+      "summary": "readPackageNameSync is a function defined in eliza/packages/app-core/src/utils/eliza-root.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/utils/eliza-root.ts:listAncestorDirs",
+      "type": "function",
+      "name": "listAncestorDirs",
+      "filePath": "eliza/packages/app-core/src/utils/eliza-root.ts",
+      "summary": "listAncestorDirs is a function defined in eliza/packages/app-core/src/utils/eliza-root.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/utils/eliza-root.ts:findPackageRoot",
+      "type": "function",
+      "name": "findPackageRoot",
+      "filePath": "eliza/packages/app-core/src/utils/eliza-root.ts",
+      "summary": "findPackageRoot is a function defined in eliza/packages/app-core/src/utils/eliza-root.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/utils/eliza-root.ts:findPackageRootSync",
+      "type": "function",
+      "name": "findPackageRootSync",
+      "filePath": "eliza/packages/app-core/src/utils/eliza-root.ts",
+      "summary": "findPackageRootSync is a function defined in eliza/packages/app-core/src/utils/eliza-root.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/utils/eliza-root.ts:candidateDirsFromArgv1",
+      "type": "function",
+      "name": "candidateDirsFromArgv1",
+      "filePath": "eliza/packages/app-core/src/utils/eliza-root.ts",
+      "summary": "candidateDirsFromArgv1 is a function defined in eliza/packages/app-core/src/utils/eliza-root.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/utils/eliza-root.ts:candidateDirsFromOptions",
+      "type": "function",
+      "name": "candidateDirsFromOptions",
+      "filePath": "eliza/packages/app-core/src/utils/eliza-root.ts",
+      "summary": "candidateDirsFromOptions is a function defined in eliza/packages/app-core/src/utils/eliza-root.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/utils/eliza-root.ts:resolveElizaPackageRoot",
+      "type": "function",
+      "name": "resolveElizaPackageRoot",
+      "filePath": "eliza/packages/app-core/src/utils/eliza-root.ts",
+      "summary": "resolveElizaPackageRoot is a function defined in eliza/packages/app-core/src/utils/eliza-root.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/utils/eliza-root.ts:resolveElizaPackageRootSync",
+      "type": "function",
+      "name": "resolveElizaPackageRootSync",
+      "filePath": "eliza/packages/app-core/src/utils/eliza-root.ts",
+      "summary": "resolveElizaPackageRootSync is a function defined in eliza/packages/app-core/src/utils/eliza-root.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test-stubs/node-llama-cpp.ts",
+      "type": "file",
+      "name": "node-llama-cpp.ts",
+      "filePath": "eliza/packages/app-core/test-stubs/node-llama-cpp.ts",
+      "summary": "node-llama-cpp.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 4 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/app/mockInlineUi.tsx",
+      "type": "file",
+      "name": "mockInlineUi.tsx",
+      "filePath": "eliza/packages/app-core/test/app/mockInlineUi.tsx",
+      "summary": "mockInlineUi.tsx is a typescript source file in the Milady codebase. It contains 9 functions.",
+      "languageNotes": "typescript; code; 249 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/app/mockInlineUi.tsx:passthrough",
+      "type": "function",
+      "name": "passthrough",
+      "filePath": "eliza/packages/app-core/test/app/mockInlineUi.tsx",
+      "summary": "passthrough is a function defined in eliza/packages/app-core/test/app/mockInlineUi.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/app/mockInlineUi.tsx:button",
+      "type": "function",
+      "name": "button",
+      "filePath": "eliza/packages/app-core/test/app/mockInlineUi.tsx",
+      "summary": "button is a function defined in eliza/packages/app-core/test/app/mockInlineUi.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/app/mockInlineUi.tsx:input",
+      "type": "function",
+      "name": "input",
+      "filePath": "eliza/packages/app-core/test/app/mockInlineUi.tsx",
+      "summary": "input is a function defined in eliza/packages/app-core/test/app/mockInlineUi.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/app/mockInlineUi.tsx:textarea",
+      "type": "function",
+      "name": "textarea",
+      "filePath": "eliza/packages/app-core/test/app/mockInlineUi.tsx",
+      "summary": "textarea is a function defined in eliza/packages/app-core/test/app/mockInlineUi.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/app/mockInlineUi.tsx:dialogRoot",
+      "type": "function",
+      "name": "dialogRoot",
+      "filePath": "eliza/packages/app-core/test/app/mockInlineUi.tsx",
+      "summary": "dialogRoot is a function defined in eliza/packages/app-core/test/app/mockInlineUi.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/app/mockInlineUi.tsx:pageLayout",
+      "type": "function",
+      "name": "pageLayout",
+      "filePath": "eliza/packages/app-core/test/app/mockInlineUi.tsx",
+      "summary": "pageLayout is a function defined in eliza/packages/app-core/test/app/mockInlineUi.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/test/app/mockInlineUi.tsx:MockSidebar",
+      "type": "function",
+      "name": "MockSidebar",
+      "filePath": "eliza/packages/app-core/test/app/mockInlineUi.tsx",
+      "summary": "MockSidebar is a function defined in eliza/packages/app-core/test/app/mockInlineUi.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/app/mockInlineUi.tsx:sidebarHeader",
+      "type": "function",
+      "name": "sidebarHeader",
+      "filePath": "eliza/packages/app-core/test/app/mockInlineUi.tsx",
+      "summary": "sidebarHeader is a function defined in eliza/packages/app-core/test/app/mockInlineUi.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/app/mockInlineUi.tsx:createInlineUiMock",
+      "type": "function",
+      "name": "createInlineUiMock",
+      "filePath": "eliza/packages/app-core/test/app/mockInlineUi.tsx",
+      "summary": "createInlineUiMock is a function defined in eliza/packages/app-core/test/app/mockInlineUi.tsx."
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:eliza/packages/app-core/test/browser-extension/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/packages/app-core/test/browser-extension/README.md",
+      "summary": "README.md documents eliza/packages/app-core/test/browser-extension with 138 lines of reference material.",
+      "languageNotes": "markdown; docs; 138 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/browser-extension/test-harness.ts",
+      "type": "file",
+      "name": "test-harness.ts",
+      "filePath": "eliza/packages/app-core/test/browser-extension/test-harness.ts",
+      "summary": "test-harness.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 class.",
+      "languageNotes": "typescript; code; 499 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/browser-extension/test-harness.ts:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/packages/app-core/test/browser-extension/test-harness.ts",
+      "summary": "main is a function defined in eliza/packages/app-core/test/browser-extension/test-harness.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/app-core/test/browser-extension/test-harness.ts:ExtensionTestHarness",
+      "type": "class",
+      "name": "ExtensionTestHarness",
+      "filePath": "eliza/packages/app-core/test/browser-extension/test-harness.ts",
+      "summary": "ExtensionTestHarness is a class or type declared in eliza/packages/app-core/test/browser-extension/test-harness.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/test/contracts/foundry.toml",
+      "type": "config",
+      "name": "foundry.toml",
+      "filePath": "eliza/packages/app-core/test/contracts/foundry.toml",
+      "summary": "foundry.toml configures toml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "toml; config; 14 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/tangy-jokes-begin.md",
+      "type": "document",
+      "name": "tangy-jokes-begin.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/tangy-jokes-begin.md",
+      "summary": "tangy-jokes-begin.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset with 5 lines of reference material.",
+      "languageNotes": "markdown; docs; 5 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/tidy-turkeys-build.md",
+      "type": "document",
+      "name": "tidy-turkeys-build.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/tidy-turkeys-build.md",
+      "summary": "tidy-turkeys-build.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset with 5 lines of reference material.",
+      "languageNotes": "markdown; docs; 5 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.gitattributes",
+      "type": "file",
+      "name": ".gitattributes",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.gitattributes",
+      "summary": ".gitattributes is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 3 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.github/actions/gas-compare/action.yml",
+      "type": "config",
+      "name": "action.yml",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.github/actions/gas-compare/action.yml",
+      "summary": "action.yml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 51 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.github/actions/setup/action.yml",
+      "type": "config",
+      "name": "action.yml",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.github/actions/setup/action.yml",
+      "summary": "action.yml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 108 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.github/actions/storage-layout/action.yml",
+      "type": "config",
+      "name": "action.yml",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.github/actions/storage-layout/action.yml",
+      "summary": "action.yml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 57 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.github/CODEOWNERS",
+      "type": "file",
+      "name": "CODEOWNERS",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.github/CODEOWNERS",
+      "summary": "CODEOWNERS is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 10 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.github/PULL_REQUEST_TEMPLATE.md",
+      "type": "document",
+      "name": "PULL_REQUEST_TEMPLATE.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.github/PULL_REQUEST_TEMPLATE.md",
+      "summary": "PULL_REQUEST_TEMPLATE.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.github with 20 lines of reference material.",
+      "languageNotes": "markdown; docs; 20 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.gitmodules",
+      "type": "file",
+      "name": ".gitmodules",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.gitmodules",
+      "summary": ".gitmodules is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 10 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.husky/pre-commit",
+      "type": "file",
+      "name": "pre-commit",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.husky/pre-commit",
+      "summary": "pre-commit is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 2 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/audits/2017-03.md",
+      "type": "document",
+      "name": "2017-03.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/audits/2017-03.md",
+      "summary": "2017-03.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/audits with 292 lines of reference material.",
+      "languageNotes": "markdown; docs; 292 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/audits/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/audits/README.md",
+      "summary": "README.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/audits with 24 lines of reference material.",
+      "languageNotes": "markdown; docs; 24 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/voice-profiles/nickname-evaluator.ts",
+      "target": "function:eliza/packages/app-core/src/services/voice-profiles/nickname-evaluator.ts:trimNickname",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:createEnvSandbox",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:looksLikePlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:extractPlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:isPackageImportResolvable",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:isWorkspaceDependency",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveDiscordPluginImportSpecifier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveTelegramPluginImportSpecifier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveLensPluginImportSpecifier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveFarcasterPluginImportSpecifier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveNostrPluginImportSpecifier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveMatrixPluginImportSpecifier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveFeishuPluginImportSpecifier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveWechatPluginImportSpecifier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:buildMockUpdateCheckResult",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:waitMs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:createMockHttpResponse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:createMockHeadersRequest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:createMockIncomingMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:createMockJsonRequest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:isOptionalImportError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/test-support/test-helpers.ts",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:tryOptionalDynamicImport",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:extractPlugin",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:looksLikePlugin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:extractPlugin",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:looksLikePlugin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:extractPlugin",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:looksLikePlugin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:extractPlugin",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:looksLikePlugin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveDiscordPluginImportSpecifier",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:isPackageImportResolvable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveTelegramPluginImportSpecifier",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:isPackageImportResolvable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveLensPluginImportSpecifier",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:isPackageImportResolvable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveLensPluginImportSpecifier",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:isPackageImportResolvable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveFarcasterPluginImportSpecifier",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:isPackageImportResolvable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveNostrPluginImportSpecifier",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:isPackageImportResolvable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveMatrixPluginImportSpecifier",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:isPackageImportResolvable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveFeishuPluginImportSpecifier",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:isPackageImportResolvable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveWechatPluginImportSpecifier",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:isPackageImportResolvable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:resolveWechatPluginImportSpecifier",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:isPackageImportResolvable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:createMockHeadersRequest",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:createMockIncomingMessage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:createMockJsonRequest",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:createMockIncomingMessage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:tryOptionalDynamicImport",
+      "target": "function:eliza/packages/app-core/src/test-support/test-helpers.ts:isOptionalImportError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/utils/eliza-root.ts",
+      "target": "function:eliza/packages/app-core/src/utils/eliza-root.ts:readPackageName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/utils/eliza-root.ts",
+      "target": "function:eliza/packages/app-core/src/utils/eliza-root.ts:readPackageNameSync",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/utils/eliza-root.ts",
+      "target": "function:eliza/packages/app-core/src/utils/eliza-root.ts:listAncestorDirs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/utils/eliza-root.ts",
+      "target": "function:eliza/packages/app-core/src/utils/eliza-root.ts:findPackageRoot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/utils/eliza-root.ts",
+      "target": "function:eliza/packages/app-core/src/utils/eliza-root.ts:findPackageRootSync",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/utils/eliza-root.ts",
+      "target": "function:eliza/packages/app-core/src/utils/eliza-root.ts:candidateDirsFromArgv1",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/utils/eliza-root.ts",
+      "target": "function:eliza/packages/app-core/src/utils/eliza-root.ts:candidateDirsFromOptions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/utils/eliza-root.ts",
+      "target": "function:eliza/packages/app-core/src/utils/eliza-root.ts:resolveElizaPackageRoot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/utils/eliza-root.ts",
+      "target": "function:eliza/packages/app-core/src/utils/eliza-root.ts:resolveElizaPackageRootSync",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/utils/eliza-root.ts:findPackageRoot",
+      "target": "function:eliza/packages/app-core/src/utils/eliza-root.ts:listAncestorDirs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/utils/eliza-root.ts:findPackageRoot",
+      "target": "function:eliza/packages/app-core/src/utils/eliza-root.ts:readPackageName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/utils/eliza-root.ts:findPackageRootSync",
+      "target": "function:eliza/packages/app-core/src/utils/eliza-root.ts:listAncestorDirs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/utils/eliza-root.ts:findPackageRootSync",
+      "target": "function:eliza/packages/app-core/src/utils/eliza-root.ts:readPackageNameSync",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/utils/eliza-root.ts:candidateDirsFromOptions",
+      "target": "function:eliza/packages/app-core/src/utils/eliza-root.ts:candidateDirsFromArgv1",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/utils/eliza-root.ts:resolveElizaPackageRoot",
+      "target": "function:eliza/packages/app-core/src/utils/eliza-root.ts:candidateDirsFromOptions",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/utils/eliza-root.ts:resolveElizaPackageRoot",
+      "target": "function:eliza/packages/app-core/src/utils/eliza-root.ts:findPackageRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/utils/eliza-root.ts:resolveElizaPackageRootSync",
+      "target": "function:eliza/packages/app-core/src/utils/eliza-root.ts:candidateDirsFromOptions",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/utils/eliza-root.ts:resolveElizaPackageRootSync",
+      "target": "function:eliza/packages/app-core/src/utils/eliza-root.ts:findPackageRootSync",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/app/mockInlineUi.tsx",
+      "target": "function:eliza/packages/app-core/test/app/mockInlineUi.tsx:passthrough",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/app/mockInlineUi.tsx",
+      "target": "function:eliza/packages/app-core/test/app/mockInlineUi.tsx:button",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/app/mockInlineUi.tsx",
+      "target": "function:eliza/packages/app-core/test/app/mockInlineUi.tsx:input",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/app/mockInlineUi.tsx",
+      "target": "function:eliza/packages/app-core/test/app/mockInlineUi.tsx:textarea",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/app/mockInlineUi.tsx",
+      "target": "function:eliza/packages/app-core/test/app/mockInlineUi.tsx:dialogRoot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/app/mockInlineUi.tsx",
+      "target": "function:eliza/packages/app-core/test/app/mockInlineUi.tsx:pageLayout",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/app/mockInlineUi.tsx",
+      "target": "function:eliza/packages/app-core/test/app/mockInlineUi.tsx:MockSidebar",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/app/mockInlineUi.tsx",
+      "target": "function:eliza/packages/app-core/test/app/mockInlineUi.tsx:sidebarHeader",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/app/mockInlineUi.tsx",
+      "target": "function:eliza/packages/app-core/test/app/mockInlineUi.tsx:createInlineUiMock",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/browser-extension/test-harness.ts",
+      "target": "function:eliza/packages/app-core/test/browser-extension/test-harness.ts:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/browser-extension/test-harness.ts",
+      "target": "class:eliza/packages/app-core/test/browser-extension/test-harness.ts:ExtensionTestHarness",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/voice-profiles/__tests__/nickname-evaluator.test.ts",
+      "target": "file:eliza/packages/app-core/src/services/voice-profiles/nickname-evaluator.ts",
+      "type": "imports"
+    }
+  ]
+}

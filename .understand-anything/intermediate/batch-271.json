@@ -1,0 +1,417 @@
+{
+  "batchIndex": 271,
+  "nodes": [
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:apps/homepage/public/vrms/shaw.vrm",
+      "type": "file",
+      "name": "shaw.vrm",
+      "filePath": "apps/homepage/public/vrms/shaw.vrm",
+      "summary": "shaw.vrm is a vrm source file in the Milady codebase.",
+      "languageNotes": "vrm; code; 26885 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/homepage/src/__tests__/homepage-e2e-contract.test.ts",
+      "type": "file",
+      "name": "homepage-e2e-contract.test.ts",
+      "filePath": "apps/homepage/src/__tests__/homepage-e2e-contract.test.ts",
+      "summary": "homepage-e2e-contract.test.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 26 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/homepage/src/__tests__/setup.ts",
+      "type": "file",
+      "name": "setup.ts",
+      "filePath": "apps/homepage/src/__tests__/setup.ts",
+      "summary": "setup.ts is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 49 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/__tests__/setup.ts:createMemoryStorage",
+      "type": "function",
+      "name": "createMemoryStorage",
+      "filePath": "apps/homepage/src/__tests__/setup.ts",
+      "summary": "createMemoryStorage is a function defined in apps/homepage/src/__tests__/setup.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/__tests__/setup.ts:ensureStorage",
+      "type": "function",
+      "name": "ensureStorage",
+      "filePath": "apps/homepage/src/__tests__/setup.ts",
+      "summary": "ensureStorage is a function defined in apps/homepage/src/__tests__/setup.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/homepage/src/App.tsx",
+      "type": "file",
+      "name": "App.tsx",
+      "filePath": "apps/homepage/src/App.tsx",
+      "summary": "App.tsx is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 2 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:apps/homepage/src/data/agent-phrases.json",
+      "type": "config",
+      "name": "agent-phrases.json",
+      "filePath": "apps/homepage/src/data/agent-phrases.json",
+      "summary": "agent-phrases.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 48 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:apps/homepage/src/docs/content/developer/index.mdx",
+      "type": "document",
+      "name": "index.mdx",
+      "filePath": "apps/homepage/src/docs/content/developer/index.mdx",
+      "summary": "index.mdx documents apps/homepage/src/docs/content/developer with 36 lines of reference material.",
+      "languageNotes": "markdown; docs; 36 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:apps/homepage/src/docs/content/index.mdx",
+      "type": "document",
+      "name": "index.mdx",
+      "filePath": "apps/homepage/src/docs/content/index.mdx",
+      "summary": "index.mdx documents apps/homepage/src/docs/content with 13 lines of reference material.",
+      "languageNotes": "markdown; docs; 13 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/homepage/src/docs/mdx.d.ts",
+      "type": "file",
+      "name": "mdx.d.ts",
+      "filePath": "apps/homepage/src/docs/mdx.d.ts",
+      "summary": "mdx.d.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 14 lines"
+    },
+    {
+      "tags": [
+        "frontend"
+      ],
+      "complexity": "complex",
+      "id": "file:apps/homepage/src/styles.css",
+      "type": "file",
+      "name": "styles.css",
+      "filePath": "apps/homepage/src/styles.css",
+      "summary": "styles.css is a css source file in the Milady codebase.",
+      "languageNotes": "css; markup; 831 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:apps/homepage/test/e2e/docs.spec.ts",
+      "type": "file",
+      "name": "docs.spec.ts",
+      "filePath": "apps/homepage/test/e2e/docs.spec.ts",
+      "summary": "docs.spec.ts is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 343 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/test/e2e/docs.spec.ts:collectTierLinks",
+      "type": "function",
+      "name": "collectTierLinks",
+      "filePath": "apps/homepage/test/e2e/docs.spec.ts",
+      "summary": "collectTierLinks is a function defined in apps/homepage/test/e2e/docs.spec.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/test/e2e/docs.spec.ts:discoverDocRoutes",
+      "type": "function",
+      "name": "discoverDocRoutes",
+      "filePath": "apps/homepage/test/e2e/docs.spec.ts",
+      "summary": "discoverDocRoutes is a function defined in apps/homepage/test/e2e/docs.spec.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/homepage/vite.config.ts",
+      "type": "file",
+      "name": "vite.config.ts",
+      "filePath": "apps/homepage/vite.config.ts",
+      "summary": "vite.config.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 125 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/vite.config.ts:shouldUseLocalElizaSource",
+      "type": "function",
+      "name": "shouldUseLocalElizaSource",
+      "filePath": "apps/homepage/vite.config.ts",
+      "summary": "shouldUseLocalElizaSource is a function defined in apps/homepage/vite.config.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/homepage/vitest.config.ts",
+      "type": "file",
+      "name": "vitest.config.ts",
+      "filePath": "apps/homepage/vitest.config.ts",
+      "summary": "vitest.config.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 17 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:automations/agent-automation.yaml",
+      "type": "config",
+      "name": "agent-automation.yaml",
+      "filePath": "automations/agent-automation.yaml",
+      "summary": "agent-automation.yaml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 20 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "simple",
+      "id": "service:deploy/k8s/availability/hpa.yaml",
+      "type": "service",
+      "name": "hpa.yaml",
+      "filePath": "deploy/k8s/availability/hpa.yaml",
+      "summary": "hpa.yaml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 56 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "simple",
+      "id": "service:deploy/k8s/availability/pdb.yaml",
+      "type": "service",
+      "name": "pdb.yaml",
+      "filePath": "deploy/k8s/availability/pdb.yaml",
+      "summary": "pdb.yaml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 35 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "moderate",
+      "id": "service:deploy/k8s/logging/fluent-bit.yaml",
+      "type": "service",
+      "name": "fluent-bit.yaml",
+      "filePath": "deploy/k8s/logging/fluent-bit.yaml",
+      "summary": "fluent-bit.yaml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 183 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "simple",
+      "id": "service:deploy/k8s/policy/cluster-image-policy.yaml",
+      "type": "service",
+      "name": "cluster-image-policy.yaml",
+      "filePath": "deploy/k8s/policy/cluster-image-policy.yaml",
+      "summary": "cluster-image-policy.yaml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 21 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "simple",
+      "id": "service:deploy/k8s/policy/README.md",
+      "type": "service",
+      "name": "README.md",
+      "filePath": "deploy/k8s/policy/README.md",
+      "summary": "README.md defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "markdown; infra; 36 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "moderate",
+      "id": "service:deploy/k8s/security/pod-security-template.yaml",
+      "type": "service",
+      "name": "pod-security-template.yaml",
+      "filePath": "deploy/k8s/security/pod-security-template.yaml",
+      "summary": "pod-security-template.yaml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 71 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "simple",
+      "id": "service:deploy/k8s/service-mesh/namespace-annotations.yaml",
+      "type": "service",
+      "name": "namespace-annotations.yaml",
+      "filePath": "deploy/k8s/service-mesh/namespace-annotations.yaml",
+      "summary": "namespace-annotations.yaml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 22 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "simple",
+      "id": "service:deploy/k8s/service-mesh/README.md",
+      "type": "service",
+      "name": "README.md",
+      "filePath": "deploy/k8s/service-mesh/README.md",
+      "summary": "README.md defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "markdown; infra; 66 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:deploy/observability/grafana/dashboards/security-overview.json",
+      "type": "config",
+      "name": "security-overview.json",
+      "filePath": "deploy/observability/grafana/dashboards/security-overview.json",
+      "summary": "security-overview.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 177 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:deploy/observability/loki/loki-config.yaml",
+      "type": "config",
+      "name": "loki-config.yaml",
+      "filePath": "deploy/observability/loki/loki-config.yaml",
+      "summary": "loki-config.yaml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 72 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:deploy/observability/otel-collector-config.yaml",
+      "type": "config",
+      "name": "otel-collector-config.yaml",
+      "filePath": "deploy/observability/otel-collector-config.yaml",
+      "summary": "otel-collector-config.yaml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 164 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:deploy/observability/prometheus/alerts/security.yml",
+      "type": "config",
+      "name": "security.yml",
+      "filePath": "deploy/observability/prometheus/alerts/security.yml",
+      "summary": "security.yml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 155 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/__tests__/setup.ts",
+      "target": "function:apps/homepage/src/__tests__/setup.ts:createMemoryStorage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/__tests__/setup.ts",
+      "target": "function:apps/homepage/src/__tests__/setup.ts:ensureStorage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/__tests__/setup.ts:ensureStorage",
+      "target": "function:apps/homepage/src/__tests__/setup.ts:createMemoryStorage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/test/e2e/docs.spec.ts",
+      "target": "function:apps/homepage/test/e2e/docs.spec.ts:collectTierLinks",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/test/e2e/docs.spec.ts",
+      "target": "function:apps/homepage/test/e2e/docs.spec.ts:discoverDocRoutes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/test/e2e/docs.spec.ts:discoverDocRoutes",
+      "target": "function:apps/homepage/test/e2e/docs.spec.ts:collectTierLinks",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/vite.config.ts",
+      "target": "function:apps/homepage/vite.config.ts:shouldUseLocalElizaSource",
+      "type": "contains"
+    }
+  ]
+}

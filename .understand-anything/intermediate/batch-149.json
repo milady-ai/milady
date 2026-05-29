@@ -1,0 +1,1218 @@
+{
+  "batchIndex": 149,
+  "nodes": [
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_endurance_harness.test.mjs",
+      "type": "file",
+      "name": "bargein_endurance_harness.test.mjs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/bargein_endurance_harness.test.mjs",
+      "summary": "bargein_endurance_harness.test.mjs is a javascript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "javascript; code; 158 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_endurance_harness.test.mjs:args",
+      "type": "function",
+      "name": "args",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/bargein_endurance_harness.test.mjs",
+      "summary": "args is a function defined in eliza/plugins/plugin-local-inference/native/verify/bargein_endurance_harness.test.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_endurance_harness.test.mjs:kokoroRun",
+      "type": "function",
+      "name": "kokoroRun",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/bargein_endurance_harness.test.mjs",
+      "summary": "kokoroRun is a function defined in eliza/plugins/plugin-local-inference/native/verify/bargein_endurance_harness.test.mjs."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "type": "file",
+      "name": "bargein_latency_harness.mjs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "summary": "bargein_latency_harness.mjs is a javascript source file in the Milady codebase. It contains 18 functions.",
+      "languageNotes": "javascript; code; 556 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:timestamp",
+      "type": "function",
+      "name": "timestamp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "summary": "timestamp is a function defined in eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:parseArgs",
+      "type": "function",
+      "name": "parseArgs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "summary": "parseArgs is a function defined in eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:stateDir",
+      "type": "function",
+      "name": "stateDir",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "summary": "stateDir is a function defined in eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:modelsRoot",
+      "type": "function",
+      "name": "modelsRoot",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "summary": "modelsRoot is a function defined in eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:readJson",
+      "type": "function",
+      "name": "readJson",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "summary": "readJson is a function defined in eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:readManifestTier",
+      "type": "function",
+      "name": "readManifestTier",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "summary": "readManifestTier is a function defined in eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:inferTierFromBundle",
+      "type": "function",
+      "name": "inferTierFromBundle",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "summary": "inferTierFromBundle is a function defined in eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:resolveBundle",
+      "type": "function",
+      "name": "resolveBundle",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "summary": "resolveBundle is a function defined in eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:latestLocalE2eReportPath",
+      "type": "function",
+      "name": "latestLocalE2eReportPath",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "summary": "latestLocalE2eReportPath is a function defined in eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:runE2eBench",
+      "type": "function",
+      "name": "runE2eBench",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "summary": "runE2eBench is a function defined in eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:finite",
+      "type": "function",
+      "name": "finite",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "summary": "finite is a function defined in eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:round1",
+      "type": "function",
+      "name": "round1",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "summary": "round1 is a function defined in eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:selectE2eRun",
+      "type": "function",
+      "name": "selectE2eRun",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "summary": "selectE2eRun is a function defined in eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:dflashRequiredForRun",
+      "type": "function",
+      "name": "dflashRequiredForRun",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "summary": "dflashRequiredForRun is a function defined in eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:buildBlockedReport",
+      "type": "function",
+      "name": "buildBlockedReport",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "summary": "buildBlockedReport is a function defined in eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:buildBargeInReportFromE2e",
+      "type": "function",
+      "name": "buildBargeInReportFromE2e",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "summary": "buildBargeInReportFromE2e is a function defined in eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:writeReport",
+      "type": "function",
+      "name": "writeReport",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "summary": "writeReport is a function defined in eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:runCli",
+      "type": "function",
+      "name": "runCli",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "summary": "runCli is a function defined in eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "type": "file",
+      "name": "thirty_turn_endurance_harness.mjs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "summary": "thirty_turn_endurance_harness.mjs is a javascript source file in the Milady codebase. It contains 19 functions.",
+      "languageNotes": "javascript; code; 589 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:timestamp",
+      "type": "function",
+      "name": "timestamp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "summary": "timestamp is a function defined in eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:parseArgs",
+      "type": "function",
+      "name": "parseArgs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "summary": "parseArgs is a function defined in eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:stateDir",
+      "type": "function",
+      "name": "stateDir",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "summary": "stateDir is a function defined in eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:modelsRoot",
+      "type": "function",
+      "name": "modelsRoot",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "summary": "modelsRoot is a function defined in eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:readJson",
+      "type": "function",
+      "name": "readJson",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "summary": "readJson is a function defined in eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:readManifestTier",
+      "type": "function",
+      "name": "readManifestTier",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "summary": "readManifestTier is a function defined in eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:inferTierFromBundle",
+      "type": "function",
+      "name": "inferTierFromBundle",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "summary": "inferTierFromBundle is a function defined in eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:resolveBundle",
+      "type": "function",
+      "name": "resolveBundle",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "summary": "resolveBundle is a function defined in eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:latestLocalE2eReportPath",
+      "type": "function",
+      "name": "latestLocalE2eReportPath",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "summary": "latestLocalE2eReportPath is a function defined in eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:runE2eBench",
+      "type": "function",
+      "name": "runE2eBench",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "summary": "runE2eBench is a function defined in eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:finite",
+      "type": "function",
+      "name": "finite",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "summary": "finite is a function defined in eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:round2",
+      "type": "function",
+      "name": "round2",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "summary": "round2 is a function defined in eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:selectE2eRun",
+      "type": "function",
+      "name": "selectE2eRun",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "summary": "selectE2eRun is a function defined in eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:dflashRequiredForRun",
+      "type": "function",
+      "name": "dflashRequiredForRun",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "summary": "dflashRequiredForRun is a function defined in eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:buildBlockedReport",
+      "type": "function",
+      "name": "buildBlockedReport",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "summary": "buildBlockedReport is a function defined in eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:requiredOptimizationsOk",
+      "type": "function",
+      "name": "requiredOptimizationsOk",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "summary": "requiredOptimizationsOk is a function defined in eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:buildThirtyTurnReportFromE2e",
+      "type": "function",
+      "name": "buildThirtyTurnReportFromE2e",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "summary": "buildThirtyTurnReportFromE2e is a function defined in eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:writeReport",
+      "type": "function",
+      "name": "writeReport",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "summary": "writeReport is a function defined in eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:runCli",
+      "type": "function",
+      "name": "runCli",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "summary": "runCli is a function defined in eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_endurance_harness.test.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_endurance_harness.test.mjs:args",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_endurance_harness.test.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_endurance_harness.test.mjs:kokoroRun",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:timestamp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:parseArgs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:stateDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:modelsRoot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:readJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:readManifestTier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:inferTierFromBundle",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:resolveBundle",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:latestLocalE2eReportPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:runE2eBench",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:finite",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:round1",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:selectE2eRun",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:dflashRequiredForRun",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:buildBlockedReport",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:buildBargeInReportFromE2e",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:writeReport",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:runCli",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:parseArgs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:timestamp",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:modelsRoot",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:stateDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:readManifestTier",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:readJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:inferTierFromBundle",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:readManifestTier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:resolveBundle",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:inferTierFromBundle",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:resolveBundle",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:modelsRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:resolveBundle",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:inferTierFromBundle",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:latestLocalE2eReportPath",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:timestamp",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:runE2eBench",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:latestLocalE2eReportPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:runE2eBench",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:readJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:buildBargeInReportFromE2e",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:selectE2eRun",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:buildBargeInReportFromE2e",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:buildBlockedReport",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:buildBargeInReportFromE2e",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:finite",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:buildBargeInReportFromE2e",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:finite",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:buildBargeInReportFromE2e",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:finite",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:buildBargeInReportFromE2e",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:finite",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:buildBargeInReportFromE2e",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:dflashRequiredForRun",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:buildBargeInReportFromE2e",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:round1",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:buildBargeInReportFromE2e",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:round1",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:buildBargeInReportFromE2e",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:round1",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:buildBargeInReportFromE2e",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:round1",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:buildBargeInReportFromE2e",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:round1",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:runCli",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:parseArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:runCli",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:resolveBundle",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:runCli",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:buildBlockedReport",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:runCli",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:readJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:runCli",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:runE2eBench",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:runCli",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:buildBargeInReportFromE2e",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:runCli",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:buildBlockedReport",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:runCli",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs:writeReport",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:timestamp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:parseArgs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:stateDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:modelsRoot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:readJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:readManifestTier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:inferTierFromBundle",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:resolveBundle",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:latestLocalE2eReportPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:runE2eBench",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:finite",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:round2",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:selectE2eRun",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:dflashRequiredForRun",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:buildBlockedReport",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:requiredOptimizationsOk",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:buildThirtyTurnReportFromE2e",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:writeReport",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:runCli",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:parseArgs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:timestamp",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:modelsRoot",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:stateDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:readManifestTier",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:readJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:inferTierFromBundle",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:readManifestTier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:resolveBundle",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:inferTierFromBundle",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:resolveBundle",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:modelsRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:resolveBundle",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:inferTierFromBundle",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:latestLocalE2eReportPath",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:timestamp",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:runE2eBench",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:latestLocalE2eReportPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:runE2eBench",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:readJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:requiredOptimizationsOk",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:dflashRequiredForRun",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:buildThirtyTurnReportFromE2e",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:selectE2eRun",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:buildThirtyTurnReportFromE2e",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:buildBlockedReport",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:buildThirtyTurnReportFromE2e",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:finite",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:buildThirtyTurnReportFromE2e",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:finite",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:buildThirtyTurnReportFromE2e",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:requiredOptimizationsOk",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:buildThirtyTurnReportFromE2e",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:dflashRequiredForRun",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:buildThirtyTurnReportFromE2e",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:dflashRequiredForRun",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:buildThirtyTurnReportFromE2e",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:round2",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:buildThirtyTurnReportFromE2e",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:finite",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:buildThirtyTurnReportFromE2e",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:round2",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:runCli",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:parseArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:runCli",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:resolveBundle",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:runCli",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:buildBlockedReport",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:runCli",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:readJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:runCli",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:runE2eBench",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:runCli",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:buildThirtyTurnReportFromE2e",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:runCli",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:buildBlockedReport",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:runCli",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs:writeReport",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_endurance_harness.test.mjs",
+      "target": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_latency_harness.mjs",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/bargein_endurance_harness.test.mjs",
+      "target": "file:eliza/plugins/plugin-local-inference/native/verify/thirty_turn_endurance_harness.mjs",
+      "type": "imports"
+    }
+  ]
+}

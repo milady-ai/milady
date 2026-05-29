@@ -1,0 +1,703 @@
+{
+  "batchIndex": 262,
+  "nodes": [
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:scripts/README-IOS-SIMULATOR.md",
+      "type": "document",
+      "name": "README-IOS-SIMULATOR.md",
+      "filePath": "scripts/README-IOS-SIMULATOR.md",
+      "summary": "README-IOS-SIMULATOR.md documents scripts with 130 lines of reference material.",
+      "languageNotes": "markdown; docs; 130 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:scripts/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "scripts/README.md",
+      "summary": "README.md documents scripts with 19 lines of reference material.",
+      "languageNotes": "markdown; docs; 19 lines"
+    },
+    {
+      "tags": [
+        "script"
+      ],
+      "complexity": "simple",
+      "id": "file:scripts/dependency-audit.sh",
+      "type": "file",
+      "name": "dependency-audit.sh",
+      "filePath": "scripts/dependency-audit.sh",
+      "summary": "dependency-audit.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 8 lines"
+    },
+    {
+      "tags": [
+        "script"
+      ],
+      "complexity": "moderate",
+      "id": "file:scripts/dev-guard.ps1",
+      "type": "file",
+      "name": "dev-guard.ps1",
+      "filePath": "scripts/dev-guard.ps1",
+      "summary": "dev-guard.ps1 automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "powershell; script; 86 lines"
+    },
+    {
+      "tags": [
+        "script",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:scripts/electrobun-agent-doctor.sh",
+      "type": "file",
+      "name": "electrobun-agent-doctor.sh",
+      "filePath": "scripts/electrobun-agent-doctor.sh",
+      "summary": "electrobun-agent-doctor.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 38 lines"
+    },
+    {
+      "tags": [
+        "script",
+        "desktop",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:scripts/electrobun-build-test.sh",
+      "type": "file",
+      "name": "electrobun-build-test.sh",
+      "filePath": "scripts/electrobun-build-test.sh",
+      "summary": "electrobun-build-test.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 45 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/electrobun-build-test.sh:has_root_script",
+      "type": "function",
+      "name": "has_root_script",
+      "filePath": "scripts/electrobun-build-test.sh",
+      "summary": "has_root_script is a function defined in scripts/electrobun-build-test.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/electrobun-build-test.sh:has_desktop_script",
+      "type": "function",
+      "name": "has_desktop_script",
+      "filePath": "scripts/electrobun-build-test.sh",
+      "summary": "has_desktop_script is a function defined in scripts/electrobun-build-test.sh."
+    },
+    {
+      "tags": [
+        "script",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:scripts/electrobun-port-audit.sh",
+      "type": "file",
+      "name": "electrobun-port-audit.sh",
+      "filePath": "scripts/electrobun-port-audit.sh",
+      "summary": "electrobun-port-audit.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 25 lines"
+    },
+    {
+      "tags": [
+        "script",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:scripts/electrobun-release-audit.sh",
+      "type": "file",
+      "name": "electrobun-release-audit.sh",
+      "filePath": "scripts/electrobun-release-audit.sh",
+      "summary": "electrobun-release-audit.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 28 lines"
+    },
+    {
+      "tags": [
+        "script",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:scripts/install-published-workspace-fallback-deps.sh",
+      "type": "file",
+      "name": "install-published-workspace-fallback-deps.sh",
+      "filePath": "scripts/install-published-workspace-fallback-deps.sh",
+      "summary": "install-published-workspace-fallback-deps.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 426 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/install-published-workspace-fallback-deps.sh:read_package_spec_from_manifest",
+      "type": "function",
+      "name": "read_package_spec_from_manifest",
+      "filePath": "scripts/install-published-workspace-fallback-deps.sh",
+      "summary": "read_package_spec_from_manifest is a function defined in scripts/install-published-workspace-fallback-deps.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/install-published-workspace-fallback-deps.sh:read_dependency_spec_from_manifest",
+      "type": "function",
+      "name": "read_dependency_spec_from_manifest",
+      "filePath": "scripts/install-published-workspace-fallback-deps.sh",
+      "summary": "read_dependency_spec_from_manifest is a function defined in scripts/install-published-workspace-fallback-deps.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/install-published-workspace-fallback-deps.sh:append_versioned_package",
+      "type": "function",
+      "name": "append_versioned_package",
+      "filePath": "scripts/install-published-workspace-fallback-deps.sh",
+      "summary": "append_versioned_package is a function defined in scripts/install-published-workspace-fallback-deps.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/install-published-workspace-fallback-deps.sh:append_dependency_spec_package",
+      "type": "function",
+      "name": "append_dependency_spec_package",
+      "filePath": "scripts/install-published-workspace-fallback-deps.sh",
+      "summary": "append_dependency_spec_package is a function defined in scripts/install-published-workspace-fallback-deps.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/install-published-workspace-fallback-deps.sh:ensure_eliza_submodule_manifest",
+      "type": "function",
+      "name": "ensure_eliza_submodule_manifest",
+      "filePath": "scripts/install-published-workspace-fallback-deps.sh",
+      "summary": "ensure_eliza_submodule_manifest is a function defined in scripts/install-published-workspace-fallback-deps.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/install-published-workspace-fallback-deps.sh:append_third_party_dependencies_from_manifest",
+      "type": "function",
+      "name": "append_third_party_dependencies_from_manifest",
+      "filePath": "scripts/install-published-workspace-fallback-deps.sh",
+      "summary": "append_third_party_dependencies_from_manifest is a function defined in scripts/install-published-workspace-fallback-deps.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/install-published-workspace-fallback-deps.sh:symlink_installed_packages_into_manifest_node_modules",
+      "type": "function",
+      "name": "symlink_installed_packages_into_manifest_node_modules",
+      "filePath": "scripts/install-published-workspace-fallback-deps.sh",
+      "summary": "symlink_installed_packages_into_manifest_node_modules is a function defined in scripts/install-published-workspace-fallback-deps.sh."
+    },
+    {
+      "tags": [
+        "script",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:scripts/miladyos-dev.sh",
+      "type": "file",
+      "name": "miladyos-dev.sh",
+      "filePath": "scripts/miladyos-dev.sh",
+      "summary": "miladyos-dev.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 197 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/miladyos-dev.sh:fail",
+      "type": "function",
+      "name": "fail",
+      "filePath": "scripts/miladyos-dev.sh",
+      "summary": "fail is a function defined in scripts/miladyos-dev.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/miladyos-dev.sh:say",
+      "type": "function",
+      "name": "say",
+      "filePath": "scripts/miladyos-dev.sh",
+      "summary": "say is a function defined in scripts/miladyos-dev.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/miladyos-dev.sh:require",
+      "type": "function",
+      "name": "require",
+      "filePath": "scripts/miladyos-dev.sh",
+      "summary": "require is a function defined in scripts/miladyos-dev.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/miladyos-dev.sh:ensure_host_resources",
+      "type": "function",
+      "name": "ensure_host_resources",
+      "filePath": "scripts/miladyos-dev.sh",
+      "summary": "ensure_host_resources is a function defined in scripts/miladyos-dev.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/miladyos-dev.sh:cmd_status",
+      "type": "function",
+      "name": "cmd_status",
+      "filePath": "scripts/miladyos-dev.sh",
+      "summary": "cmd_status is a function defined in scripts/miladyos-dev.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/miladyos-dev.sh:cmd_web",
+      "type": "function",
+      "name": "cmd_web",
+      "filePath": "scripts/miladyos-dev.sh",
+      "summary": "cmd_web is a function defined in scripts/miladyos-dev.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/miladyos-dev.sh:cmd_open",
+      "type": "function",
+      "name": "cmd_open",
+      "filePath": "scripts/miladyos-dev.sh",
+      "summary": "cmd_open is a function defined in scripts/miladyos-dev.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/miladyos-dev.sh:cmd_logs",
+      "type": "function",
+      "name": "cmd_logs",
+      "filePath": "scripts/miladyos-dev.sh",
+      "summary": "cmd_logs is a function defined in scripts/miladyos-dev.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/miladyos-dev.sh:cmd_agent_logs",
+      "type": "function",
+      "name": "cmd_agent_logs",
+      "filePath": "scripts/miladyos-dev.sh",
+      "summary": "cmd_agent_logs is a function defined in scripts/miladyos-dev.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/miladyos-dev.sh:cmd_shell",
+      "type": "function",
+      "name": "cmd_shell",
+      "filePath": "scripts/miladyos-dev.sh",
+      "summary": "cmd_shell is a function defined in scripts/miladyos-dev.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/miladyos-dev.sh:cmd_restart_app",
+      "type": "function",
+      "name": "cmd_restart_app",
+      "filePath": "scripts/miladyos-dev.sh",
+      "summary": "cmd_restart_app is a function defined in scripts/miladyos-dev.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/miladyos-dev.sh:cmd_push_agent",
+      "type": "function",
+      "name": "cmd_push_agent",
+      "filePath": "scripts/miladyos-dev.sh",
+      "summary": "cmd_push_agent is a function defined in scripts/miladyos-dev.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/miladyos-dev.sh:cmd_stage_models",
+      "type": "function",
+      "name": "cmd_stage_models",
+      "filePath": "scripts/miladyos-dev.sh",
+      "summary": "cmd_stage_models is a function defined in scripts/miladyos-dev.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/miladyos-dev.sh:cmd_rebuild_apk",
+      "type": "function",
+      "name": "cmd_rebuild_apk",
+      "filePath": "scripts/miladyos-dev.sh",
+      "summary": "cmd_rebuild_apk is a function defined in scripts/miladyos-dev.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/miladyos-dev.sh:cmd_reflash",
+      "type": "function",
+      "name": "cmd_reflash",
+      "filePath": "scripts/miladyos-dev.sh",
+      "summary": "cmd_reflash is a function defined in scripts/miladyos-dev.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/miladyos-dev.sh:cmd_stop",
+      "type": "function",
+      "name": "cmd_stop",
+      "filePath": "scripts/miladyos-dev.sh",
+      "summary": "cmd_stop is a function defined in scripts/miladyos-dev.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/miladyos-dev.sh:cmd_start",
+      "type": "function",
+      "name": "cmd_start",
+      "filePath": "scripts/miladyos-dev.sh",
+      "summary": "cmd_start is a function defined in scripts/miladyos-dev.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/miladyos-dev.sh:cmd_reset",
+      "type": "function",
+      "name": "cmd_reset",
+      "filePath": "scripts/miladyos-dev.sh",
+      "summary": "cmd_reset is a function defined in scripts/miladyos-dev.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/miladyos-dev.sh:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "scripts/miladyos-dev.sh",
+      "summary": "main is a function defined in scripts/miladyos-dev.sh."
+    },
+    {
+      "tags": [
+        "script"
+      ],
+      "complexity": "simple",
+      "id": "file:scripts/security-audit.sh",
+      "type": "file",
+      "name": "security-audit.sh",
+      "filePath": "scripts/security-audit.sh",
+      "summary": "security-audit.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 37 lines"
+    },
+    {
+      "tags": [
+        "script",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:scripts/validate-agentic-electrobun.sh",
+      "type": "file",
+      "name": "validate-agentic-electrobun.sh",
+      "filePath": "scripts/validate-agentic-electrobun.sh",
+      "summary": "validate-agentic-electrobun.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 37 lines"
+    },
+    {
+      "tags": [
+        "script"
+      ],
+      "complexity": "simple",
+      "id": "file:scripts/worktree-env.sh",
+      "type": "file",
+      "name": "worktree-env.sh",
+      "filePath": "scripts/worktree-env.sh",
+      "summary": "worktree-env.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 41 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/electrobun-build-test.sh",
+      "target": "function:scripts/electrobun-build-test.sh:has_root_script",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/electrobun-build-test.sh",
+      "target": "function:scripts/electrobun-build-test.sh:has_desktop_script",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/install-published-workspace-fallback-deps.sh",
+      "target": "function:scripts/install-published-workspace-fallback-deps.sh:read_package_spec_from_manifest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/install-published-workspace-fallback-deps.sh",
+      "target": "function:scripts/install-published-workspace-fallback-deps.sh:read_dependency_spec_from_manifest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/install-published-workspace-fallback-deps.sh",
+      "target": "function:scripts/install-published-workspace-fallback-deps.sh:append_versioned_package",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/install-published-workspace-fallback-deps.sh",
+      "target": "function:scripts/install-published-workspace-fallback-deps.sh:append_dependency_spec_package",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/install-published-workspace-fallback-deps.sh",
+      "target": "function:scripts/install-published-workspace-fallback-deps.sh:ensure_eliza_submodule_manifest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/install-published-workspace-fallback-deps.sh",
+      "target": "function:scripts/install-published-workspace-fallback-deps.sh:append_third_party_dependencies_from_manifest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/install-published-workspace-fallback-deps.sh",
+      "target": "function:scripts/install-published-workspace-fallback-deps.sh:symlink_installed_packages_into_manifest_node_modules",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/miladyos-dev.sh",
+      "target": "function:scripts/miladyos-dev.sh:fail",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/miladyos-dev.sh",
+      "target": "function:scripts/miladyos-dev.sh:say",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/miladyos-dev.sh",
+      "target": "function:scripts/miladyos-dev.sh:require",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/miladyos-dev.sh",
+      "target": "function:scripts/miladyos-dev.sh:ensure_host_resources",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/miladyos-dev.sh",
+      "target": "function:scripts/miladyos-dev.sh:cmd_status",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/miladyos-dev.sh",
+      "target": "function:scripts/miladyos-dev.sh:cmd_web",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/miladyos-dev.sh",
+      "target": "function:scripts/miladyos-dev.sh:cmd_open",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/miladyos-dev.sh",
+      "target": "function:scripts/miladyos-dev.sh:cmd_logs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/miladyos-dev.sh",
+      "target": "function:scripts/miladyos-dev.sh:cmd_agent_logs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/miladyos-dev.sh",
+      "target": "function:scripts/miladyos-dev.sh:cmd_shell",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/miladyos-dev.sh",
+      "target": "function:scripts/miladyos-dev.sh:cmd_restart_app",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/miladyos-dev.sh",
+      "target": "function:scripts/miladyos-dev.sh:cmd_push_agent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/miladyos-dev.sh",
+      "target": "function:scripts/miladyos-dev.sh:cmd_stage_models",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/miladyos-dev.sh",
+      "target": "function:scripts/miladyos-dev.sh:cmd_rebuild_apk",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/miladyos-dev.sh",
+      "target": "function:scripts/miladyos-dev.sh:cmd_reflash",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/miladyos-dev.sh",
+      "target": "function:scripts/miladyos-dev.sh:cmd_stop",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/miladyos-dev.sh",
+      "target": "function:scripts/miladyos-dev.sh:cmd_start",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/miladyos-dev.sh",
+      "target": "function:scripts/miladyos-dev.sh:cmd_reset",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/miladyos-dev.sh",
+      "target": "function:scripts/miladyos-dev.sh:main",
+      "type": "contains"
+    }
+  ]
+}

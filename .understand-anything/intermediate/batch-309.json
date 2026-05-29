@@ -1,0 +1,306 @@
+{
+  "batchIndex": 309,
+  "nodes": [
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/AccessControl.conf",
+      "type": "file",
+      "name": "AccessControl.conf",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/AccessControl.conf",
+      "summary": "AccessControl.conf is a conf source file in the Milady codebase.",
+      "languageNotes": "conf; code; 8 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/AccessControl.spec",
+      "type": "file",
+      "name": "AccessControl.spec",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/AccessControl.spec",
+      "summary": "AccessControl.spec is a spec source file in the Milady codebase.",
+      "languageNotes": "spec; code; 119 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/AccessControlDefaultAdminRules.conf",
+      "type": "file",
+      "name": "AccessControlDefaultAdminRules.conf",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/AccessControlDefaultAdminRules.conf",
+      "summary": "AccessControlDefaultAdminRules.conf is a conf source file in the Milady codebase.",
+      "languageNotes": "conf; code; 8 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/AccessControlDefaultAdminRules.spec",
+      "type": "file",
+      "name": "AccessControlDefaultAdminRules.spec",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/AccessControlDefaultAdminRules.spec",
+      "summary": "AccessControlDefaultAdminRules.spec is a spec source file in the Milady codebase.",
+      "languageNotes": "spec; code; 467 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/AccessManaged.conf",
+      "type": "file",
+      "name": "AccessManaged.conf",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/AccessManaged.conf",
+      "summary": "AccessManaged.conf is a conf source file in the Milady codebase.",
+      "languageNotes": "conf; code; 14 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/AccessManaged.spec",
+      "type": "file",
+      "name": "AccessManaged.spec",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/AccessManaged.spec",
+      "summary": "AccessManaged.spec is a spec source file in the Milady codebase.",
+      "languageNotes": "spec; code; 49 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/AccessManager.conf",
+      "type": "file",
+      "name": "AccessManager.conf",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/AccessManager.conf",
+      "summary": "AccessManager.conf is a conf source file in the Milady codebase.",
+      "languageNotes": "conf; code; 10 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/AccessManager.spec",
+      "type": "file",
+      "name": "AccessManager.spec",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/AccessManager.spec",
+      "summary": "AccessManager.spec is a spec source file in the Milady codebase.",
+      "languageNotes": "spec; code; 837 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/Account.conf",
+      "type": "file",
+      "name": "Account.conf",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/Account.conf",
+      "summary": "Account.conf is a conf source file in the Milady codebase.",
+      "languageNotes": "conf; code; 9 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/Account.spec",
+      "type": "file",
+      "name": "Account.spec",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/Account.spec",
+      "summary": "Account.spec is a spec source file in the Milady codebase.",
+      "languageNotes": "spec; code; 490 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/DoubleEndedQueue.conf",
+      "type": "file",
+      "name": "DoubleEndedQueue.conf",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/DoubleEndedQueue.conf",
+      "summary": "DoubleEndedQueue.conf is a conf source file in the Milady codebase.",
+      "languageNotes": "conf; code; 8 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/DoubleEndedQueue.spec",
+      "type": "file",
+      "name": "DoubleEndedQueue.spec",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/DoubleEndedQueue.spec",
+      "summary": "DoubleEndedQueue.spec is a spec source file in the Milady codebase.",
+      "languageNotes": "spec; code; 300 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/EnumerableMap.conf",
+      "type": "file",
+      "name": "EnumerableMap.conf",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/EnumerableMap.conf",
+      "summary": "EnumerableMap.conf is a conf source file in the Milady codebase.",
+      "languageNotes": "conf; code; 8 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/EnumerableMap.spec",
+      "type": "file",
+      "name": "EnumerableMap.spec",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/EnumerableMap.spec",
+      "summary": "EnumerableMap.spec is a spec source file in the Milady codebase.",
+      "languageNotes": "spec; code; 364 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/EnumerableSet.conf",
+      "type": "file",
+      "name": "EnumerableSet.conf",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/EnumerableSet.conf",
+      "summary": "EnumerableSet.conf is a conf source file in the Milady codebase.",
+      "languageNotes": "conf; code; 8 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/EnumerableSet.spec",
+      "type": "file",
+      "name": "EnumerableSet.spec",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/EnumerableSet.spec",
+      "summary": "EnumerableSet.spec is a spec source file in the Milady codebase.",
+      "languageNotes": "spec; code; 272 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/ERC20.conf",
+      "type": "file",
+      "name": "ERC20.conf",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/ERC20.conf",
+      "summary": "ERC20.conf is a conf source file in the Milady codebase.",
+      "languageNotes": "conf; code; 9 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/ERC20.spec",
+      "type": "file",
+      "name": "ERC20.spec",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/ERC20.spec",
+      "summary": "ERC20.spec is a spec source file in the Milady codebase.",
+      "languageNotes": "spec; code; 352 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/ERC20FlashMint.conf",
+      "type": "file",
+      "name": "ERC20FlashMint.conf",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/ERC20FlashMint.conf",
+      "summary": "ERC20FlashMint.conf is a conf source file in the Milady codebase.",
+      "languageNotes": "conf; code; 10 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/ERC20FlashMint.spec",
+      "type": "file",
+      "name": "ERC20FlashMint.spec",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/ERC20FlashMint.spec",
+      "summary": "ERC20FlashMint.spec is a spec source file in the Milady codebase.",
+      "languageNotes": "spec; code; 55 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/ERC20Wrapper.conf",
+      "type": "file",
+      "name": "ERC20Wrapper.conf",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/ERC20Wrapper.conf",
+      "summary": "ERC20Wrapper.conf is a conf source file in the Milady codebase.",
+      "languageNotes": "conf; code; 13 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/ERC20Wrapper.spec",
+      "type": "file",
+      "name": "ERC20Wrapper.spec",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/ERC20Wrapper.spec",
+      "summary": "ERC20Wrapper.spec is a spec source file in the Milady codebase.",
+      "languageNotes": "spec; code; 226 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/ERC721.conf",
+      "type": "file",
+      "name": "ERC721.conf",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/ERC721.conf",
+      "summary": "ERC721.conf is a conf source file in the Milady codebase.",
+      "languageNotes": "conf; code; 10 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/ERC721.spec",
+      "type": "file",
+      "name": "ERC721.spec",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/ERC721.spec",
+      "summary": "ERC721.spec is a spec source file in the Milady codebase.",
+      "languageNotes": "spec; code; 695 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/helpers/helpers.spec",
+      "type": "file",
+      "name": "helpers.spec",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/helpers/helpers.spec",
+      "summary": "helpers.spec is a spec source file in the Milady codebase.",
+      "languageNotes": "spec; code; 13 lines"
+    }
+  ],
+  "edges": []
+}

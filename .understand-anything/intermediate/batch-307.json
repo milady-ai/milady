@@ -1,0 +1,308 @@
+{
+  "batchIndex": 307,
+  "nodes": [
+    {
+      "tags": [
+        "test",
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/antora.yml",
+      "type": "config",
+      "name": "antora.yml",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/antora.yml",
+      "summary": "antora.yml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 7 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/nav.adoc",
+      "type": "file",
+      "name": "nav.adoc",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/nav.adoc",
+      "summary": "nav.adoc is a adoc source file in the Milady codebase.",
+      "languageNotes": "adoc; code; 29 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/access-control.adoc",
+      "type": "file",
+      "name": "access-control.adoc",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/access-control.adoc",
+      "summary": "access-control.adoc is a adoc source file in the Milady codebase.",
+      "languageNotes": "adoc; code; 339 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/account-abstraction.adoc",
+      "type": "file",
+      "name": "account-abstraction.adoc",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/account-abstraction.adoc",
+      "summary": "account-abstraction.adoc is a adoc source file in the Milady codebase.",
+      "languageNotes": "adoc; code; 100 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/accounts.adoc",
+      "type": "file",
+      "name": "accounts.adoc",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/accounts.adoc",
+      "summary": "accounts.adoc is a adoc source file in the Milady codebase.",
+      "languageNotes": "adoc; code; 354 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/backwards-compatibility.adoc",
+      "type": "file",
+      "name": "backwards-compatibility.adoc",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/backwards-compatibility.adoc",
+      "summary": "backwards-compatibility.adoc is a adoc source file in the Milady codebase.",
+      "languageNotes": "adoc; code; 50 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/eoa-delegation.adoc",
+      "type": "file",
+      "name": "eoa-delegation.adoc",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/eoa-delegation.adoc",
+      "summary": "eoa-delegation.adoc is a adoc source file in the Milady codebase.",
+      "languageNotes": "adoc; code; 143 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/erc1155.adoc",
+      "type": "file",
+      "name": "erc1155.adoc",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/erc1155.adoc",
+      "summary": "erc1155.adoc is a adoc source file in the Milady codebase.",
+      "languageNotes": "adoc; code; 118 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/erc20-supply.adoc",
+      "type": "file",
+      "name": "erc20-supply.adoc",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/erc20-supply.adoc",
+      "summary": "erc20-supply.adoc is a adoc source file in the Milady codebase.",
+      "languageNotes": "adoc; code; 71 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/erc20.adoc",
+      "type": "file",
+      "name": "erc20.adoc",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/erc20.adoc",
+      "summary": "erc20.adoc is a adoc source file in the Milady codebase.",
+      "languageNotes": "adoc; code; 67 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/erc4626.adoc",
+      "type": "file",
+      "name": "erc4626.adoc",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/erc4626.adoc",
+      "summary": "erc4626.adoc is a adoc source file in the Milady codebase.",
+      "languageNotes": "adoc; code; 214 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/erc6909.adoc",
+      "type": "file",
+      "name": "erc6909.adoc",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/erc6909.adoc",
+      "summary": "erc6909.adoc is a adoc source file in the Milady codebase.",
+      "languageNotes": "adoc; code; 47 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/erc721.adoc",
+      "type": "file",
+      "name": "erc721.adoc",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/erc721.adoc",
+      "summary": "erc721.adoc is a adoc source file in the Milady codebase.",
+      "languageNotes": "adoc; code; 58 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/extending-contracts.adoc",
+      "type": "file",
+      "name": "extending-contracts.adoc",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/extending-contracts.adoc",
+      "summary": "extending-contracts.adoc is a adoc source file in the Milady codebase.",
+      "languageNotes": "adoc; code; 51 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/faq.adoc",
+      "type": "file",
+      "name": "faq.adoc",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/faq.adoc",
+      "summary": "faq.adoc is a adoc source file in the Milady codebase.",
+      "languageNotes": "adoc; code; 13 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/governance.adoc",
+      "type": "file",
+      "name": "governance.adoc",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/governance.adoc",
+      "summary": "governance.adoc is a adoc source file in the Milady codebase.",
+      "languageNotes": "adoc; code; 242 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/index.adoc",
+      "type": "file",
+      "name": "index.adoc",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/index.adoc",
+      "summary": "index.adoc is a adoc source file in the Milady codebase.",
+      "languageNotes": "adoc; code; 100 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/multisig.adoc",
+      "type": "file",
+      "name": "multisig.adoc",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/multisig.adoc",
+      "summary": "multisig.adoc is a adoc source file in the Milady codebase.",
+      "languageNotes": "adoc; code; 308 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/tokens.adoc",
+      "type": "file",
+      "name": "tokens.adoc",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/tokens.adoc",
+      "summary": "tokens.adoc is a adoc source file in the Milady codebase.",
+      "languageNotes": "adoc; code; 31 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/upgradeable.adoc",
+      "type": "file",
+      "name": "upgradeable.adoc",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/upgradeable.adoc",
+      "summary": "upgradeable.adoc is a adoc source file in the Milady codebase.",
+      "languageNotes": "adoc; code; 77 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/utilities.adoc",
+      "type": "file",
+      "name": "utilities.adoc",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/utilities.adoc",
+      "summary": "utilities.adoc is a adoc source file in the Milady codebase.",
+      "languageNotes": "adoc; code; 634 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/wizard.adoc",
+      "type": "file",
+      "name": "wizard.adoc",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/modules/ROOT/pages/wizard.adoc",
+      "summary": "wizard.adoc is a adoc source file in the Milady codebase.",
+      "languageNotes": "adoc; code; 15 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/README.md",
+      "summary": "README.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs with 16 lines of reference material.",
+      "languageNotes": "markdown; docs; 16 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/templates/contract.hbs",
+      "type": "file",
+      "name": "contract.hbs",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/templates/contract.hbs",
+      "summary": "contract.hbs is a hbs source file in the Milady codebase.",
+      "languageNotes": "hbs; code; 141 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/templates/page.hbs",
+      "type": "file",
+      "name": "page.hbs",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/docs/templates/page.hbs",
+      "summary": "page.hbs is a hbs source file in the Milady codebase.",
+      "languageNotes": "hbs; code; 4 lines"
+    }
+  ],
+  "edges": []
+}

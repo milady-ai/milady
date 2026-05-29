@@ -1,0 +1,160 @@
+{
+  "batchIndex": 158,
+  "nodes": [
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/agents/electrobun-alignment-agent.md",
+      "type": "document",
+      "name": "electrobun-alignment-agent.md",
+      "filePath": ".claude/plugins/electrobun-dev/agents/electrobun-alignment-agent.md",
+      "summary": "electrobun-alignment-agent.md documents .claude/plugins/electrobun-dev/agents with 197 lines of reference material.",
+      "languageNotes": "markdown; docs; 197 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/agents/electrobun-architect.md",
+      "type": "document",
+      "name": "electrobun-architect.md",
+      "filePath": ".claude/plugins/electrobun-dev/agents/electrobun-architect.md",
+      "summary": "electrobun-architect.md documents .claude/plugins/electrobun-dev/agents with 173 lines of reference material.",
+      "languageNotes": "markdown; docs; 173 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/agents/electrobun-backend-agent.md",
+      "type": "document",
+      "name": "electrobun-backend-agent.md",
+      "filePath": ".claude/plugins/electrobun-dev/agents/electrobun-backend-agent.md",
+      "summary": "electrobun-backend-agent.md documents .claude/plugins/electrobun-dev/agents with 231 lines of reference material.",
+      "languageNotes": "markdown; docs; 231 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/agents/electrobun-debugger.md",
+      "type": "document",
+      "name": "electrobun-debugger.md",
+      "filePath": ".claude/plugins/electrobun-dev/agents/electrobun-debugger.md",
+      "summary": "electrobun-debugger.md documents .claude/plugins/electrobun-dev/agents with 121 lines of reference material.",
+      "languageNotes": "markdown; docs; 121 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/agents/electrobun-docs-agent.md",
+      "type": "document",
+      "name": "electrobun-docs-agent.md",
+      "filePath": ".claude/plugins/electrobun-dev/agents/electrobun-docs-agent.md",
+      "summary": "electrobun-docs-agent.md documents .claude/plugins/electrobun-dev/agents with 275 lines of reference material.",
+      "languageNotes": "markdown; docs; 275 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/agents/electrobun-kitchen-agent.md",
+      "type": "document",
+      "name": "electrobun-kitchen-agent.md",
+      "filePath": ".claude/plugins/electrobun-dev/agents/electrobun-kitchen-agent.md",
+      "summary": "electrobun-kitchen-agent.md documents .claude/plugins/electrobun-dev/agents with 83 lines of reference material.",
+      "languageNotes": "markdown; docs; 83 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/agents/electrobun-planner.md",
+      "type": "document",
+      "name": "electrobun-planner.md",
+      "filePath": ".claude/plugins/electrobun-dev/agents/electrobun-planner.md",
+      "summary": "electrobun-planner.md documents .claude/plugins/electrobun-dev/agents with 135 lines of reference material.",
+      "languageNotes": "markdown; docs; 135 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/agents/electrobun-qa-engineer.md",
+      "type": "document",
+      "name": "electrobun-qa-engineer.md",
+      "filePath": ".claude/plugins/electrobun-dev/agents/electrobun-qa-engineer.md",
+      "summary": "electrobun-qa-engineer.md documents .claude/plugins/electrobun-dev/agents with 166 lines of reference material.",
+      "languageNotes": "markdown; docs; 166 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/agents/electrobun-researcher.md",
+      "type": "document",
+      "name": "electrobun-researcher.md",
+      "filePath": ".claude/plugins/electrobun-dev/agents/electrobun-researcher.md",
+      "summary": "electrobun-researcher.md documents .claude/plugins/electrobun-dev/agents with 118 lines of reference material.",
+      "languageNotes": "markdown; docs; 118 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/agents/electrobun-test-writer.md",
+      "type": "document",
+      "name": "electrobun-test-writer.md",
+      "filePath": ".claude/plugins/electrobun-dev/agents/electrobun-test-writer.md",
+      "summary": "electrobun-test-writer.md documents .claude/plugins/electrobun-dev/agents with 197 lines of reference material.",
+      "languageNotes": "markdown; docs; 197 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/agents/electrobun-ui-agent.md",
+      "type": "document",
+      "name": "electrobun-ui-agent.md",
+      "filePath": ".claude/plugins/electrobun-dev/agents/electrobun-ui-agent.md",
+      "summary": "electrobun-ui-agent.md documents .claude/plugins/electrobun-dev/agents with 224 lines of reference material.",
+      "languageNotes": "markdown; docs; 224 lines"
+    }
+  ],
+  "edges": []
+}

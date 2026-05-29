@@ -1,0 +1,111 @@
+{
+  "batchIndex": 250,
+  "nodes": [
+    {
+      "tags": [
+        "documentation",
+        "voice",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/plugins/plugin-local-inference/native/verify/asr_bench_fixtures/non_publish_structure_5utt/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/asr_bench_fixtures/non_publish_structure_5utt/README.md",
+      "summary": "README.md documents eliza/plugins/plugin-local-inference/native/verify/asr_bench_fixtures/non_publish_structure_5utt with 18 lines of reference material.",
+      "languageNotes": "markdown; docs; 18 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "voice",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/plugins/plugin-local-inference/native/verify/asr_bench_fixtures/non_publish_structure_5utt/manifest.json",
+      "type": "config",
+      "name": "manifest.json",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/asr_bench_fixtures/non_publish_structure_5utt/manifest.json",
+      "summary": "manifest.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 53 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "voice",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/plugins/plugin-local-inference/native/verify/asr_bench_fixtures/non_publish_structure_5utt/utt-01.txt",
+      "type": "document",
+      "name": "utt-01.txt",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/asr_bench_fixtures/non_publish_structure_5utt/utt-01.txt",
+      "summary": "utt-01.txt documents eliza/plugins/plugin-local-inference/native/verify/asr_bench_fixtures/non_publish_structure_5utt with 1 lines of reference material.",
+      "languageNotes": "txt; docs; 1 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "voice",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/plugins/plugin-local-inference/native/verify/asr_bench_fixtures/non_publish_structure_5utt/utt-02.txt",
+      "type": "document",
+      "name": "utt-02.txt",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/asr_bench_fixtures/non_publish_structure_5utt/utt-02.txt",
+      "summary": "utt-02.txt documents eliza/plugins/plugin-local-inference/native/verify/asr_bench_fixtures/non_publish_structure_5utt with 1 lines of reference material.",
+      "languageNotes": "txt; docs; 1 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "voice",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/plugins/plugin-local-inference/native/verify/asr_bench_fixtures/non_publish_structure_5utt/utt-03.txt",
+      "type": "document",
+      "name": "utt-03.txt",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/asr_bench_fixtures/non_publish_structure_5utt/utt-03.txt",
+      "summary": "utt-03.txt documents eliza/plugins/plugin-local-inference/native/verify/asr_bench_fixtures/non_publish_structure_5utt with 1 lines of reference material.",
+      "languageNotes": "txt; docs; 1 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "voice",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/plugins/plugin-local-inference/native/verify/asr_bench_fixtures/non_publish_structure_5utt/utt-04.txt",
+      "type": "document",
+      "name": "utt-04.txt",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/asr_bench_fixtures/non_publish_structure_5utt/utt-04.txt",
+      "summary": "utt-04.txt documents eliza/plugins/plugin-local-inference/native/verify/asr_bench_fixtures/non_publish_structure_5utt with 1 lines of reference material.",
+      "languageNotes": "txt; docs; 1 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "voice",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/plugins/plugin-local-inference/native/verify/asr_bench_fixtures/non_publish_structure_5utt/utt-05.txt",
+      "type": "document",
+      "name": "utt-05.txt",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/asr_bench_fixtures/non_publish_structure_5utt/utt-05.txt",
+      "summary": "utt-05.txt documents eliza/plugins/plugin-local-inference/native/verify/asr_bench_fixtures/non_publish_structure_5utt with 1 lines of reference material.",
+      "languageNotes": "txt; docs; 1 lines"
+    }
+  ],
+  "edges": []
+}

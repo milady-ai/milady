@@ -1,0 +1,149 @@
+{
+  "batchIndex": 178,
+  "nodes": [
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands/electrobun-agent-tool.md",
+      "type": "document",
+      "name": "electrobun-agent-tool.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands/electrobun-agent-tool.md",
+      "summary": "electrobun-agent-tool.md documents docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands with 14 lines of reference material.",
+      "languageNotes": "markdown; docs; 14 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands/electrobun-build-fix.md",
+      "type": "document",
+      "name": "electrobun-build-fix.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands/electrobun-build-fix.md",
+      "summary": "electrobun-build-fix.md documents docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands with 11 lines of reference material.",
+      "languageNotes": "markdown; docs; 11 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands/electrobun-menu-tray.md",
+      "type": "document",
+      "name": "electrobun-menu-tray.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands/electrobun-menu-tray.md",
+      "summary": "electrobun-menu-tray.md documents docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands with 13 lines of reference material.",
+      "languageNotes": "markdown; docs; 13 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands/electrobun-plan.md",
+      "type": "document",
+      "name": "electrobun-plan.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands/electrobun-plan.md",
+      "summary": "electrobun-plan.md documents docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands with 17 lines of reference material.",
+      "languageNotes": "markdown; docs; 17 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands/electrobun-port-apple.md",
+      "type": "document",
+      "name": "electrobun-port-apple.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands/electrobun-port-apple.md",
+      "summary": "electrobun-port-apple.md documents docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands with 15 lines of reference material.",
+      "languageNotes": "markdown; docs; 15 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands/electrobun-release.md",
+      "type": "document",
+      "name": "electrobun-release.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands/electrobun-release.md",
+      "summary": "electrobun-release.md documents docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands with 15 lines of reference material.",
+      "languageNotes": "markdown; docs; 15 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands/electrobun-rpc.md",
+      "type": "document",
+      "name": "electrobun-rpc.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands/electrobun-rpc.md",
+      "summary": "electrobun-rpc.md documents docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands with 13 lines of reference material.",
+      "languageNotes": "markdown; docs; 13 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands/electrobun-security-review.md",
+      "type": "document",
+      "name": "electrobun-security-review.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands/electrobun-security-review.md",
+      "summary": "electrobun-security-review.md documents docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands with 15 lines of reference material.",
+      "languageNotes": "markdown; docs; 15 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands/electrobun-test.md",
+      "type": "document",
+      "name": "electrobun-test.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands/electrobun-test.md",
+      "summary": "electrobun-test.md documents docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands with 12 lines of reference material.",
+      "languageNotes": "markdown; docs; 12 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands/electrobun-update.md",
+      "type": "document",
+      "name": "electrobun-update.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands/electrobun-update.md",
+      "summary": "electrobun-update.md documents docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands with 14 lines of reference material.",
+      "languageNotes": "markdown; docs; 14 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands/electrobun-view.md",
+      "type": "document",
+      "name": "electrobun-view.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands/electrobun-view.md",
+      "summary": "electrobun-view.md documents docs/agent-packs/electrobun-agentic-desktop-2026/.claude/commands with 14 lines of reference material.",
+      "languageNotes": "markdown; docs; 14 lines"
+    }
+  ],
+  "edges": []
+}

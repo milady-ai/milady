@@ -1,0 +1,537 @@
+{
+  "batchIndex": 278,
+  "nodes": [
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/packaging/debian/postinst",
+      "type": "file",
+      "name": "postinst",
+      "filePath": "eliza/packages/app-core/packaging/debian/postinst",
+      "summary": "postinst is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 28 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/packaging/debian/prerm",
+      "type": "file",
+      "name": "prerm",
+      "filePath": "eliza/packages/app-core/packaging/debian/prerm",
+      "summary": "prerm is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 14 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/packaging/debian/rules",
+      "type": "file",
+      "name": "rules",
+      "filePath": "eliza/packages/app-core/packaging/debian/rules",
+      "summary": "rules is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 44 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/packaging/debian/source/format",
+      "type": "file",
+      "name": "format",
+      "filePath": "eliza/packages/app-core/packaging/debian/source/format",
+      "summary": "format is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 1 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/packaging/flatpak/ai.elizaos.App.desktop",
+      "type": "file",
+      "name": "ai.elizaos.App.desktop",
+      "filePath": "eliza/packages/app-core/packaging/flatpak/ai.elizaos.App.desktop",
+      "summary": "ai.elizaos.App.desktop is a desktop source file in the Milady codebase.",
+      "languageNotes": "desktop; code; 11 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/packaging/homebrew/elizaos-app.cask.rb",
+      "type": "file",
+      "name": "elizaos-app.cask.rb",
+      "filePath": "eliza/packages/app-core/packaging/homebrew/elizaos-app.cask.rb",
+      "summary": "elizaos-app.cask.rb is a ruby source file in the Milady codebase.",
+      "languageNotes": "ruby; code; 60 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/packaging/homebrew/elizaos-app.rb",
+      "type": "file",
+      "name": "elizaos-app.rb",
+      "filePath": "eliza/packages/app-core/packaging/homebrew/elizaos-app.rb",
+      "summary": "elizaos-app.rb is a ruby source file in the Milady codebase. It contains 2 functions, 1 class.",
+      "languageNotes": "ruby; code; 49 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "ruby"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/packaging/homebrew/elizaos-app.rb:install",
+      "type": "function",
+      "name": "install",
+      "filePath": "eliza/packages/app-core/packaging/homebrew/elizaos-app.rb",
+      "summary": "install is a function defined in eliza/packages/app-core/packaging/homebrew/elizaos-app.rb."
+    },
+    {
+      "tags": [
+        "function",
+        "ruby"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/packaging/homebrew/elizaos-app.rb:caveats",
+      "type": "function",
+      "name": "caveats",
+      "filePath": "eliza/packages/app-core/packaging/homebrew/elizaos-app.rb",
+      "summary": "caveats is a function defined in eliza/packages/app-core/packaging/homebrew/elizaos-app.rb."
+    },
+    {
+      "tags": [
+        "class",
+        "ruby"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/packaging/homebrew/elizaos-app.rb:ElizaosApp",
+      "type": "class",
+      "name": "ElizaosApp",
+      "filePath": "eliza/packages/app-core/packaging/homebrew/elizaos-app.rb",
+      "summary": "ElizaosApp is a class or type declared in eliza/packages/app-core/packaging/homebrew/elizaos-app.rb."
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/packaging/homebrew/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/packages/app-core/packaging/homebrew/README.md",
+      "summary": "README.md documents eliza/packages/app-core/packaging/homebrew with 80 lines of reference material.",
+      "languageNotes": "markdown; docs; 80 lines"
+    },
+    {
+      "tags": [
+        "script"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/packaging/inno/build-inno.ps1",
+      "type": "file",
+      "name": "build-inno.ps1",
+      "filePath": "eliza/packages/app-core/packaging/inno/build-inno.ps1",
+      "summary": "build-inno.ps1 automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "powershell; script; 231 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/packaging/inno/ElizaOSApp.iss",
+      "type": "file",
+      "name": "ElizaOSApp.iss",
+      "filePath": "eliza/packages/app-core/packaging/inno/ElizaOSApp.iss",
+      "summary": "ElizaOSApp.iss is a iss source file in the Milady codebase.",
+      "languageNotes": "iss; code; 53 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/packaging/msix/store/description.md",
+      "type": "document",
+      "name": "description.md",
+      "filePath": "eliza/packages/app-core/packaging/msix/store/description.md",
+      "summary": "description.md documents eliza/packages/app-core/packaging/msix/store with 31 lines of reference material.",
+      "languageNotes": "markdown; docs; 31 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/packaging/msix/store/listing.json",
+      "type": "config",
+      "name": "listing.json",
+      "filePath": "eliza/packages/app-core/packaging/msix/store/listing.json",
+      "summary": "listing.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 27 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "complex",
+      "id": "document:eliza/packages/app-core/packaging/PUBLISHING_GUIDE.md",
+      "type": "document",
+      "name": "PUBLISHING_GUIDE.md",
+      "filePath": "eliza/packages/app-core/packaging/PUBLISHING_GUIDE.md",
+      "summary": "PUBLISHING_GUIDE.md documents eliza/packages/app-core/packaging with 707 lines of reference material.",
+      "languageNotes": "markdown; docs; 707 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/packaging/pypi/elizaos_app/py.typed",
+      "type": "file",
+      "name": "py.typed",
+      "filePath": "eliza/packages/app-core/packaging/pypi/elizaos_app/py.typed",
+      "summary": "py.typed is a typed source file in the Milady codebase.",
+      "languageNotes": "typed; code; 1 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/packaging/pypi/pyproject.toml",
+      "type": "config",
+      "name": "pyproject.toml",
+      "filePath": "eliza/packages/app-core/packaging/pypi/pyproject.toml",
+      "summary": "pyproject.toml configures toml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "toml; config; 38 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/packaging/pypi/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/packages/app-core/packaging/pypi/README.md",
+      "summary": "README.md documents eliza/packages/app-core/packaging/pypi with 14 lines of reference material.",
+      "languageNotes": "markdown; docs; 14 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "complex",
+      "id": "config:eliza/packages/app-core/packaging/snap/snapcraft.yaml",
+      "type": "config",
+      "name": "snapcraft.yaml",
+      "filePath": "eliza/packages/app-core/packaging/snap/snapcraft.yaml",
+      "summary": "snapcraft.yaml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 561 lines"
+    },
+    {
+      "tags": [
+        "script",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/packaging/test-packaging.sh",
+      "type": "file",
+      "name": "test-packaging.sh",
+      "filePath": "eliza/packages/app-core/packaging/test-packaging.sh",
+      "summary": "test-packaging.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 309 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/packaging/test-packaging.sh:find_repo_root",
+      "type": "function",
+      "name": "find_repo_root",
+      "filePath": "eliza/packages/app-core/packaging/test-packaging.sh",
+      "summary": "find_repo_root is a function defined in eliza/packages/app-core/packaging/test-packaging.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/packaging/test-packaging.sh:green",
+      "type": "function",
+      "name": "green",
+      "filePath": "eliza/packages/app-core/packaging/test-packaging.sh",
+      "summary": "green is a function defined in eliza/packages/app-core/packaging/test-packaging.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/packaging/test-packaging.sh:red",
+      "type": "function",
+      "name": "red",
+      "filePath": "eliza/packages/app-core/packaging/test-packaging.sh",
+      "summary": "red is a function defined in eliza/packages/app-core/packaging/test-packaging.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/packaging/test-packaging.sh:yellow",
+      "type": "function",
+      "name": "yellow",
+      "filePath": "eliza/packages/app-core/packaging/test-packaging.sh",
+      "summary": "yellow is a function defined in eliza/packages/app-core/packaging/test-packaging.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/packaging/test-packaging.sh:bold",
+      "type": "function",
+      "name": "bold",
+      "filePath": "eliza/packages/app-core/packaging/test-packaging.sh",
+      "summary": "bold is a function defined in eliza/packages/app-core/packaging/test-packaging.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/packaging/test-packaging.sh:check",
+      "type": "function",
+      "name": "check",
+      "filePath": "eliza/packages/app-core/packaging/test-packaging.sh",
+      "summary": "check is a function defined in eliza/packages/app-core/packaging/test-packaging.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/packaging/test-packaging.sh:check_file",
+      "type": "function",
+      "name": "check_file",
+      "filePath": "eliza/packages/app-core/packaging/test-packaging.sh",
+      "summary": "check_file is a function defined in eliza/packages/app-core/packaging/test-packaging.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/packaging/test-packaging.sh:skip",
+      "type": "function",
+      "name": "skip",
+      "filePath": "eliza/packages/app-core/packaging/test-packaging.sh",
+      "summary": "skip is a function defined in eliza/packages/app-core/packaging/test-packaging.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/packaging/test-packaging.sh:python_has_module",
+      "type": "function",
+      "name": "python_has_module",
+      "filePath": "eliza/packages/app-core/packaging/test-packaging.sh",
+      "summary": "python_has_module is a function defined in eliza/packages/app-core/packaging/test-packaging.sh."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/patches/@noble%2Fcurves@2.0.1.patch",
+      "type": "file",
+      "name": "@noble%2Fcurves@2.0.1.patch",
+      "filePath": "eliza/packages/app-core/patches/@noble%2Fcurves@2.0.1.patch",
+      "summary": "@noble%2Fcurves@2.0.1.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 33 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/patches/@pixiv%2Fthree-vrm@3.5.2.patch",
+      "type": "file",
+      "name": "@pixiv%2Fthree-vrm@3.5.2.patch",
+      "filePath": "eliza/packages/app-core/patches/@pixiv%2Fthree-vrm@3.5.2.patch",
+      "summary": "@pixiv%2Fthree-vrm@3.5.2.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 26 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/patches/coding-agent-adapters@0.16.3.patch",
+      "type": "file",
+      "name": "coding-agent-adapters@0.16.3.patch",
+      "filePath": "eliza/packages/app-core/patches/coding-agent-adapters@0.16.3.patch",
+      "summary": "coding-agent-adapters@0.16.3.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 44 lines"
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/patches/electrobun@1.16.0.patch",
+      "type": "file",
+      "name": "electrobun@1.16.0.patch",
+      "filePath": "eliza/packages/app-core/patches/electrobun@1.16.0.patch",
+      "summary": "electrobun@1.16.0.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 13 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/patches/proper-lockfile@4.1.2.patch",
+      "type": "file",
+      "name": "proper-lockfile@4.1.2.patch",
+      "filePath": "eliza/packages/app-core/patches/proper-lockfile@4.1.2.patch",
+      "summary": "proper-lockfile@4.1.2.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 14 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/patches/pty-manager@1.11.0.patch",
+      "type": "file",
+      "name": "pty-manager@1.11.0.patch",
+      "filePath": "eliza/packages/app-core/patches/pty-manager@1.11.0.patch",
+      "summary": "pty-manager@1.11.0.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 194 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "complex",
+      "id": "config:eliza/packages/app-core/platforms/android/app/build.gradle",
+      "type": "config",
+      "name": "build.gradle",
+      "filePath": "eliza/packages/app-core/platforms/android/app/build.gradle",
+      "summary": "build.gradle configures gradle settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "gradle; config; 353 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/packaging/homebrew/elizaos-app.rb",
+      "target": "function:eliza/packages/app-core/packaging/homebrew/elizaos-app.rb:install",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/packaging/homebrew/elizaos-app.rb",
+      "target": "function:eliza/packages/app-core/packaging/homebrew/elizaos-app.rb:caveats",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/packaging/homebrew/elizaos-app.rb",
+      "target": "class:eliza/packages/app-core/packaging/homebrew/elizaos-app.rb:ElizaosApp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/packaging/test-packaging.sh",
+      "target": "function:eliza/packages/app-core/packaging/test-packaging.sh:find_repo_root",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/packaging/test-packaging.sh",
+      "target": "function:eliza/packages/app-core/packaging/test-packaging.sh:green",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/packaging/test-packaging.sh",
+      "target": "function:eliza/packages/app-core/packaging/test-packaging.sh:red",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/packaging/test-packaging.sh",
+      "target": "function:eliza/packages/app-core/packaging/test-packaging.sh:yellow",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/packaging/test-packaging.sh",
+      "target": "function:eliza/packages/app-core/packaging/test-packaging.sh:bold",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/packaging/test-packaging.sh",
+      "target": "function:eliza/packages/app-core/packaging/test-packaging.sh:check",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/packaging/test-packaging.sh",
+      "target": "function:eliza/packages/app-core/packaging/test-packaging.sh:check_file",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/packaging/test-packaging.sh",
+      "target": "function:eliza/packages/app-core/packaging/test-packaging.sh:skip",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/packaging/test-packaging.sh",
+      "target": "function:eliza/packages/app-core/packaging/test-packaging.sh:python_has_module",
+      "type": "contains"
+    }
+  ]
+}

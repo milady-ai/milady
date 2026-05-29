@@ -1,0 +1,1562 @@
+{
+  "batchIndex": 322,
+  "nodes": [
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/assets-classic/background/optimized/clouds_8x_360p.webm",
+      "type": "file",
+      "name": "clouds_8x_360p.webm",
+      "filePath": "eliza/packages/shared/assets-classic/background/optimized/clouds_8x_360p.webm",
+      "summary": "clouds_8x_360p.webm is a webm source file in the Milady codebase.",
+      "languageNotes": "webm; code; 1338 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/assets-classic/background/optimized/clouds_8x_480p.webm",
+      "type": "file",
+      "name": "clouds_8x_480p.webm",
+      "filePath": "eliza/packages/shared/assets-classic/background/optimized/clouds_8x_480p.webm",
+      "summary": "clouds_8x_480p.webm is a webm source file in the Milady codebase.",
+      "languageNotes": "webm; code; 2082 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/assets-classic/background/optimized/clouds_8x_720p.webm",
+      "type": "file",
+      "name": "clouds_8x_720p.webm",
+      "filePath": "eliza/packages/shared/assets-classic/background/optimized/clouds_8x_720p.webm",
+      "summary": "clouds_8x_720p.webm is a webm source file in the Milady codebase.",
+      "languageNotes": "webm; code; 4206 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/scripts/generate-keywords.mjs",
+      "type": "file",
+      "name": "generate-keywords.mjs",
+      "filePath": "eliza/packages/shared/scripts/generate-keywords.mjs",
+      "summary": "generate-keywords.mjs is a javascript source file in the Milady codebase. It contains 10 functions.",
+      "languageNotes": "javascript; code; 312 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/scripts/generate-keywords.mjs:loadKeywordFiles",
+      "type": "function",
+      "name": "loadKeywordFiles",
+      "filePath": "eliza/packages/shared/scripts/generate-keywords.mjs",
+      "summary": "loadKeywordFiles is a function defined in eliza/packages/shared/scripts/generate-keywords.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/scripts/generate-keywords.mjs:mergeStringArrays",
+      "type": "function",
+      "name": "mergeStringArrays",
+      "filePath": "eliza/packages/shared/scripts/generate-keywords.mjs",
+      "summary": "mergeStringArrays is a function defined in eliza/packages/shared/scripts/generate-keywords.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/scripts/generate-keywords.mjs:mergeKeywordEntry",
+      "type": "function",
+      "name": "mergeKeywordEntry",
+      "filePath": "eliza/packages/shared/scripts/generate-keywords.mjs",
+      "summary": "mergeKeywordEntry is a function defined in eliza/packages/shared/scripts/generate-keywords.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/scripts/generate-keywords.mjs:generateTypeScript",
+      "type": "function",
+      "name": "generateTypeScript",
+      "filePath": "eliza/packages/shared/scripts/generate-keywords.mjs",
+      "summary": "generateTypeScript is a function defined in eliza/packages/shared/scripts/generate-keywords.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/scripts/generate-keywords.mjs:indent",
+      "type": "function",
+      "name": "indent",
+      "filePath": "eliza/packages/shared/scripts/generate-keywords.mjs",
+      "summary": "indent is a function defined in eliza/packages/shared/scripts/generate-keywords.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/scripts/generate-keywords.mjs:termsToMultiline",
+      "type": "function",
+      "name": "termsToMultiline",
+      "filePath": "eliza/packages/shared/scripts/generate-keywords.mjs",
+      "summary": "termsToMultiline is a function defined in eliza/packages/shared/scripts/generate-keywords.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/scripts/generate-keywords.mjs:emitTreeTS",
+      "type": "function",
+      "name": "emitTreeTS",
+      "filePath": "eliza/packages/shared/scripts/generate-keywords.mjs",
+      "summary": "emitTreeTS is a function defined in eliza/packages/shared/scripts/generate-keywords.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/scripts/generate-keywords.mjs:isLeafEntry",
+      "type": "function",
+      "name": "isLeafEntry",
+      "filePath": "eliza/packages/shared/scripts/generate-keywords.mjs",
+      "summary": "isLeafEntry is a function defined in eliza/packages/shared/scripts/generate-keywords.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/scripts/generate-keywords.mjs:generateJavaScript",
+      "type": "function",
+      "name": "generateJavaScript",
+      "filePath": "eliza/packages/shared/scripts/generate-keywords.mjs",
+      "summary": "generateJavaScript is a function defined in eliza/packages/shared/scripts/generate-keywords.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/scripts/generate-keywords.mjs:generateTypeScriptStandalone",
+      "type": "function",
+      "name": "generateTypeScriptStandalone",
+      "filePath": "eliza/packages/shared/scripts/generate-keywords.mjs",
+      "summary": "generateTypeScriptStandalone is a function defined in eliza/packages/shared/scripts/generate-keywords.mjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/scripts/sync-to-public.mjs",
+      "type": "file",
+      "name": "sync-to-public.mjs",
+      "filePath": "eliza/packages/shared/scripts/sync-to-public.mjs",
+      "summary": "sync-to-public.mjs is a javascript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "javascript; code; 185 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/scripts/sync-to-public.mjs:copyDir",
+      "type": "function",
+      "name": "copyDir",
+      "filePath": "eliza/packages/shared/scripts/sync-to-public.mjs",
+      "summary": "copyDir is a function defined in eliza/packages/shared/scripts/sync-to-public.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/scripts/sync-to-public.mjs:copyDirClean",
+      "type": "function",
+      "name": "copyDirClean",
+      "filePath": "eliza/packages/shared/scripts/sync-to-public.mjs",
+      "summary": "copyDirClean is a function defined in eliza/packages/shared/scripts/sync-to-public.mjs."
+    },
+    {
+      "tags": [
+        "api"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/api/http-helpers.ts",
+      "type": "file",
+      "name": "http-helpers.ts",
+      "filePath": "eliza/packages/shared/src/api/http-helpers.ts",
+      "summary": "http-helpers.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 12 lines"
+    },
+    {
+      "tags": [
+        "api"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/api/route-helpers.ts",
+      "type": "file",
+      "name": "route-helpers.ts",
+      "filePath": "eliza/packages/shared/src/api/route-helpers.ts",
+      "summary": "route-helpers.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 7 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/src/app-hero-art.ts",
+      "type": "file",
+      "name": "app-hero-art.ts",
+      "filePath": "eliza/packages/shared/src/app-hero-art.ts",
+      "summary": "app-hero-art.ts is a typescript source file in the Milady codebase. It contains 18 functions.",
+      "languageNotes": "typescript; code; 410 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/app-hero-art.ts:hashString",
+      "type": "function",
+      "name": "hashString",
+      "filePath": "eliza/packages/shared/src/app-hero-art.ts",
+      "summary": "hashString is a function defined in eliza/packages/shared/src/app-hero-art.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/app-hero-art.ts:trimPackagePrefix",
+      "type": "function",
+      "name": "trimPackagePrefix",
+      "filePath": "eliza/packages/shared/src/app-hero-art.ts",
+      "summary": "trimPackagePrefix is a function defined in eliza/packages/shared/src/app-hero-art.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/app-hero-art.ts:getAppHeroDisplayLabel",
+      "type": "function",
+      "name": "getAppHeroDisplayLabel",
+      "filePath": "eliza/packages/shared/src/app-hero-art.ts",
+      "summary": "getAppHeroDisplayLabel is a function defined in eliza/packages/shared/src/app-hero-art.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/app-hero-art.ts:getAppHeroMonogram",
+      "type": "function",
+      "name": "getAppHeroMonogram",
+      "filePath": "eliza/packages/shared/src/app-hero-art.ts",
+      "summary": "getAppHeroMonogram is a function defined in eliza/packages/shared/src/app-hero-art.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/app-hero-art.ts:getAppHeroThemeKey",
+      "type": "function",
+      "name": "getAppHeroThemeKey",
+      "filePath": "eliza/packages/shared/src/app-hero-art.ts",
+      "summary": "getAppHeroThemeKey is a function defined in eliza/packages/shared/src/app-hero-art.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/app-hero-art.ts:getHeroPalette",
+      "type": "function",
+      "name": "getHeroPalette",
+      "filePath": "eliza/packages/shared/src/app-hero-art.ts",
+      "summary": "getHeroPalette is a function defined in eliza/packages/shared/src/app-hero-art.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/app-hero-art.ts:getSeededOffset",
+      "type": "function",
+      "name": "getSeededOffset",
+      "filePath": "eliza/packages/shared/src/app-hero-art.ts",
+      "summary": "getSeededOffset is a function defined in eliza/packages/shared/src/app-hero-art.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/app-hero-art.ts:escapeXmlText",
+      "type": "function",
+      "name": "escapeXmlText",
+      "filePath": "eliza/packages/shared/src/app-hero-art.ts",
+      "summary": "escapeXmlText is a function defined in eliza/packages/shared/src/app-hero-art.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/app-hero-art.ts:renderPlayMotif",
+      "type": "function",
+      "name": "renderPlayMotif",
+      "filePath": "eliza/packages/shared/src/app-hero-art.ts",
+      "summary": "renderPlayMotif is a function defined in eliza/packages/shared/src/app-hero-art.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/app-hero-art.ts:renderChatMotif",
+      "type": "function",
+      "name": "renderChatMotif",
+      "filePath": "eliza/packages/shared/src/app-hero-art.ts",
+      "summary": "renderChatMotif is a function defined in eliza/packages/shared/src/app-hero-art.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/app-hero-art.ts:renderMoneyMotif",
+      "type": "function",
+      "name": "renderMoneyMotif",
+      "filePath": "eliza/packages/shared/src/app-hero-art.ts",
+      "summary": "renderMoneyMotif is a function defined in eliza/packages/shared/src/app-hero-art.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/app-hero-art.ts:renderToolsMotif",
+      "type": "function",
+      "name": "renderToolsMotif",
+      "filePath": "eliza/packages/shared/src/app-hero-art.ts",
+      "summary": "renderToolsMotif is a function defined in eliza/packages/shared/src/app-hero-art.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/app-hero-art.ts:renderWorldMotif",
+      "type": "function",
+      "name": "renderWorldMotif",
+      "filePath": "eliza/packages/shared/src/app-hero-art.ts",
+      "summary": "renderWorldMotif is a function defined in eliza/packages/shared/src/app-hero-art.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/app-hero-art.ts:renderOpsMotif",
+      "type": "function",
+      "name": "renderOpsMotif",
+      "filePath": "eliza/packages/shared/src/app-hero-art.ts",
+      "summary": "renderOpsMotif is a function defined in eliza/packages/shared/src/app-hero-art.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/app-hero-art.ts:renderDefaultMotif",
+      "type": "function",
+      "name": "renderDefaultMotif",
+      "filePath": "eliza/packages/shared/src/app-hero-art.ts",
+      "summary": "renderDefaultMotif is a function defined in eliza/packages/shared/src/app-hero-art.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/app-hero-art.ts:renderThemeMotif",
+      "type": "function",
+      "name": "renderThemeMotif",
+      "filePath": "eliza/packages/shared/src/app-hero-art.ts",
+      "summary": "renderThemeMotif is a function defined in eliza/packages/shared/src/app-hero-art.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/app-hero-art.ts:createGeneratedAppHeroSvg",
+      "type": "function",
+      "name": "createGeneratedAppHeroSvg",
+      "filePath": "eliza/packages/shared/src/app-hero-art.ts",
+      "summary": "createGeneratedAppHeroSvg is a function defined in eliza/packages/shared/src/app-hero-art.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/app-hero-art.ts:createGeneratedAppHeroDataUrl",
+      "type": "function",
+      "name": "createGeneratedAppHeroDataUrl",
+      "filePath": "eliza/packages/shared/src/app-hero-art.ts",
+      "summary": "createGeneratedAppHeroDataUrl is a function defined in eliza/packages/shared/src/app-hero-art.ts."
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/awareness/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/shared/src/awareness/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "frontend"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/brand-classic/brand.css",
+      "type": "file",
+      "name": "brand.css",
+      "filePath": "eliza/packages/shared/src/brand-classic/brand.css",
+      "summary": "brand.css is a css source file in the Milady codebase.",
+      "languageNotes": "css; markup; 7 lines"
+    },
+    {
+      "tags": [
+        "entry-point",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/brand-classic/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/shared/src/brand-classic/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 97 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/brand-classic/index.ts:brandAssetPath",
+      "type": "function",
+      "name": "brandAssetPath",
+      "filePath": "eliza/packages/shared/src/brand-classic/index.ts",
+      "summary": "brandAssetPath is a function defined in eliza/packages/shared/src/brand-classic/index.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/brand-public/background/clouds-poster-480p.webp",
+      "type": "file",
+      "name": "clouds-poster-480p.webp",
+      "filePath": "eliza/packages/shared/src/brand-public/background/clouds-poster-480p.webp",
+      "summary": "clouds-poster-480p.webp is a webp source file in the Milady codebase.",
+      "languageNotes": "webp; code; 76 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/brand-public/background/clouds-poster-720p.webp",
+      "type": "file",
+      "name": "clouds-poster-720p.webp",
+      "filePath": "eliza/packages/shared/src/brand-public/background/clouds-poster-720p.webp",
+      "summary": "clouds-poster-720p.webp is a webp source file in the Milady codebase.",
+      "languageNotes": "webp; code; 153 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/src/brand-public/background/clouds-slow-4x-480p.webm",
+      "type": "file",
+      "name": "clouds-slow-4x-480p.webm",
+      "filePath": "eliza/packages/shared/src/brand-public/background/clouds-slow-4x-480p.webm",
+      "summary": "clouds-slow-4x-480p.webm is a webm source file in the Milady codebase.",
+      "languageNotes": "webm; code; 1447 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/src/brand-public/background/clouds-slow-4x-720p.webm",
+      "type": "file",
+      "name": "clouds-slow-4x-720p.webm",
+      "filePath": "eliza/packages/shared/src/brand-public/background/clouds-slow-4x-720p.webm",
+      "summary": "clouds-slow-4x-720p.webm is a webm source file in the Milady codebase.",
+      "languageNotes": "webm; code; 2910 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/src/brand-public/background/clouds-slow-8x-480p.webm",
+      "type": "file",
+      "name": "clouds-slow-8x-480p.webm",
+      "filePath": "eliza/packages/shared/src/brand-public/background/clouds-slow-8x-480p.webm",
+      "summary": "clouds-slow-8x-480p.webm is a webm source file in the Milady codebase.",
+      "languageNotes": "webm; code; 2082 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/src/brand-public/background/clouds-slow-8x-720p.webm",
+      "type": "file",
+      "name": "clouds-slow-8x-720p.webm",
+      "filePath": "eliza/packages/shared/src/brand-public/background/clouds-slow-8x-720p.webm",
+      "summary": "clouds-slow-8x-720p.webm is a webm source file in the Milady codebase.",
+      "languageNotes": "webm; code; 4206 lines"
+    },
+    {
+      "tags": [
+        "frontend"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/brand/brand.css",
+      "type": "file",
+      "name": "brand.css",
+      "filePath": "eliza/packages/shared/src/brand/brand.css",
+      "summary": "brand.css is a css source file in the Milady codebase.",
+      "languageNotes": "css; markup; 8 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/src/character-presets.characters.ts",
+      "type": "file",
+      "name": "character-presets.characters.ts",
+      "filePath": "eliza/packages/shared/src/character-presets.characters.ts",
+      "summary": "character-presets.characters.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 2651 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/character-presets.shared.ts",
+      "type": "file",
+      "name": "character-presets.shared.ts",
+      "filePath": "eliza/packages/shared/src/character-presets.shared.ts",
+      "summary": "character-presets.shared.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 7 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/src/character-presets.ts",
+      "type": "file",
+      "name": "character-presets.ts",
+      "filePath": "eliza/packages/shared/src/character-presets.ts",
+      "summary": "character-presets.ts is a typescript source file in the Milady codebase. It contains 11 functions, 3 imports.",
+      "languageNotes": "typescript; code; 268 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/character-presets.ts:addLanguageRule",
+      "type": "function",
+      "name": "addLanguageRule",
+      "filePath": "eliza/packages/shared/src/character-presets.ts",
+      "summary": "addLanguageRule is a function defined in eliza/packages/shared/src/character-presets.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/character-presets.ts:normalizeCharacterLanguage",
+      "type": "function",
+      "name": "normalizeCharacterLanguage",
+      "filePath": "eliza/packages/shared/src/character-presets.ts",
+      "summary": "normalizeCharacterLanguage is a function defined in eliza/packages/shared/src/character-presets.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/character-presets.ts:mergeSharedStyleRules",
+      "type": "function",
+      "name": "mergeSharedStyleRules",
+      "filePath": "eliza/packages/shared/src/character-presets.ts",
+      "summary": "mergeSharedStyleRules is a function defined in eliza/packages/shared/src/character-presets.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/character-presets.ts:resolveCharacterVariant",
+      "type": "function",
+      "name": "resolveCharacterVariant",
+      "filePath": "eliza/packages/shared/src/character-presets.ts",
+      "summary": "resolveCharacterVariant is a function defined in eliza/packages/shared/src/character-presets.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/character-presets.ts:getStylePresets",
+      "type": "function",
+      "name": "getStylePresets",
+      "filePath": "eliza/packages/shared/src/character-presets.ts",
+      "summary": "getStylePresets is a function defined in eliza/packages/shared/src/character-presets.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/character-presets.ts:getDefaultStylePreset",
+      "type": "function",
+      "name": "getDefaultStylePreset",
+      "filePath": "eliza/packages/shared/src/character-presets.ts",
+      "summary": "getDefaultStylePreset is a function defined in eliza/packages/shared/src/character-presets.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/character-presets.ts:resolveStylePresetById",
+      "type": "function",
+      "name": "resolveStylePresetById",
+      "filePath": "eliza/packages/shared/src/character-presets.ts",
+      "summary": "resolveStylePresetById is a function defined in eliza/packages/shared/src/character-presets.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/character-presets.ts:resolveStylePresetByName",
+      "type": "function",
+      "name": "resolveStylePresetByName",
+      "filePath": "eliza/packages/shared/src/character-presets.ts",
+      "summary": "resolveStylePresetByName is a function defined in eliza/packages/shared/src/character-presets.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/character-presets.ts:resolveStylePresetByAvatarIndex",
+      "type": "function",
+      "name": "resolveStylePresetByAvatarIndex",
+      "filePath": "eliza/packages/shared/src/character-presets.ts",
+      "summary": "resolveStylePresetByAvatarIndex is a function defined in eliza/packages/shared/src/character-presets.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/character-presets.ts:getPresetNameMap",
+      "type": "function",
+      "name": "getPresetNameMap",
+      "filePath": "eliza/packages/shared/src/character-presets.ts",
+      "summary": "getPresetNameMap is a function defined in eliza/packages/shared/src/character-presets.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/character-presets.ts:buildElizaCharacterCatalog",
+      "type": "function",
+      "name": "buildElizaCharacterCatalog",
+      "filePath": "eliza/packages/shared/src/character-presets.ts",
+      "summary": "buildElizaCharacterCatalog is a function defined in eliza/packages/shared/src/character-presets.ts."
+    },
+    {
+      "tags": [
+        "entry-point",
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/checkout/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/shared/src/checkout/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase. It contains 2 functions, 1 class.",
+      "languageNotes": "typescript; code; 98 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/checkout/index.ts:createStripeCheckoutSession",
+      "type": "function",
+      "name": "createStripeCheckoutSession",
+      "filePath": "eliza/packages/shared/src/checkout/index.ts",
+      "summary": "createStripeCheckoutSession is a function defined in eliza/packages/shared/src/checkout/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/checkout/index.ts:startStripeCheckout",
+      "type": "function",
+      "name": "startStripeCheckout",
+      "filePath": "eliza/packages/shared/src/checkout/index.ts",
+      "summary": "startStripeCheckout is a function defined in eliza/packages/shared/src/checkout/index.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/shared/src/checkout/index.ts:StripeCheckoutError",
+      "type": "class",
+      "name": "StripeCheckoutError",
+      "filePath": "eliza/packages/shared/src/checkout/index.ts",
+      "summary": "StripeCheckoutError is a class or type declared in eliza/packages/shared/src/checkout/index.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/cli/parse-duration.ts",
+      "type": "file",
+      "name": "parse-duration.ts",
+      "filePath": "eliza/packages/shared/src/cli/parse-duration.ts",
+      "summary": "parse-duration.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 41 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/cli/parse-duration.ts:parseDurationMs",
+      "type": "function",
+      "name": "parseDurationMs",
+      "filePath": "eliza/packages/shared/src/cli/parse-duration.ts",
+      "summary": "parseDurationMs is a function defined in eliza/packages/shared/src/cli/parse-duration.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/config/__tests__/cloud-only.test.ts",
+      "type": "file",
+      "name": "cloud-only.test.ts",
+      "filePath": "eliza/packages/shared/src/config/__tests__/cloud-only.test.ts",
+      "summary": "cloud-only.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 52 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/config/__tests__/distribution-profile.test.ts",
+      "type": "file",
+      "name": "distribution-profile.test.ts",
+      "filePath": "eliza/packages/shared/src/config/__tests__/distribution-profile.test.ts",
+      "summary": "distribution-profile.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 50 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/scripts/generate-keywords.mjs",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:loadKeywordFiles",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/scripts/generate-keywords.mjs",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:mergeStringArrays",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/scripts/generate-keywords.mjs",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:mergeKeywordEntry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/scripts/generate-keywords.mjs",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:generateTypeScript",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/scripts/generate-keywords.mjs",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:indent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/scripts/generate-keywords.mjs",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:termsToMultiline",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/scripts/generate-keywords.mjs",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:emitTreeTS",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/scripts/generate-keywords.mjs",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:isLeafEntry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/scripts/generate-keywords.mjs",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:generateJavaScript",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/scripts/generate-keywords.mjs",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:generateTypeScriptStandalone",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/scripts/generate-keywords.mjs:loadKeywordFiles",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:mergeKeywordEntry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/scripts/generate-keywords.mjs:mergeKeywordEntry",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:mergeStringArrays",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/scripts/generate-keywords.mjs:generateTypeScript",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:emitTreeTS",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/scripts/generate-keywords.mjs:emitTreeTS",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:isLeafEntry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/scripts/generate-keywords.mjs:emitTreeTS",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:indent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/scripts/generate-keywords.mjs:emitTreeTS",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:indent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/scripts/generate-keywords.mjs:emitTreeTS",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:termsToMultiline",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/scripts/generate-keywords.mjs:emitTreeTS",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:indent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/scripts/generate-keywords.mjs:emitTreeTS",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:indent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/scripts/generate-keywords.mjs:emitTreeTS",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:termsToMultiline",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/scripts/generate-keywords.mjs:emitTreeTS",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:indent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/scripts/generate-keywords.mjs:emitTreeTS",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:indent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/scripts/generate-keywords.mjs:emitTreeTS",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:indent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/scripts/generate-keywords.mjs:emitTreeTS",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:indent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/scripts/generate-keywords.mjs:generateJavaScript",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:emitTreeTS",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/scripts/generate-keywords.mjs:generateTypeScriptStandalone",
+      "target": "function:eliza/packages/shared/scripts/generate-keywords.mjs:emitTreeTS",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/scripts/sync-to-public.mjs",
+      "target": "function:eliza/packages/shared/scripts/sync-to-public.mjs:copyDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/scripts/sync-to-public.mjs",
+      "target": "function:eliza/packages/shared/scripts/sync-to-public.mjs:copyDirClean",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/app-hero-art.ts",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:hashString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/app-hero-art.ts",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:trimPackagePrefix",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/app-hero-art.ts",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:getAppHeroDisplayLabel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/app-hero-art.ts",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:getAppHeroMonogram",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/app-hero-art.ts",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:getAppHeroThemeKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/app-hero-art.ts",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:getHeroPalette",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/app-hero-art.ts",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:getSeededOffset",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/app-hero-art.ts",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:escapeXmlText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/app-hero-art.ts",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:renderPlayMotif",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/app-hero-art.ts",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:renderChatMotif",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/app-hero-art.ts",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:renderMoneyMotif",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/app-hero-art.ts",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:renderToolsMotif",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/app-hero-art.ts",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:renderWorldMotif",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/app-hero-art.ts",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:renderOpsMotif",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/app-hero-art.ts",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:renderDefaultMotif",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/app-hero-art.ts",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:renderThemeMotif",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/app-hero-art.ts",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:createGeneratedAppHeroSvg",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/app-hero-art.ts",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:createGeneratedAppHeroDataUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:getAppHeroDisplayLabel",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:trimPackagePrefix",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:getAppHeroMonogram",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:trimPackagePrefix",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:getHeroPalette",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:hashString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:renderPlayMotif",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:getSeededOffset",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:renderPlayMotif",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:getSeededOffset",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:renderChatMotif",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:getSeededOffset",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:renderMoneyMotif",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:getSeededOffset",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:renderToolsMotif",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:getSeededOffset",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:renderWorldMotif",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:getSeededOffset",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:renderOpsMotif",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:getSeededOffset",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:renderDefaultMotif",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:getSeededOffset",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:renderThemeMotif",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:renderPlayMotif",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:renderThemeMotif",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:renderChatMotif",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:renderThemeMotif",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:renderMoneyMotif",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:renderThemeMotif",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:renderToolsMotif",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:renderThemeMotif",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:renderWorldMotif",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:renderThemeMotif",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:renderOpsMotif",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:renderThemeMotif",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:renderDefaultMotif",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:createGeneratedAppHeroSvg",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:getHeroPalette",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:createGeneratedAppHeroSvg",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:getAppHeroThemeKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:createGeneratedAppHeroSvg",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:hashString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:createGeneratedAppHeroSvg",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:renderThemeMotif",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:createGeneratedAppHeroSvg",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:escapeXmlText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:createGeneratedAppHeroSvg",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:getAppHeroDisplayLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/app-hero-art.ts:createGeneratedAppHeroDataUrl",
+      "target": "function:eliza/packages/shared/src/app-hero-art.ts:createGeneratedAppHeroSvg",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/brand-classic/index.ts",
+      "target": "function:eliza/packages/shared/src/brand-classic/index.ts:brandAssetPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/character-presets.ts",
+      "target": "function:eliza/packages/shared/src/character-presets.ts:addLanguageRule",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/character-presets.ts",
+      "target": "function:eliza/packages/shared/src/character-presets.ts:normalizeCharacterLanguage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/character-presets.ts",
+      "target": "function:eliza/packages/shared/src/character-presets.ts:mergeSharedStyleRules",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/character-presets.ts",
+      "target": "function:eliza/packages/shared/src/character-presets.ts:resolveCharacterVariant",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/character-presets.ts",
+      "target": "function:eliza/packages/shared/src/character-presets.ts:getStylePresets",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/character-presets.ts",
+      "target": "function:eliza/packages/shared/src/character-presets.ts:getDefaultStylePreset",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/character-presets.ts",
+      "target": "function:eliza/packages/shared/src/character-presets.ts:resolveStylePresetById",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/character-presets.ts",
+      "target": "function:eliza/packages/shared/src/character-presets.ts:resolveStylePresetByName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/character-presets.ts",
+      "target": "function:eliza/packages/shared/src/character-presets.ts:resolveStylePresetByAvatarIndex",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/character-presets.ts",
+      "target": "function:eliza/packages/shared/src/character-presets.ts:getPresetNameMap",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/character-presets.ts",
+      "target": "function:eliza/packages/shared/src/character-presets.ts:buildElizaCharacterCatalog",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/character-presets.ts:resolveCharacterVariant",
+      "target": "function:eliza/packages/shared/src/character-presets.ts:addLanguageRule",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/character-presets.ts:resolveCharacterVariant",
+      "target": "function:eliza/packages/shared/src/character-presets.ts:mergeSharedStyleRules",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/character-presets.ts:getStylePresets",
+      "target": "function:eliza/packages/shared/src/character-presets.ts:normalizeCharacterLanguage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/character-presets.ts:getDefaultStylePreset",
+      "target": "function:eliza/packages/shared/src/character-presets.ts:getStylePresets",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/character-presets.ts:resolveStylePresetById",
+      "target": "function:eliza/packages/shared/src/character-presets.ts:normalizeCharacterLanguage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/character-presets.ts:resolveStylePresetById",
+      "target": "function:eliza/packages/shared/src/character-presets.ts:resolveCharacterVariant",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/character-presets.ts:resolveStylePresetByName",
+      "target": "function:eliza/packages/shared/src/character-presets.ts:normalizeCharacterLanguage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/character-presets.ts:resolveStylePresetByName",
+      "target": "function:eliza/packages/shared/src/character-presets.ts:resolveCharacterVariant",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/character-presets.ts:resolveStylePresetByAvatarIndex",
+      "target": "function:eliza/packages/shared/src/character-presets.ts:normalizeCharacterLanguage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/character-presets.ts:resolveStylePresetByAvatarIndex",
+      "target": "function:eliza/packages/shared/src/character-presets.ts:resolveCharacterVariant",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/character-presets.ts:getPresetNameMap",
+      "target": "function:eliza/packages/shared/src/character-presets.ts:getStylePresets",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/checkout/index.ts",
+      "target": "function:eliza/packages/shared/src/checkout/index.ts:createStripeCheckoutSession",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/checkout/index.ts",
+      "target": "function:eliza/packages/shared/src/checkout/index.ts:startStripeCheckout",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/checkout/index.ts",
+      "target": "class:eliza/packages/shared/src/checkout/index.ts:StripeCheckoutError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/checkout/index.ts:startStripeCheckout",
+      "target": "function:eliza/packages/shared/src/checkout/index.ts:createStripeCheckoutSession",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/cli/parse-duration.ts",
+      "target": "function:eliza/packages/shared/src/cli/parse-duration.ts:parseDurationMs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/shared/src/config/__tests__/distribution-profile.test.ts",
+      "target": "file:eliza/packages/shared/src/config/distribution-profile.ts",
+      "type": "imports"
+    }
+  ]
+}

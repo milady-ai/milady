@@ -1,0 +1,45 @@
+{
+  "batchIndex": 221,
+  "nodes": [
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.github/ISSUE_TEMPLATE/bug_report.md",
+      "type": "document",
+      "name": "bug_report.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.github/ISSUE_TEMPLATE/bug_report.md",
+      "summary": "bug_report.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.github/ISSUE_TEMPLATE with 21 lines of reference material.",
+      "languageNotes": "markdown; docs; 21 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.github/ISSUE_TEMPLATE/config.yml",
+      "type": "config",
+      "name": "config.yml",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.github/ISSUE_TEMPLATE/config.yml",
+      "summary": "config.yml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 4 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.github/ISSUE_TEMPLATE/feature_request.md",
+      "type": "document",
+      "name": "feature_request.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.github/ISSUE_TEMPLATE/feature_request.md",
+      "summary": "feature_request.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.github/ISSUE_TEMPLATE with 14 lines of reference material.",
+      "languageNotes": "markdown; docs; 14 lines"
+    }
+  ],
+  "edges": []
+}

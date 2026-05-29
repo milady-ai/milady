@@ -1,0 +1,2374 @@
+{
+  "batchIndex": 325,
+  "nodes": [
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/contracts/cloud-topology.ts",
+      "type": "file",
+      "name": "cloud-topology.ts",
+      "filePath": "eliza/packages/shared/src/contracts/cloud-topology.ts",
+      "summary": "cloud-topology.ts is a typescript source file in the Milady codebase. It contains 7 functions, 1 imports.",
+      "languageNotes": "typescript; code; 126 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/cloud-topology.ts:asConfigRecord",
+      "type": "function",
+      "name": "asConfigRecord",
+      "filePath": "eliza/packages/shared/src/contracts/cloud-topology.ts",
+      "summary": "asConfigRecord is a function defined in eliza/packages/shared/src/contracts/cloud-topology.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/cloud-topology.ts:_readConfigString",
+      "type": "function",
+      "name": "_readConfigString",
+      "filePath": "eliza/packages/shared/src/contracts/cloud-topology.ts",
+      "summary": "_readConfigString is a function defined in eliza/packages/shared/src/contracts/cloud-topology.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/cloud-topology.ts:normalizeSecretString",
+      "type": "function",
+      "name": "normalizeSecretString",
+      "filePath": "eliza/packages/shared/src/contracts/cloud-topology.ts",
+      "summary": "normalizeSecretString is a function defined in eliza/packages/shared/src/contracts/cloud-topology.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/cloud-topology.ts:isElizaCloudLinkedInConfig",
+      "type": "function",
+      "name": "isElizaCloudLinkedInConfig",
+      "filePath": "eliza/packages/shared/src/contracts/cloud-topology.ts",
+      "summary": "isElizaCloudLinkedInConfig is a function defined in eliza/packages/shared/src/contracts/cloud-topology.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/cloud-topology.ts:resolveElizaCloudTopology",
+      "type": "function",
+      "name": "resolveElizaCloudTopology",
+      "filePath": "eliza/packages/shared/src/contracts/cloud-topology.ts",
+      "summary": "resolveElizaCloudTopology is a function defined in eliza/packages/shared/src/contracts/cloud-topology.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/cloud-topology.ts:isElizaCloudServiceSelectedInConfig",
+      "type": "function",
+      "name": "isElizaCloudServiceSelectedInConfig",
+      "filePath": "eliza/packages/shared/src/contracts/cloud-topology.ts",
+      "summary": "isElizaCloudServiceSelectedInConfig is a function defined in eliza/packages/shared/src/contracts/cloud-topology.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/cloud-topology.ts:shouldLoadElizaCloudPluginInConfig",
+      "type": "function",
+      "name": "shouldLoadElizaCloudPluginInConfig",
+      "filePath": "eliza/packages/shared/src/contracts/cloud-topology.ts",
+      "summary": "shouldLoadElizaCloudPluginInConfig is a function defined in eliza/packages/shared/src/contracts/cloud-topology.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/contracts/config.ts",
+      "type": "file",
+      "name": "config.ts",
+      "filePath": "eliza/packages/shared/src/contracts/config.ts",
+      "summary": "config.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 242 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/contracts/connector-routes.test.ts",
+      "type": "file",
+      "name": "connector-routes.test.ts",
+      "filePath": "eliza/packages/shared/src/contracts/connector-routes.test.ts",
+      "summary": "connector-routes.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 118 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/contracts/connector-routes.ts",
+      "type": "file",
+      "name": "connector-routes.ts",
+      "filePath": "eliza/packages/shared/src/contracts/connector-routes.ts",
+      "summary": "connector-routes.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 63 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/src/contracts/content-pack.ts",
+      "type": "file",
+      "name": "content-pack.ts",
+      "filePath": "eliza/packages/shared/src/contracts/content-pack.ts",
+      "summary": "content-pack.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 248 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/shared/src/contracts/content-pack.ts:validateContentPackManifest",
+      "type": "function",
+      "name": "validateContentPackManifest",
+      "filePath": "eliza/packages/shared/src/contracts/content-pack.ts",
+      "summary": "validateContentPackManifest is a function defined in eliza/packages/shared/src/contracts/content-pack.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/contracts/conversation-routes.test.ts",
+      "type": "file",
+      "name": "conversation-routes.test.ts",
+      "filePath": "eliza/packages/shared/src/contracts/conversation-routes.test.ts",
+      "summary": "conversation-routes.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 135 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/contracts/conversation-routes.ts",
+      "type": "file",
+      "name": "conversation-routes.ts",
+      "filePath": "eliza/packages/shared/src/contracts/conversation-routes.ts",
+      "summary": "conversation-routes.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 138 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/contracts/diagnostics-routes.test.ts",
+      "type": "file",
+      "name": "diagnostics-routes.test.ts",
+      "filePath": "eliza/packages/shared/src/contracts/diagnostics-routes.test.ts",
+      "summary": "diagnostics-routes.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 50 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/contracts/diagnostics-routes.ts",
+      "type": "file",
+      "name": "diagnostics-routes.ts",
+      "filePath": "eliza/packages/shared/src/contracts/diagnostics-routes.ts",
+      "summary": "diagnostics-routes.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 31 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/contracts/drop.ts",
+      "type": "file",
+      "name": "drop.ts",
+      "filePath": "eliza/packages/shared/src/contracts/drop.ts",
+      "summary": "drop.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 21 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/contracts/feature-result.ts",
+      "type": "file",
+      "name": "feature-result.ts",
+      "filePath": "eliza/packages/shared/src/contracts/feature-result.ts",
+      "summary": "feature-result.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 18 lines"
+    },
+    {
+      "tags": [
+        "first-run",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "type": "file",
+      "name": "first-run-options.ts",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "first-run-options.ts is a typescript source file in the Milady codebase. It contains 47 functions, 3 imports.",
+      "languageNotes": "typescript; code; 1783 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:pickFirstRunCloudModelPreferences",
+      "type": "function",
+      "name": "pickFirstRunCloudModelPreferences",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "pickFirstRunCloudModelPreferences is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "type": "function",
+      "name": "readFirstRunCloudModelPreferences",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "readFirstRunCloudModelPreferences is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:isSubscriptionProviderSelectionId",
+      "type": "function",
+      "name": "isSubscriptionProviderSelectionId",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "isSubscriptionProviderSelectionId is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeSubscriptionProviderSelectionId",
+      "type": "function",
+      "name": "normalizeSubscriptionProviderSelectionId",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "normalizeSubscriptionProviderSelectionId is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getStoredSubscriptionProvider",
+      "type": "function",
+      "name": "getStoredSubscriptionProvider",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "getStoredSubscriptionProvider is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getSubscriptionProviderFamily",
+      "type": "function",
+      "name": "getSubscriptionProviderFamily",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "getSubscriptionProviderFamily is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:requiresAdditionalRuntimeProvider",
+      "type": "function",
+      "name": "requiresAdditionalRuntimeProvider",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "requiresAdditionalRuntimeProvider is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "function",
+      "name": "normalizeFirstRunProviderId",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "normalizeFirstRunProviderId is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getFirstRunProviderOption",
+      "type": "function",
+      "name": "getFirstRunProviderOption",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "getFirstRunProviderOption is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getFirstRunProviderFamily",
+      "type": "function",
+      "name": "getFirstRunProviderFamily",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "getFirstRunProviderFamily is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getStoredFirstRunProviderId",
+      "type": "function",
+      "name": "getStoredFirstRunProviderId",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "getStoredFirstRunProviderId is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getDirectAccountProviderForFirstRunProvider",
+      "type": "function",
+      "name": "getDirectAccountProviderForFirstRunProvider",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "getDirectAccountProviderForFirstRunProvider is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:sortFirstRunProviders",
+      "type": "function",
+      "name": "sortFirstRunProviders",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "sortFirstRunProviders is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:isCloudManagedConnection",
+      "type": "function",
+      "name": "isCloudManagedConnection",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "isCloudManagedConnection is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:isRemoteProviderConnection",
+      "type": "function",
+      "name": "isRemoteProviderConnection",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "isRemoteProviderConnection is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:isLocalProviderConnection",
+      "type": "function",
+      "name": "isLocalProviderConnection",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "isLocalProviderConnection is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:isFirstRunConnectionComplete",
+      "type": "function",
+      "name": "isFirstRunConnectionComplete",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "isFirstRunConnectionComplete is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "function",
+      "name": "asConfigRecord",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "asConfigRecord is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "function",
+      "name": "readConfigString",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "readConfigString is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "function",
+      "name": "normalizeSecretString",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "normalizeSecretString is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunEnvContainer",
+      "type": "function",
+      "name": "readFirstRunEnvContainer",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "readFirstRunEnvContainer is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunEnvString",
+      "type": "function",
+      "name": "readFirstRunEnvString",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "readFirstRunEnvString is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunEnvSecret",
+      "type": "function",
+      "name": "readFirstRunEnvSecret",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "readFirstRunEnvSecret is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getFirstRunProviderSignalEnvKeys",
+      "type": "function",
+      "name": "getFirstRunProviderSignalEnvKeys",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "getFirstRunProviderSignalEnvKeys is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunProviderApiKey",
+      "type": "function",
+      "name": "readFirstRunProviderApiKey",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "readFirstRunProviderApiKey is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readPrimaryModelFromConfig",
+      "type": "function",
+      "name": "readPrimaryModelFromConfig",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "readPrimaryModelFromConfig is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:hasExplicitCanonicalRuntimeConfig",
+      "type": "function",
+      "name": "hasExplicitCanonicalRuntimeConfig",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "hasExplicitCanonicalRuntimeConfig is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:buildElizaCloudTextRoute",
+      "type": "function",
+      "name": "buildElizaCloudTextRoute",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "buildElizaCloudTextRoute is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyDeploymentTargetInConfig",
+      "type": "function",
+      "name": "resolveLegacyDeploymentTargetInConfig",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "resolveLegacyDeploymentTargetInConfig is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "type": "function",
+      "name": "resolveLegacyServiceRoutingInConfig",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "resolveLegacyServiceRoutingInConfig is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:pruneLegacyCloudRoutingFields",
+      "type": "function",
+      "name": "pruneLegacyCloudRoutingFields",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "pruneLegacyCloudRoutingFields is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:migrateLegacyRuntimeConfig",
+      "type": "function",
+      "name": "migrateLegacyRuntimeConfig",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "migrateLegacyRuntimeConfig is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLinkedAccountsInConfig",
+      "type": "function",
+      "name": "resolveLinkedAccountsInConfig",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "resolveLinkedAccountsInConfig is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveDeploymentTargetInConfig",
+      "type": "function",
+      "name": "resolveDeploymentTargetInConfig",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "resolveDeploymentTargetInConfig is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveServiceRoutingInConfig",
+      "type": "function",
+      "name": "resolveServiceRoutingInConfig",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "resolveServiceRoutingInConfig is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:deriveFirstRunConnectionFromRuntimeConfig",
+      "type": "function",
+      "name": "deriveFirstRunConnectionFromRuntimeConfig",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "deriveFirstRunConnectionFromRuntimeConfig is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveConfiguredLocalProviderFromSignals",
+      "type": "function",
+      "name": "resolveConfiguredLocalProviderFromSignals",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "resolveConfiguredLocalProviderFromSignals is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "type": "function",
+      "name": "normalizePersistedFirstRunConnection",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "normalizePersistedFirstRunConnection is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeFirstRunCredentialInputs",
+      "type": "function",
+      "name": "normalizeFirstRunCredentialInputs",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "normalizeFirstRunCredentialInputs is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:deriveFirstRunCredentialPersistencePlan",
+      "type": "function",
+      "name": "deriveFirstRunCredentialPersistencePlan",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "deriveFirstRunCredentialPersistencePlan is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:stripFirstRunConnectionSecrets",
+      "type": "function",
+      "name": "stripFirstRunConnectionSecrets",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "stripFirstRunConnectionSecrets is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "type": "function",
+      "name": "inferCompatibilityFirstRunConnection",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "inferCompatibilityFirstRunConnection is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferFirstRunConnectionFromConfig",
+      "type": "function",
+      "name": "inferFirstRunConnectionFromConfig",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "inferFirstRunConnectionFromConfig is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "type": "function",
+      "name": "inferLegacyCloudInferenceSelection",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "inferLegacyCloudInferenceSelection is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:isCloudInferenceSelectedInConfig",
+      "type": "function",
+      "name": "isCloudInferenceSelectedInConfig",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "isCloudInferenceSelectedInConfig is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:registerProviderOption",
+      "type": "function",
+      "name": "registerProviderOption",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "registerProviderOption is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getProviderOptions",
+      "type": "function",
+      "name": "getProviderOptions",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+      "summary": "getProviderOptions is a function defined in eliza/packages/shared/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "first-run"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/contracts/first-run-routes.test.ts",
+      "type": "file",
+      "name": "first-run-routes.test.ts",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-routes.test.ts",
+      "summary": "first-run-routes.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 146 lines"
+    },
+    {
+      "tags": [
+        "first-run"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/contracts/first-run-routes.ts",
+      "type": "file",
+      "name": "first-run-routes.ts",
+      "filePath": "eliza/packages/shared/src/contracts/first-run-routes.ts",
+      "summary": "first-run-routes.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 129 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/contracts/health.ts",
+      "type": "file",
+      "name": "health.ts",
+      "filePath": "eliza/packages/shared/src/contracts/health.ts",
+      "summary": "health.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 103 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/contracts/inbox-routes.test.ts",
+      "type": "file",
+      "name": "inbox-routes.test.ts",
+      "filePath": "eliza/packages/shared/src/contracts/inbox-routes.test.ts",
+      "summary": "inbox-routes.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 142 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/contracts/inbox-routes.ts",
+      "type": "file",
+      "name": "inbox-routes.ts",
+      "filePath": "eliza/packages/shared/src/contracts/inbox-routes.ts",
+      "summary": "inbox-routes.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 49 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/contracts/inbox.ts",
+      "type": "file",
+      "name": "inbox.ts",
+      "filePath": "eliza/packages/shared/src/contracts/inbox.ts",
+      "summary": "inbox.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 27 lines"
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/contracts/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/shared/src/contracts/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 41 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/contracts/lifeops-connector-degradation.ts",
+      "type": "file",
+      "name": "lifeops-connector-degradation.ts",
+      "filePath": "eliza/packages/shared/src/contracts/lifeops-connector-degradation.ts",
+      "summary": "lifeops-connector-degradation.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 23 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/src/contracts/lifeops.ts",
+      "type": "file",
+      "name": "lifeops.ts",
+      "filePath": "eliza/packages/shared/src/contracts/lifeops.ts",
+      "summary": "lifeops.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 4311 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/lifeops.ts:capabilitiesForSide",
+      "type": "function",
+      "name": "capabilitiesForSide",
+      "filePath": "eliza/packages/shared/src/contracts/lifeops.ts",
+      "summary": "capabilitiesForSide is a function defined in eliza/packages/shared/src/contracts/lifeops.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/contracts/memory-routes.test.ts",
+      "type": "file",
+      "name": "memory-routes.test.ts",
+      "filePath": "eliza/packages/shared/src/contracts/memory-routes.test.ts",
+      "summary": "memory-routes.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 45 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/contracts/memory-routes.ts",
+      "type": "file",
+      "name": "memory-routes.ts",
+      "filePath": "eliza/packages/shared/src/contracts/memory-routes.ts",
+      "summary": "memory-routes.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 30 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/src/contracts/misc-routes.test.ts",
+      "type": "file",
+      "name": "misc-routes.test.ts",
+      "filePath": "eliza/packages/shared/src/contracts/misc-routes.test.ts",
+      "summary": "misc-routes.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 259 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/contracts/misc-routes.ts",
+      "type": "file",
+      "name": "misc-routes.ts",
+      "filePath": "eliza/packages/shared/src/contracts/misc-routes.ts",
+      "summary": "misc-routes.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 192 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/cloud-topology.ts",
+      "target": "function:eliza/packages/shared/src/contracts/cloud-topology.ts:asConfigRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/cloud-topology.ts",
+      "target": "function:eliza/packages/shared/src/contracts/cloud-topology.ts:_readConfigString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/cloud-topology.ts",
+      "target": "function:eliza/packages/shared/src/contracts/cloud-topology.ts:normalizeSecretString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/cloud-topology.ts",
+      "target": "function:eliza/packages/shared/src/contracts/cloud-topology.ts:isElizaCloudLinkedInConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/cloud-topology.ts",
+      "target": "function:eliza/packages/shared/src/contracts/cloud-topology.ts:resolveElizaCloudTopology",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/cloud-topology.ts",
+      "target": "function:eliza/packages/shared/src/contracts/cloud-topology.ts:isElizaCloudServiceSelectedInConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/cloud-topology.ts",
+      "target": "function:eliza/packages/shared/src/contracts/cloud-topology.ts:shouldLoadElizaCloudPluginInConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/cloud-topology.ts:isElizaCloudLinkedInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/cloud-topology.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/cloud-topology.ts:isElizaCloudLinkedInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/cloud-topology.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/cloud-topology.ts:resolveElizaCloudTopology",
+      "target": "function:eliza/packages/shared/src/contracts/cloud-topology.ts:isElizaCloudLinkedInConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/cloud-topology.ts:isElizaCloudServiceSelectedInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/cloud-topology.ts:resolveElizaCloudTopology",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/cloud-topology.ts:shouldLoadElizaCloudPluginInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/cloud-topology.ts:resolveElizaCloudTopology",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/content-pack.ts",
+      "target": "function:eliza/packages/shared/src/contracts/content-pack.ts:validateContentPackManifest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:pickFirstRunCloudModelPreferences",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:isSubscriptionProviderSelectionId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeSubscriptionProviderSelectionId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getStoredSubscriptionProvider",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getSubscriptionProviderFamily",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:requiresAdditionalRuntimeProvider",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getFirstRunProviderOption",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getFirstRunProviderFamily",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getStoredFirstRunProviderId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getDirectAccountProviderForFirstRunProvider",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:sortFirstRunProviders",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:isCloudManagedConnection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:isRemoteProviderConnection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:isLocalProviderConnection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:isFirstRunConnectionComplete",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunEnvContainer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunEnvString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunEnvSecret",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getFirstRunProviderSignalEnvKeys",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunProviderApiKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readPrimaryModelFromConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:hasExplicitCanonicalRuntimeConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:buildElizaCloudTextRoute",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyDeploymentTargetInConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:pruneLegacyCloudRoutingFields",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:migrateLegacyRuntimeConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLinkedAccountsInConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveDeploymentTargetInConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveServiceRoutingInConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:deriveFirstRunConnectionFromRuntimeConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveConfiguredLocalProviderFromSignals",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeFirstRunCredentialInputs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:deriveFirstRunCredentialPersistencePlan",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:stripFirstRunConnectionSecrets",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferFirstRunConnectionFromConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:isCloudInferenceSelectedInConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:registerProviderOption",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getProviderOptions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:pickFirstRunCloudModelPreferences",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeSubscriptionProviderSelectionId",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeSubscriptionProviderSelectionId",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:isSubscriptionProviderSelectionId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:requiresAdditionalRuntimeProvider",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeSubscriptionProviderSelectionId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getFirstRunProviderOption",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getFirstRunProviderFamily",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getFirstRunProviderOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getStoredFirstRunProviderId",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getFirstRunProviderOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getDirectAccountProviderForFirstRunProvider",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:isFirstRunConnectionComplete",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:isLocalProviderConnection",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:isFirstRunConnectionComplete",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:isRemoteProviderConnection",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:isFirstRunConnectionComplete",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:isCloudManagedConnection",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunEnvContainer",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunEnvContainer",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunEnvString",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunEnvContainer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunEnvString",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunEnvString",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunEnvSecret",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunEnvSecret",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunEnvString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getFirstRunProviderSignalEnvKeys",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getFirstRunProviderOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunProviderApiKey",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getFirstRunProviderOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunProviderApiKey",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunEnvSecret",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunProviderApiKey",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunEnvSecret",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readPrimaryModelFromConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readPrimaryModelFromConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readPrimaryModelFromConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readPrimaryModelFromConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:hasExplicitCanonicalRuntimeConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:buildElizaCloudTextRoute",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:pickFirstRunCloudModelPreferences",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyDeploymentTargetInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyDeploymentTargetInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyDeploymentTargetInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyDeploymentTargetInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyDeploymentTargetInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyDeploymentTargetInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyDeploymentTargetInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyDeploymentTargetInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyDeploymentTargetInConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readPrimaryModelFromConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:buildElizaCloudTextRoute",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveConfiguredLocalProviderFromSignals",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readPrimaryModelFromConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:pruneLegacyCloudRoutingFields",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:pruneLegacyCloudRoutingFields",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:pruneLegacyCloudRoutingFields",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:migrateLegacyRuntimeConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:migrateLegacyRuntimeConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyDeploymentTargetInConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:migrateLegacyRuntimeConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLinkedAccountsInConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:migrateLegacyRuntimeConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:migrateLegacyRuntimeConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:pruneLegacyCloudRoutingFields",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLinkedAccountsInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLinkedAccountsInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveLinkedAccountsInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveDeploymentTargetInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveServiceRoutingInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveServiceRoutingInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveDeploymentTargetInConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveServiceRoutingInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readPrimaryModelFromConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveServiceRoutingInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveConfiguredLocalProviderFromSignals",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveServiceRoutingInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readPrimaryModelFromConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:deriveFirstRunConnectionFromRuntimeConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveServiceRoutingInConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:deriveFirstRunConnectionFromRuntimeConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveDeploymentTargetInConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:deriveFirstRunConnectionFromRuntimeConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:deriveFirstRunConnectionFromRuntimeConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunProviderApiKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:deriveFirstRunConnectionFromRuntimeConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:pickFirstRunCloudModelPreferences",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveConfiguredLocalProviderFromSignals",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveConfiguredLocalProviderFromSignals",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveConfiguredLocalProviderFromSignals",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveConfiguredLocalProviderFromSignals",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveConfiguredLocalProviderFromSignals",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:requiresAdditionalRuntimeProvider",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveConfiguredLocalProviderFromSignals",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:getFirstRunProviderSignalEnvKeys",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveConfiguredLocalProviderFromSignals",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunEnvString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeFirstRunCredentialInputs",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeFirstRunCredentialInputs",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeFirstRunCredentialInputs",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:deriveFirstRunCredentialPersistencePlan",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeFirstRunCredentialInputs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:deriveFirstRunCredentialPersistencePlan",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:deriveFirstRunCredentialPersistencePlan",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:pickFirstRunCloudModelPreferences",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:deriveFirstRunCredentialPersistencePlan",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:deriveFirstRunCredentialPersistencePlan",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:stripFirstRunConnectionSecrets",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:pickFirstRunCloudModelPreferences",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveConfiguredLocalProviderFromSignals",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readPrimaryModelFromConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readFirstRunProviderApiKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferFirstRunConnectionFromConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:deriveFirstRunConnectionFromRuntimeConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:isCloudInferenceSelectedInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:resolveServiceRoutingInConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/first-run-options.ts:isCloudInferenceSelectedInConfig",
+      "target": "function:eliza/packages/shared/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/lifeops.ts",
+      "target": "function:eliza/packages/shared/src/contracts/lifeops.ts:capabilitiesForSide",
+      "type": "contains"
+    }
+  ]
+}

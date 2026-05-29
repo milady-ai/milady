@@ -1,0 +1,814 @@
+{
+  "batchIndex": 98,
+  "nodes": [
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/brand/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/shared/src/brand/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 146 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/App.cloud-shell.test.tsx",
+      "type": "file",
+      "name": "App.cloud-shell.test.tsx",
+      "filePath": "eliza/packages/ui/src/App.cloud-shell.test.tsx",
+      "summary": "App.cloud-shell.test.tsx is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 156 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/backgrounds/CloudVideoBackground.tsx",
+      "type": "file",
+      "name": "CloudVideoBackground.tsx",
+      "filePath": "eliza/packages/ui/src/backgrounds/CloudVideoBackground.tsx",
+      "summary": "CloudVideoBackground.tsx is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 240 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/backgrounds/CloudVideoBackground.tsx:CloudVideoBackground",
+      "type": "function",
+      "name": "CloudVideoBackground",
+      "filePath": "eliza/packages/ui/src/backgrounds/CloudVideoBackground.tsx",
+      "summary": "CloudVideoBackground is a function defined in eliza/packages/ui/src/backgrounds/CloudVideoBackground.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/brand/eliza-logo.tsx",
+      "type": "file",
+      "name": "eliza-logo.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/brand/eliza-logo.tsx",
+      "summary": "eliza-logo.tsx is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 20 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/brand/eliza-logo.tsx:ElizaLogo",
+      "type": "function",
+      "name": "ElizaLogo",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/brand/eliza-logo.tsx",
+      "summary": "ElizaLogo is a function defined in eliza/packages/ui/src/cloud-ui/components/brand/eliza-logo.tsx."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/pages/HomeView.test.tsx",
+      "type": "file",
+      "name": "HomeView.test.tsx",
+      "filePath": "eliza/packages/ui/src/components/pages/HomeView.test.tsx",
+      "summary": "HomeView.test.tsx is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 101 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/pages/HomeView.tsx",
+      "type": "file",
+      "name": "HomeView.tsx",
+      "filePath": "eliza/packages/ui/src/components/pages/HomeView.tsx",
+      "summary": "HomeView.tsx is a typescript source file in the Milady codebase. It contains 1 function, 4 imports.",
+      "languageNotes": "typescript; code; 138 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/components/pages/HomeView.tsx:HomeView",
+      "type": "function",
+      "name": "HomeView",
+      "filePath": "eliza/packages/ui/src/components/pages/HomeView.tsx",
+      "summary": "HomeView is a function defined in eliza/packages/ui/src/components/pages/HomeView.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/shell/AssistantOverlay.tsx",
+      "type": "file",
+      "name": "AssistantOverlay.tsx",
+      "filePath": "eliza/packages/ui/src/components/shell/AssistantOverlay.tsx",
+      "summary": "AssistantOverlay.tsx is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 144 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/components/shell/AssistantOverlay.tsx:AssistantOverlay",
+      "type": "function",
+      "name": "AssistantOverlay",
+      "filePath": "eliza/packages/ui/src/components/shell/AssistantOverlay.tsx",
+      "summary": "AssistantOverlay is a function defined in eliza/packages/ui/src/components/shell/AssistantOverlay.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/shell/ChatSurface.tsx",
+      "type": "file",
+      "name": "ChatSurface.tsx",
+      "filePath": "eliza/packages/ui/src/components/shell/ChatSurface.tsx",
+      "summary": "ChatSurface.tsx is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 127 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/components/shell/ChatSurface.tsx:ChatSurface",
+      "type": "function",
+      "name": "ChatSurface",
+      "filePath": "eliza/packages/ui/src/components/shell/ChatSurface.tsx",
+      "summary": "ChatSurface is a function defined in eliza/packages/ui/src/components/shell/ChatSurface.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/shell/HomePill.tsx",
+      "type": "file",
+      "name": "HomePill.tsx",
+      "filePath": "eliza/packages/ui/src/components/shell/HomePill.tsx",
+      "summary": "HomePill.tsx is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 73 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/shell/HomePill.tsx:HomePill",
+      "type": "function",
+      "name": "HomePill",
+      "filePath": "eliza/packages/ui/src/components/shell/HomePill.tsx",
+      "summary": "HomePill is a function defined in eliza/packages/ui/src/components/shell/HomePill.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/shell/ShellControllerContext.tsx",
+      "type": "file",
+      "name": "ShellControllerContext.tsx",
+      "filePath": "eliza/packages/ui/src/components/shell/ShellControllerContext.tsx",
+      "summary": "ShellControllerContext.tsx is a typescript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "typescript; code; 31 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/shell/ShellControllerContext.tsx:ShellControllerProvider",
+      "type": "function",
+      "name": "ShellControllerProvider",
+      "filePath": "eliza/packages/ui/src/components/shell/ShellControllerContext.tsx",
+      "summary": "ShellControllerProvider is a function defined in eliza/packages/ui/src/components/shell/ShellControllerContext.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/shell/ShellControllerContext.tsx:useShellControllerContext",
+      "type": "function",
+      "name": "useShellControllerContext",
+      "filePath": "eliza/packages/ui/src/components/shell/ShellControllerContext.tsx",
+      "summary": "useShellControllerContext is a function defined in eliza/packages/ui/src/components/shell/ShellControllerContext.tsx."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/shell/__tests__/AssistantOverlay.test.tsx",
+      "type": "file",
+      "name": "AssistantOverlay.test.tsx",
+      "filePath": "eliza/packages/ui/src/components/shell/__tests__/AssistantOverlay.test.tsx",
+      "summary": "AssistantOverlay.test.tsx is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 155 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/shell/__tests__/ChatSurface.test.tsx",
+      "type": "file",
+      "name": "ChatSurface.test.tsx",
+      "filePath": "eliza/packages/ui/src/components/shell/__tests__/ChatSurface.test.tsx",
+      "summary": "ChatSurface.test.tsx is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 167 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/shell/__tests__/HomePill.test.tsx",
+      "type": "file",
+      "name": "HomePill.test.tsx",
+      "filePath": "eliza/packages/ui/src/components/shell/__tests__/HomePill.test.tsx",
+      "summary": "HomePill.test.tsx is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 86 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/shell/__tests__/exports.test.ts",
+      "type": "file",
+      "name": "exports.test.ts",
+      "filePath": "eliza/packages/ui/src/components/shell/__tests__/exports.test.ts",
+      "summary": "exports.test.ts is a typescript source file in the Milady codebase. It contains 5 imports.",
+      "languageNotes": "typescript; code; 18 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/shell/__tests__/shell-assistant-flow.test.tsx",
+      "type": "file",
+      "name": "shell-assistant-flow.test.tsx",
+      "filePath": "eliza/packages/ui/src/components/shell/__tests__/shell-assistant-flow.test.tsx",
+      "summary": "shell-assistant-flow.test.tsx is a typescript source file in the Milady codebase. It contains 1 function, 4 imports.",
+      "languageNotes": "typescript; code; 133 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/shell/__tests__/shell-assistant-flow.test.tsx:ShellAssistantHarness",
+      "type": "function",
+      "name": "ShellAssistantHarness",
+      "filePath": "eliza/packages/ui/src/components/shell/__tests__/shell-assistant-flow.test.tsx",
+      "summary": "ShellAssistantHarness is a function defined in eliza/packages/ui/src/components/shell/__tests__/shell-assistant-flow.test.tsx."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/shell/__tests__/shell-state.test.ts",
+      "type": "file",
+      "name": "shell-state.test.ts",
+      "filePath": "eliza/packages/ui/src/components/shell/__tests__/shell-state.test.ts",
+      "summary": "shell-state.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 167 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/shell/__tests__/shell-state.test.ts:reduce",
+      "type": "function",
+      "name": "reduce",
+      "filePath": "eliza/packages/ui/src/components/shell/__tests__/shell-state.test.ts",
+      "summary": "reduce is a function defined in eliza/packages/ui/src/components/shell/__tests__/shell-state.test.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/shell/__tests__/useShellState.test.tsx",
+      "type": "file",
+      "name": "useShellState.test.tsx",
+      "filePath": "eliza/packages/ui/src/components/shell/__tests__/useShellState.test.tsx",
+      "summary": "useShellState.test.tsx is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 88 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/shell/shell-state.ts",
+      "type": "file",
+      "name": "shell-state.ts",
+      "filePath": "eliza/packages/ui/src/components/shell/shell-state.ts",
+      "summary": "shell-state.ts is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 124 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/shell/shell-state.ts:nextId",
+      "type": "function",
+      "name": "nextId",
+      "filePath": "eliza/packages/ui/src/components/shell/shell-state.ts",
+      "summary": "nextId is a function defined in eliza/packages/ui/src/components/shell/shell-state.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/shell/shell-state.ts:shellReducer",
+      "type": "function",
+      "name": "shellReducer",
+      "filePath": "eliza/packages/ui/src/components/shell/shell-state.ts",
+      "summary": "shellReducer is a function defined in eliza/packages/ui/src/components/shell/shell-state.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/shell/useShellController.ts",
+      "type": "file",
+      "name": "useShellController.ts",
+      "filePath": "eliza/packages/ui/src/components/shell/useShellController.ts",
+      "summary": "useShellController.ts is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 149 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/components/shell/useShellController.ts:useShellController",
+      "type": "function",
+      "name": "useShellController",
+      "filePath": "eliza/packages/ui/src/components/shell/useShellController.ts",
+      "summary": "useShellController is a function defined in eliza/packages/ui/src/components/shell/useShellController.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/shell/useShellState.ts",
+      "type": "file",
+      "name": "useShellState.ts",
+      "filePath": "eliza/packages/ui/src/components/shell/useShellState.ts",
+      "summary": "useShellState.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 52 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/shell/useShellState.ts:useShellState",
+      "type": "function",
+      "name": "useShellState",
+      "filePath": "eliza/packages/ui/src/components/shell/useShellState.ts",
+      "summary": "useShellState is a function defined in eliza/packages/ui/src/components/shell/useShellState.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/lib/floating-layers.ts",
+      "type": "file",
+      "name": "floating-layers.ts",
+      "filePath": "eliza/packages/ui/src/lib/floating-layers.ts",
+      "summary": "floating-layers.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 20 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/backgrounds/CloudVideoBackground.tsx",
+      "target": "function:eliza/packages/ui/src/backgrounds/CloudVideoBackground.tsx:CloudVideoBackground",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/brand/eliza-logo.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/brand/eliza-logo.tsx:ElizaLogo",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/pages/HomeView.tsx",
+      "target": "function:eliza/packages/ui/src/components/pages/HomeView.tsx:HomeView",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/shell/AssistantOverlay.tsx",
+      "target": "function:eliza/packages/ui/src/components/shell/AssistantOverlay.tsx:AssistantOverlay",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/shell/ChatSurface.tsx",
+      "target": "function:eliza/packages/ui/src/components/shell/ChatSurface.tsx:ChatSurface",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/shell/HomePill.tsx",
+      "target": "function:eliza/packages/ui/src/components/shell/HomePill.tsx:HomePill",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/shell/ShellControllerContext.tsx",
+      "target": "function:eliza/packages/ui/src/components/shell/ShellControllerContext.tsx:ShellControllerProvider",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/shell/ShellControllerContext.tsx",
+      "target": "function:eliza/packages/ui/src/components/shell/ShellControllerContext.tsx:useShellControllerContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/shell/__tests__/shell-assistant-flow.test.tsx",
+      "target": "function:eliza/packages/ui/src/components/shell/__tests__/shell-assistant-flow.test.tsx:ShellAssistantHarness",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/shell/__tests__/shell-state.test.ts",
+      "target": "function:eliza/packages/ui/src/components/shell/__tests__/shell-state.test.ts:reduce",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/shell/shell-state.ts",
+      "target": "function:eliza/packages/ui/src/components/shell/shell-state.ts:nextId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/shell/shell-state.ts",
+      "target": "function:eliza/packages/ui/src/components/shell/shell-state.ts:shellReducer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/shell/shell-state.ts:shellReducer",
+      "target": "function:eliza/packages/ui/src/components/shell/shell-state.ts:nextId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/shell/shell-state.ts:shellReducer",
+      "target": "function:eliza/packages/ui/src/components/shell/shell-state.ts:nextId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/shell/useShellController.ts",
+      "target": "function:eliza/packages/ui/src/components/shell/useShellController.ts:useShellController",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/shell/useShellState.ts",
+      "target": "function:eliza/packages/ui/src/components/shell/useShellState.ts:useShellState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/App.cloud-shell.test.tsx",
+      "target": "file:eliza/packages/shared/src/brand/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/App.cloud-shell.test.tsx",
+      "target": "file:eliza/packages/ui/src/backgrounds/CloudVideoBackground.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/backgrounds/CloudVideoBackground.tsx",
+      "target": "file:eliza/packages/shared/src/brand/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/brand/eliza-logo.tsx",
+      "target": "file:eliza/packages/shared/src/brand/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/pages/HomeView.test.tsx",
+      "target": "file:eliza/packages/ui/src/components/pages/HomeView.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/pages/HomeView.tsx",
+      "target": "file:eliza/packages/ui/src/backgrounds/CloudVideoBackground.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/pages/HomeView.tsx",
+      "target": "file:eliza/packages/ui/src/components/shell/ShellControllerContext.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/pages/HomeView.tsx",
+      "target": "file:eliza/packages/ui/src/components/voice/VoiceWaveform.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/pages/HomeView.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/AssistantOverlay.tsx",
+      "target": "file:eliza/packages/ui/src/components/shell/shell-state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/AssistantOverlay.tsx",
+      "target": "file:eliza/packages/ui/src/lib/floating-layers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/ChatSurface.tsx",
+      "target": "file:eliza/packages/ui/src/components/shell/shell-state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/ChatSurface.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/HomePill.tsx",
+      "target": "file:eliza/packages/ui/src/components/shell/shell-state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/HomePill.tsx",
+      "target": "file:eliza/packages/ui/src/lib/floating-layers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/HomePill.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/ShellControllerContext.tsx",
+      "target": "file:eliza/packages/ui/src/components/shell/useShellController.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/__tests__/AssistantOverlay.test.tsx",
+      "target": "file:eliza/packages/ui/src/components/shell/AssistantOverlay.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/__tests__/ChatSurface.test.tsx",
+      "target": "file:eliza/packages/ui/src/components/shell/ChatSurface.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/__tests__/ChatSurface.test.tsx",
+      "target": "file:eliza/packages/ui/src/components/shell/shell-state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/__tests__/HomePill.test.tsx",
+      "target": "file:eliza/packages/ui/src/components/shell/HomePill.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/__tests__/HomePill.test.tsx",
+      "target": "file:eliza/packages/ui/src/components/shell/shell-state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/__tests__/exports.test.ts",
+      "target": "file:eliza/packages/ui/src/components/shell/AssistantOverlay.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/__tests__/exports.test.ts",
+      "target": "file:eliza/packages/ui/src/components/shell/ChatSurface.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/__tests__/exports.test.ts",
+      "target": "file:eliza/packages/ui/src/components/shell/HomePill.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/__tests__/exports.test.ts",
+      "target": "file:eliza/packages/ui/src/components/shell/shell-state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/__tests__/exports.test.ts",
+      "target": "file:eliza/packages/ui/src/components/shell/useShellState.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/__tests__/shell-assistant-flow.test.tsx",
+      "target": "file:eliza/packages/ui/src/components/shell/AssistantOverlay.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/__tests__/shell-assistant-flow.test.tsx",
+      "target": "file:eliza/packages/ui/src/components/shell/ChatSurface.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/__tests__/shell-assistant-flow.test.tsx",
+      "target": "file:eliza/packages/ui/src/components/shell/HomePill.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/__tests__/shell-assistant-flow.test.tsx",
+      "target": "file:eliza/packages/ui/src/components/shell/shell-state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/__tests__/shell-state.test.ts",
+      "target": "file:eliza/packages/ui/src/components/shell/shell-state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/__tests__/useShellState.test.tsx",
+      "target": "file:eliza/packages/ui/src/components/shell/useShellState.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/__tests__/useShellState.test.tsx",
+      "target": "file:eliza/packages/ui/src/events/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/useShellController.ts",
+      "target": "file:eliza/packages/ui/src/components/shell/shell-state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/useShellController.ts",
+      "target": "file:eliza/packages/ui/src/state/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/useShellController.ts",
+      "target": "file:eliza/packages/ui/src/voice/voice-capture-factory.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/useShellState.ts",
+      "target": "file:eliza/packages/ui/src/components/shell/shell-state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/shell/useShellState.ts",
+      "target": "file:eliza/packages/ui/src/events/index.ts",
+      "type": "imports"
+    }
+  ]
+}

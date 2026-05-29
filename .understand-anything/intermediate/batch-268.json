@@ -1,0 +1,340 @@
+{
+  "batchIndex": 268,
+  "nodes": [
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:.biomeignore",
+      "type": "file",
+      "name": ".biomeignore",
+      "filePath": ".biomeignore",
+      "summary": ".biomeignore is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 10 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:.claude/launch.json",
+      "type": "config",
+      "name": "launch.json",
+      "filePath": ".claude/launch.json",
+      "summary": "launch.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 58 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "complex",
+      "id": "document:.claude/plans/entity-model-analysis.md",
+      "type": "document",
+      "name": "entity-model-analysis.md",
+      "filePath": ".claude/plans/entity-model-analysis.md",
+      "summary": "entity-model-analysis.md documents .claude/plans with 518 lines of reference material.",
+      "languageNotes": "markdown; docs; 518 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "complex",
+      "id": "document:.claude/plans/system-permissions-implementation.md",
+      "type": "document",
+      "name": "system-permissions-implementation.md",
+      "filePath": ".claude/plans/system-permissions-implementation.md",
+      "summary": "system-permissions-implementation.md documents .claude/plans with 865 lines of reference material.",
+      "languageNotes": "markdown; docs; 865 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:.claude/plugins/electrobun-dev/.claude-plugin/plugin.json",
+      "type": "config",
+      "name": "plugin.json",
+      "filePath": ".claude/plugins/electrobun-dev/.claude-plugin/plugin.json",
+      "summary": "plugin.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 8 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "complex",
+      "id": "document:.claude/plugins/electrobun-dev/skills/electrobun-build/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": ".claude/plugins/electrobun-dev/skills/electrobun-build/SKILL.md",
+      "summary": "SKILL.md documents .claude/plugins/electrobun-dev/skills/electrobun-build with 330 lines of reference material.",
+      "languageNotes": "markdown; docs; 330 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/skills/electrobun-config/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": ".claude/plugins/electrobun-dev/skills/electrobun-config/SKILL.md",
+      "summary": "SKILL.md documents .claude/plugins/electrobun-dev/skills/electrobun-config with 145 lines of reference material.",
+      "languageNotes": "markdown; docs; 145 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/skills/electrobun-dev/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": ".claude/plugins/electrobun-dev/skills/electrobun-dev/SKILL.md",
+      "summary": "SKILL.md documents .claude/plugins/electrobun-dev/skills/electrobun-dev with 102 lines of reference material.",
+      "languageNotes": "markdown; docs; 102 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/skills/electrobun-guide/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": ".claude/plugins/electrobun-dev/skills/electrobun-guide/SKILL.md",
+      "summary": "SKILL.md documents .claude/plugins/electrobun-dev/skills/electrobun-guide with 267 lines of reference material.",
+      "languageNotes": "markdown; docs; 267 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/skills/electrobun-init/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": ".claude/plugins/electrobun-dev/skills/electrobun-init/SKILL.md",
+      "summary": "SKILL.md documents .claude/plugins/electrobun-dev/skills/electrobun-init with 103 lines of reference material.",
+      "languageNotes": "markdown; docs; 103 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/skills/electrobun-kitchen-sink/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": ".claude/plugins/electrobun-dev/skills/electrobun-kitchen-sink/SKILL.md",
+      "summary": "SKILL.md documents .claude/plugins/electrobun-dev/skills/electrobun-kitchen-sink with 236 lines of reference material.",
+      "languageNotes": "markdown; docs; 236 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/skills/electrobun-milady/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": ".claude/plugins/electrobun-dev/skills/electrobun-milady/SKILL.md",
+      "summary": "SKILL.md documents .claude/plugins/electrobun-dev/skills/electrobun-milady with 298 lines of reference material.",
+      "languageNotes": "markdown; docs; 298 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "complex",
+      "id": "document:.claude/plugins/electrobun-dev/skills/electrobun-platform/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": ".claude/plugins/electrobun-dev/skills/electrobun-platform/SKILL.md",
+      "summary": "SKILL.md documents .claude/plugins/electrobun-dev/skills/electrobun-platform with 297 lines of reference material.",
+      "languageNotes": "markdown; docs; 297 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/skills/electrobun-release/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": ".claude/plugins/electrobun-dev/skills/electrobun-release/SKILL.md",
+      "summary": "SKILL.md documents .claude/plugins/electrobun-dev/skills/electrobun-release with 287 lines of reference material.",
+      "languageNotes": "markdown; docs; 287 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/skills/electrobun-rpc/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": ".claude/plugins/electrobun-dev/skills/electrobun-rpc/SKILL.md",
+      "summary": "SKILL.md documents .claude/plugins/electrobun-dev/skills/electrobun-rpc with 133 lines of reference material.",
+      "languageNotes": "markdown; docs; 133 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/skills/electrobun-sdlc/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": ".claude/plugins/electrobun-dev/skills/electrobun-sdlc/SKILL.md",
+      "summary": "SKILL.md documents .claude/plugins/electrobun-dev/skills/electrobun-sdlc with 155 lines of reference material.",
+      "languageNotes": "markdown; docs; 155 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/skills/electrobun-teams/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": ".claude/plugins/electrobun-dev/skills/electrobun-teams/SKILL.md",
+      "summary": "SKILL.md documents .claude/plugins/electrobun-dev/skills/electrobun-teams with 163 lines of reference material.",
+      "languageNotes": "markdown; docs; 163 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "complex",
+      "id": "document:.claude/plugins/electrobun-dev/skills/electrobun-testing/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": ".claude/plugins/electrobun-dev/skills/electrobun-testing/SKILL.md",
+      "summary": "SKILL.md documents .claude/plugins/electrobun-dev/skills/electrobun-testing with 294 lines of reference material.",
+      "languageNotes": "markdown; docs; 294 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/skills/electrobun-webgpu/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": ".claude/plugins/electrobun-dev/skills/electrobun-webgpu/SKILL.md",
+      "summary": "SKILL.md documents .claude/plugins/electrobun-dev/skills/electrobun-webgpu with 161 lines of reference material.",
+      "languageNotes": "markdown; docs; 161 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/skills/electrobun-workflow/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": ".claude/plugins/electrobun-dev/skills/electrobun-workflow/SKILL.md",
+      "summary": "SKILL.md documents .claude/plugins/electrobun-dev/skills/electrobun-workflow with 141 lines of reference material.",
+      "languageNotes": "markdown; docs; 141 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/skills/electrobun/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": ".claude/plugins/electrobun-dev/skills/electrobun/SKILL.md",
+      "summary": "SKILL.md documents .claude/plugins/electrobun-dev/skills/electrobun with 188 lines of reference material.",
+      "languageNotes": "markdown; docs; 188 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:.claude/settings.json",
+      "type": "config",
+      "name": "settings.json",
+      "filePath": ".claude/settings.json",
+      "summary": "settings.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 74 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:.codeflowignore",
+      "type": "file",
+      "name": ".codeflowignore",
+      "filePath": ".codeflowignore",
+      "summary": ".codeflowignore is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 47 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:.codex/AGENTS.md",
+      "type": "document",
+      "name": "AGENTS.md",
+      "filePath": ".codex/AGENTS.md",
+      "summary": "AGENTS.md documents .codex with 17 lines of reference material.",
+      "languageNotes": "markdown; docs; 17 lines"
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:.cursor/rules/electrobun-agentic-desktop-2026.mdc",
+      "type": "file",
+      "name": "electrobun-agentic-desktop-2026.mdc",
+      "filePath": ".cursor/rules/electrobun-agentic-desktop-2026.mdc",
+      "summary": "electrobun-agentic-desktop-2026.mdc is a mdc source file in the Milady codebase.",
+      "languageNotes": "mdc; code; 28 lines"
+    }
+  ],
+  "edges": []
+}

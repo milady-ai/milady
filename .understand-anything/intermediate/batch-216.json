@@ -1,0 +1,267 @@
+{
+  "batchIndex": 216,
+  "nodes": [
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/plugins/facewear.json",
+      "type": "config",
+      "name": "facewear.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/plugins/facewear.json",
+      "summary": "facewear.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 131 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/plugins/form.json",
+      "type": "config",
+      "name": "form.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/plugins/form.json",
+      "summary": "form.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 26 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/plugins/github.json",
+      "type": "config",
+      "name": "github.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/plugins/github.json",
+      "summary": "github.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 93 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/plugins/gmail-watch.json",
+      "type": "config",
+      "name": "gmail-watch.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/plugins/gmail-watch.json",
+      "summary": "gmail-watch.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 25 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/plugins/goals.json",
+      "type": "config",
+      "name": "goals.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/plugins/goals.json",
+      "summary": "goals.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 77 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/plugins/google-genai.json",
+      "type": "config",
+      "name": "google-genai.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/plugins/google-genai.json",
+      "summary": "google-genai.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 106 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/plugins/groq.json",
+      "type": "config",
+      "name": "groq.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/plugins/groq.json",
+      "summary": "groq.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 93 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/plugins/hedera.json",
+      "type": "config",
+      "name": "hedera.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/plugins/hedera.json",
+      "summary": "hedera.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 48 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/plugins/inmemorydb.json",
+      "type": "config",
+      "name": "inmemorydb.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/plugins/inmemorydb.json",
+      "summary": "inmemorydb.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 25 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/plugins/linear.json",
+      "type": "config",
+      "name": "linear.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/plugins/linear.json",
+      "summary": "linear.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 51 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/plugins/local-inference.json",
+      "type": "config",
+      "name": "local-inference.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/plugins/local-inference.json",
+      "summary": "local-inference.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 142 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/plugins/local-storage.json",
+      "type": "config",
+      "name": "local-storage.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/plugins/local-storage.json",
+      "summary": "local-storage.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 36 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/plugins/localdb.json",
+      "type": "config",
+      "name": "localdb.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/plugins/localdb.json",
+      "summary": "localdb.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 25 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/plugins/mcp.json",
+      "type": "config",
+      "name": "mcp.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/plugins/mcp.json",
+      "summary": "mcp.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 44 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/plugins/memory.json",
+      "type": "config",
+      "name": "memory.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/plugins/memory.json",
+      "summary": "memory.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 124 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/plugins/minecraft.json",
+      "type": "config",
+      "name": "minecraft.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/plugins/minecraft.json",
+      "summary": "minecraft.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 79 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/plugins/mlx.json",
+      "type": "config",
+      "name": "mlx.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/plugins/mlx.json",
+      "summary": "mlx.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 80 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/plugins/moltbook.json",
+      "type": "config",
+      "name": "moltbook.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/plugins/moltbook.json",
+      "summary": "moltbook.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 83 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/plugins/music.json",
+      "type": "config",
+      "name": "music.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/plugins/music.json",
+      "summary": "music.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 155 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/plugins/mysticism.json",
+      "type": "config",
+      "name": "mysticism.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/plugins/mysticism.json",
+      "summary": "mysticism.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 48 lines"
+    }
+  ],
+  "edges": []
+}

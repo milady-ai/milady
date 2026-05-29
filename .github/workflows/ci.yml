@@ -136,6 +136,14 @@ jobs:
       - name: Biome format check
         run: bunx @biomejs/biome format scripts/validate-ci-bootstrap-contract.mjs
 
+      - name: Flow guard (topology)
+        # Plumber guard: fail fast if apps/app reaches by relative path into the
+        # gitignored eliza/ clone source (the recurring vite.config CI break), plus
+        # a circular-dependency check. See .dependency-cruiser.cjs + .claude/topology.md.
+        run: |
+          bun run check:flow
+          bun run check:cycles
+
   typecheck:
     name: Type Check
     runs-on: ubuntu-24.04

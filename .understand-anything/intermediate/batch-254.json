@@ -1,0 +1,45 @@
+{
+  "batchIndex": 254,
+  "nodes": [
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/plugins/plugin-registry/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "eliza/plugins/plugin-registry/package.json",
+      "summary": "package.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 50 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/plugins/plugin-registry/tsconfig.build.json",
+      "type": "config",
+      "name": "tsconfig.build.json",
+      "filePath": "eliza/plugins/plugin-registry/tsconfig.build.json",
+      "summary": "tsconfig.build.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 9 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/plugins/plugin-registry/tsconfig.json",
+      "type": "config",
+      "name": "tsconfig.json",
+      "filePath": "eliza/plugins/plugin-registry/tsconfig.json",
+      "summary": "tsconfig.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 66 lines"
+    }
+  ],
+  "edges": []
+}

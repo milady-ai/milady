@@ -19,7 +19,7 @@ API_PORT=$((31337 + OFFSET))
 UI_PORT=$((2138 + OFFSET))
 HOME_PORT=$((2142 + OFFSET))
 GATEWAY_PORT=$((18789 + OFFSET))
-STATE_DIR="~/.milady-wt-${SLOT}"
+STATE_DIR="~/.local/state/milady-wt-${SLOT}"
 
 cat > .env.worktree <<EOF
 # Worktree isolation — slot ${SLOT}
@@ -27,10 +27,18 @@ cat > .env.worktree <<EOF
 # Regenerate with a different slot number to change ports.
 
 MILADY_API_PORT=${API_PORT}
+ELIZA_API_PORT=${API_PORT}
 MILADY_PORT=${UI_PORT}
+ELIZA_UI_PORT=${UI_PORT}
+ELIZA_PORT=${UI_PORT}
 MILADY_HOME_PORT=${HOME_PORT}
+ELIZA_HOME_PORT=${HOME_PORT}
 MILADY_GATEWAY_PORT=${GATEWAY_PORT}
+ELIZA_GATEWAY_PORT=${GATEWAY_PORT}
+MILADY_NAMESPACE=milady
+ELIZA_NAMESPACE=milady
 MILADY_STATE_DIR=${STATE_DIR}
+ELIZA_STATE_DIR=${STATE_DIR}
 EOF
 
 echo "Wrote .env.worktree (slot ${SLOT})"

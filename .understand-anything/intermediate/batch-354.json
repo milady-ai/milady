@@ -1,0 +1,483 @@
+{
+  "batchIndex": 354,
+  "nodes": [
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:skills/.defaults/things-mac/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/things-mac/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/things-mac with 86 lines of reference material.",
+      "languageNotes": "markdown; docs; 86 lines"
+    },
+    {
+      "tags": [
+        "script",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:skills/.defaults/tmux/scripts/find-sessions.sh",
+      "type": "file",
+      "name": "find-sessions.sh",
+      "filePath": "skills/.defaults/tmux/scripts/find-sessions.sh",
+      "summary": "find-sessions.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 112 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:skills/.defaults/tmux/scripts/find-sessions.sh:usage",
+      "type": "function",
+      "name": "usage",
+      "filePath": "skills/.defaults/tmux/scripts/find-sessions.sh",
+      "summary": "usage is a function defined in skills/.defaults/tmux/scripts/find-sessions.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:skills/.defaults/tmux/scripts/find-sessions.sh:list_sessions",
+      "type": "function",
+      "name": "list_sessions",
+      "filePath": "skills/.defaults/tmux/scripts/find-sessions.sh",
+      "summary": "list_sessions is a function defined in skills/.defaults/tmux/scripts/find-sessions.sh."
+    },
+    {
+      "tags": [
+        "script",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:skills/.defaults/tmux/scripts/wait-for-text.sh",
+      "type": "file",
+      "name": "wait-for-text.sh",
+      "filePath": "skills/.defaults/tmux/scripts/wait-for-text.sh",
+      "summary": "wait-for-text.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 83 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:skills/.defaults/tmux/scripts/wait-for-text.sh:usage",
+      "type": "function",
+      "name": "usage",
+      "filePath": "skills/.defaults/tmux/scripts/wait-for-text.sh",
+      "summary": "usage is a function defined in skills/.defaults/tmux/scripts/wait-for-text.sh."
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:skills/.defaults/tmux/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/tmux/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/tmux with 135 lines of reference material.",
+      "languageNotes": "markdown; docs; 135 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:skills/.defaults/trello/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/trello/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/trello with 95 lines of reference material.",
+      "languageNotes": "markdown; docs; 95 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/wacli/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/wacli/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/wacli with 72 lines of reference material.",
+      "languageNotes": "markdown; docs; 72 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/weather/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/weather/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/weather with 54 lines of reference material.",
+      "languageNotes": "markdown; docs; 54 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:skills/.defaults/yara-authoring/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/yara-authoring/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/yara-authoring with 111 lines of reference material.",
+      "languageNotes": "markdown; docs; 111 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "skills/README.md",
+      "summary": "README.md documents skills with 7 lines of reference material.",
+      "languageNotes": "markdown; docs; 7 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:templates/electrobun/APPLE_TO_ELECTROBUN_EXAMPLE.md",
+      "type": "document",
+      "name": "APPLE_TO_ELECTROBUN_EXAMPLE.md",
+      "filePath": "templates/electrobun/APPLE_TO_ELECTROBUN_EXAMPLE.md",
+      "summary": "APPLE_TO_ELECTROBUN_EXAMPLE.md documents templates/electrobun with 18 lines of reference material.",
+      "languageNotes": "markdown; docs; 18 lines"
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:templates/electrobun/bunfig.toml.template",
+      "type": "file",
+      "name": "bunfig.toml.template",
+      "filePath": "templates/electrobun/bunfig.toml.template",
+      "summary": "bunfig.toml.template is a template source file in the Milady codebase.",
+      "languageNotes": "template; code; 10 lines"
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "moderate",
+      "id": "file:templates/electrobun/electrobun.config.ts",
+      "type": "file",
+      "name": "electrobun.config.ts",
+      "filePath": "templates/electrobun/electrobun.config.ts",
+      "summary": "electrobun.config.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 66 lines"
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:templates/electrobun/eval_cases.json.example",
+      "type": "file",
+      "name": "eval_cases.json.example",
+      "filePath": "templates/electrobun/eval_cases.json.example",
+      "summary": "eval_cases.json.example is a example source file in the Milady codebase.",
+      "languageNotes": "example; code; 14 lines"
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:templates/electrobun/package.json.template",
+      "type": "file",
+      "name": "package.json.template",
+      "filePath": "templates/electrobun/package.json.template",
+      "summary": "package.json.template is a template source file in the Milady codebase.",
+      "languageNotes": "template; code; 26 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:templates/electrobun/README-template.md",
+      "type": "document",
+      "name": "README-template.md",
+      "filePath": "templates/electrobun/README-template.md",
+      "summary": "README-template.md documents templates/electrobun with 13 lines of reference material.",
+      "languageNotes": "markdown; docs; 13 lines"
+    },
+    {
+      "tags": [
+        "desktop",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:templates/electrobun/src/bun/network/http-client.ts",
+      "type": "file",
+      "name": "http-client.ts",
+      "filePath": "templates/electrobun/src/bun/network/http-client.ts",
+      "summary": "http-client.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 31 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:templates/electrobun/src/bun/network/http-client.ts:requestJson",
+      "type": "function",
+      "name": "requestJson",
+      "filePath": "templates/electrobun/src/bun/network/http-client.ts",
+      "summary": "requestJson is a function defined in templates/electrobun/src/bun/network/http-client.ts."
+    },
+    {
+      "tags": [
+        "desktop",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:templates/electrobun/src/bun/storage/sqlite-repository.ts",
+      "type": "file",
+      "name": "sqlite-repository.ts",
+      "filePath": "templates/electrobun/src/bun/storage/sqlite-repository.ts",
+      "summary": "sqlite-repository.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 31 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:templates/electrobun/src/bun/storage/sqlite-repository.ts:openAppDatabase",
+      "type": "function",
+      "name": "openAppDatabase",
+      "filePath": "templates/electrobun/src/bun/storage/sqlite-repository.ts",
+      "summary": "openAppDatabase is a function defined in templates/electrobun/src/bun/storage/sqlite-repository.ts."
+    },
+    {
+      "tags": [
+        "frontend",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:templates/electrobun/src/mainview/index.html",
+      "type": "file",
+      "name": "index.html",
+      "filePath": "templates/electrobun/src/mainview/index.html",
+      "summary": "index.html is a html source file in the Milady codebase.",
+      "languageNotes": "html; markup; 34 lines"
+    },
+    {
+      "tags": [
+        "frontend",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:templates/electrobun/src/mainview/style.css",
+      "type": "file",
+      "name": "style.css",
+      "filePath": "templates/electrobun/src/mainview/style.css",
+      "summary": "style.css is a css source file in the Milady codebase.",
+      "languageNotes": "css; markup; 47 lines"
+    },
+    {
+      "tags": [
+        "frontend",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:templates/electrobun/src/webviewtag/index.html",
+      "type": "file",
+      "name": "index.html",
+      "filePath": "templates/electrobun/src/webviewtag/index.html",
+      "summary": "index.html is a html source file in the Milady codebase.",
+      "languageNotes": "html; markup; 18 lines"
+    },
+    {
+      "tags": [
+        "entry-point",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:templates/electrobun/src/webviewtag/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "templates/electrobun/src/webviewtag/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 17 lines"
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:templates/electrobun/tsconfig.json.template",
+      "type": "file",
+      "name": "tsconfig.json.template",
+      "filePath": "templates/electrobun/tsconfig.json.template",
+      "summary": "tsconfig.json.template is a template source file in the Milady codebase.",
+      "languageNotes": "template; code; 16 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:tsconfig.workspace.json",
+      "type": "config",
+      "name": "tsconfig.workspace.json",
+      "filePath": "tsconfig.workspace.json",
+      "summary": "tsconfig.workspace.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 9 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:tsdown.config.mjs",
+      "type": "file",
+      "name": "tsdown.config.mjs",
+      "filePath": "tsdown.config.mjs",
+      "summary": "tsdown.config.mjs is a javascript source file in the Milady codebase. It contains 3 functions.",
+      "languageNotes": "javascript; code; 147 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:tsdown.config.mjs:localUpstreamsDisabled",
+      "type": "function",
+      "name": "localUpstreamsDisabled",
+      "filePath": "tsdown.config.mjs",
+      "summary": "localUpstreamsDisabled is a function defined in tsdown.config.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:tsdown.config.mjs:explicitAppCoreEntry",
+      "type": "function",
+      "name": "explicitAppCoreEntry",
+      "filePath": "tsdown.config.mjs",
+      "summary": "explicitAppCoreEntry is a function defined in tsdown.config.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:tsdown.config.mjs:appCoreEntry",
+      "type": "function",
+      "name": "appCoreEntry",
+      "filePath": "tsdown.config.mjs",
+      "summary": "appCoreEntry is a function defined in tsdown.config.mjs."
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "complex",
+      "id": "config:upstreams.lock.json",
+      "type": "config",
+      "name": "upstreams.lock.json",
+      "filePath": "upstreams.lock.json",
+      "summary": "upstreams.lock.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 377 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:skills/.defaults/tmux/scripts/find-sessions.sh",
+      "target": "function:skills/.defaults/tmux/scripts/find-sessions.sh:usage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:skills/.defaults/tmux/scripts/find-sessions.sh",
+      "target": "function:skills/.defaults/tmux/scripts/find-sessions.sh:list_sessions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:skills/.defaults/tmux/scripts/wait-for-text.sh",
+      "target": "function:skills/.defaults/tmux/scripts/wait-for-text.sh:usage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:templates/electrobun/src/bun/network/http-client.ts",
+      "target": "function:templates/electrobun/src/bun/network/http-client.ts:requestJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:templates/electrobun/src/bun/storage/sqlite-repository.ts",
+      "target": "function:templates/electrobun/src/bun/storage/sqlite-repository.ts:openAppDatabase",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:tsdown.config.mjs",
+      "target": "function:tsdown.config.mjs:localUpstreamsDisabled",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:tsdown.config.mjs",
+      "target": "function:tsdown.config.mjs:explicitAppCoreEntry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:tsdown.config.mjs",
+      "target": "function:tsdown.config.mjs:appCoreEntry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:tsdown.config.mjs:appCoreEntry",
+      "target": "function:tsdown.config.mjs:explicitAppCoreEntry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:tsdown.config.mjs:appCoreEntry",
+      "target": "function:tsdown.config.mjs:localUpstreamsDisabled",
+      "type": "calls"
+    }
+  ]
+}

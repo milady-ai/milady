@@ -1,0 +1,46 @@
+{
+  "batchIndex": 205,
+  "nodes": [
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "complex",
+      "id": "document:eliza/packages/app-core/platforms/electrobun/remotes/runtime/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/runtime/README.md",
+      "summary": "README.md documents eliza/packages/app-core/platforms/electrobun/remotes/runtime with 370 lines of reference material.",
+      "languageNotes": "markdown; docs; 370 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/electrobun/remotes/runtime/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/runtime/package.json",
+      "summary": "package.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 13 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/electrobun/remotes/runtime/plugin.json",
+      "type": "config",
+      "name": "plugin.json",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/runtime/plugin.json",
+      "summary": "plugin.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 30 lines"
+    }
+  ],
+  "edges": []
+}

@@ -1,0 +1,1124 @@
+{
+  "batchIndex": 109,
+  "nodes": [
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/index.test.ts",
+      "type": "file",
+      "name": "index.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/index.test.ts",
+      "summary": "index.test.ts is a typescript source file in the Milady codebase. It contains 4 imports.",
+      "languageNotes": "typescript; code; 67 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/structured-output.test.ts",
+      "type": "file",
+      "name": "structured-output.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/structured-output.test.ts",
+      "summary": "structured-output.test.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 215 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/text-streaming.test.ts",
+      "type": "file",
+      "name": "text-streaming.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/text-streaming.test.ts",
+      "summary": "text-streaming.test.ts is a typescript source file in the Milady codebase. It contains 3 functions, 3 imports.",
+      "languageNotes": "typescript; code; 174 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/text-streaming.test.ts:makeBaseResult",
+      "type": "function",
+      "name": "makeBaseResult",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/text-streaming.test.ts",
+      "summary": "makeBaseResult is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/text-streaming.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/text-streaming.test.ts:makeCtx",
+      "type": "function",
+      "name": "makeCtx",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/text-streaming.test.ts",
+      "summary": "makeCtx is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/text-streaming.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/text-streaming.test.ts:estimateUsage",
+      "type": "function",
+      "name": "estimateUsage",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/text-streaming.test.ts",
+      "summary": "estimateUsage is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/text-streaming.test.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/environment.ts",
+      "type": "file",
+      "name": "environment.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/environment.ts",
+      "summary": "environment.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 71 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/environment.ts:validateConfig",
+      "type": "function",
+      "name": "validateConfig",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/environment.ts",
+      "summary": "validateConfig is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/environment.ts."
+    },
+    {
+      "tags": [
+        "entry-point",
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase. It contains 15 functions, 1 class, 7 imports.",
+      "languageNotes": "typescript; code; 749 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:isStreamResult",
+      "type": "function",
+      "name": "isStreamResult",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "summary": "isStreamResult is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:getObjectField",
+      "type": "function",
+      "name": "getObjectField",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "summary": "getObjectField is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:extractEmbeddingText",
+      "type": "function",
+      "name": "extractEmbeddingText",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "summary": "extractEmbeddingText is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:estimateTokenCount",
+      "type": "function",
+      "name": "estimateTokenCount",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "summary": "estimateTokenCount is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:estimateUsage",
+      "type": "function",
+      "name": "estimateUsage",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "summary": "estimateUsage is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:normalizedToTokenUsage",
+      "type": "function",
+      "name": "normalizedToTokenUsage",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "summary": "normalizedToTokenUsage is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:estimateEmbeddingUsage",
+      "type": "function",
+      "name": "estimateEmbeddingUsage",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "summary": "estimateEmbeddingUsage is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:stripThinkTags",
+      "type": "function",
+      "name": "stripThinkTags",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "summary": "stripThinkTags is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:wantsNativeShape",
+      "type": "function",
+      "name": "wantsNativeShape",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "summary": "wantsNativeShape is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:shouldFallbackFromLocalInference",
+      "type": "function",
+      "name": "shouldFallbackFromLocalInference",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "summary": "shouldFallbackFromLocalInference is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:tryLocalInferenceModel",
+      "type": "function",
+      "name": "tryLocalInferenceModel",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "summary": "tryLocalInferenceModel is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:buildNativeResult",
+      "type": "function",
+      "name": "buildNativeResult",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "summary": "buildNativeResult is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:getLocalModelLabel",
+      "type": "function",
+      "name": "getLocalModelLabel",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "summary": "getLocalModelLabel is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:emitModelUsed",
+      "type": "function",
+      "name": "emitModelUsed",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "summary": "emitModelUsed is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:finalizeTextResult",
+      "type": "function",
+      "name": "finalizeTextResult",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "summary": "finalizeTextResult is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:LocalAIManager",
+      "type": "class",
+      "name": "LocalAIManager",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "summary": "LocalAIManager is a class or type declared in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts",
+      "type": "file",
+      "name": "loader.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts",
+      "summary": "loader.ts is a typescript source file in the Milady codebase. It contains 5 functions, 1 class, 3 imports.",
+      "languageNotes": "typescript; code; 386 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts:loadMobileCapacitor",
+      "type": "function",
+      "name": "loadMobileCapacitor",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts",
+      "summary": "loadMobileCapacitor is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts:synthesizeDesktopModelDescriptor",
+      "type": "function",
+      "name": "synthesizeDesktopModelDescriptor",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts",
+      "summary": "synthesizeDesktopModelDescriptor is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts:detectBackend",
+      "type": "function",
+      "name": "detectBackend",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts",
+      "summary": "detectBackend is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts:initCapacitorLlama",
+      "type": "function",
+      "name": "initCapacitorLlama",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts",
+      "summary": "initCapacitorLlama is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts:releaseAllCapacitorLlama",
+      "type": "function",
+      "name": "releaseAllCapacitorLlama",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts",
+      "summary": "releaseAllCapacitorLlama is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts:DesktopCapacitorLlamaContext",
+      "type": "class",
+      "name": "DesktopCapacitorLlamaContext",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts",
+      "summary": "DesktopCapacitorLlamaContext is a class or type declared in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts",
+      "type": "file",
+      "name": "structured-output.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts",
+      "summary": "structured-output.ts is a typescript source file in the Milady codebase. It contains 5 functions, 2 imports.",
+      "languageNotes": "typescript; code; 165 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts:buildCapacitorTools",
+      "type": "function",
+      "name": "buildCapacitorTools",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts",
+      "summary": "buildCapacitorTools is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts:extractToolCalls",
+      "type": "function",
+      "name": "extractToolCalls",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts",
+      "summary": "extractToolCalls is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts:parseToolArguments",
+      "type": "function",
+      "name": "parseToolArguments",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts",
+      "summary": "parseToolArguments is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts:planStructuredRequest",
+      "type": "function",
+      "name": "planStructuredRequest",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts",
+      "summary": "planStructuredRequest is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts:applyStructuredPlan",
+      "type": "function",
+      "name": "applyStructuredPlan",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts",
+      "summary": "applyStructuredPlan is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/text-streaming.ts",
+      "type": "file",
+      "name": "text-streaming.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/text-streaming.ts",
+      "summary": "text-streaming.ts is a typescript source file in the Milady codebase. It contains 3 functions, 2 imports.",
+      "languageNotes": "typescript; code; 227 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/text-streaming.ts:indexOfIgnoreCase",
+      "type": "function",
+      "name": "indexOfIgnoreCase",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/text-streaming.ts",
+      "summary": "indexOfIgnoreCase is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/text-streaming.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/text-streaming.ts:createThinkTagStreamFilter",
+      "type": "function",
+      "name": "createThinkTagStreamFilter",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/text-streaming.ts",
+      "summary": "createThinkTagStreamFilter is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/text-streaming.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/text-streaming.ts:streamCapacitorPrompt",
+      "type": "function",
+      "name": "streamCapacitorPrompt",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/text-streaming.ts",
+      "summary": "streamCapacitorPrompt is a function defined in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/text-streaming.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase. It contains 1 class.",
+      "languageNotes": "typescript; code; 374 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/types.ts:CapacitorLlamaUnsupportedError",
+      "type": "class",
+      "name": "CapacitorLlamaUnsupportedError",
+      "filePath": "eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/types.ts",
+      "summary": "CapacitorLlamaUnsupportedError is a class or type declared in eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/types.ts."
+    },
+    {
+      "tags": [
+        "entry-point",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-local-inference/src/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 50 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/text-streaming.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/text-streaming.test.ts:makeBaseResult",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/text-streaming.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/text-streaming.test.ts:makeCtx",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/text-streaming.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/text-streaming.test.ts:estimateUsage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/environment.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/environment.ts:validateConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:isStreamResult",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:getObjectField",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:extractEmbeddingText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:estimateTokenCount",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:estimateUsage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:normalizedToTokenUsage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:estimateEmbeddingUsage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:stripThinkTags",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:wantsNativeShape",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:shouldFallbackFromLocalInference",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:tryLocalInferenceModel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:buildNativeResult",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:getLocalModelLabel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:emitModelUsed",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:finalizeTextResult",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:LocalAIManager",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:extractEmbeddingText",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:getObjectField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:estimateUsage",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:estimateTokenCount",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:estimateUsage",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:estimateTokenCount",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:estimateEmbeddingUsage",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:estimateTokenCount",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:tryLocalInferenceModel",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:shouldFallbackFromLocalInference",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:finalizeTextResult",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:isStreamResult",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:finalizeTextResult",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:getLocalModelLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:finalizeTextResult",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:emitModelUsed",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:finalizeTextResult",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:emitModelUsed",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:finalizeTextResult",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:getLocalModelLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:finalizeTextResult",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:estimateUsage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:finalizeTextResult",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:wantsNativeShape",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:finalizeTextResult",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts:buildNativeResult",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts:loadMobileCapacitor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts:synthesizeDesktopModelDescriptor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts:detectBackend",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts:initCapacitorLlama",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts:releaseAllCapacitorLlama",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts:DesktopCapacitorLlamaContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts:initCapacitorLlama",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts:detectBackend",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts:initCapacitorLlama",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts:loadMobileCapacitor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts:releaseAllCapacitorLlama",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts:detectBackend",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts:releaseAllCapacitorLlama",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts:loadMobileCapacitor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts:buildCapacitorTools",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts:extractToolCalls",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts:parseToolArguments",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts:planStructuredRequest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts:applyStructuredPlan",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts:extractToolCalls",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts:parseToolArguments",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts:planStructuredRequest",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts:buildCapacitorTools",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/text-streaming.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/text-streaming.ts:indexOfIgnoreCase",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/text-streaming.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/text-streaming.ts:createThinkTagStreamFilter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/text-streaming.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/text-streaming.ts:streamCapacitorPrompt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/text-streaming.ts:streamCapacitorPrompt",
+      "target": "function:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/text-streaming.ts:createThinkTagStreamFilter",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/types.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/types.ts:CapacitorLlamaUnsupportedError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/index.test.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/index.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/environment.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/index.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/index.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/structured-output.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/structured-output.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/text-streaming.test.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/text-streaming.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/text-streaming.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/__tests__/text-streaming.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/environment.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/environment.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/text-streaming.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/index.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/loader.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/desktop-llama-adapter.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/structured-output.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/text-streaming.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/text-streaming.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/adapters/capacitor-llama/types.ts",
+      "type": "imports"
+    }
+  ]
+}

@@ -1,0 +1,428 @@
+{
+  "batchIndex": 153,
+  "nodes": [
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "complex",
+      "id": "pipeline:.github/workflows/agent-fix-ci.yml",
+      "type": "pipeline",
+      "name": "agent-fix-ci.yml",
+      "filePath": ".github/workflows/agent-fix-ci.yml",
+      "summary": "agent-fix-ci.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 278 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "complex",
+      "id": "pipeline:.github/workflows/agent-implement.yml",
+      "type": "pipeline",
+      "name": "agent-implement.yml",
+      "filePath": ".github/workflows/agent-implement.yml",
+      "summary": "agent-implement.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 360 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "complex",
+      "id": "pipeline:.github/workflows/agent-release.yml",
+      "type": "pipeline",
+      "name": "agent-release.yml",
+      "filePath": ".github/workflows/agent-release.yml",
+      "summary": "agent-release.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 1366 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "complex",
+      "id": "pipeline:.github/workflows/agent-review-apply-greptile-suggestions.yml",
+      "type": "pipeline",
+      "name": "agent-review-apply-greptile-suggestions.yml",
+      "filePath": ".github/workflows/agent-review-apply-greptile-suggestions.yml",
+      "summary": "agent-review-apply-greptile-suggestions.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 401 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "complex",
+      "id": "pipeline:.github/workflows/agent-review-greptile-weighted.yml",
+      "type": "pipeline",
+      "name": "agent-review-greptile-weighted.yml",
+      "filePath": ".github/workflows/agent-review-greptile-weighted.yml",
+      "summary": "agent-review-greptile-weighted.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 327 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "complex",
+      "id": "pipeline:.github/workflows/agent-review.yml",
+      "type": "pipeline",
+      "name": "agent-review.yml",
+      "filePath": ".github/workflows/agent-review.yml",
+      "summary": "agent-review.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 1349 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "simple",
+      "id": "pipeline:.github/workflows/android-apk.yml",
+      "type": "pipeline",
+      "name": "android-apk.yml",
+      "filePath": ".github/workflows/android-apk.yml",
+      "summary": "android-apk.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 60 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "complex",
+      "id": "pipeline:.github/workflows/android-release.yml",
+      "type": "pipeline",
+      "name": "android-release.yml",
+      "filePath": ".github/workflows/android-release.yml",
+      "summary": "android-release.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 328 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "complex",
+      "id": "pipeline:.github/workflows/apple-store-release.yml",
+      "type": "pipeline",
+      "name": "apple-store-release.yml",
+      "filePath": ".github/workflows/apple-store-release.yml",
+      "summary": "apple-store-release.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 552 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "complex",
+      "id": "pipeline:.github/workflows/build-cloud-agent.yml",
+      "type": "pipeline",
+      "name": "build-cloud-agent.yml",
+      "filePath": ".github/workflows/build-cloud-agent.yml",
+      "summary": "build-cloud-agent.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 507 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "complex",
+      "id": "pipeline:.github/workflows/build-cloud-image.yml",
+      "type": "pipeline",
+      "name": "build-cloud-image.yml",
+      "filePath": ".github/workflows/build-cloud-image.yml",
+      "summary": "build-cloud-image.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 572 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "complex",
+      "id": "pipeline:.github/workflows/build-docker.yml",
+      "type": "pipeline",
+      "name": "build-docker.yml",
+      "filePath": ".github/workflows/build-docker.yml",
+      "summary": "build-docker.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 531 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "complex",
+      "id": "pipeline:.github/workflows/build-tails-iso.yml",
+      "type": "pipeline",
+      "name": "build-tails-iso.yml",
+      "filePath": ".github/workflows/build-tails-iso.yml",
+      "summary": "build-tails-iso.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 395 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "moderate",
+      "id": "pipeline:.github/workflows/ci-fork.yml",
+      "type": "pipeline",
+      "name": "ci-fork.yml",
+      "filePath": ".github/workflows/ci-fork.yml",
+      "summary": "ci-fork.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 148 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "complex",
+      "id": "pipeline:.github/workflows/ci.yml",
+      "type": "pipeline",
+      "name": "ci.yml",
+      "filePath": ".github/workflows/ci.yml",
+      "summary": "ci.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 319 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "moderate",
+      "id": "pipeline:.github/workflows/container-scan.yml",
+      "type": "pipeline",
+      "name": "container-scan.yml",
+      "filePath": ".github/workflows/container-scan.yml",
+      "summary": "container-scan.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 106 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "simple",
+      "id": "pipeline:.github/workflows/coverage-gate.yml",
+      "type": "pipeline",
+      "name": "coverage-gate.yml",
+      "filePath": ".github/workflows/coverage-gate.yml",
+      "summary": "coverage-gate.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 69 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "moderate",
+      "id": "pipeline:.github/workflows/deploy-origin-smoke.yml",
+      "type": "pipeline",
+      "name": "deploy-origin-smoke.yml",
+      "filePath": ".github/workflows/deploy-origin-smoke.yml",
+      "summary": "deploy-origin-smoke.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 86 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "moderate",
+      "id": "pipeline:.github/workflows/deploy-web.yml",
+      "type": "pipeline",
+      "name": "deploy-web.yml",
+      "filePath": ".github/workflows/deploy-web.yml",
+      "summary": "deploy-web.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 94 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "moderate",
+      "id": "pipeline:.github/workflows/e2e-orphan-sweeper.yml",
+      "type": "pipeline",
+      "name": "e2e-orphan-sweeper.yml",
+      "filePath": ".github/workflows/e2e-orphan-sweeper.yml",
+      "summary": "e2e-orphan-sweeper.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 118 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "simple",
+      "id": "pipeline:.github/workflows/gitleaks.yml",
+      "type": "pipeline",
+      "name": "gitleaks.yml",
+      "filePath": ".github/workflows/gitleaks.yml",
+      "summary": "gitleaks.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 52 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "moderate",
+      "id": "pipeline:.github/workflows/miladyos-cuttlefish.yml",
+      "type": "pipeline",
+      "name": "miladyos-cuttlefish.yml",
+      "filePath": ".github/workflows/miladyos-cuttlefish.yml",
+      "summary": "miladyos-cuttlefish.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 78 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "moderate",
+      "id": "pipeline:.github/workflows/publish-npm.yml",
+      "type": "pipeline",
+      "name": "publish-npm.yml",
+      "filePath": ".github/workflows/publish-npm.yml",
+      "summary": "publish-npm.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 134 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "complex",
+      "id": "pipeline:.github/workflows/publish-packages.yml",
+      "type": "pipeline",
+      "name": "publish-packages.yml",
+      "filePath": ".github/workflows/publish-packages.yml",
+      "summary": "publish-packages.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 506 lines"
+    },
+    {
+      "tags": [
+        "infrastructure",
+        "desktop"
+      ],
+      "complexity": "complex",
+      "id": "pipeline:.github/workflows/release-electrobun.yml",
+      "type": "pipeline",
+      "name": "release-electrobun.yml",
+      "filePath": ".github/workflows/release-electrobun.yml",
+      "summary": "release-electrobun.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 2134 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "complex",
+      "id": "pipeline:.github/workflows/release-orchestrator.yml",
+      "type": "pipeline",
+      "name": "release-orchestrator.yml",
+      "filePath": ".github/workflows/release-orchestrator.yml",
+      "summary": "release-orchestrator.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 378 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "moderate",
+      "id": "pipeline:.github/workflows/reusable-npm-publish.yml",
+      "type": "pipeline",
+      "name": "reusable-npm-publish.yml",
+      "filePath": ".github/workflows/reusable-npm-publish.yml",
+      "summary": "reusable-npm-publish.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 146 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "moderate",
+      "id": "pipeline:.github/workflows/rotate-e2e-secrets.yml",
+      "type": "pipeline",
+      "name": "rotate-e2e-secrets.yml",
+      "filePath": ".github/workflows/rotate-e2e-secrets.yml",
+      "summary": "rotate-e2e-secrets.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 92 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "moderate",
+      "id": "pipeline:.github/workflows/sign-images.yml",
+      "type": "pipeline",
+      "name": "sign-images.yml",
+      "filePath": ".github/workflows/sign-images.yml",
+      "summary": "sign-images.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 72 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "moderate",
+      "id": "pipeline:.github/workflows/sign-windows.yml",
+      "type": "pipeline",
+      "name": "sign-windows.yml",
+      "filePath": ".github/workflows/sign-windows.yml",
+      "summary": "sign-windows.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 108 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "simple",
+      "id": "pipeline:.github/workflows/soc2-verify.yml",
+      "type": "pipeline",
+      "name": "soc2-verify.yml",
+      "filePath": ".github/workflows/soc2-verify.yml",
+      "summary": "soc2-verify.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 61 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "moderate",
+      "id": "pipeline:.github/workflows/task-agent-cross-platform-review.yml",
+      "type": "pipeline",
+      "name": "task-agent-cross-platform-review.yml",
+      "filePath": ".github/workflows/task-agent-cross-platform-review.yml",
+      "summary": "task-agent-cross-platform-review.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 85 lines"
+    },
+    {
+      "tags": [
+        "infrastructure",
+        "desktop"
+      ],
+      "complexity": "moderate",
+      "id": "pipeline:.github/workflows/test-electrobun-release.yml",
+      "type": "pipeline",
+      "name": "test-electrobun-release.yml",
+      "filePath": ".github/workflows/test-electrobun-release.yml",
+      "summary": "test-electrobun-release.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 77 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "simple",
+      "id": "pipeline:.github/workflows/update-homebrew.yml",
+      "type": "pipeline",
+      "name": "update-homebrew.yml",
+      "filePath": ".github/workflows/update-homebrew.yml",
+      "summary": "update-homebrew.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 56 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "simple",
+      "id": "pipeline:.github/workflows/verify-patches.yml",
+      "type": "pipeline",
+      "name": "verify-patches.yml",
+      "filePath": ".github/workflows/verify-patches.yml",
+      "summary": "verify-patches.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 31 lines"
+    }
+  ],
+  "edges": []
+}

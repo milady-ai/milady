@@ -1,0 +1,1438 @@
+{
+  "batchIndex": 122,
+  "nodes": [
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:scripts/lib/install-env.mjs",
+      "type": "file",
+      "name": "install-env.mjs",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "install-env.mjs is a javascript source file in the Milady codebase. It contains 24 functions.",
+      "languageNotes": "javascript; code; 409 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-env.mjs:unique",
+      "type": "function",
+      "name": "unique",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "unique is a function defined in scripts/lib/install-env.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-env.mjs:parseMajor",
+      "type": "function",
+      "name": "parseMajor",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "parseMajor is a function defined in scripts/lib/install-env.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-env.mjs:normalizeVersion",
+      "type": "function",
+      "name": "normalizeVersion",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "normalizeVersion is a function defined in scripts/lib/install-env.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-env.mjs:parseNodeProbeOutput",
+      "type": "function",
+      "name": "parseNodeProbeOutput",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "parseNodeProbeOutput is a function defined in scripts/lib/install-env.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-env.mjs:probeNode",
+      "type": "function",
+      "name": "probeNode",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "probeNode is a function defined in scripts/lib/install-env.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-env.mjs:probePython",
+      "type": "function",
+      "name": "probePython",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "probePython is a function defined in scripts/lib/install-env.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-env.mjs:readRequiredNodeVersion",
+      "type": "function",
+      "name": "readRequiredNodeVersion",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "readRequiredNodeVersion is a function defined in scripts/lib/install-env.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-env.mjs:nodeCandidatesForVersion",
+      "type": "function",
+      "name": "nodeCandidatesForVersion",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "nodeCandidatesForVersion is a function defined in scripts/lib/install-env.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-env.mjs:pythonCandidates",
+      "type": "function",
+      "name": "pythonCandidates",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "pythonCandidates is a function defined in scripts/lib/install-env.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-env.mjs:selectNodeCandidate",
+      "type": "function",
+      "name": "selectNodeCandidate",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "selectNodeCandidate is a function defined in scripts/lib/install-env.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-env.mjs:selectPythonCandidate",
+      "type": "function",
+      "name": "selectPythonCandidate",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "selectPythonCandidate is a function defined in scripts/lib/install-env.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-env.mjs:buildPathWithNodeBin",
+      "type": "function",
+      "name": "buildPathWithNodeBin",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "buildPathWithNodeBin is a function defined in scripts/lib/install-env.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-env.mjs:shellQuote",
+      "type": "function",
+      "name": "shellQuote",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "shellQuote is a function defined in scripts/lib/install-env.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-env.mjs:writeInstallLifecycleNodeShim",
+      "type": "function",
+      "name": "writeInstallLifecycleNodeShim",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "writeInstallLifecycleNodeShim is a function defined in scripts/lib/install-env.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-env.mjs:shouldSkipInstallPreflight",
+      "type": "function",
+      "name": "shouldSkipInstallPreflight",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "shouldSkipInstallPreflight is a function defined in scripts/lib/install-env.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-env.mjs:readinessResult",
+      "type": "function",
+      "name": "readinessResult",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "readinessResult is a function defined in scripts/lib/install-env.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-env.mjs:getNodeReadinessCode",
+      "type": "function",
+      "name": "getNodeReadinessCode",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "getNodeReadinessCode is a function defined in scripts/lib/install-env.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-env.mjs:getPythonReadinessCode",
+      "type": "function",
+      "name": "getPythonReadinessCode",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "getPythonReadinessCode is a function defined in scripts/lib/install-env.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-env.mjs:evaluateInstallReadiness",
+      "type": "function",
+      "name": "evaluateInstallReadiness",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "evaluateInstallReadiness is a function defined in scripts/lib/install-env.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-env.mjs:formatInstallReadinessError",
+      "type": "function",
+      "name": "formatInstallReadinessError",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "formatInstallReadinessError is a function defined in scripts/lib/install-env.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-env.mjs:getConfiguredPython",
+      "type": "function",
+      "name": "getConfiguredPython",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "getConfiguredPython is a function defined in scripts/lib/install-env.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-env.mjs:getFallbackPythonChecks",
+      "type": "function",
+      "name": "getFallbackPythonChecks",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "getFallbackPythonChecks is a function defined in scripts/lib/install-env.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-env.mjs:evaluateCurrentInstallEnvironment",
+      "type": "function",
+      "name": "evaluateCurrentInstallEnvironment",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "evaluateCurrentInstallEnvironment is a function defined in scripts/lib/install-env.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-env.mjs:resolveInstallEnvironment",
+      "type": "function",
+      "name": "resolveInstallEnvironment",
+      "filePath": "scripts/lib/install-env.mjs",
+      "summary": "resolveInstallEnvironment is a function defined in scripts/lib/install-env.mjs."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:scripts/lib/install-env.test.ts",
+      "type": "file",
+      "name": "install-env.test.ts",
+      "filePath": "scripts/lib/install-env.test.ts",
+      "summary": "install-env.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 212 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:scripts/lib/install-profiles.mjs",
+      "type": "file",
+      "name": "install-profiles.mjs",
+      "filePath": "scripts/lib/install-profiles.mjs",
+      "summary": "install-profiles.mjs is a javascript source file in the Milady codebase. It contains 13 functions.",
+      "languageNotes": "javascript; code; 297 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-profiles.mjs:uniqueProfileIds",
+      "type": "function",
+      "name": "uniqueProfileIds",
+      "filePath": "scripts/lib/install-profiles.mjs",
+      "summary": "uniqueProfileIds is a function defined in scripts/lib/install-profiles.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-profiles.mjs:defaultInstallProfileIds",
+      "type": "function",
+      "name": "defaultInstallProfileIds",
+      "filePath": "scripts/lib/install-profiles.mjs",
+      "summary": "defaultInstallProfileIds is a function defined in scripts/lib/install-profiles.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-profiles.mjs:parseInstallProfileList",
+      "type": "function",
+      "name": "parseInstallProfileList",
+      "filePath": "scripts/lib/install-profiles.mjs",
+      "summary": "parseInstallProfileList is a function defined in scripts/lib/install-profiles.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-profiles.mjs:expandInstallProfileIds",
+      "type": "function",
+      "name": "expandInstallProfileIds",
+      "filePath": "scripts/lib/install-profiles.mjs",
+      "summary": "expandInstallProfileIds is a function defined in scripts/lib/install-profiles.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-profiles.mjs:buildInstallPlan",
+      "type": "function",
+      "name": "buildInstallPlan",
+      "filePath": "scripts/lib/install-profiles.mjs",
+      "summary": "buildInstallPlan is a function defined in scripts/lib/install-profiles.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-profiles.mjs:normalizeInstallState",
+      "type": "function",
+      "name": "normalizeInstallState",
+      "filePath": "scripts/lib/install-profiles.mjs",
+      "summary": "normalizeInstallState is a function defined in scripts/lib/install-profiles.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-profiles.mjs:moveCursor",
+      "type": "function",
+      "name": "moveCursor",
+      "filePath": "scripts/lib/install-profiles.mjs",
+      "summary": "moveCursor is a function defined in scripts/lib/install-profiles.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-profiles.mjs:applyInstallProfileKey",
+      "type": "function",
+      "name": "applyInstallProfileKey",
+      "filePath": "scripts/lib/install-profiles.mjs",
+      "summary": "applyInstallProfileKey is a function defined in scripts/lib/install-profiles.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-profiles.mjs:renderInstallProfilePrompt",
+      "type": "function",
+      "name": "renderInstallProfilePrompt",
+      "filePath": "scripts/lib/install-profiles.mjs",
+      "summary": "renderInstallProfilePrompt is a function defined in scripts/lib/install-profiles.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-profiles.mjs:setInputRawMode",
+      "type": "function",
+      "name": "setInputRawMode",
+      "filePath": "scripts/lib/install-profiles.mjs",
+      "summary": "setInputRawMode is a function defined in scripts/lib/install-profiles.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-profiles.mjs:createRawModeRestorer",
+      "type": "function",
+      "name": "createRawModeRestorer",
+      "filePath": "scripts/lib/install-profiles.mjs",
+      "summary": "createRawModeRestorer is a function defined in scripts/lib/install-profiles.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-profiles.mjs:waitForProfileSelection",
+      "type": "function",
+      "name": "waitForProfileSelection",
+      "filePath": "scripts/lib/install-profiles.mjs",
+      "summary": "waitForProfileSelection is a function defined in scripts/lib/install-profiles.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/lib/install-profiles.mjs:promptInstallProfiles",
+      "type": "function",
+      "name": "promptInstallProfiles",
+      "filePath": "scripts/lib/install-profiles.mjs",
+      "summary": "promptInstallProfiles is a function defined in scripts/lib/install-profiles.mjs."
+    },
+    {
+      "tags": [
+        "test",
+        "class"
+      ],
+      "complexity": "moderate",
+      "id": "file:scripts/lib/install-profiles.test.ts",
+      "type": "file",
+      "name": "install-profiles.test.ts",
+      "filePath": "scripts/lib/install-profiles.test.ts",
+      "summary": "install-profiles.test.ts is a typescript source file in the Milady codebase. It contains 2 classes, 1 imports.",
+      "languageNotes": "typescript; code; 166 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:scripts/lib/install-profiles.test.ts:FakeInput",
+      "type": "class",
+      "name": "FakeInput",
+      "filePath": "scripts/lib/install-profiles.test.ts",
+      "summary": "FakeInput is a class or type declared in scripts/lib/install-profiles.test.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:scripts/lib/install-profiles.test.ts:FakeOutput",
+      "type": "class",
+      "name": "FakeOutput",
+      "filePath": "scripts/lib/install-profiles.test.ts",
+      "summary": "FakeOutput is a class or type declared in scripts/lib/install-profiles.test.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:scripts/preinstall.mjs",
+      "type": "file",
+      "name": "preinstall.mjs",
+      "filePath": "scripts/preinstall.mjs",
+      "summary": "preinstall.mjs is a javascript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "javascript; code; 50 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:scripts/run-init-then-bun-install.mjs",
+      "type": "file",
+      "name": "run-init-then-bun-install.mjs",
+      "filePath": "scripts/run-init-then-bun-install.mjs",
+      "summary": "run-init-then-bun-install.mjs is a javascript source file in the Milady codebase. It contains 9 functions, 2 imports.",
+      "languageNotes": "javascript; code; 212 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-init-then-bun-install.mjs:usage",
+      "type": "function",
+      "name": "usage",
+      "filePath": "scripts/run-init-then-bun-install.mjs",
+      "summary": "usage is a function defined in scripts/run-init-then-bun-install.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-init-then-bun-install.mjs:splitBunInstallArgs",
+      "type": "function",
+      "name": "splitBunInstallArgs",
+      "filePath": "scripts/run-init-then-bun-install.mjs",
+      "summary": "splitBunInstallArgs is a function defined in scripts/run-init-then-bun-install.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-init-then-bun-install.mjs:knownArgumentIndexes",
+      "type": "function",
+      "name": "knownArgumentIndexes",
+      "filePath": "scripts/run-init-then-bun-install.mjs",
+      "summary": "knownArgumentIndexes is a function defined in scripts/run-init-then-bun-install.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-init-then-bun-install.mjs:collectProfileValues",
+      "type": "function",
+      "name": "collectProfileValues",
+      "filePath": "scripts/run-init-then-bun-install.mjs",
+      "summary": "collectProfileValues is a function defined in scripts/run-init-then-bun-install.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-init-then-bun-install.mjs:parseArgs",
+      "type": "function",
+      "name": "parseArgs",
+      "filePath": "scripts/run-init-then-bun-install.mjs",
+      "summary": "parseArgs is a function defined in scripts/run-init-then-bun-install.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-init-then-bun-install.mjs:canPrompt",
+      "type": "function",
+      "name": "canPrompt",
+      "filePath": "scripts/run-init-then-bun-install.mjs",
+      "summary": "canPrompt is a function defined in scripts/run-init-then-bun-install.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-init-then-bun-install.mjs:selectProfiles",
+      "type": "function",
+      "name": "selectProfiles",
+      "filePath": "scripts/run-init-then-bun-install.mjs",
+      "summary": "selectProfiles is a function defined in scripts/run-init-then-bun-install.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-init-then-bun-install.mjs:runStep",
+      "type": "function",
+      "name": "runStep",
+      "filePath": "scripts/run-init-then-bun-install.mjs",
+      "summary": "runStep is a function defined in scripts/run-init-then-bun-install.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-init-then-bun-install.mjs:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "scripts/run-init-then-bun-install.mjs",
+      "summary": "main is a function defined in scripts/run-init-then-bun-install.mjs."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:scripts/run-init-then-bun-install.test.ts",
+      "type": "file",
+      "name": "run-init-then-bun-install.test.ts",
+      "filePath": "scripts/run-init-then-bun-install.test.ts",
+      "summary": "run-init-then-bun-install.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 31 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-env.mjs",
+      "target": "function:scripts/lib/install-env.mjs:unique",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-env.mjs",
+      "target": "function:scripts/lib/install-env.mjs:parseMajor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-env.mjs",
+      "target": "function:scripts/lib/install-env.mjs:normalizeVersion",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-env.mjs",
+      "target": "function:scripts/lib/install-env.mjs:parseNodeProbeOutput",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-env.mjs",
+      "target": "function:scripts/lib/install-env.mjs:probeNode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-env.mjs",
+      "target": "function:scripts/lib/install-env.mjs:probePython",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-env.mjs",
+      "target": "function:scripts/lib/install-env.mjs:readRequiredNodeVersion",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-env.mjs",
+      "target": "function:scripts/lib/install-env.mjs:nodeCandidatesForVersion",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-env.mjs",
+      "target": "function:scripts/lib/install-env.mjs:pythonCandidates",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-env.mjs",
+      "target": "function:scripts/lib/install-env.mjs:selectNodeCandidate",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-env.mjs",
+      "target": "function:scripts/lib/install-env.mjs:selectPythonCandidate",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-env.mjs",
+      "target": "function:scripts/lib/install-env.mjs:buildPathWithNodeBin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-env.mjs",
+      "target": "function:scripts/lib/install-env.mjs:shellQuote",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-env.mjs",
+      "target": "function:scripts/lib/install-env.mjs:writeInstallLifecycleNodeShim",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-env.mjs",
+      "target": "function:scripts/lib/install-env.mjs:shouldSkipInstallPreflight",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-env.mjs",
+      "target": "function:scripts/lib/install-env.mjs:readinessResult",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-env.mjs",
+      "target": "function:scripts/lib/install-env.mjs:getNodeReadinessCode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-env.mjs",
+      "target": "function:scripts/lib/install-env.mjs:getPythonReadinessCode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-env.mjs",
+      "target": "function:scripts/lib/install-env.mjs:evaluateInstallReadiness",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-env.mjs",
+      "target": "function:scripts/lib/install-env.mjs:formatInstallReadinessError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-env.mjs",
+      "target": "function:scripts/lib/install-env.mjs:getConfiguredPython",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-env.mjs",
+      "target": "function:scripts/lib/install-env.mjs:getFallbackPythonChecks",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-env.mjs",
+      "target": "function:scripts/lib/install-env.mjs:evaluateCurrentInstallEnvironment",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-env.mjs",
+      "target": "function:scripts/lib/install-env.mjs:resolveInstallEnvironment",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:probeNode",
+      "target": "function:scripts/lib/install-env.mjs:parseNodeProbeOutput",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:nodeCandidatesForVersion",
+      "target": "function:scripts/lib/install-env.mjs:normalizeVersion",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:nodeCandidatesForVersion",
+      "target": "function:scripts/lib/install-env.mjs:unique",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:pythonCandidates",
+      "target": "function:scripts/lib/install-env.mjs:unique",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:selectNodeCandidate",
+      "target": "function:scripts/lib/install-env.mjs:normalizeVersion",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:selectNodeCandidate",
+      "target": "function:scripts/lib/install-env.mjs:normalizeVersion",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:selectNodeCandidate",
+      "target": "function:scripts/lib/install-env.mjs:parseMajor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:writeInstallLifecycleNodeShim",
+      "target": "function:scripts/lib/install-env.mjs:shellQuote",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:writeInstallLifecycleNodeShim",
+      "target": "function:scripts/lib/install-env.mjs:shellQuote",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:writeInstallLifecycleNodeShim",
+      "target": "function:scripts/lib/install-env.mjs:shellQuote",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:getNodeReadinessCode",
+      "target": "function:scripts/lib/install-env.mjs:parseMajor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:evaluateInstallReadiness",
+      "target": "function:scripts/lib/install-env.mjs:normalizeVersion",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:evaluateInstallReadiness",
+      "target": "function:scripts/lib/install-env.mjs:getNodeReadinessCode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:evaluateInstallReadiness",
+      "target": "function:scripts/lib/install-env.mjs:getPythonReadinessCode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:evaluateInstallReadiness",
+      "target": "function:scripts/lib/install-env.mjs:readinessResult",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:evaluateInstallReadiness",
+      "target": "function:scripts/lib/install-env.mjs:readinessResult",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:getConfiguredPython",
+      "target": "function:scripts/lib/install-env.mjs:probePython",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:getFallbackPythonChecks",
+      "target": "function:scripts/lib/install-env.mjs:probePython",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:getFallbackPythonChecks",
+      "target": "function:scripts/lib/install-env.mjs:probePython",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:evaluateCurrentInstallEnvironment",
+      "target": "function:scripts/lib/install-env.mjs:readRequiredNodeVersion",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:evaluateCurrentInstallEnvironment",
+      "target": "function:scripts/lib/install-env.mjs:probeNode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:evaluateCurrentInstallEnvironment",
+      "target": "function:scripts/lib/install-env.mjs:getConfiguredPython",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:evaluateCurrentInstallEnvironment",
+      "target": "function:scripts/lib/install-env.mjs:getFallbackPythonChecks",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:evaluateCurrentInstallEnvironment",
+      "target": "function:scripts/lib/install-env.mjs:evaluateInstallReadiness",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:resolveInstallEnvironment",
+      "target": "function:scripts/lib/install-env.mjs:readRequiredNodeVersion",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:resolveInstallEnvironment",
+      "target": "function:scripts/lib/install-env.mjs:probeNode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:resolveInstallEnvironment",
+      "target": "function:scripts/lib/install-env.mjs:nodeCandidatesForVersion",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:resolveInstallEnvironment",
+      "target": "function:scripts/lib/install-env.mjs:probeNode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:resolveInstallEnvironment",
+      "target": "function:scripts/lib/install-env.mjs:selectNodeCandidate",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:resolveInstallEnvironment",
+      "target": "function:scripts/lib/install-env.mjs:selectPythonCandidate",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:resolveInstallEnvironment",
+      "target": "function:scripts/lib/install-env.mjs:pythonCandidates",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:resolveInstallEnvironment",
+      "target": "function:scripts/lib/install-env.mjs:probePython",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-env.mjs:resolveInstallEnvironment",
+      "target": "function:scripts/lib/install-env.mjs:buildPathWithNodeBin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-profiles.mjs",
+      "target": "function:scripts/lib/install-profiles.mjs:uniqueProfileIds",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-profiles.mjs",
+      "target": "function:scripts/lib/install-profiles.mjs:defaultInstallProfileIds",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-profiles.mjs",
+      "target": "function:scripts/lib/install-profiles.mjs:parseInstallProfileList",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-profiles.mjs",
+      "target": "function:scripts/lib/install-profiles.mjs:expandInstallProfileIds",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-profiles.mjs",
+      "target": "function:scripts/lib/install-profiles.mjs:buildInstallPlan",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-profiles.mjs",
+      "target": "function:scripts/lib/install-profiles.mjs:normalizeInstallState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-profiles.mjs",
+      "target": "function:scripts/lib/install-profiles.mjs:moveCursor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-profiles.mjs",
+      "target": "function:scripts/lib/install-profiles.mjs:applyInstallProfileKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-profiles.mjs",
+      "target": "function:scripts/lib/install-profiles.mjs:renderInstallProfilePrompt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-profiles.mjs",
+      "target": "function:scripts/lib/install-profiles.mjs:setInputRawMode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-profiles.mjs",
+      "target": "function:scripts/lib/install-profiles.mjs:createRawModeRestorer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-profiles.mjs",
+      "target": "function:scripts/lib/install-profiles.mjs:waitForProfileSelection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-profiles.mjs",
+      "target": "function:scripts/lib/install-profiles.mjs:promptInstallProfiles",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-profiles.mjs:parseInstallProfileList",
+      "target": "function:scripts/lib/install-profiles.mjs:uniqueProfileIds",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-profiles.mjs:expandInstallProfileIds",
+      "target": "function:scripts/lib/install-profiles.mjs:defaultInstallProfileIds",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-profiles.mjs:buildInstallPlan",
+      "target": "function:scripts/lib/install-profiles.mjs:expandInstallProfileIds",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-profiles.mjs:normalizeInstallState",
+      "target": "function:scripts/lib/install-profiles.mjs:uniqueProfileIds",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-profiles.mjs:normalizeInstallState",
+      "target": "function:scripts/lib/install-profiles.mjs:defaultInstallProfileIds",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-profiles.mjs:applyInstallProfileKey",
+      "target": "function:scripts/lib/install-profiles.mjs:normalizeInstallState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-profiles.mjs:applyInstallProfileKey",
+      "target": "function:scripts/lib/install-profiles.mjs:moveCursor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-profiles.mjs:applyInstallProfileKey",
+      "target": "function:scripts/lib/install-profiles.mjs:moveCursor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-profiles.mjs:applyInstallProfileKey",
+      "target": "function:scripts/lib/install-profiles.mjs:defaultInstallProfileIds",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-profiles.mjs:renderInstallProfilePrompt",
+      "target": "function:scripts/lib/install-profiles.mjs:normalizeInstallState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-profiles.mjs:createRawModeRestorer",
+      "target": "function:scripts/lib/install-profiles.mjs:setInputRawMode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-profiles.mjs:promptInstallProfiles",
+      "target": "function:scripts/lib/install-profiles.mjs:defaultInstallProfileIds",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-profiles.mjs:promptInstallProfiles",
+      "target": "function:scripts/lib/install-profiles.mjs:createRawModeRestorer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-profiles.mjs:promptInstallProfiles",
+      "target": "function:scripts/lib/install-profiles.mjs:setInputRawMode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/lib/install-profiles.mjs:promptInstallProfiles",
+      "target": "function:scripts/lib/install-profiles.mjs:waitForProfileSelection",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-profiles.test.ts",
+      "target": "class:scripts/lib/install-profiles.test.ts:FakeInput",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/lib/install-profiles.test.ts",
+      "target": "class:scripts/lib/install-profiles.test.ts:FakeOutput",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-init-then-bun-install.mjs",
+      "target": "function:scripts/run-init-then-bun-install.mjs:usage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-init-then-bun-install.mjs",
+      "target": "function:scripts/run-init-then-bun-install.mjs:splitBunInstallArgs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-init-then-bun-install.mjs",
+      "target": "function:scripts/run-init-then-bun-install.mjs:knownArgumentIndexes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-init-then-bun-install.mjs",
+      "target": "function:scripts/run-init-then-bun-install.mjs:collectProfileValues",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-init-then-bun-install.mjs",
+      "target": "function:scripts/run-init-then-bun-install.mjs:parseArgs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-init-then-bun-install.mjs",
+      "target": "function:scripts/run-init-then-bun-install.mjs:canPrompt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-init-then-bun-install.mjs",
+      "target": "function:scripts/run-init-then-bun-install.mjs:selectProfiles",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-init-then-bun-install.mjs",
+      "target": "function:scripts/run-init-then-bun-install.mjs:runStep",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-init-then-bun-install.mjs",
+      "target": "function:scripts/run-init-then-bun-install.mjs:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-init-then-bun-install.mjs:parseArgs",
+      "target": "function:scripts/run-init-then-bun-install.mjs:splitBunInstallArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-init-then-bun-install.mjs:parseArgs",
+      "target": "function:scripts/run-init-then-bun-install.mjs:knownArgumentIndexes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-init-then-bun-install.mjs:parseArgs",
+      "target": "function:scripts/run-init-then-bun-install.mjs:collectProfileValues",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-init-then-bun-install.mjs:selectProfiles",
+      "target": "function:scripts/run-init-then-bun-install.mjs:canPrompt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-init-then-bun-install.mjs:main",
+      "target": "function:scripts/run-init-then-bun-install.mjs:parseArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-init-then-bun-install.mjs:main",
+      "target": "function:scripts/run-init-then-bun-install.mjs:usage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-init-then-bun-install.mjs:main",
+      "target": "function:scripts/run-init-then-bun-install.mjs:selectProfiles",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-init-then-bun-install.mjs:main",
+      "target": "function:scripts/run-init-then-bun-install.mjs:runStep",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:scripts/lib/install-env.test.ts",
+      "target": "file:scripts/lib/install-env.mjs",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:scripts/lib/install-profiles.test.ts",
+      "target": "file:scripts/lib/install-profiles.mjs",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:scripts/preinstall.mjs",
+      "target": "file:scripts/lib/install-env.mjs",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:scripts/run-init-then-bun-install.mjs",
+      "target": "file:scripts/lib/install-env.mjs",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:scripts/run-init-then-bun-install.mjs",
+      "target": "file:scripts/lib/install-profiles.mjs",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:scripts/run-init-then-bun-install.test.ts",
+      "target": "file:scripts/run-init-then-bun-install.mjs",
+      "type": "imports"
+    }
+  ]
+}

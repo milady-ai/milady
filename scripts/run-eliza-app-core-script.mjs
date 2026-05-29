@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolveElizaAppCoreScript } from "./lib/resolve-eliza-app-core-script.mjs";
+import { syncElizaEnvAliases } from "./lib/sync-eliza-env-aliases.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
@@ -42,6 +43,8 @@ if (!scriptName) {
   process.exit(1);
 }
 
+syncElizaEnvAliases({ defaultNamespace: "milady" });
+
 const scriptPath = resolveElizaAppCoreScript(scriptName, { repoRoot });
 const localScriptPath = path.join(
   localElizaRoot,
@@ -64,7 +67,17 @@ const child = spawn(
   [resolvedScriptPath, ...scriptArgs],
   {
     cwd: repoRoot,
-    env: process.env,
+    // app-core scripts that diff/validate the consuming repo (e.g.
+    // validate-regression-matrix.mjs) resolve their repo root via
+    // `git rev-parse --show-toplevel`, which points at the nested eliza/
+    // checkout in CI rather than this milady workspace. Anchor them to the
+    // milady root so the regression-matrix contract validates milady's
+    // workflows and resolves the milady base SHA. Only this script reads the
+    // var, so setting it for every app-core invocation has no other effect.
+    env: {
+      ...process.env,
+      MILADY_REPO_ROOT: process.env.MILADY_REPO_ROOT ?? repoRoot,
+    },
     stdio: "inherit",
   },
 );

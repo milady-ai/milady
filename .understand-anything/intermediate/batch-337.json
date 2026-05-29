@@ -1,0 +1,844 @@
+{
+  "batchIndex": 337,
+  "nodes": [
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/vault/src/profiles.d.ts",
+      "type": "file",
+      "name": "profiles.d.ts",
+      "filePath": "eliza/packages/vault/src/profiles.d.ts",
+      "summary": "profiles.d.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 68 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/vault/src/profiles.ts",
+      "type": "file",
+      "name": "profiles.ts",
+      "filePath": "eliza/packages/vault/src/profiles.ts",
+      "summary": "profiles.ts is a typescript source file in the Milady codebase. It contains 8 functions, 2 imports.",
+      "languageNotes": "typescript; code; 252 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/profiles.ts:resolveActiveValue",
+      "type": "function",
+      "name": "resolveActiveValue",
+      "filePath": "eliza/packages/vault/src/profiles.ts",
+      "summary": "resolveActiveValue is a function defined in eliza/packages/vault/src/profiles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/profiles.ts:readRoutingConfig",
+      "type": "function",
+      "name": "readRoutingConfig",
+      "filePath": "eliza/packages/vault/src/profiles.ts",
+      "summary": "readRoutingConfig is a function defined in eliza/packages/vault/src/profiles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/profiles.ts:writeRoutingConfig",
+      "type": "function",
+      "name": "writeRoutingConfig",
+      "filePath": "eliza/packages/vault/src/profiles.ts",
+      "summary": "writeRoutingConfig is a function defined in eliza/packages/vault/src/profiles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/profiles.ts:pickRule",
+      "type": "function",
+      "name": "pickRule",
+      "filePath": "eliza/packages/vault/src/profiles.ts",
+      "summary": "pickRule is a function defined in eliza/packages/vault/src/profiles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/profiles.ts:matchesScope",
+      "type": "function",
+      "name": "matchesScope",
+      "filePath": "eliza/packages/vault/src/profiles.ts",
+      "summary": "matchesScope is a function defined in eliza/packages/vault/src/profiles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/profiles.ts:parseRoutingConfig",
+      "type": "function",
+      "name": "parseRoutingConfig",
+      "filePath": "eliza/packages/vault/src/profiles.ts",
+      "summary": "parseRoutingConfig is a function defined in eliza/packages/vault/src/profiles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/profiles.ts:normalizeRoutingConfig",
+      "type": "function",
+      "name": "normalizeRoutingConfig",
+      "filePath": "eliza/packages/vault/src/profiles.ts",
+      "summary": "normalizeRoutingConfig is a function defined in eliza/packages/vault/src/profiles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/profiles.ts:normalizeRule",
+      "type": "function",
+      "name": "normalizeRule",
+      "filePath": "eliza/packages/vault/src/profiles.ts",
+      "summary": "normalizeRule is a function defined in eliza/packages/vault/src/profiles.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/vault/src/store.d.ts",
+      "type": "file",
+      "name": "store.d.ts",
+      "filePath": "eliza/packages/vault/src/store.d.ts",
+      "summary": "store.d.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 10 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/vault/src/store.ts",
+      "type": "file",
+      "name": "store.ts",
+      "filePath": "eliza/packages/vault/src/store.ts",
+      "summary": "store.ts is a typescript source file in the Milady codebase. It contains 7 functions, 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 161 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/store.ts:emptyStore",
+      "type": "function",
+      "name": "emptyStore",
+      "filePath": "eliza/packages/vault/src/store.ts",
+      "summary": "emptyStore is a function defined in eliza/packages/vault/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/store.ts:readStore",
+      "type": "function",
+      "name": "readStore",
+      "filePath": "eliza/packages/vault/src/store.ts",
+      "summary": "readStore is a function defined in eliza/packages/vault/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/store.ts:writeStore",
+      "type": "function",
+      "name": "writeStore",
+      "filePath": "eliza/packages/vault/src/store.ts",
+      "summary": "writeStore is a function defined in eliza/packages/vault/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/store.ts:setEntry",
+      "type": "function",
+      "name": "setEntry",
+      "filePath": "eliza/packages/vault/src/store.ts",
+      "summary": "setEntry is a function defined in eliza/packages/vault/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/store.ts:removeEntry",
+      "type": "function",
+      "name": "removeEntry",
+      "filePath": "eliza/packages/vault/src/store.ts",
+      "summary": "removeEntry is a function defined in eliza/packages/vault/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/store.ts:validateShape",
+      "type": "function",
+      "name": "validateShape",
+      "filePath": "eliza/packages/vault/src/store.ts",
+      "summary": "validateShape is a function defined in eliza/packages/vault/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/store.ts:validateEntry",
+      "type": "function",
+      "name": "validateEntry",
+      "filePath": "eliza/packages/vault/src/store.ts",
+      "summary": "validateEntry is a function defined in eliza/packages/vault/src/store.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/vault/src/store.ts:StoreFormatError",
+      "type": "class",
+      "name": "StoreFormatError",
+      "filePath": "eliza/packages/vault/src/store.ts",
+      "summary": "StoreFormatError is a class or type declared in eliza/packages/vault/src/store.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/vault/src/testing.d.ts",
+      "type": "file",
+      "name": "testing.d.ts",
+      "filePath": "eliza/packages/vault/src/testing.d.ts",
+      "summary": "testing.d.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 32 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/vault/src/testing.ts",
+      "type": "file",
+      "name": "testing.ts",
+      "filePath": "eliza/packages/vault/src/testing.ts",
+      "summary": "testing.ts is a typescript source file in the Milady codebase. It contains 1 function, 5 imports.",
+      "languageNotes": "typescript; code; 97 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/testing.ts:createTestVault",
+      "type": "function",
+      "name": "createTestVault",
+      "filePath": "eliza/packages/vault/src/testing.ts",
+      "summary": "createTestVault is a function defined in eliza/packages/vault/src/testing.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/vault/src/types.d.ts",
+      "type": "file",
+      "name": "types.d.ts",
+      "filePath": "eliza/packages/vault/src/types.d.ts",
+      "summary": "types.d.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 56 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/vault/src/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "eliza/packages/vault/src/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 64 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/vault/src/vault-types.d.ts",
+      "type": "file",
+      "name": "vault-types.d.ts",
+      "filePath": "eliza/packages/vault/src/vault-types.d.ts",
+      "summary": "vault-types.d.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 61 lines"
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/vault/src/vault-types.ts",
+      "type": "file",
+      "name": "vault-types.ts",
+      "filePath": "eliza/packages/vault/src/vault-types.ts",
+      "summary": "vault-types.ts is a typescript source file in the Milady codebase. It contains 1 class, 2 imports.",
+      "languageNotes": "typescript; code; 79 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/vault/src/vault-types.ts:VaultMissError",
+      "type": "class",
+      "name": "VaultMissError",
+      "filePath": "eliza/packages/vault/src/vault-types.ts",
+      "summary": "VaultMissError is a class or type declared in eliza/packages/vault/src/vault-types.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/vault/src/vault.d.ts",
+      "type": "file",
+      "name": "vault.d.ts",
+      "filePath": "eliza/packages/vault/src/vault.d.ts",
+      "summary": "vault.d.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 9 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/vault/src/vault.ts",
+      "type": "file",
+      "name": "vault.ts",
+      "filePath": "eliza/packages/vault/src/vault.ts",
+      "summary": "vault.ts is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 33 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/vault.ts:createVault",
+      "type": "function",
+      "name": "createVault",
+      "filePath": "eliza/packages/vault/src/vault.ts",
+      "summary": "createVault is a function defined in eliza/packages/vault/src/vault.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/vault/test/credentials.test.ts",
+      "type": "file",
+      "name": "credentials.test.ts",
+      "filePath": "eliza/packages/vault/test/credentials.test.ts",
+      "summary": "credentials.test.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 271 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/vault/test/external-credentials.test.ts",
+      "type": "file",
+      "name": "external-credentials.test.ts",
+      "filePath": "eliza/packages/vault/test/external-credentials.test.ts",
+      "summary": "external-credentials.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 4 imports.",
+      "languageNotes": "typescript; code; 527 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/test/external-credentials.test.ts:fakeExec",
+      "type": "function",
+      "name": "fakeExec",
+      "filePath": "eliza/packages/vault/test/external-credentials.test.ts",
+      "summary": "fakeExec is a function defined in eliza/packages/vault/test/external-credentials.test.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/vault/test/install.test.ts",
+      "type": "file",
+      "name": "install.test.ts",
+      "filePath": "eliza/packages/vault/test/install.test.ts",
+      "summary": "install.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 122 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/vault/test/inventory.test.ts",
+      "type": "file",
+      "name": "inventory.test.ts",
+      "filePath": "eliza/packages/vault/test/inventory.test.ts",
+      "summary": "inventory.test.ts is a typescript source file in the Milady codebase. It contains 4 imports.",
+      "languageNotes": "typescript; code; 313 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/vault/test/manager.test.ts",
+      "type": "file",
+      "name": "manager.test.ts",
+      "filePath": "eliza/packages/vault/test/manager.test.ts",
+      "summary": "manager.test.ts is a typescript source file in the Milady codebase. It contains 6 imports.",
+      "languageNotes": "typescript; code; 370 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/vault/test/master-key.test.ts",
+      "type": "file",
+      "name": "master-key.test.ts",
+      "filePath": "eliza/packages/vault/test/master-key.test.ts",
+      "summary": "master-key.test.ts is a typescript source file in the Milady codebase. It contains 3 imports.",
+      "languageNotes": "typescript; code; 298 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/vault/test/pglite-vault.test.ts",
+      "type": "file",
+      "name": "pglite-vault.test.ts",
+      "filePath": "eliza/packages/vault/test/pglite-vault.test.ts",
+      "summary": "pglite-vault.test.ts is a typescript source file in the Milady codebase. It contains 5 imports.",
+      "languageNotes": "typescript; code; 319 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/vault/test/profiles.test.ts",
+      "type": "file",
+      "name": "profiles.test.ts",
+      "filePath": "eliza/packages/vault/test/profiles.test.ts",
+      "summary": "profiles.test.ts is a typescript source file in the Milady codebase. It contains 6 imports.",
+      "languageNotes": "typescript; code; 318 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/vault/test/vault.test.ts",
+      "type": "file",
+      "name": "vault.test.ts",
+      "filePath": "eliza/packages/vault/test/vault.test.ts",
+      "summary": "vault.test.ts is a typescript source file in the Milady codebase. It contains 3 imports.",
+      "languageNotes": "typescript; code; 337 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/vault/test/vitest-assertion-shim.ts",
+      "type": "file",
+      "name": "vitest-assertion-shim.ts",
+      "filePath": "eliza/packages/vault/test/vitest-assertion-shim.ts",
+      "summary": "vitest-assertion-shim.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 37 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/test/vitest-assertion-shim.ts:runtimeVaultCaller",
+      "type": "function",
+      "name": "runtimeVaultCaller",
+      "filePath": "eliza/packages/vault/test/vitest-assertion-shim.ts",
+      "summary": "runtimeVaultCaller is a function defined in eliza/packages/vault/test/vitest-assertion-shim.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/test/vitest-assertion-shim.ts:runtimePassphraseMasterKeyCaller",
+      "type": "function",
+      "name": "runtimePassphraseMasterKeyCaller",
+      "filePath": "eliza/packages/vault/test/vitest-assertion-shim.ts",
+      "summary": "runtimePassphraseMasterKeyCaller is a function defined in eliza/packages/vault/test/vitest-assertion-shim.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/vault/vitest.config.ts",
+      "type": "file",
+      "name": "vitest.config.ts",
+      "filePath": "eliza/packages/vault/vitest.config.ts",
+      "summary": "vitest.config.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 9 lines"
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-agent-skills/auto-enable.ts",
+      "type": "file",
+      "name": "auto-enable.ts",
+      "filePath": "eliza/plugins/plugin-agent-skills/auto-enable.ts",
+      "summary": "auto-enable.ts is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 24 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/auto-enable.ts:isFeatureEnabled",
+      "type": "function",
+      "name": "isFeatureEnabled",
+      "filePath": "eliza/plugins/plugin-agent-skills/auto-enable.ts",
+      "summary": "isFeatureEnabled is a function defined in eliza/plugins/plugin-agent-skills/auto-enable.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/auto-enable.ts:shouldEnable",
+      "type": "function",
+      "name": "shouldEnable",
+      "filePath": "eliza/plugins/plugin-agent-skills/auto-enable.ts",
+      "summary": "shouldEnable is a function defined in eliza/plugins/plugin-agent-skills/auto-enable.ts."
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-agent-skills/src/__tests__/core-test-mock.ts",
+      "type": "file",
+      "name": "core-test-mock.ts",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/__tests__/core-test-mock.ts",
+      "summary": "core-test-mock.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 82 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/profiles.ts",
+      "target": "function:eliza/packages/vault/src/profiles.ts:resolveActiveValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/profiles.ts",
+      "target": "function:eliza/packages/vault/src/profiles.ts:readRoutingConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/profiles.ts",
+      "target": "function:eliza/packages/vault/src/profiles.ts:writeRoutingConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/profiles.ts",
+      "target": "function:eliza/packages/vault/src/profiles.ts:pickRule",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/profiles.ts",
+      "target": "function:eliza/packages/vault/src/profiles.ts:matchesScope",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/profiles.ts",
+      "target": "function:eliza/packages/vault/src/profiles.ts:parseRoutingConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/profiles.ts",
+      "target": "function:eliza/packages/vault/src/profiles.ts:normalizeRoutingConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/profiles.ts",
+      "target": "function:eliza/packages/vault/src/profiles.ts:normalizeRule",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/profiles.ts:resolveActiveValue",
+      "target": "function:eliza/packages/vault/src/profiles.ts:readRoutingConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/profiles.ts:resolveActiveValue",
+      "target": "function:eliza/packages/vault/src/profiles.ts:pickRule",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/profiles.ts:readRoutingConfig",
+      "target": "function:eliza/packages/vault/src/profiles.ts:parseRoutingConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/profiles.ts:writeRoutingConfig",
+      "target": "function:eliza/packages/vault/src/profiles.ts:normalizeRoutingConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/profiles.ts:pickRule",
+      "target": "function:eliza/packages/vault/src/profiles.ts:matchesScope",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/profiles.ts:parseRoutingConfig",
+      "target": "function:eliza/packages/vault/src/profiles.ts:normalizeRule",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/profiles.ts:normalizeRoutingConfig",
+      "target": "function:eliza/packages/vault/src/profiles.ts:normalizeRule",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/store.ts",
+      "target": "function:eliza/packages/vault/src/store.ts:emptyStore",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/store.ts",
+      "target": "function:eliza/packages/vault/src/store.ts:readStore",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/store.ts",
+      "target": "function:eliza/packages/vault/src/store.ts:writeStore",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/store.ts",
+      "target": "function:eliza/packages/vault/src/store.ts:setEntry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/store.ts",
+      "target": "function:eliza/packages/vault/src/store.ts:removeEntry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/store.ts",
+      "target": "function:eliza/packages/vault/src/store.ts:validateShape",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/store.ts",
+      "target": "function:eliza/packages/vault/src/store.ts:validateEntry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/store.ts",
+      "target": "class:eliza/packages/vault/src/store.ts:StoreFormatError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/store.ts:readStore",
+      "target": "function:eliza/packages/vault/src/store.ts:emptyStore",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/store.ts:readStore",
+      "target": "function:eliza/packages/vault/src/store.ts:validateShape",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/store.ts:validateShape",
+      "target": "function:eliza/packages/vault/src/store.ts:validateEntry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/testing.ts",
+      "target": "function:eliza/packages/vault/src/testing.ts:createTestVault",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/vault-types.ts",
+      "target": "class:eliza/packages/vault/src/vault-types.ts:VaultMissError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/vault.ts",
+      "target": "function:eliza/packages/vault/src/vault.ts:createVault",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/test/external-credentials.test.ts",
+      "target": "function:eliza/packages/vault/test/external-credentials.test.ts:fakeExec",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/test/vitest-assertion-shim.ts",
+      "target": "function:eliza/packages/vault/test/vitest-assertion-shim.ts:runtimeVaultCaller",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/test/vitest-assertion-shim.ts",
+      "target": "function:eliza/packages/vault/test/vitest-assertion-shim.ts:runtimePassphraseMasterKeyCaller",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/auto-enable.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/auto-enable.ts:isFeatureEnabled",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/auto-enable.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/auto-enable.ts:shouldEnable",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/auto-enable.ts:shouldEnable",
+      "target": "function:eliza/plugins/plugin-agent-skills/auto-enable.ts:isFeatureEnabled",
+      "type": "calls"
+    }
+  ]
+}

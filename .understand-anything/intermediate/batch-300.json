@@ -1,0 +1,306 @@
+{
+  "batchIndex": 300,
+  "nodes": [
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC1363Spender.sol",
+      "type": "file",
+      "name": "IERC1363Spender.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC1363Spender.sol",
+      "summary": "IERC1363Spender.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 26 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC165.sol",
+      "type": "file",
+      "name": "IERC165.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC165.sol",
+      "summary": "IERC165.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 6 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC1820Implementer.sol",
+      "type": "file",
+      "name": "IERC1820Implementer.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC1820Implementer.sol",
+      "summary": "IERC1820Implementer.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 20 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC1820Registry.sol",
+      "type": "file",
+      "name": "IERC1820Registry.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC1820Registry.sol",
+      "summary": "IERC1820Registry.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 112 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC1967.sol",
+      "type": "file",
+      "name": "IERC1967.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC1967.sol",
+      "summary": "IERC1967.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 24 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol",
+      "type": "file",
+      "name": "IERC20.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol",
+      "summary": "IERC20.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 6 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC20Metadata.sol",
+      "type": "file",
+      "name": "IERC20Metadata.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC20Metadata.sol",
+      "summary": "IERC20Metadata.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 6 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC2309.sol",
+      "type": "file",
+      "name": "IERC2309.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC2309.sol",
+      "summary": "IERC2309.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 19 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC2612.sol",
+      "type": "file",
+      "name": "IERC2612.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC2612.sol",
+      "summary": "IERC2612.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 8 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC2981.sol",
+      "type": "file",
+      "name": "IERC2981.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC2981.sol",
+      "summary": "IERC2981.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 26 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC3156.sol",
+      "type": "file",
+      "name": "IERC3156.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC3156.sol",
+      "summary": "IERC3156.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 7 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC3156FlashBorrower.sol",
+      "type": "file",
+      "name": "IERC3156FlashBorrower.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC3156FlashBorrower.sol",
+      "summary": "IERC3156FlashBorrower.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 27 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC3156FlashLender.sol",
+      "type": "file",
+      "name": "IERC3156FlashLender.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC3156FlashLender.sol",
+      "summary": "IERC3156FlashLender.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 41 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC4626.sol",
+      "type": "file",
+      "name": "IERC4626.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC4626.sol",
+      "summary": "IERC4626.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 230 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC4906.sol",
+      "type": "file",
+      "name": "IERC4906.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC4906.sol",
+      "summary": "IERC4906.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 20 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC5267.sol",
+      "type": "file",
+      "name": "IERC5267.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC5267.sol",
+      "summary": "IERC5267.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 28 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC5313.sol",
+      "type": "file",
+      "name": "IERC5313.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC5313.sol",
+      "summary": "IERC5313.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 16 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC5805.sol",
+      "type": "file",
+      "name": "IERC5805.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC5805.sol",
+      "summary": "IERC5805.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 9 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC6372.sol",
+      "type": "file",
+      "name": "IERC6372.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC6372.sol",
+      "summary": "IERC6372.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 17 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC6909.sol",
+      "type": "file",
+      "name": "IERC6909.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC6909.sol",
+      "summary": "IERC6909.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 125 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC721.sol",
+      "type": "file",
+      "name": "IERC721.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC721.sol",
+      "summary": "IERC721.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 6 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC721Enumerable.sol",
+      "type": "file",
+      "name": "IERC721Enumerable.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC721Enumerable.sol",
+      "summary": "IERC721Enumerable.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 6 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC721Metadata.sol",
+      "type": "file",
+      "name": "IERC721Metadata.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC721Metadata.sol",
+      "summary": "IERC721Metadata.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 6 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC721Receiver.sol",
+      "type": "file",
+      "name": "IERC721Receiver.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC721Receiver.sol",
+      "summary": "IERC721Receiver.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 6 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC7751.sol",
+      "type": "file",
+      "name": "IERC7751.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/interfaces/IERC7751.sol",
+      "summary": "IERC7751.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 12 lines"
+    }
+  ],
+  "edges": []
+}

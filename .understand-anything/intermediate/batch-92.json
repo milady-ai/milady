@@ -1,0 +1,1578 @@
+{
+  "batchIndex": 92,
+  "nodes": [
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/audio/__init__.py",
+      "summary": "__init__.py is a python source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "python; code; 5 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/audio_utils.py",
+      "type": "file",
+      "name": "audio_utils.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/audio/audio_utils.py",
+      "summary": "audio_utils.py is a python source file in the Milady codebase. It contains 2 classes.",
+      "languageNotes": "python; code; 193 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/audio_utils.py:AudioUtils",
+      "type": "class",
+      "name": "AudioUtils",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/audio/audio_utils.py",
+      "summary": "AudioUtils is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/audio/audio_utils.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/audio_utils.py:PhonemeProcessorUtils",
+      "type": "class",
+      "name": "PhonemeProcessorUtils",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/audio/audio_utils.py",
+      "summary": "PhonemeProcessorUtils is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/audio/audio_utils.py."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py",
+      "type": "file",
+      "name": "hifigan_vocoder.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py",
+      "summary": "hifigan_vocoder.py is a python source file in the Milady codebase. It contains 1 function, 4 classes.",
+      "languageNotes": "python; code; 255 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py:load_hifigan_model",
+      "type": "function",
+      "name": "load_hifigan_model",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py",
+      "summary": "load_hifigan_model is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py:AttrDict",
+      "type": "class",
+      "name": "AttrDict",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py",
+      "summary": "AttrDict is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py:ResBlock",
+      "type": "class",
+      "name": "ResBlock",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py",
+      "summary": "ResBlock is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py:HiFiGANGenerator",
+      "type": "class",
+      "name": "HiFiGANGenerator",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py",
+      "summary": "HiFiGANGenerator is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py:HiFiGANConfig",
+      "type": "class",
+      "name": "HiFiGANConfig",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py",
+      "summary": "HiFiGANConfig is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/vocoder_manager.py",
+      "type": "file",
+      "name": "vocoder_manager.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/audio/vocoder_manager.py",
+      "summary": "vocoder_manager.py is a python source file in the Milady codebase. It contains 1 class, 1 imports.",
+      "languageNotes": "python; code; 207 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/vocoder_manager.py:VocoderManager",
+      "type": "class",
+      "name": "VocoderManager",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/audio/vocoder_manager.py",
+      "summary": "VocoderManager is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/audio/vocoder_manager.py."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/inference_english.py",
+      "type": "file",
+      "name": "inference_english.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/inference_english.py",
+      "summary": "inference_english.py is a python source file in the Milady codebase. It contains 2 functions, 1 class, 3 imports.",
+      "languageNotes": "python; code; 536 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/inference_english.py:parse_arguments",
+      "type": "function",
+      "name": "parse_arguments",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/inference_english.py",
+      "summary": "parse_arguments is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/inference_english.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/inference_english.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/inference_english.py",
+      "summary": "main is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/inference_english.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/inference_english.py:KokoroEnglishTTS",
+      "type": "class",
+      "name": "KokoroEnglishTTS",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/inference_english.py",
+      "summary": "KokoroEnglishTTS is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/inference_english.py."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/__init__.py",
+      "summary": "__init__.py is a python source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "python; code; 4 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model.py",
+      "type": "file",
+      "name": "model.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model.py",
+      "summary": "model.py is a python source file in the Milady codebase. It contains 2 classes, 3 imports.",
+      "languageNotes": "python; code; 1179 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model.py:GPUProfiler",
+      "type": "class",
+      "name": "GPUProfiler",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model.py",
+      "summary": "GPUProfiler is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model.py:KokoroModel",
+      "type": "class",
+      "name": "KokoroModel",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model.py",
+      "summary": "KokoroModel is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model.py."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model_transformers.py",
+      "type": "file",
+      "name": "model_transformers.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model_transformers.py",
+      "summary": "model_transformers.py is a python source file in the Milady codebase. It contains 4 classes.",
+      "languageNotes": "python; code; 421 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model_transformers.py:MultiHeadAttention",
+      "type": "class",
+      "name": "MultiHeadAttention",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model_transformers.py",
+      "summary": "MultiHeadAttention is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model_transformers.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model_transformers.py:TransformerEncoderBlock",
+      "type": "class",
+      "name": "TransformerEncoderBlock",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model_transformers.py",
+      "summary": "TransformerEncoderBlock is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model_transformers.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model_transformers.py:TransformerDecoderBlock",
+      "type": "class",
+      "name": "TransformerDecoderBlock",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model_transformers.py",
+      "summary": "TransformerDecoderBlock is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model_transformers.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model_transformers.py:TransformerDecoder",
+      "type": "class",
+      "name": "TransformerDecoder",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model_transformers.py",
+      "summary": "TransformerDecoder is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model_transformers.py."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/positional_encoding.py",
+      "type": "file",
+      "name": "positional_encoding.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/positional_encoding.py",
+      "summary": "positional_encoding.py is a python source file in the Milady codebase. It contains 1 class.",
+      "languageNotes": "python; code; 92 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/positional_encoding.py:PositionalEncoding",
+      "type": "class",
+      "name": "PositionalEncoding",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/positional_encoding.py",
+      "summary": "PositionalEncoding is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/positional_encoding.py."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/postnet.py",
+      "type": "file",
+      "name": "postnet.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/postnet.py",
+      "summary": "postnet.py is a python source file in the Milady codebase. It contains 2 classes.",
+      "languageNotes": "python; code; 194 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/postnet.py:Postnet",
+      "type": "class",
+      "name": "Postnet",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/postnet.py",
+      "summary": "Postnet is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/postnet.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/postnet.py:LightweightPostnet",
+      "type": "class",
+      "name": "LightweightPostnet",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/postnet.py",
+      "summary": "LightweightPostnet is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/postnet.py."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/test_dual_loss.py",
+      "type": "file",
+      "name": "test_dual_loss.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/test_dual_loss.py",
+      "summary": "test_dual_loss.py is a python source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "python; code; 198 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/test_overfit.py",
+      "type": "file",
+      "name": "test_overfit.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/test_overfit.py",
+      "summary": "test_overfit.py is a python source file in the Milady codebase. It contains 1 function, 1 class, 2 imports.",
+      "languageNotes": "python; code; 791 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/test_overfit.py:test_overfit",
+      "type": "function",
+      "name": "test_overfit",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/test_overfit.py",
+      "summary": "test_overfit is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/test_overfit.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/test_overfit.py:SingleSampleDataset",
+      "type": "class",
+      "name": "SingleSampleDataset",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/test_overfit.py",
+      "summary": "SingleSampleDataset is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/test_overfit.py."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/test_spike_samples.py",
+      "type": "file",
+      "name": "test_spike_samples.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/test_spike_samples.py",
+      "summary": "test_spike_samples.py is a python source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "python; code; 222 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/test_training_health.py",
+      "type": "file",
+      "name": "test_training_health.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/test_training_health.py",
+      "summary": "test_training_health.py is a python source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "python; code; 198 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/test_vocoder_quality.py",
+      "type": "file",
+      "name": "test_vocoder_quality.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/test_vocoder_quality.py",
+      "summary": "test_vocoder_quality.py is a python source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "python; code; 85 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/test_warmup_schedule.py",
+      "type": "file",
+      "name": "test_warmup_schedule.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/test_warmup_schedule.py",
+      "summary": "test_warmup_schedule.py is a python source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "python; code; 144 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/__init__.py",
+      "summary": "__init__.py is a python source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "python; code; 5 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/adaptive_memory_manager.py",
+      "type": "file",
+      "name": "adaptive_memory_manager.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/adaptive_memory_manager.py",
+      "summary": "adaptive_memory_manager.py is a python source file in the Milady codebase. It contains 4 classes, 1 imports.",
+      "languageNotes": "python; code; 473 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/training/adaptive_memory_manager.py:MemoryPressureLevel",
+      "type": "class",
+      "name": "MemoryPressureLevel",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/adaptive_memory_manager.py",
+      "summary": "MemoryPressureLevel is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/training/adaptive_memory_manager.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/training/adaptive_memory_manager.py:MemoryThresholds",
+      "type": "class",
+      "name": "MemoryThresholds",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/adaptive_memory_manager.py",
+      "summary": "MemoryThresholds is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/training/adaptive_memory_manager.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/training/adaptive_memory_manager.py:CleanupStrategy",
+      "type": "class",
+      "name": "CleanupStrategy",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/adaptive_memory_manager.py",
+      "summary": "CleanupStrategy is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/training/adaptive_memory_manager.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/training/adaptive_memory_manager.py:AdaptiveMemoryManager",
+      "type": "class",
+      "name": "AdaptiveMemoryManager",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/adaptive_memory_manager.py",
+      "summary": "AdaptiveMemoryManager is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/training/adaptive_memory_manager.py."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py",
+      "type": "file",
+      "name": "checkpoint_manager.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py",
+      "summary": "checkpoint_manager.py is a python source file in the Milady codebase. It contains 9 functions, 1 imports.",
+      "languageNotes": "python; code; 301 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py:save_model_config",
+      "type": "function",
+      "name": "save_model_config",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py",
+      "summary": "save_model_config is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py:save_phoneme_processor",
+      "type": "function",
+      "name": "save_phoneme_processor",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py",
+      "summary": "save_phoneme_processor is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py:load_phoneme_processor",
+      "type": "function",
+      "name": "load_phoneme_processor",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py",
+      "summary": "load_phoneme_processor is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py:save_checkpoint",
+      "type": "function",
+      "name": "save_checkpoint",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py",
+      "summary": "save_checkpoint is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py:load_checkpoint",
+      "type": "function",
+      "name": "load_checkpoint",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py",
+      "summary": "load_checkpoint is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py:find_latest_checkpoint",
+      "type": "function",
+      "name": "find_latest_checkpoint",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py",
+      "summary": "find_latest_checkpoint is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py:cleanup_old_checkpoints",
+      "type": "function",
+      "name": "cleanup_old_checkpoints",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py",
+      "summary": "cleanup_old_checkpoints is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py:check_disk_space",
+      "type": "function",
+      "name": "check_disk_space",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py",
+      "summary": "check_disk_space is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py:save_final_model",
+      "type": "function",
+      "name": "save_final_model",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py",
+      "summary": "save_final_model is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py",
+      "type": "file",
+      "name": "config_english.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py",
+      "summary": "config_english.py is a python source file in the Milady codebase. It contains 4 functions, 1 class.",
+      "languageNotes": "python; code; 393 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py:get_default_config",
+      "type": "function",
+      "name": "get_default_config",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py",
+      "summary": "get_default_config is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py:get_small_config",
+      "type": "function",
+      "name": "get_small_config",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py",
+      "summary": "get_small_config is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py:get_medium_config",
+      "type": "function",
+      "name": "get_medium_config",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py",
+      "summary": "get_medium_config is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py:get_large_config",
+      "type": "function",
+      "name": "get_large_config",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py",
+      "summary": "get_large_config is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py:EnglishTrainingConfig",
+      "type": "class",
+      "name": "EnglishTrainingConfig",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py",
+      "summary": "EnglishTrainingConfig is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/device_type.py",
+      "type": "file",
+      "name": "device_type.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/device_type.py",
+      "summary": "device_type.py is a python source file in the Milady codebase. It contains 1 class.",
+      "languageNotes": "python; code; 7 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/training/device_type.py:DeviceType",
+      "type": "class",
+      "name": "DeviceType",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/device_type.py",
+      "summary": "DeviceType is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/training/device_type.py."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/english_trainer.py",
+      "type": "file",
+      "name": "english_trainer.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/english_trainer.py",
+      "summary": "english_trainer.py is a python source file in the Milady codebase. It contains 1 class, 6 imports.",
+      "languageNotes": "python; code; 1633 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/training/english_trainer.py:EnglishTrainer",
+      "type": "class",
+      "name": "EnglishTrainer",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/english_trainer.py",
+      "summary": "EnglishTrainer is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/training/english_trainer.py."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/interbatch_profiler.py",
+      "type": "file",
+      "name": "interbatch_profiler.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/interbatch_profiler.py",
+      "summary": "interbatch_profiler.py is a python source file in the Milady codebase. It contains 1 class, 1 imports.",
+      "languageNotes": "python; code; 211 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/training/interbatch_profiler.py:InterbatchProfiler",
+      "type": "class",
+      "name": "InterbatchProfiler",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/interbatch_profiler.py",
+      "summary": "InterbatchProfiler is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/training/interbatch_profiler.py."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/mps_grad_scaler.py",
+      "type": "file",
+      "name": "mps_grad_scaler.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/mps_grad_scaler.py",
+      "summary": "mps_grad_scaler.py is a python source file in the Milady codebase. It contains 1 class.",
+      "languageNotes": "python; code; 91 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/training/mps_grad_scaler.py:MPSGradScaler",
+      "type": "class",
+      "name": "MPSGradScaler",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training/mps_grad_scaler.py",
+      "summary": "MPSGradScaler is a class or type declared in eliza/plugins/plugin-local-inference/native/kokoro_training/training/mps_grad_scaler.py."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py",
+      "type": "file",
+      "name": "training_english.py",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py",
+      "summary": "training_english.py is a python source file in the Milady codebase. It contains 5 functions, 2 imports.",
+      "languageNotes": "python; code; 385 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py:parse_arguments",
+      "type": "function",
+      "name": "parse_arguments",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py",
+      "summary": "parse_arguments is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py:create_config_from_args",
+      "type": "function",
+      "name": "create_config_from_args",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py",
+      "summary": "create_config_from_args is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py:validate_dataset",
+      "type": "function",
+      "name": "validate_dataset",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py",
+      "summary": "validate_dataset is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py:test_phoneme_processor",
+      "type": "function",
+      "name": "test_phoneme_processor",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py",
+      "summary": "test_phoneme_processor is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py",
+      "summary": "main is a function defined in eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/audio_utils.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/audio_utils.py:AudioUtils",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/audio_utils.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/audio_utils.py:PhonemeProcessorUtils",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py:load_hifigan_model",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py:AttrDict",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py:ResBlock",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py:HiFiGANGenerator",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py:HiFiGANConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/vocoder_manager.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/vocoder_manager.py:VocoderManager",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/inference_english.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/inference_english.py:parse_arguments",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/inference_english.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/inference_english.py:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/inference_english.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/inference_english.py:KokoroEnglishTTS",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/inference_english.py:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/inference_english.py:parse_arguments",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/inference_english.py:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/inference_english.py:parse_arguments",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model.py:GPUProfiler",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model.py:KokoroModel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model_transformers.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model_transformers.py:MultiHeadAttention",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model_transformers.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model_transformers.py:TransformerEncoderBlock",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model_transformers.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model_transformers.py:TransformerDecoderBlock",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model_transformers.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model_transformers.py:TransformerDecoder",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/positional_encoding.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/positional_encoding.py:PositionalEncoding",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/postnet.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/postnet.py:Postnet",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/postnet.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/postnet.py:LightweightPostnet",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/test_overfit.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/test_overfit.py:test_overfit",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/test_overfit.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/test_overfit.py:SingleSampleDataset",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/adaptive_memory_manager.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/training/adaptive_memory_manager.py:MemoryPressureLevel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/adaptive_memory_manager.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/training/adaptive_memory_manager.py:MemoryThresholds",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/adaptive_memory_manager.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/training/adaptive_memory_manager.py:CleanupStrategy",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/adaptive_memory_manager.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/training/adaptive_memory_manager.py:AdaptiveMemoryManager",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py:save_model_config",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py:save_phoneme_processor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py:load_phoneme_processor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py:save_checkpoint",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py:load_checkpoint",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py:find_latest_checkpoint",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py:cleanup_old_checkpoints",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py:check_disk_space",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py:save_final_model",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py:save_checkpoint",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py:check_disk_space",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py:save_checkpoint",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py:cleanup_old_checkpoints",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py:get_default_config",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py:get_small_config",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py:get_medium_config",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py:get_large_config",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py:EnglishTrainingConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/device_type.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/training/device_type.py:DeviceType",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/english_trainer.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/training/english_trainer.py:EnglishTrainer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/interbatch_profiler.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/training/interbatch_profiler.py:InterbatchProfiler",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/mps_grad_scaler.py",
+      "target": "class:eliza/plugins/plugin-local-inference/native/kokoro_training/training/mps_grad_scaler.py:MPSGradScaler",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py:parse_arguments",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py:create_config_from_args",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py:validate_dataset",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py:test_phoneme_processor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py:parse_arguments",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py:create_config_from_args",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py:validate_dataset",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py:test_phoneme_processor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/__init__.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/audio_utils.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/__init__.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/vocoder_manager.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/vocoder_manager.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/hifigan_vocoder.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/inference_english.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/audio_utils.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/inference_english.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/vocoder_manager.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/inference_english.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/__init__.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model_transformers.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/positional_encoding.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/postnet.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/test_dual_loss.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/test_dual_loss.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/test_overfit.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/test_overfit.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/test_spike_samples.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/test_spike_samples.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/test_training_health.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/test_training_health.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/test_vocoder_quality.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/audio/vocoder_manager.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/test_vocoder_quality.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/test_warmup_schedule.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/__init__.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/__init__.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/english_trainer.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/adaptive_memory_manager.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/device_type.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/english_trainer.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/kokoro/model.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/english_trainer.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/adaptive_memory_manager.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/english_trainer.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/checkpoint_manager.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/english_trainer.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/device_type.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/english_trainer.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/interbatch_profiler.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/english_trainer.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/mps_grad_scaler.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/interbatch_profiler.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/config_english.py",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training_english.py",
+      "target": "file:eliza/plugins/plugin-local-inference/native/kokoro_training/training/english_trainer.py",
+      "type": "imports"
+    }
+  ]
+}

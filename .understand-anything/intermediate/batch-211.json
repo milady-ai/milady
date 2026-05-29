@@ -1,0 +1,247 @@
+{
+  "batchIndex": 211,
+  "nodes": [
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/apps/2004scape.json",
+      "type": "config",
+      "name": "2004scape.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/apps/2004scape.json",
+      "summary": "2004scape.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 27 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/apps/app-polymarket.json",
+      "type": "config",
+      "name": "app-polymarket.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/apps/app-polymarket.json",
+      "summary": "app-polymarket.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 31 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/apps/clawville.json",
+      "type": "config",
+      "name": "clawville.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/apps/clawville.json",
+      "summary": "clawville.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 27 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/apps/companion.json",
+      "type": "config",
+      "name": "companion.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/apps/companion.json",
+      "summary": "companion.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 28 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/apps/database-viewer.json",
+      "type": "config",
+      "name": "database-viewer.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/apps/database-viewer.json",
+      "summary": "database-viewer.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 27 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/apps/defense-of-the-agents.json",
+      "type": "config",
+      "name": "defense-of-the-agents.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/apps/defense-of-the-agents.json",
+      "summary": "defense-of-the-agents.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 27 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/apps/documents.json",
+      "type": "config",
+      "name": "documents.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/apps/documents.json",
+      "summary": "documents.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 30 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/apps/feed.json",
+      "type": "config",
+      "name": "feed.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/apps/feed.json",
+      "summary": "feed.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 27 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/apps/hyperliquid.json",
+      "type": "config",
+      "name": "hyperliquid.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/apps/hyperliquid.json",
+      "summary": "hyperliquid.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 31 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/apps/hyperscape.json",
+      "type": "config",
+      "name": "hyperscape.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/apps/hyperscape.json",
+      "summary": "hyperscape.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 27 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/apps/lifeops.json",
+      "type": "config",
+      "name": "lifeops.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/apps/lifeops.json",
+      "summary": "lifeops.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 31 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/apps/log-viewer.json",
+      "type": "config",
+      "name": "log-viewer.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/apps/log-viewer.json",
+      "summary": "log-viewer.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 27 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/apps/memory-viewer.json",
+      "type": "config",
+      "name": "memory-viewer.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/apps/memory-viewer.json",
+      "summary": "memory-viewer.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 27 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/apps/model-tester.json",
+      "type": "config",
+      "name": "model-tester.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/apps/model-tester.json",
+      "summary": "model-tester.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 31 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/apps/plugin-viewer.json",
+      "type": "config",
+      "name": "plugin-viewer.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/apps/plugin-viewer.json",
+      "summary": "plugin-viewer.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 27 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/apps/relationship-viewer.json",
+      "type": "config",
+      "name": "relationship-viewer.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/apps/relationship-viewer.json",
+      "summary": "relationship-viewer.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 27 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/apps/runtime-debugger.json",
+      "type": "config",
+      "name": "runtime-debugger.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/apps/runtime-debugger.json",
+      "summary": "runtime-debugger.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 27 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/apps/scape.json",
+      "type": "config",
+      "name": "scape.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/apps/scape.json",
+      "summary": "scape.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 117 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/apps/shopify.json",
+      "type": "config",
+      "name": "shopify.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/apps/shopify.json",
+      "summary": "shopify.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 31 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/src/registry/entries/apps/skills-viewer.json",
+      "type": "config",
+      "name": "skills-viewer.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/apps/skills-viewer.json",
+      "summary": "skills-viewer.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 27 lines"
+    }
+  ],
+  "edges": []
+}

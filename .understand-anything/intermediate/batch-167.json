@@ -1,0 +1,151 @@
+{
+  "batchIndex": 167,
+  "nodes": [
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:apps/homepage/src/docs/content/advanced/connect-acp.mdx",
+      "type": "document",
+      "name": "connect-acp.mdx",
+      "filePath": "apps/homepage/src/docs/content/advanced/connect-acp.mdx",
+      "summary": "connect-acp.mdx documents apps/homepage/src/docs/content/advanced with 67 lines of reference material.",
+      "languageNotes": "markdown; docs; 67 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:apps/homepage/src/docs/content/advanced/connect-iq-solana.mdx",
+      "type": "document",
+      "name": "connect-iq-solana.mdx",
+      "filePath": "apps/homepage/src/docs/content/advanced/connect-iq-solana.mdx",
+      "summary": "connect-iq-solana.mdx documents apps/homepage/src/docs/content/advanced with 71 lines of reference material.",
+      "languageNotes": "markdown; docs; 71 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:apps/homepage/src/docs/content/advanced/connect-mcp.mdx",
+      "type": "document",
+      "name": "connect-mcp.mdx",
+      "filePath": "apps/homepage/src/docs/content/advanced/connect-mcp.mdx",
+      "summary": "connect-mcp.mdx documents apps/homepage/src/docs/content/advanced with 98 lines of reference material.",
+      "languageNotes": "markdown; docs; 98 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:apps/homepage/src/docs/content/advanced/connect-tlon.mdx",
+      "type": "document",
+      "name": "connect-tlon.mdx",
+      "filePath": "apps/homepage/src/docs/content/advanced/connect-tlon.mdx",
+      "summary": "connect-tlon.mdx documents apps/homepage/src/docs/content/advanced with 66 lines of reference material.",
+      "languageNotes": "markdown; docs; 66 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:apps/homepage/src/docs/content/advanced/multi-connector-setup.mdx",
+      "type": "document",
+      "name": "multi-connector-setup.mdx",
+      "filePath": "apps/homepage/src/docs/content/advanced/multi-connector-setup.mdx",
+      "summary": "multi-connector-setup.mdx documents apps/homepage/src/docs/content/advanced with 75 lines of reference material.",
+      "languageNotes": "markdown; docs; 75 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:apps/homepage/src/docs/content/advanced/plugins-for-users.mdx",
+      "type": "document",
+      "name": "plugins-for-users.mdx",
+      "filePath": "apps/homepage/src/docs/content/advanced/plugins-for-users.mdx",
+      "summary": "plugins-for-users.mdx documents apps/homepage/src/docs/content/advanced with 106 lines of reference material.",
+      "languageNotes": "markdown; docs; 106 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:apps/homepage/src/docs/content/advanced/power-user-shortcuts.mdx",
+      "type": "document",
+      "name": "power-user-shortcuts.mdx",
+      "filePath": "apps/homepage/src/docs/content/advanced/power-user-shortcuts.mdx",
+      "summary": "power-user-shortcuts.mdx documents apps/homepage/src/docs/content/advanced with 169 lines of reference material.",
+      "languageNotes": "markdown; docs; 169 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:apps/homepage/src/docs/content/advanced/privacy-and-data.mdx",
+      "type": "document",
+      "name": "privacy-and-data.mdx",
+      "filePath": "apps/homepage/src/docs/content/advanced/privacy-and-data.mdx",
+      "summary": "privacy-and-data.mdx documents apps/homepage/src/docs/content/advanced with 127 lines of reference material.",
+      "languageNotes": "markdown; docs; 127 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:apps/homepage/src/docs/content/advanced/stream-custom-rtmp.mdx",
+      "type": "document",
+      "name": "stream-custom-rtmp.mdx",
+      "filePath": "apps/homepage/src/docs/content/advanced/stream-custom-rtmp.mdx",
+      "summary": "stream-custom-rtmp.mdx documents apps/homepage/src/docs/content/advanced with 73 lines of reference material.",
+      "languageNotes": "markdown; docs; 73 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:apps/homepage/src/docs/content/advanced/stream-twitch.mdx",
+      "type": "document",
+      "name": "stream-twitch.mdx",
+      "filePath": "apps/homepage/src/docs/content/advanced/stream-twitch.mdx",
+      "summary": "stream-twitch.mdx documents apps/homepage/src/docs/content/advanced with 64 lines of reference material.",
+      "languageNotes": "markdown; docs; 64 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:apps/homepage/src/docs/content/advanced/stream-youtube.mdx",
+      "type": "document",
+      "name": "stream-youtube.mdx",
+      "filePath": "apps/homepage/src/docs/content/advanced/stream-youtube.mdx",
+      "summary": "stream-youtube.mdx documents apps/homepage/src/docs/content/advanced with 72 lines of reference material.",
+      "languageNotes": "markdown; docs; 72 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:apps/homepage/src/docs/content/advanced/wallet-and-payments.mdx",
+      "type": "document",
+      "name": "wallet-and-payments.mdx",
+      "filePath": "apps/homepage/src/docs/content/advanced/wallet-and-payments.mdx",
+      "summary": "wallet-and-payments.mdx documents apps/homepage/src/docs/content/advanced with 106 lines of reference material.",
+      "languageNotes": "markdown; docs; 106 lines"
+    }
+  ],
+  "edges": []
+}

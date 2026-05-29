@@ -102,6 +102,20 @@ jobs:
           ref: ${{ inputs.source_sha || github.event.release.tag_name || github.sha }}
           submodules: false
 
+      # ── 1b. Free runner disk space ──────────────────────────────────────────
+      # The combined eliza source build + linked workspace node_modules + Docker
+      # build context exceeds the ~14 GB free on the default ubuntu runner, which
+      # surfaced as intermittent (now deterministic) "No space left on device"
+      # IOExceptions during install. Reclaim the large preinstalled toolchains we
+      # do not use here (~25-35 GB) before the heavy install/Docker build. Inline
+      # rm (no third-party action) keeps the pinned-action security posture intact.
+      - name: Free runner disk space
+        run: |
+          echo "Disk before cleanup:"; df -h /
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          sudo docker image prune --all --force || true
+          echo "Disk after cleanup:"; df -h /
+
       # ── 2. Set up Node 22 ───────────────────────────────────────────────────
       - name: Setup Node.js 22
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e

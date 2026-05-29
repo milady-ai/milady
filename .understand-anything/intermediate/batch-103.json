@@ -1,0 +1,1482 @@
+{
+  "batchIndex": 103,
+  "nodes": [
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/app/test/ui-smoke/app-windows.spec.ts",
+      "type": "file",
+      "name": "app-windows.spec.ts",
+      "filePath": "apps/app/test/ui-smoke/app-windows.spec.ts",
+      "summary": "app-windows.spec.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 64 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/app/test/ui-smoke/apps-session-direct-a.spec.ts",
+      "type": "file",
+      "name": "apps-session-direct-a.spec.ts",
+      "filePath": "apps/app/test/ui-smoke/apps-session-direct-a.spec.ts",
+      "summary": "apps-session-direct-a.spec.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 39 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/app/test/ui-smoke/apps-session-direct-b.spec.ts",
+      "type": "file",
+      "name": "apps-session-direct-b.spec.ts",
+      "filePath": "apps/app/test/ui-smoke/apps-session-direct-b.spec.ts",
+      "summary": "apps-session-direct-b.spec.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 39 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/app/test/ui-smoke/apps-session-route-cases.ts",
+      "type": "file",
+      "name": "apps-session-route-cases.ts",
+      "filePath": "apps/app/test/ui-smoke/apps-session-route-cases.ts",
+      "summary": "apps-session-route-cases.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 110 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/apps-session-route-cases.ts:escapeRegExp",
+      "type": "function",
+      "name": "escapeRegExp",
+      "filePath": "apps/app/test/ui-smoke/apps-session-route-cases.ts",
+      "summary": "escapeRegExp is a function defined in apps/app/test/ui-smoke/apps-session-route-cases.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/app/test/ui-smoke/apps-session.spec.ts",
+      "type": "file",
+      "name": "apps-session.spec.ts",
+      "filePath": "apps/app/test/ui-smoke/apps-session.spec.ts",
+      "summary": "apps-session.spec.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 51 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:apps/app/test/ui-smoke/automations.spec.ts",
+      "type": "file",
+      "name": "automations.spec.ts",
+      "filePath": "apps/app/test/ui-smoke/automations.spec.ts",
+      "summary": "automations.spec.ts is a typescript source file in the Milady codebase. It contains 6 functions, 1 imports.",
+      "languageNotes": "typescript; code; 668 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/automations.spec.ts:workflowFixture",
+      "type": "function",
+      "name": "workflowFixture",
+      "filePath": "apps/app/test/ui-smoke/automations.spec.ts",
+      "summary": "workflowFixture is a function defined in apps/app/test/ui-smoke/automations.spec.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/automations.spec.ts:eventTaskItem",
+      "type": "function",
+      "name": "eventTaskItem",
+      "filePath": "apps/app/test/ui-smoke/automations.spec.ts",
+      "summary": "eventTaskItem is a function defined in apps/app/test/ui-smoke/automations.spec.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/automations.spec.ts:workflowItem",
+      "type": "function",
+      "name": "workflowItem",
+      "filePath": "apps/app/test/ui-smoke/automations.spec.ts",
+      "summary": "workflowItem is a function defined in apps/app/test/ui-smoke/automations.spec.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/automations.spec.ts:draftWorkflowItem",
+      "type": "function",
+      "name": "draftWorkflowItem",
+      "filePath": "apps/app/test/ui-smoke/automations.spec.ts",
+      "summary": "draftWorkflowItem is a function defined in apps/app/test/ui-smoke/automations.spec.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/automations.spec.ts:automationSummary",
+      "type": "function",
+      "name": "automationSummary",
+      "filePath": "apps/app/test/ui-smoke/automations.spec.ts",
+      "summary": "automationSummary is a function defined in apps/app/test/ui-smoke/automations.spec.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:apps/app/test/ui-smoke/automations.spec.ts:installAutomationsApi",
+      "type": "function",
+      "name": "installAutomationsApi",
+      "filePath": "apps/app/test/ui-smoke/automations.spec.ts",
+      "summary": "installAutomationsApi is a function defined in apps/app/test/ui-smoke/automations.spec.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/app/test/ui-smoke/backgrounds.spec.ts",
+      "type": "file",
+      "name": "backgrounds.spec.ts",
+      "filePath": "apps/app/test/ui-smoke/backgrounds.spec.ts",
+      "summary": "backgrounds.spec.ts is a typescript source file in the Milady codebase. It contains 6 functions, 1 imports.",
+      "languageNotes": "typescript; code; 213 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/backgrounds.spec.ts:installCompanionAppRoutes",
+      "type": "function",
+      "name": "installCompanionAppRoutes",
+      "filePath": "apps/app/test/ui-smoke/backgrounds.spec.ts",
+      "summary": "installCompanionAppRoutes is a function defined in apps/app/test/ui-smoke/backgrounds.spec.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/backgrounds.spec.ts:openCompanionApp",
+      "type": "function",
+      "name": "openCompanionApp",
+      "filePath": "apps/app/test/ui-smoke/backgrounds.spec.ts",
+      "summary": "openCompanionApp is a function defined in apps/app/test/ui-smoke/backgrounds.spec.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/backgrounds.spec.ts:readBackgroundLayoutMetrics",
+      "type": "function",
+      "name": "readBackgroundLayoutMetrics",
+      "filePath": "apps/app/test/ui-smoke/backgrounds.spec.ts",
+      "summary": "readBackgroundLayoutMetrics is a function defined in apps/app/test/ui-smoke/backgrounds.spec.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/backgrounds.spec.ts:requireRect",
+      "type": "function",
+      "name": "requireRect",
+      "filePath": "apps/app/test/ui-smoke/backgrounds.spec.ts",
+      "summary": "requireRect is a function defined in apps/app/test/ui-smoke/backgrounds.spec.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/backgrounds.spec.ts:expectRectToFillViewport",
+      "type": "function",
+      "name": "expectRectToFillViewport",
+      "filePath": "apps/app/test/ui-smoke/backgrounds.spec.ts",
+      "summary": "expectRectToFillViewport is a function defined in apps/app/test/ui-smoke/backgrounds.spec.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/backgrounds.spec.ts:expectNoBackgroundCornerClipping",
+      "type": "function",
+      "name": "expectNoBackgroundCornerClipping",
+      "filePath": "apps/app/test/ui-smoke/backgrounds.spec.ts",
+      "summary": "expectNoBackgroundCornerClipping is a function defined in apps/app/test/ui-smoke/backgrounds.spec.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/app/test/ui-smoke/browser-workspace.spec.ts",
+      "type": "file",
+      "name": "browser-workspace.spec.ts",
+      "filePath": "apps/app/test/ui-smoke/browser-workspace.spec.ts",
+      "summary": "browser-workspace.spec.ts is a typescript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "typescript; code; 157 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/browser-workspace.spec.ts:isBrowserWorkspaceSmokeSnapshot",
+      "type": "function",
+      "name": "isBrowserWorkspaceSmokeSnapshot",
+      "filePath": "apps/app/test/ui-smoke/browser-workspace.spec.ts",
+      "summary": "isBrowserWorkspaceSmokeSnapshot is a function defined in apps/app/test/ui-smoke/browser-workspace.spec.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/browser-workspace.spec.ts:resetBrowserWorkspaceTabs",
+      "type": "function",
+      "name": "resetBrowserWorkspaceTabs",
+      "filePath": "apps/app/test/ui-smoke/browser-workspace.spec.ts",
+      "summary": "resetBrowserWorkspaceTabs is a function defined in apps/app/test/ui-smoke/browser-workspace.spec.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/app/test/ui-smoke/cloud-wallet-import.spec.ts",
+      "type": "file",
+      "name": "cloud-wallet-import.spec.ts",
+      "filePath": "apps/app/test/ui-smoke/cloud-wallet-import.spec.ts",
+      "summary": "cloud-wallet-import.spec.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 128 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/cloud-wallet-import.spec.ts:openWalletRpcSettings",
+      "type": "function",
+      "name": "openWalletRpcSettings",
+      "filePath": "apps/app/test/ui-smoke/cloud-wallet-import.spec.ts",
+      "summary": "openWalletRpcSettings is a function defined in apps/app/test/ui-smoke/cloud-wallet-import.spec.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/app/test/ui-smoke/computer-use.spec.ts",
+      "type": "file",
+      "name": "computer-use.spec.ts",
+      "filePath": "apps/app/test/ui-smoke/computer-use.spec.ts",
+      "summary": "computer-use.spec.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 52 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:apps/app/test/ui-smoke/game-apps.spec.ts",
+      "type": "file",
+      "name": "game-apps.spec.ts",
+      "filePath": "apps/app/test/ui-smoke/game-apps.spec.ts",
+      "summary": "game-apps.spec.ts is a typescript source file in the Milady codebase. It contains 5 functions, 1 imports.",
+      "languageNotes": "typescript; code; 341 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/game-apps.spec.ts:nowIso",
+      "type": "function",
+      "name": "nowIso",
+      "filePath": "apps/app/test/ui-smoke/game-apps.spec.ts",
+      "summary": "nowIso is a function defined in apps/app/test/ui-smoke/game-apps.spec.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/game-apps.spec.ts:makeSession",
+      "type": "function",
+      "name": "makeSession",
+      "filePath": "apps/app/test/ui-smoke/game-apps.spec.ts",
+      "summary": "makeSession is a function defined in apps/app/test/ui-smoke/game-apps.spec.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/game-apps.spec.ts:makeRun",
+      "type": "function",
+      "name": "makeRun",
+      "filePath": "apps/app/test/ui-smoke/game-apps.spec.ts",
+      "summary": "makeRun is a function defined in apps/app/test/ui-smoke/game-apps.spec.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/game-apps.spec.ts:makeApp",
+      "type": "function",
+      "name": "makeApp",
+      "filePath": "apps/app/test/ui-smoke/game-apps.spec.ts",
+      "summary": "makeApp is a function defined in apps/app/test/ui-smoke/game-apps.spec.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:apps/app/test/ui-smoke/game-apps.spec.ts:installGameRoutes",
+      "type": "function",
+      "name": "installGameRoutes",
+      "filePath": "apps/app/test/ui-smoke/game-apps.spec.ts",
+      "summary": "installGameRoutes is a function defined in apps/app/test/ui-smoke/game-apps.spec.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:apps/app/test/ui-smoke/helpers.ts",
+      "type": "file",
+      "name": "helpers.ts",
+      "filePath": "apps/app/test/ui-smoke/helpers.ts",
+      "summary": "helpers.ts is a typescript source file in the Milady codebase. It contains 19 functions.",
+      "languageNotes": "typescript; code; 722 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/helpers.ts:seedAppStorage",
+      "type": "function",
+      "name": "seedAppStorage",
+      "filePath": "apps/app/test/ui-smoke/helpers.ts",
+      "summary": "seedAppStorage is a function defined in apps/app/test/ui-smoke/helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/helpers.ts:expectRootReady",
+      "type": "function",
+      "name": "expectRootReady",
+      "filePath": "apps/app/test/ui-smoke/helpers.ts",
+      "summary": "expectRootReady is a function defined in apps/app/test/ui-smoke/helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/helpers.ts:expectNoFirstRunRedirect",
+      "type": "function",
+      "name": "expectNoFirstRunRedirect",
+      "filePath": "apps/app/test/ui-smoke/helpers.ts",
+      "summary": "expectNoFirstRunRedirect is a function defined in apps/app/test/ui-smoke/helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/helpers.ts:openAppPath",
+      "type": "function",
+      "name": "openAppPath",
+      "filePath": "apps/app/test/ui-smoke/helpers.ts",
+      "summary": "openAppPath is a function defined in apps/app/test/ui-smoke/helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/helpers.ts:readLocalStorage",
+      "type": "function",
+      "name": "readLocalStorage",
+      "filePath": "apps/app/test/ui-smoke/helpers.ts",
+      "summary": "readLocalStorage is a function defined in apps/app/test/ui-smoke/helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/helpers.ts:openSettingsSection",
+      "type": "function",
+      "name": "openSettingsSection",
+      "filePath": "apps/app/test/ui-smoke/helpers.ts",
+      "summary": "openSettingsSection is a function defined in apps/app/test/ui-smoke/helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/helpers.ts:locatorVisible",
+      "type": "function",
+      "name": "locatorVisible",
+      "filePath": "apps/app/test/ui-smoke/helpers.ts",
+      "summary": "locatorVisible is a function defined in apps/app/test/ui-smoke/helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/helpers.ts:formatReadyCheck",
+      "type": "function",
+      "name": "formatReadyCheck",
+      "filePath": "apps/app/test/ui-smoke/helpers.ts",
+      "summary": "formatReadyCheck is a function defined in apps/app/test/ui-smoke/helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/helpers.ts:readyChecksPassed",
+      "type": "function",
+      "name": "readyChecksPassed",
+      "filePath": "apps/app/test/ui-smoke/helpers.ts",
+      "summary": "readyChecksPassed is a function defined in apps/app/test/ui-smoke/helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/helpers.ts:evaluateReadyChecks",
+      "type": "function",
+      "name": "evaluateReadyChecks",
+      "filePath": "apps/app/test/ui-smoke/helpers.ts",
+      "summary": "evaluateReadyChecks is a function defined in apps/app/test/ui-smoke/helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/helpers.ts:assertReadyChecks",
+      "type": "function",
+      "name": "assertReadyChecks",
+      "filePath": "apps/app/test/ui-smoke/helpers.ts",
+      "summary": "assertReadyChecks is a function defined in apps/app/test/ui-smoke/helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/helpers.ts:emptyWalletMarketSource",
+      "type": "function",
+      "name": "emptyWalletMarketSource",
+      "filePath": "apps/app/test/ui-smoke/helpers.ts",
+      "summary": "emptyWalletMarketSource is a function defined in apps/app/test/ui-smoke/helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/helpers.ts:emptyWalletMarketOverview",
+      "type": "function",
+      "name": "emptyWalletMarketOverview",
+      "filePath": "apps/app/test/ui-smoke/helpers.ts",
+      "summary": "emptyWalletMarketOverview is a function defined in apps/app/test/ui-smoke/helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/helpers.ts:emptyWalletTradingProfile",
+      "type": "function",
+      "name": "emptyWalletTradingProfile",
+      "filePath": "apps/app/test/ui-smoke/helpers.ts",
+      "summary": "emptyWalletTradingProfile is a function defined in apps/app/test/ui-smoke/helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/helpers.ts:smokePermission",
+      "type": "function",
+      "name": "smokePermission",
+      "filePath": "apps/app/test/ui-smoke/helpers.ts",
+      "summary": "smokePermission is a function defined in apps/app/test/ui-smoke/helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/helpers.ts:smokePermissionsState",
+      "type": "function",
+      "name": "smokePermissionsState",
+      "filePath": "apps/app/test/ui-smoke/helpers.ts",
+      "summary": "smokePermissionsState is a function defined in apps/app/test/ui-smoke/helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/helpers.ts:catalogApp",
+      "type": "function",
+      "name": "catalogApp",
+      "filePath": "apps/app/test/ui-smoke/helpers.ts",
+      "summary": "catalogApp is a function defined in apps/app/test/ui-smoke/helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:apps/app/test/ui-smoke/helpers.ts:installDefaultAppRoutes",
+      "type": "function",
+      "name": "installDefaultAppRoutes",
+      "filePath": "apps/app/test/ui-smoke/helpers.ts",
+      "summary": "installDefaultAppRoutes is a function defined in apps/app/test/ui-smoke/helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:apps/app/test/ui-smoke/helpers.ts:installCloudWalletImportApiOverrides",
+      "type": "function",
+      "name": "installCloudWalletImportApiOverrides",
+      "filePath": "apps/app/test/ui-smoke/helpers.ts",
+      "summary": "installCloudWalletImportApiOverrides is a function defined in apps/app/test/ui-smoke/helpers.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/app/test/ui-smoke/mobile-routes.spec.ts",
+      "type": "file",
+      "name": "mobile-routes.spec.ts",
+      "filePath": "apps/app/test/ui-smoke/mobile-routes.spec.ts",
+      "summary": "mobile-routes.spec.ts is a typescript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "typescript; code; 73 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/mobile-routes.spec.ts:expectNoHorizontalOverflow",
+      "type": "function",
+      "name": "expectNoHorizontalOverflow",
+      "filePath": "apps/app/test/ui-smoke/mobile-routes.spec.ts",
+      "summary": "expectNoHorizontalOverflow is a function defined in apps/app/test/ui-smoke/mobile-routes.spec.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/mobile-routes.spec.ts:expectMobileViewportLocked",
+      "type": "function",
+      "name": "expectMobileViewportLocked",
+      "filePath": "apps/app/test/ui-smoke/mobile-routes.spec.ts",
+      "summary": "expectMobileViewportLocked is a function defined in apps/app/test/ui-smoke/mobile-routes.spec.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/app/test/ui-smoke/settings-extended.spec.ts",
+      "type": "file",
+      "name": "settings-extended.spec.ts",
+      "filePath": "apps/app/test/ui-smoke/settings-extended.spec.ts",
+      "summary": "settings-extended.spec.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 234 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/settings-extended.spec.ts:openSettings",
+      "type": "function",
+      "name": "openSettings",
+      "filePath": "apps/app/test/ui-smoke/settings-extended.spec.ts",
+      "summary": "openSettings is a function defined in apps/app/test/ui-smoke/settings-extended.spec.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/app/test/ui-smoke/titlebar-navigation.spec.ts",
+      "type": "file",
+      "name": "titlebar-navigation.spec.ts",
+      "filePath": "apps/app/test/ui-smoke/titlebar-navigation.spec.ts",
+      "summary": "titlebar-navigation.spec.ts is a typescript source file in the Milady codebase. It contains 3 functions, 1 imports.",
+      "languageNotes": "typescript; code; 102 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/titlebar-navigation.spec.ts:seedElectrobunRuntime",
+      "type": "function",
+      "name": "seedElectrobunRuntime",
+      "filePath": "apps/app/test/ui-smoke/titlebar-navigation.spec.ts",
+      "summary": "seedElectrobunRuntime is a function defined in apps/app/test/ui-smoke/titlebar-navigation.spec.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/titlebar-navigation.spec.ts:getAppRegion",
+      "type": "function",
+      "name": "getAppRegion",
+      "filePath": "apps/app/test/ui-smoke/titlebar-navigation.spec.ts",
+      "summary": "getAppRegion is a function defined in apps/app/test/ui-smoke/titlebar-navigation.spec.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/ui-smoke/titlebar-navigation.spec.ts:clickLocatorAtVerticalFraction",
+      "type": "function",
+      "name": "clickLocatorAtVerticalFraction",
+      "filePath": "apps/app/test/ui-smoke/titlebar-navigation.spec.ts",
+      "summary": "clickLocatorAtVerticalFraction is a function defined in apps/app/test/ui-smoke/titlebar-navigation.spec.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/app/test/ui-smoke/ui-smoke.spec.ts",
+      "type": "file",
+      "name": "ui-smoke.spec.ts",
+      "filePath": "apps/app/test/ui-smoke/ui-smoke.spec.ts",
+      "summary": "ui-smoke.spec.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 51 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/apps-session-route-cases.ts",
+      "target": "function:apps/app/test/ui-smoke/apps-session-route-cases.ts:escapeRegExp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/automations.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/automations.spec.ts:workflowFixture",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/automations.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/automations.spec.ts:eventTaskItem",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/automations.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/automations.spec.ts:workflowItem",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/automations.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/automations.spec.ts:draftWorkflowItem",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/automations.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/automations.spec.ts:automationSummary",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/automations.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/automations.spec.ts:installAutomationsApi",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/automations.spec.ts:installAutomationsApi",
+      "target": "function:apps/app/test/ui-smoke/automations.spec.ts:automationSummary",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/automations.spec.ts:installAutomationsApi",
+      "target": "function:apps/app/test/ui-smoke/automations.spec.ts:workflowFixture",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/automations.spec.ts:installAutomationsApi",
+      "target": "function:apps/app/test/ui-smoke/automations.spec.ts:workflowItem",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/automations.spec.ts:installAutomationsApi",
+      "target": "function:apps/app/test/ui-smoke/automations.spec.ts:workflowFixture",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/automations.spec.ts:installAutomationsApi",
+      "target": "function:apps/app/test/ui-smoke/automations.spec.ts:workflowItem",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/automations.spec.ts:installAutomationsApi",
+      "target": "function:apps/app/test/ui-smoke/automations.spec.ts:draftWorkflowItem",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/backgrounds.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/backgrounds.spec.ts:installCompanionAppRoutes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/backgrounds.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/backgrounds.spec.ts:openCompanionApp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/backgrounds.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/backgrounds.spec.ts:readBackgroundLayoutMetrics",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/backgrounds.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/backgrounds.spec.ts:requireRect",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/backgrounds.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/backgrounds.spec.ts:expectRectToFillViewport",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/backgrounds.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/backgrounds.spec.ts:expectNoBackgroundCornerClipping",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/backgrounds.spec.ts:openCompanionApp",
+      "target": "function:apps/app/test/ui-smoke/backgrounds.spec.ts:installCompanionAppRoutes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/browser-workspace.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/browser-workspace.spec.ts:isBrowserWorkspaceSmokeSnapshot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/browser-workspace.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/browser-workspace.spec.ts:resetBrowserWorkspaceTabs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/browser-workspace.spec.ts:resetBrowserWorkspaceTabs",
+      "target": "function:apps/app/test/ui-smoke/browser-workspace.spec.ts:isBrowserWorkspaceSmokeSnapshot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/browser-workspace.spec.ts:resetBrowserWorkspaceTabs",
+      "target": "function:apps/app/test/ui-smoke/browser-workspace.spec.ts:isBrowserWorkspaceSmokeSnapshot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/cloud-wallet-import.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/cloud-wallet-import.spec.ts:openWalletRpcSettings",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/game-apps.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/game-apps.spec.ts:nowIso",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/game-apps.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/game-apps.spec.ts:makeSession",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/game-apps.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/game-apps.spec.ts:makeRun",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/game-apps.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/game-apps.spec.ts:makeApp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/game-apps.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/game-apps.spec.ts:installGameRoutes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/game-apps.spec.ts:makeRun",
+      "target": "function:apps/app/test/ui-smoke/game-apps.spec.ts:makeSession",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/game-apps.spec.ts:makeRun",
+      "target": "function:apps/app/test/ui-smoke/game-apps.spec.ts:nowIso",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/game-apps.spec.ts:makeRun",
+      "target": "function:apps/app/test/ui-smoke/game-apps.spec.ts:nowIso",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/game-apps.spec.ts:makeRun",
+      "target": "function:apps/app/test/ui-smoke/game-apps.spec.ts:nowIso",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/game-apps.spec.ts:makeRun",
+      "target": "function:apps/app/test/ui-smoke/game-apps.spec.ts:nowIso",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/game-apps.spec.ts:installGameRoutes",
+      "target": "function:apps/app/test/ui-smoke/game-apps.spec.ts:makeRun",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/game-apps.spec.ts:installGameRoutes",
+      "target": "function:apps/app/test/ui-smoke/game-apps.spec.ts:makeApp",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/game-apps.spec.ts:installGameRoutes",
+      "target": "function:apps/app/test/ui-smoke/game-apps.spec.ts:makeRun",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/helpers.ts",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:seedAppStorage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/helpers.ts",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:expectRootReady",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/helpers.ts",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:expectNoFirstRunRedirect",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/helpers.ts",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:openAppPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/helpers.ts",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:readLocalStorage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/helpers.ts",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:openSettingsSection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/helpers.ts",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:locatorVisible",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/helpers.ts",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:formatReadyCheck",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/helpers.ts",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:readyChecksPassed",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/helpers.ts",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:evaluateReadyChecks",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/helpers.ts",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:assertReadyChecks",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/helpers.ts",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:emptyWalletMarketSource",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/helpers.ts",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:emptyWalletMarketOverview",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/helpers.ts",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:emptyWalletTradingProfile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/helpers.ts",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:smokePermission",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/helpers.ts",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:smokePermissionsState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/helpers.ts",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:catalogApp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/helpers.ts",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:installDefaultAppRoutes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/helpers.ts",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:installCloudWalletImportApiOverrides",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/helpers.ts:openAppPath",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:expectRootReady",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/helpers.ts:openAppPath",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:expectNoFirstRunRedirect",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/helpers.ts:evaluateReadyChecks",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:locatorVisible",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/helpers.ts:evaluateReadyChecks",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:locatorVisible",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/helpers.ts:evaluateReadyChecks",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:readyChecksPassed",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/helpers.ts:assertReadyChecks",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:evaluateReadyChecks",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/helpers.ts:assertReadyChecks",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:formatReadyCheck",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/helpers.ts:emptyWalletMarketOverview",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:emptyWalletMarketSource",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/helpers.ts:emptyWalletMarketOverview",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:emptyWalletMarketSource",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/helpers.ts:emptyWalletMarketOverview",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:emptyWalletMarketSource",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/helpers.ts:smokePermissionsState",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:smokePermission",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/helpers.ts:smokePermissionsState",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:smokePermission",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/helpers.ts:smokePermissionsState",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:smokePermission",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/helpers.ts:smokePermissionsState",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:smokePermission",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/helpers.ts:smokePermissionsState",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:smokePermission",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/helpers.ts:smokePermissionsState",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:smokePermission",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/helpers.ts:installDefaultAppRoutes",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:catalogApp",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/helpers.ts:installDefaultAppRoutes",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:smokePermissionsState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/helpers.ts:installDefaultAppRoutes",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:smokePermissionsState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/helpers.ts:installDefaultAppRoutes",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:smokePermissionsState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/helpers.ts:installDefaultAppRoutes",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:smokePermissionsState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/helpers.ts:installDefaultAppRoutes",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:smokePermissionsState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/helpers.ts:installDefaultAppRoutes",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:emptyWalletMarketOverview",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/ui-smoke/helpers.ts:installDefaultAppRoutes",
+      "target": "function:apps/app/test/ui-smoke/helpers.ts:emptyWalletTradingProfile",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/mobile-routes.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/mobile-routes.spec.ts:expectNoHorizontalOverflow",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/mobile-routes.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/mobile-routes.spec.ts:expectMobileViewportLocked",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/settings-extended.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/settings-extended.spec.ts:openSettings",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/titlebar-navigation.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/titlebar-navigation.spec.ts:seedElectrobunRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/titlebar-navigation.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/titlebar-navigation.spec.ts:getAppRegion",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/ui-smoke/titlebar-navigation.spec.ts",
+      "target": "function:apps/app/test/ui-smoke/titlebar-navigation.spec.ts:clickLocatorAtVerticalFraction",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/app/test/ui-smoke/app-windows.spec.ts",
+      "target": "file:apps/app/test/ui-smoke/helpers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/app/test/ui-smoke/apps-session-direct-a.spec.ts",
+      "target": "file:apps/app/test/ui-smoke/apps-session-route-cases.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/app/test/ui-smoke/apps-session-direct-a.spec.ts",
+      "target": "file:apps/app/test/ui-smoke/helpers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/app/test/ui-smoke/apps-session-direct-b.spec.ts",
+      "target": "file:apps/app/test/ui-smoke/apps-session-route-cases.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/app/test/ui-smoke/apps-session-direct-b.spec.ts",
+      "target": "file:apps/app/test/ui-smoke/helpers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/app/test/ui-smoke/apps-session.spec.ts",
+      "target": "file:apps/app/test/ui-smoke/helpers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/app/test/ui-smoke/automations.spec.ts",
+      "target": "file:apps/app/test/ui-smoke/helpers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/app/test/ui-smoke/backgrounds.spec.ts",
+      "target": "file:apps/app/test/ui-smoke/helpers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/app/test/ui-smoke/browser-workspace.spec.ts",
+      "target": "file:apps/app/test/ui-smoke/helpers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/app/test/ui-smoke/cloud-wallet-import.spec.ts",
+      "target": "file:apps/app/test/ui-smoke/helpers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/app/test/ui-smoke/computer-use.spec.ts",
+      "target": "file:apps/app/test/ui-smoke/helpers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/app/test/ui-smoke/game-apps.spec.ts",
+      "target": "file:apps/app/test/ui-smoke/helpers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/app/test/ui-smoke/mobile-routes.spec.ts",
+      "target": "file:apps/app/test/ui-smoke/helpers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/app/test/ui-smoke/settings-extended.spec.ts",
+      "target": "file:apps/app/test/ui-smoke/helpers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/app/test/ui-smoke/titlebar-navigation.spec.ts",
+      "target": "file:apps/app/test/ui-smoke/helpers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/app/test/ui-smoke/ui-smoke.spec.ts",
+      "target": "file:apps/app/test/ui-smoke/helpers.ts",
+      "type": "imports"
+    }
+  ]
+}

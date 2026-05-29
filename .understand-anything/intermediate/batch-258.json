@@ -1,0 +1,42 @@
+{
+  "batchIndex": 258,
+  "nodes": [
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:native/ios-bun-port/polyfill/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "native/ios-bun-port/polyfill/README.md",
+      "summary": "README.md documents native/ios-bun-port/polyfill with 146 lines of reference material.",
+      "languageNotes": "markdown; docs; 146 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:native/ios-bun-port/polyfill/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "native/ios-bun-port/polyfill/package.json",
+      "summary": "package.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 15 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:native/ios-bun-port/polyfill/tsconfig.json",
+      "type": "config",
+      "name": "tsconfig.json",
+      "filePath": "native/ios-bun-port/polyfill/tsconfig.json",
+      "summary": "tsconfig.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 28 lines"
+    }
+  ],
+  "edges": []
+}

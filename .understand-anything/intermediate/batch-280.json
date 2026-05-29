@@ -1,0 +1,1709 @@
+{
+  "batchIndex": 280,
+  "nodes": [
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java",
+      "type": "file",
+      "name": "ElizaSmsGatewayService.java",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java",
+      "summary": "ElizaSmsGatewayService.java is a java source file in the Milady codebase. It contains 8 functions, 1 class.",
+      "languageNotes": "java; code; 268 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:onBind",
+      "type": "function",
+      "name": "onBind",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java",
+      "summary": "onBind is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:onStartCommand",
+      "type": "function",
+      "name": "onStartCommand",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java",
+      "summary": "onStartCommand is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:start",
+      "type": "function",
+      "name": "start",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java",
+      "summary": "start is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:forwardAndReply",
+      "type": "function",
+      "name": "forwardAndReply",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java",
+      "summary": "forwardAndReply is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:postToCloud",
+      "type": "function",
+      "name": "postToCloud",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java",
+      "summary": "postToCloud is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:buildCloudPayload",
+      "type": "function",
+      "name": "buildCloudPayload",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java",
+      "summary": "buildCloudPayload is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:readResponse",
+      "type": "function",
+      "name": "readResponse",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java",
+      "summary": "readResponse is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:persistSentMessage",
+      "type": "function",
+      "name": "persistSentMessage",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java",
+      "summary": "persistSentMessage is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java."
+    },
+    {
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:ElizaSmsGatewayService",
+      "type": "class",
+      "name": "ElizaSmsGatewayService",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java",
+      "summary": "ElizaSmsGatewayService is a class or type declared in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java."
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsReceiver.java",
+      "type": "file",
+      "name": "ElizaSmsReceiver.java",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsReceiver.java",
+      "summary": "ElizaSmsReceiver.java is a java source file in the Milady codebase. It contains 2 functions, 1 class.",
+      "languageNotes": "java; code; 95 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsReceiver.java:onReceive",
+      "type": "function",
+      "name": "onReceive",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsReceiver.java",
+      "summary": "onReceive is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsReceiver.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsReceiver.java:persistIncomingSms",
+      "type": "function",
+      "name": "persistIncomingSms",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsReceiver.java",
+      "summary": "persistIncomingSms is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsReceiver.java."
+    },
+    {
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsReceiver.java:ElizaSmsReceiver",
+      "type": "class",
+      "name": "ElizaSmsReceiver",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsReceiver.java",
+      "summary": "ElizaSmsReceiver is a class or type declared in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsReceiver.java."
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java",
+      "type": "file",
+      "name": "ElizaTasksWorker.java",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java",
+      "summary": "ElizaTasksWorker.java is a java source file in the Milady codebase. It contains 5 functions, 1 class.",
+      "languageNotes": "java; code; 194 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java:ElizaTasksWorker",
+      "type": "function",
+      "name": "ElizaTasksWorker",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java",
+      "summary": "ElizaTasksWorker is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java:doWork",
+      "type": "function",
+      "name": "doWork",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java",
+      "summary": "doWork is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java:trimTrailingSlash",
+      "type": "function",
+      "name": "trimTrailingSlash",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java",
+      "summary": "trimTrailingSlash is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java:isLocalAgentBase",
+      "type": "function",
+      "name": "isLocalAgentBase",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java",
+      "summary": "isLocalAgentBase is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java:deliverWakeViaAgentService",
+      "type": "function",
+      "name": "deliverWakeViaAgentService",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java",
+      "summary": "deliverWakeViaAgentService is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java."
+    },
+    {
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java:ElizaTasksWorker",
+      "type": "class",
+      "name": "ElizaTasksWorker",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java",
+      "summary": "ElizaTasksWorker is a class or type declared in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java."
+    },
+    {
+      "tags": [
+        "voice",
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java",
+      "type": "file",
+      "name": "ElizaVoiceCaptureService.java",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java",
+      "summary": "ElizaVoiceCaptureService.java is a java source file in the Milady codebase. It contains 10 functions, 1 class.",
+      "languageNotes": "java; code; 198 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:onCreate",
+      "type": "function",
+      "name": "onCreate",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java",
+      "summary": "onCreate is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:onStartCommand",
+      "type": "function",
+      "name": "onStartCommand",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java",
+      "summary": "onStartCommand is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:onBind",
+      "type": "function",
+      "name": "onBind",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java",
+      "summary": "onBind is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:onDestroy",
+      "type": "function",
+      "name": "onDestroy",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java",
+      "summary": "onDestroy is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:ensureNotificationChannel",
+      "type": "function",
+      "name": "ensureNotificationChannel",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java",
+      "summary": "ensureNotificationChannel is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:buildNotification",
+      "type": "function",
+      "name": "buildNotification",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java",
+      "summary": "buildNotification is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:refreshNotification",
+      "type": "function",
+      "name": "refreshNotification",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java",
+      "summary": "refreshNotification is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:start",
+      "type": "function",
+      "name": "start",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java",
+      "summary": "start is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:stop",
+      "type": "function",
+      "name": "stop",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java",
+      "summary": "stop is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:setMode",
+      "type": "function",
+      "name": "setMode",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java",
+      "summary": "setMode is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java."
+    },
+    {
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:ElizaVoiceCaptureService",
+      "type": "class",
+      "name": "ElizaVoiceCaptureService",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java",
+      "summary": "ElizaVoiceCaptureService is a class or type declared in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java."
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaWorkScheduler.java",
+      "type": "file",
+      "name": "ElizaWorkScheduler.java",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaWorkScheduler.java",
+      "summary": "ElizaWorkScheduler.java is a java source file in the Milady codebase. It contains 2 functions, 1 class.",
+      "languageNotes": "java; code; 60 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaWorkScheduler.java:ElizaWorkScheduler",
+      "type": "function",
+      "name": "ElizaWorkScheduler",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaWorkScheduler.java",
+      "summary": "ElizaWorkScheduler is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaWorkScheduler.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaWorkScheduler.java:enqueuePeriodic",
+      "type": "function",
+      "name": "enqueuePeriodic",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaWorkScheduler.java",
+      "summary": "enqueuePeriodic is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaWorkScheduler.java."
+    },
+    {
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaWorkScheduler.java:ElizaWorkScheduler",
+      "type": "class",
+      "name": "ElizaWorkScheduler",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaWorkScheduler.java",
+      "summary": "ElizaWorkScheduler is a class or type declared in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaWorkScheduler.java."
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "type": "file",
+      "name": "GatewayConnectionService.java",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "summary": "GatewayConnectionService.java is a java source file in the Milady codebase. It contains 13 functions, 1 class.",
+      "languageNotes": "java; code; 245 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:onCreate",
+      "type": "function",
+      "name": "onCreate",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "summary": "onCreate is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:onStartCommand",
+      "type": "function",
+      "name": "onStartCommand",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "summary": "onStartCommand is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:onDestroy",
+      "type": "function",
+      "name": "onDestroy",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "summary": "onDestroy is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:onBind",
+      "type": "function",
+      "name": "onBind",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "summary": "onBind is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:ensureNotificationChannel",
+      "type": "function",
+      "name": "ensureNotificationChannel",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "summary": "ensureNotificationChannel is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:buildNotification",
+      "type": "function",
+      "name": "buildNotification",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "summary": "buildNotification is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:isNotificationStop",
+      "type": "function",
+      "name": "isNotificationStop",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "summary": "isNotificationStop is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:isCloudRuntimeModeLocked",
+      "type": "function",
+      "name": "isCloudRuntimeModeLocked",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "summary": "isCloudRuntimeModeLocked is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:readRuntimeMode",
+      "type": "function",
+      "name": "readRuntimeMode",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "summary": "readRuntimeMode is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:updateNotification",
+      "type": "function",
+      "name": "updateNotification",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "summary": "updateNotification is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:start",
+      "type": "function",
+      "name": "start",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "summary": "start is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:stop",
+      "type": "function",
+      "name": "stop",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "summary": "stop is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:updateStatus",
+      "type": "function",
+      "name": "updateStatus",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "summary": "updateStatus is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java."
+    },
+    {
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:GatewayConnectionService",
+      "type": "class",
+      "name": "GatewayConnectionService",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "summary": "GatewayConnectionService is a class or type declared in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java."
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java",
+      "type": "file",
+      "name": "MainActivity.java",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java",
+      "summary": "MainActivity.java is a java source file in the Milady codebase. It contains 7 functions, 1 class.",
+      "languageNotes": "java; code; 230 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java:onCreate",
+      "type": "function",
+      "name": "onCreate",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java",
+      "summary": "onCreate is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java:resolveMixedContentMode",
+      "type": "function",
+      "name": "resolveMixedContentMode",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java",
+      "summary": "resolveMixedContentMode is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java:requestPostNotificationsIfNeeded",
+      "type": "function",
+      "name": "requestPostNotificationsIfNeeded",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java",
+      "summary": "requestPostNotificationsIfNeeded is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java:onStop",
+      "type": "function",
+      "name": "onStop",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java",
+      "summary": "onStop is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java:onDestroy",
+      "type": "function",
+      "name": "onDestroy",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java",
+      "summary": "onDestroy is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java:applyBrandUserAgentMarkers",
+      "type": "function",
+      "name": "applyBrandUserAgentMarkers",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java",
+      "summary": "applyBrandUserAgentMarkers is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java:readSystemProperty",
+      "type": "function",
+      "name": "readSystemProperty",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java",
+      "summary": "readSystemProperty is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java."
+    },
+    {
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java:MainActivity",
+      "type": "class",
+      "name": "MainActivity",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java",
+      "summary": "MainActivity is a class or type declared in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java."
+    },
+    {
+      "tags": [
+        "voice",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java",
+      "type": "file",
+      "name": "VoiceCapturePlugin.java",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java",
+      "summary": "VoiceCapturePlugin.java is a java source file in the Milady codebase. It contains 6 functions, 1 class.",
+      "languageNotes": "java; code; 119 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java:startBackgroundCapture",
+      "type": "function",
+      "name": "startBackgroundCapture",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java",
+      "summary": "startBackgroundCapture is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java:stopBackgroundCapture",
+      "type": "function",
+      "name": "stopBackgroundCapture",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java",
+      "summary": "stopBackgroundCapture is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java:setMode",
+      "type": "function",
+      "name": "setMode",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java",
+      "summary": "setMode is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java:isCaptureSupported",
+      "type": "function",
+      "name": "isCaptureSupported",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java",
+      "summary": "isCaptureSupported is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java:requestMicPermission",
+      "type": "function",
+      "name": "requestMicPermission",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java",
+      "summary": "requestMicPermission is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java."
+    },
+    {
+      "tags": [
+        "function",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java:hasRecordAudio",
+      "type": "function",
+      "name": "hasRecordAudio",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java",
+      "summary": "hasRecordAudio is a function defined in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java."
+    },
+    {
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java:VoiceCapturePlugin",
+      "type": "class",
+      "name": "VoiceCapturePlugin",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java",
+      "summary": "VoiceCapturePlugin is a class or type declared in eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java."
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/android/app/src/main/res/layout/activity_main.xml",
+      "type": "config",
+      "name": "activity_main.xml",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/res/layout/activity_main.xml",
+      "summary": "activity_main.xml configures xml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "xml; config; 12 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml",
+      "type": "config",
+      "name": "ic_launcher_round.xml",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml",
+      "summary": "ic_launcher_round.xml configures xml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "xml; config; 6 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
+      "type": "config",
+      "name": "ic_launcher.xml",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
+      "summary": "ic_launcher.xml configures xml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "xml; config; 6 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/android/capacitor-cordova-android-plugins/build.gradle",
+      "type": "config",
+      "name": "build.gradle",
+      "filePath": "eliza/packages/app-core/platforms/android/capacitor-cordova-android-plugins/build.gradle",
+      "summary": "build.gradle configures gradle settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "gradle; config; 53 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/android/capacitor-cordova-android-plugins/cordova.variables.gradle",
+      "type": "config",
+      "name": "cordova.variables.gradle",
+      "filePath": "eliza/packages/app-core/platforms/android/capacitor-cordova-android-plugins/cordova.variables.gradle",
+      "summary": "cordova.variables.gradle configures gradle settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "gradle; config; 3 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/android/capacitor-cordova-android-plugins/src/main/AndroidManifest.xml",
+      "type": "config",
+      "name": "AndroidManifest.xml",
+      "filePath": "eliza/packages/app-core/platforms/android/capacitor-cordova-android-plugins/src/main/AndroidManifest.xml",
+      "summary": "AndroidManifest.xml configures xml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "xml; config; 3 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/android/capacitor-cordova-android-plugins/src/main/java/.gitkeep",
+      "type": "file",
+      "name": ".gitkeep",
+      "filePath": "eliza/packages/app-core/platforms/android/capacitor-cordova-android-plugins/src/main/java/.gitkeep",
+      "summary": ".gitkeep is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 1 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/android/capacitor-cordova-android-plugins/src/main/res/.gitkeep",
+      "type": "file",
+      "name": ".gitkeep",
+      "filePath": "eliza/packages/app-core/platforms/android/capacitor-cordova-android-plugins/src/main/res/.gitkeep",
+      "summary": ".gitkeep is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 1 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/android/fastlane/Appfile",
+      "type": "file",
+      "name": "Appfile",
+      "filePath": "eliza/packages/app-core/platforms/android/fastlane/Appfile",
+      "summary": "Appfile is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 2 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/android/fastlane/Fastfile",
+      "type": "file",
+      "name": "Fastfile",
+      "filePath": "eliza/packages/app-core/platforms/android/fastlane/Fastfile",
+      "summary": "Fastfile is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 59 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/android/Gemfile",
+      "type": "file",
+      "name": "Gemfile",
+      "filePath": "eliza/packages/app-core/platforms/android/Gemfile",
+      "summary": "Gemfile is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 6 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/android/gradle/wrapper/gradle-wrapper.jar",
+      "type": "file",
+      "name": "gradle-wrapper.jar",
+      "filePath": "eliza/packages/app-core/platforms/android/gradle/wrapper/gradle-wrapper.jar",
+      "summary": "gradle-wrapper.jar is a jar source file in the Milady codebase.",
+      "languageNotes": "jar; code; 158 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/android/gradle/wrapper/gradle-wrapper.properties",
+      "type": "config",
+      "name": "gradle-wrapper.properties",
+      "filePath": "eliza/packages/app-core/platforms/android/gradle/wrapper/gradle-wrapper.properties",
+      "summary": "gradle-wrapper.properties configures properties settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "properties; config; 7 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/platforms/android/gradlew",
+      "type": "file",
+      "name": "gradlew",
+      "filePath": "eliza/packages/app-core/platforms/android/gradlew",
+      "summary": "gradlew is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 251 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/android/update-manifest/generate-manifest.mjs",
+      "type": "file",
+      "name": "generate-manifest.mjs",
+      "filePath": "eliza/packages/app-core/platforms/android/update-manifest/generate-manifest.mjs",
+      "summary": "generate-manifest.mjs is a javascript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "javascript; code; 97 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/android/update-manifest/generate-manifest.mjs:parseArgs",
+      "type": "function",
+      "name": "parseArgs",
+      "filePath": "eliza/packages/app-core/platforms/android/update-manifest/generate-manifest.mjs",
+      "summary": "parseArgs is a function defined in eliza/packages/app-core/platforms/android/update-manifest/generate-manifest.mjs."
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/android/update-manifest/schema.json",
+      "type": "config",
+      "name": "schema.json",
+      "filePath": "eliza/packages/app-core/platforms/android/update-manifest/schema.json",
+      "summary": "schema.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 26 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/platforms/apple-store-entitlements.reviewed.json",
+      "type": "config",
+      "name": "apple-store-entitlements.reviewed.json",
+      "filePath": "eliza/packages/app-core/platforms/apple-store-entitlements.reviewed.json",
+      "summary": "apple-store-entitlements.reviewed.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 155 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:onBind",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:onStartCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:start",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:forwardAndReply",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:postToCloud",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:buildCloudPayload",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:readResponse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:persistSentMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java",
+      "target": "class:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:ElizaSmsGatewayService",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:onStartCommand",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:forwardAndReply",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:forwardAndReply",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:postToCloud",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:forwardAndReply",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:persistSentMessage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:postToCloud",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:buildCloudPayload",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:postToCloud",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsGatewayService.java:readResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsReceiver.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsReceiver.java:onReceive",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsReceiver.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsReceiver.java:persistIncomingSms",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsReceiver.java",
+      "target": "class:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsReceiver.java:ElizaSmsReceiver",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsReceiver.java:onReceive",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaSmsReceiver.java:persistIncomingSms",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java:ElizaTasksWorker",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java:doWork",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java:trimTrailingSlash",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java:isLocalAgentBase",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java:deliverWakeViaAgentService",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java",
+      "target": "class:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java:ElizaTasksWorker",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java:doWork",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java:isLocalAgentBase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java:doWork",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java:deliverWakeViaAgentService",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java:doWork",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java:trimTrailingSlash",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java:isLocalAgentBase",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaTasksWorker.java:trimTrailingSlash",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:onCreate",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:onStartCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:onBind",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:onDestroy",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:ensureNotificationChannel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:buildNotification",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:refreshNotification",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:start",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:stop",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:setMode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java",
+      "target": "class:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:ElizaVoiceCaptureService",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:onCreate",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:ensureNotificationChannel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:onCreate",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:buildNotification",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:onStartCommand",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:refreshNotification",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:refreshNotification",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaVoiceCaptureService.java:buildNotification",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaWorkScheduler.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaWorkScheduler.java:ElizaWorkScheduler",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaWorkScheduler.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaWorkScheduler.java:enqueuePeriodic",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaWorkScheduler.java",
+      "target": "class:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaWorkScheduler.java:ElizaWorkScheduler",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:onCreate",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:onStartCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:onDestroy",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:onBind",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:ensureNotificationChannel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:buildNotification",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:isNotificationStop",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:isCloudRuntimeModeLocked",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:readRuntimeMode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:updateNotification",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:start",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:stop",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:updateStatus",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java",
+      "target": "class:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:GatewayConnectionService",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:onCreate",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:ensureNotificationChannel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:onCreate",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:buildNotification",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:onStartCommand",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:isNotificationStop",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:onStartCommand",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:isCloudRuntimeModeLocked",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:onStartCommand",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:updateNotification",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:onStartCommand",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:updateNotification",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:buildNotification",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:isCloudRuntimeModeLocked",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:isCloudRuntimeModeLocked",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:readRuntimeMode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:updateNotification",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/GatewayConnectionService.java:buildNotification",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java:onCreate",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java:resolveMixedContentMode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java:requestPostNotificationsIfNeeded",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java:onStop",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java:onDestroy",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java:applyBrandUserAgentMarkers",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java:readSystemProperty",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java",
+      "target": "class:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java:MainActivity",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java:onCreate",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java:resolveMixedContentMode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java:onCreate",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java:applyBrandUserAgentMarkers",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java:onCreate",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java:requestPostNotificationsIfNeeded",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java:applyBrandUserAgentMarkers",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/MainActivity.java:readSystemProperty",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java:startBackgroundCapture",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java:stopBackgroundCapture",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java:setMode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java:isCaptureSupported",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java:requestMicPermission",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java:hasRecordAudio",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java",
+      "target": "class:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java:VoiceCapturePlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java:startBackgroundCapture",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java:hasRecordAudio",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java:isCaptureSupported",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java:hasRecordAudio",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java:requestMicPermission",
+      "target": "function:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/VoiceCapturePlugin.java:hasRecordAudio",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/android/update-manifest/generate-manifest.mjs",
+      "target": "function:eliza/packages/app-core/platforms/android/update-manifest/generate-manifest.mjs:parseArgs",
+      "type": "contains"
+    }
+  ]
+}

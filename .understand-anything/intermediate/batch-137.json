@@ -1,0 +1,201 @@
+{
+  "batchIndex": 137,
+  "nodes": [
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/companion/desktop-bar/CompanionBar.tsx",
+      "type": "file",
+      "name": "CompanionBar.tsx",
+      "filePath": "eliza/packages/ui/src/companion/desktop-bar/CompanionBar.tsx",
+      "summary": "CompanionBar.tsx is a typescript source file in the Milady codebase. It contains 2 functions, 3 imports.",
+      "languageNotes": "typescript; code; 232 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/companion/desktop-bar/CompanionBar.tsx:combineClasses",
+      "type": "function",
+      "name": "combineClasses",
+      "filePath": "eliza/packages/ui/src/companion/desktop-bar/CompanionBar.tsx",
+      "summary": "combineClasses is a function defined in eliza/packages/ui/src/companion/desktop-bar/CompanionBar.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/companion/desktop-bar/CompanionBar.tsx:CompanionBar",
+      "type": "function",
+      "name": "CompanionBar",
+      "filePath": "eliza/packages/ui/src/companion/desktop-bar/CompanionBar.tsx",
+      "summary": "CompanionBar is a function defined in eliza/packages/ui/src/companion/desktop-bar/CompanionBar.tsx."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/companion/desktop-bar/__tests__/CompanionBar.test.tsx",
+      "type": "file",
+      "name": "CompanionBar.test.tsx",
+      "filePath": "eliza/packages/ui/src/companion/desktop-bar/__tests__/CompanionBar.test.tsx",
+      "summary": "CompanionBar.test.tsx is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 153 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/companion/desktop-bar/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "eliza/packages/ui/src/companion/desktop-bar/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 18 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/companion/desktop-bar/useKeyboardShortcuts.ts",
+      "type": "file",
+      "name": "useKeyboardShortcuts.ts",
+      "filePath": "eliza/packages/ui/src/companion/desktop-bar/useKeyboardShortcuts.ts",
+      "summary": "useKeyboardShortcuts.ts is a typescript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "typescript; code; 151 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/companion/desktop-bar/useKeyboardShortcuts.ts:hasOtherModifier",
+      "type": "function",
+      "name": "hasOtherModifier",
+      "filePath": "eliza/packages/ui/src/companion/desktop-bar/useKeyboardShortcuts.ts",
+      "summary": "hasOtherModifier is a function defined in eliza/packages/ui/src/companion/desktop-bar/useKeyboardShortcuts.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/companion/desktop-bar/useKeyboardShortcuts.ts:useKeyboardShortcuts",
+      "type": "function",
+      "name": "useKeyboardShortcuts",
+      "filePath": "eliza/packages/ui/src/companion/desktop-bar/useKeyboardShortcuts.ts",
+      "summary": "useKeyboardShortcuts is a function defined in eliza/packages/ui/src/companion/desktop-bar/useKeyboardShortcuts.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/companion/desktop-bar/CompanionBar.tsx",
+      "target": "function:eliza/packages/ui/src/companion/desktop-bar/CompanionBar.tsx:combineClasses",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/companion/desktop-bar/CompanionBar.tsx",
+      "target": "function:eliza/packages/ui/src/companion/desktop-bar/CompanionBar.tsx:CompanionBar",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/companion/desktop-bar/CompanionBar.tsx:CompanionBar",
+      "target": "function:eliza/packages/ui/src/companion/desktop-bar/CompanionBar.tsx:combineClasses",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/companion/desktop-bar/CompanionBar.tsx:CompanionBar",
+      "target": "function:eliza/packages/ui/src/companion/desktop-bar/CompanionBar.tsx:combineClasses",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/companion/desktop-bar/CompanionBar.tsx:CompanionBar",
+      "target": "function:eliza/packages/ui/src/companion/desktop-bar/CompanionBar.tsx:combineClasses",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/companion/desktop-bar/CompanionBar.tsx:CompanionBar",
+      "target": "function:eliza/packages/ui/src/companion/desktop-bar/CompanionBar.tsx:combineClasses",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/companion/desktop-bar/useKeyboardShortcuts.ts",
+      "target": "function:eliza/packages/ui/src/companion/desktop-bar/useKeyboardShortcuts.ts:hasOtherModifier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/companion/desktop-bar/useKeyboardShortcuts.ts",
+      "target": "function:eliza/packages/ui/src/companion/desktop-bar/useKeyboardShortcuts.ts:useKeyboardShortcuts",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/companion/desktop-bar/CompanionBar.tsx",
+      "target": "file:eliza/packages/ui/src/companion/desktop-bar/CompanionBar.css",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/companion/desktop-bar/CompanionBar.tsx",
+      "target": "file:eliza/packages/ui/src/companion/desktop-bar/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/companion/desktop-bar/CompanionBar.tsx",
+      "target": "file:eliza/packages/ui/src/companion/desktop-bar/useKeyboardShortcuts.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/companion/desktop-bar/__tests__/CompanionBar.test.tsx",
+      "target": "file:eliza/packages/ui/src/companion/desktop-bar/CompanionBar.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/companion/desktop-bar/__tests__/CompanionBar.test.tsx",
+      "target": "file:eliza/packages/ui/src/companion/desktop-bar/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/companion/desktop-bar/useKeyboardShortcuts.ts",
+      "target": "file:eliza/packages/ui/src/companion/desktop-bar/types.ts",
+      "type": "imports"
+    }
+  ]
+}

@@ -1,0 +1,5035 @@
+{
+  "batchIndex": 21,
+  "nodes": [
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/types/pipeline-hooks.ts",
+      "type": "file",
+      "name": "pipeline-hooks.ts",
+      "filePath": "eliza/packages/core/src/types/pipeline-hooks.ts",
+      "summary": "pipeline-hooks.ts is a typescript source file in the Milady codebase. It contains 15 functions, 4 imports.",
+      "languageNotes": "typescript; code; 418 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/pipeline-hooks.ts:withPipelinePhase",
+      "type": "function",
+      "name": "withPipelinePhase",
+      "filePath": "eliza/packages/core/src/types/pipeline-hooks.ts",
+      "summary": "withPipelinePhase is a function defined in eliza/packages/core/src/types/pipeline-hooks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/pipeline-hooks.ts:defaultPipelineHookSchedule",
+      "type": "function",
+      "name": "defaultPipelineHookSchedule",
+      "filePath": "eliza/packages/core/src/types/pipeline-hooks.ts",
+      "summary": "defaultPipelineHookSchedule is a function defined in eliza/packages/core/src/types/pipeline-hooks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/pipeline-hooks.ts:defaultPipelineHookMutatesPrimary",
+      "type": "function",
+      "name": "defaultPipelineHookMutatesPrimary",
+      "filePath": "eliza/packages/core/src/types/pipeline-hooks.ts",
+      "summary": "defaultPipelineHookMutatesPrimary is a function defined in eliza/packages/core/src/types/pipeline-hooks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/pipeline-hooks.ts:pipelineHookMetricRoomId",
+      "type": "function",
+      "name": "pipelineHookMetricRoomId",
+      "filePath": "eliza/packages/core/src/types/pipeline-hooks.ts",
+      "summary": "pipelineHookMetricRoomId is a function defined in eliza/packages/core/src/types/pipeline-hooks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/pipeline-hooks.ts:sortPipelineHooksByPosition",
+      "type": "function",
+      "name": "sortPipelineHooksByPosition",
+      "filePath": "eliza/packages/core/src/types/pipeline-hooks.ts",
+      "summary": "sortPipelineHooksByPosition is a function defined in eliza/packages/core/src/types/pipeline-hooks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/pipeline-hooks.ts:resolvePipelineHookSpec",
+      "type": "function",
+      "name": "resolvePipelineHookSpec",
+      "filePath": "eliza/packages/core/src/types/pipeline-hooks.ts",
+      "summary": "resolvePipelineHookSpec is a function defined in eliza/packages/core/src/types/pipeline-hooks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/pipeline-hooks.ts:incomingPipelineHookContext",
+      "type": "function",
+      "name": "incomingPipelineHookContext",
+      "filePath": "eliza/packages/core/src/types/pipeline-hooks.ts",
+      "summary": "incomingPipelineHookContext is a function defined in eliza/packages/core/src/types/pipeline-hooks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/pipeline-hooks.ts:preShouldRespondPipelineHookContext",
+      "type": "function",
+      "name": "preShouldRespondPipelineHookContext",
+      "filePath": "eliza/packages/core/src/types/pipeline-hooks.ts",
+      "summary": "preShouldRespondPipelineHookContext is a function defined in eliza/packages/core/src/types/pipeline-hooks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/pipeline-hooks.ts:parallelWithShouldRespondPipelineHookContext",
+      "type": "function",
+      "name": "parallelWithShouldRespondPipelineHookContext",
+      "filePath": "eliza/packages/core/src/types/pipeline-hooks.ts",
+      "summary": "parallelWithShouldRespondPipelineHookContext is a function defined in eliza/packages/core/src/types/pipeline-hooks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/pipeline-hooks.ts:outgoingPipelineHookContext",
+      "type": "function",
+      "name": "outgoingPipelineHookContext",
+      "filePath": "eliza/packages/core/src/types/pipeline-hooks.ts",
+      "summary": "outgoingPipelineHookContext is a function defined in eliza/packages/core/src/types/pipeline-hooks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/pipeline-hooks.ts:preModelPipelineHookContext",
+      "type": "function",
+      "name": "preModelPipelineHookContext",
+      "filePath": "eliza/packages/core/src/types/pipeline-hooks.ts",
+      "summary": "preModelPipelineHookContext is a function defined in eliza/packages/core/src/types/pipeline-hooks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/pipeline-hooks.ts:postModelPipelineHookContext",
+      "type": "function",
+      "name": "postModelPipelineHookContext",
+      "filePath": "eliza/packages/core/src/types/pipeline-hooks.ts",
+      "summary": "postModelPipelineHookContext is a function defined in eliza/packages/core/src/types/pipeline-hooks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/pipeline-hooks.ts:afterMemoryPersistedPipelineHookContext",
+      "type": "function",
+      "name": "afterMemoryPersistedPipelineHookContext",
+      "filePath": "eliza/packages/core/src/types/pipeline-hooks.ts",
+      "summary": "afterMemoryPersistedPipelineHookContext is a function defined in eliza/packages/core/src/types/pipeline-hooks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/pipeline-hooks.ts:modelStreamChunkPipelineHookContext",
+      "type": "function",
+      "name": "modelStreamChunkPipelineHookContext",
+      "filePath": "eliza/packages/core/src/types/pipeline-hooks.ts",
+      "summary": "modelStreamChunkPipelineHookContext is a function defined in eliza/packages/core/src/types/pipeline-hooks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/pipeline-hooks.ts:modelStreamEndPipelineHookContext",
+      "type": "function",
+      "name": "modelStreamEndPipelineHookContext",
+      "filePath": "eliza/packages/core/src/types/pipeline-hooks.ts",
+      "summary": "modelStreamEndPipelineHookContext is a function defined in eliza/packages/core/src/types/pipeline-hooks.ts."
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/types/plugin-manifest.ts",
+      "type": "file",
+      "name": "plugin-manifest.ts",
+      "filePath": "eliza/packages/core/src/types/plugin-manifest.ts",
+      "summary": "plugin-manifest.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 439 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/types/plugin-store.ts",
+      "type": "file",
+      "name": "plugin-store.ts",
+      "filePath": "eliza/packages/core/src/types/plugin-store.ts",
+      "summary": "plugin-store.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 218 lines"
+    },
+    {
+      "tags": [
+        "plugin",
+        "class"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/types/plugin.ts",
+      "type": "file",
+      "name": "plugin.ts",
+      "filePath": "eliza/packages/core/src/types/plugin.ts",
+      "summary": "plugin.ts is a typescript source file in the Milady codebase. It contains 1 class, 14 imports.",
+      "languageNotes": "typescript; code; 1041 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/core/src/types/plugin.ts:PermissionNarrowedRejection",
+      "type": "class",
+      "name": "PermissionNarrowedRejection",
+      "filePath": "eliza/packages/core/src/types/plugin.ts",
+      "summary": "PermissionNarrowedRejection is a class or type declared in eliza/packages/core/src/types/plugin.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "file",
+      "name": "primitives.ts",
+      "filePath": "eliza/packages/core/src/types/primitives.ts",
+      "summary": "primitives.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 243 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/primitives.ts:asUUID",
+      "type": "function",
+      "name": "asUUID",
+      "filePath": "eliza/packages/core/src/types/primitives.ts",
+      "summary": "asUUID is a function defined in eliza/packages/core/src/types/primitives.ts."
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/types/prompt-batcher.ts",
+      "type": "file",
+      "name": "prompt-batcher.ts",
+      "filePath": "eliza/packages/core/src/types/prompt-batcher.ts",
+      "summary": "prompt-batcher.ts is a typescript source file in the Milady codebase. It contains 1 class, 5 imports.",
+      "languageNotes": "typescript; code; 157 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/core/src/types/prompt-batcher.ts:BatcherDisposedError",
+      "type": "class",
+      "name": "BatcherDisposedError",
+      "filePath": "eliza/packages/core/src/types/prompt-batcher.ts",
+      "summary": "BatcherDisposedError is a class or type declared in eliza/packages/core/src/types/prompt-batcher.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/types/prompt-optimization-hooks.ts",
+      "type": "file",
+      "name": "prompt-optimization-hooks.ts",
+      "filePath": "eliza/packages/core/src/types/prompt-optimization-hooks.ts",
+      "summary": "prompt-optimization-hooks.ts is a typescript source file in the Milady codebase. It contains 3 imports.",
+      "languageNotes": "typescript; code; 50 lines"
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/types/prompt-optimization-score-card.ts",
+      "type": "file",
+      "name": "prompt-optimization-score-card.ts",
+      "filePath": "eliza/packages/core/src/types/prompt-optimization-score-card.ts",
+      "summary": "prompt-optimization-score-card.ts is a typescript source file in the Milady codebase. It contains 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 94 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/core/src/types/prompt-optimization-score-card.ts:ScoreCard",
+      "type": "class",
+      "name": "ScoreCard",
+      "filePath": "eliza/packages/core/src/types/prompt-optimization-score-card.ts",
+      "summary": "ScoreCard is a class or type declared in eliza/packages/core/src/types/prompt-optimization-score-card.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/types/prompt-optimization-trace.ts",
+      "type": "file",
+      "name": "prompt-optimization-trace.ts",
+      "filePath": "eliza/packages/core/src/types/prompt-optimization-trace.ts",
+      "summary": "prompt-optimization-trace.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 75 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "file",
+      "name": "runtime.ts",
+      "filePath": "eliza/packages/core/src/types/runtime.ts",
+      "summary": "runtime.ts is a typescript source file in the Milady codebase. It contains 26 imports.",
+      "languageNotes": "typescript; code; 1284 lines"
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/types/search.ts",
+      "type": "file",
+      "name": "search.ts",
+      "filePath": "eliza/packages/core/src/types/search.ts",
+      "summary": "search.ts is a typescript source file in the Milady codebase. It contains 1 class, 3 imports.",
+      "languageNotes": "typescript; code; 73 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/core/src/types/search.ts:SearchCategoryRegistryError",
+      "type": "class",
+      "name": "SearchCategoryRegistryError",
+      "filePath": "eliza/packages/core/src/types/search.ts",
+      "summary": "SearchCategoryRegistryError is a class or type declared in eliza/packages/core/src/types/search.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/types/service-interfaces.ts",
+      "type": "file",
+      "name": "service-interfaces.ts",
+      "filePath": "eliza/packages/core/src/types/service-interfaces.ts",
+      "summary": "service-interfaces.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 1737 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/types/service.ts",
+      "type": "file",
+      "name": "service.ts",
+      "filePath": "eliza/packages/core/src/types/service.ts",
+      "summary": "service.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 246 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/service.ts:getTypedService",
+      "type": "function",
+      "name": "getTypedService",
+      "filePath": "eliza/packages/core/src/types/service.ts",
+      "summary": "getTypedService is a function defined in eliza/packages/core/src/types/service.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/service.ts:createServiceError",
+      "type": "function",
+      "name": "createServiceError",
+      "filePath": "eliza/packages/core/src/types/service.ts",
+      "summary": "createServiceError is a function defined in eliza/packages/core/src/types/service.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/types/settings.ts",
+      "type": "file",
+      "name": "settings.ts",
+      "filePath": "eliza/packages/core/src/types/settings.ts",
+      "summary": "settings.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 54 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/types/setup.ts",
+      "type": "file",
+      "name": "setup.ts",
+      "filePath": "eliza/packages/core/src/types/setup.ts",
+      "summary": "setup.ts is a typescript source file in the Milady codebase. It contains 5 functions, 1 imports.",
+      "languageNotes": "typescript; code; 380 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/setup.ts:getStepIndex",
+      "type": "function",
+      "name": "getStepIndex",
+      "filePath": "eliza/packages/core/src/types/setup.ts",
+      "summary": "getStepIndex is a function defined in eliza/packages/core/src/types/setup.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/setup.ts:getNextStep",
+      "type": "function",
+      "name": "getNextStep",
+      "filePath": "eliza/packages/core/src/types/setup.ts",
+      "summary": "getNextStep is a function defined in eliza/packages/core/src/types/setup.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/setup.ts:getPreviousStep",
+      "type": "function",
+      "name": "getPreviousStep",
+      "filePath": "eliza/packages/core/src/types/setup.ts",
+      "summary": "getPreviousStep is a function defined in eliza/packages/core/src/types/setup.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/setup.ts:isStepCompleted",
+      "type": "function",
+      "name": "isStepCompleted",
+      "filePath": "eliza/packages/core/src/types/setup.ts",
+      "summary": "isStepCompleted is a function defined in eliza/packages/core/src/types/setup.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/setup.ts:calculateProgress",
+      "type": "function",
+      "name": "calculateProgress",
+      "filePath": "eliza/packages/core/src/types/setup.ts",
+      "summary": "calculateProgress is a function defined in eliza/packages/core/src/types/setup.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/types/state.ts",
+      "type": "file",
+      "name": "state.ts",
+      "filePath": "eliza/packages/core/src/types/state.ts",
+      "summary": "state.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 291 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/types/streaming.ts",
+      "type": "file",
+      "name": "streaming.ts",
+      "filePath": "eliza/packages/core/src/types/streaming.ts",
+      "summary": "streaming.ts is a typescript source file in the Milady codebase. It contains 3 imports.",
+      "languageNotes": "typescript; code; 166 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/types/task.ts",
+      "type": "file",
+      "name": "task.ts",
+      "filePath": "eliza/packages/core/src/types/task.ts",
+      "summary": "task.ts is a typescript source file in the Milady codebase. It contains 5 imports.",
+      "languageNotes": "typescript; code; 144 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/types/tee.ts",
+      "type": "file",
+      "name": "tee.ts",
+      "filePath": "eliza/packages/core/src/types/tee.ts",
+      "summary": "tee.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 79 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/types/testing.ts",
+      "type": "file",
+      "name": "testing.ts",
+      "filePath": "eliza/packages/core/src/types/testing.ts",
+      "summary": "testing.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 17 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/types/tools.ts",
+      "type": "file",
+      "name": "tools.ts",
+      "filePath": "eliza/packages/core/src/types/tools.ts",
+      "summary": "tools.ts is a typescript source file in the Milady codebase. It contains 11 functions, 1 imports.",
+      "languageNotes": "typescript; code; 480 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/tools.ts:normalizeToolName",
+      "type": "function",
+      "name": "normalizeToolName",
+      "filePath": "eliza/packages/core/src/types/tools.ts",
+      "summary": "normalizeToolName is a function defined in eliza/packages/core/src/types/tools.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/tools.ts:normalizeToolList",
+      "type": "function",
+      "name": "normalizeToolList",
+      "filePath": "eliza/packages/core/src/types/tools.ts",
+      "summary": "normalizeToolList is a function defined in eliza/packages/core/src/types/tools.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/tools.ts:expandToolGroups",
+      "type": "function",
+      "name": "expandToolGroups",
+      "filePath": "eliza/packages/core/src/types/tools.ts",
+      "summary": "expandToolGroups is a function defined in eliza/packages/core/src/types/tools.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/tools.ts:resolveToolProfilePolicy",
+      "type": "function",
+      "name": "resolveToolProfilePolicy",
+      "filePath": "eliza/packages/core/src/types/tools.ts",
+      "summary": "resolveToolProfilePolicy is a function defined in eliza/packages/core/src/types/tools.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/tools.ts:collectExplicitAllowlist",
+      "type": "function",
+      "name": "collectExplicitAllowlist",
+      "filePath": "eliza/packages/core/src/types/tools.ts",
+      "summary": "collectExplicitAllowlist is a function defined in eliza/packages/core/src/types/tools.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/tools.ts:buildPluginToolGroups",
+      "type": "function",
+      "name": "buildPluginToolGroups",
+      "filePath": "eliza/packages/core/src/types/tools.ts",
+      "summary": "buildPluginToolGroups is a function defined in eliza/packages/core/src/types/tools.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/tools.ts:expandPluginGroups",
+      "type": "function",
+      "name": "expandPluginGroups",
+      "filePath": "eliza/packages/core/src/types/tools.ts",
+      "summary": "expandPluginGroups is a function defined in eliza/packages/core/src/types/tools.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/tools.ts:expandPolicyWithPluginGroups",
+      "type": "function",
+      "name": "expandPolicyWithPluginGroups",
+      "filePath": "eliza/packages/core/src/types/tools.ts",
+      "summary": "expandPolicyWithPluginGroups is a function defined in eliza/packages/core/src/types/tools.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/tools.ts:stripPluginOnlyAllowlist",
+      "type": "function",
+      "name": "stripPluginOnlyAllowlist",
+      "filePath": "eliza/packages/core/src/types/tools.ts",
+      "summary": "stripPluginOnlyAllowlist is a function defined in eliza/packages/core/src/types/tools.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/tools.ts:mergeToolPolicies",
+      "type": "function",
+      "name": "mergeToolPolicies",
+      "filePath": "eliza/packages/core/src/types/tools.ts",
+      "summary": "mergeToolPolicies is a function defined in eliza/packages/core/src/types/tools.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/tools.ts:isToolAllowedByPolicy",
+      "type": "function",
+      "name": "isToolAllowedByPolicy",
+      "filePath": "eliza/packages/core/src/types/tools.ts",
+      "summary": "isToolAllowedByPolicy is a function defined in eliza/packages/core/src/types/tools.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/types/trigger.ts",
+      "type": "file",
+      "name": "trigger.ts",
+      "filePath": "eliza/packages/core/src/types/trigger.ts",
+      "summary": "trigger.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 48 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/utils.ts",
+      "type": "file",
+      "name": "utils.ts",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "utils.ts is a typescript source file in the Milady codebase. It contains 34 functions, 12 imports.",
+      "languageNotes": "typescript; code; 1328 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:isRestrictedCSPEnvironment",
+      "type": "function",
+      "name": "isRestrictedCSPEnvironment",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "isRestrictedCSPEnvironment is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:simpleTemplateReplace",
+      "type": "function",
+      "name": "simpleTemplateReplace",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "simpleTemplateReplace is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:upgradeDoubleToTriple",
+      "type": "function",
+      "name": "upgradeDoubleToTriple",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "upgradeDoubleToTriple is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:getCompiledTemplate",
+      "type": "function",
+      "name": "getCompiledTemplate",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "getCompiledTemplate is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:resolvePromptSeed",
+      "type": "function",
+      "name": "resolvePromptSeed",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "resolvePromptSeed is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:composePrompt",
+      "type": "function",
+      "name": "composePrompt",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "composePrompt is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:composePromptFromState",
+      "type": "function",
+      "name": "composePromptFromState",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "composePromptFromState is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:addHeader",
+      "type": "function",
+      "name": "addHeader",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "addHeader is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:composeRandomUser",
+      "type": "function",
+      "name": "composeRandomUser",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "composeRandomUser is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/src/utils.ts:formatPosts",
+      "type": "function",
+      "name": "formatPosts",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "formatPosts is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/src/utils.ts:formatMessages",
+      "type": "function",
+      "name": "formatMessages",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "formatMessages is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:parseKeyValueXml",
+      "type": "function",
+      "name": "parseKeyValueXml",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "parseKeyValueXml is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:findFirstXmlBlock",
+      "type": "function",
+      "name": "findFirstXmlBlock",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "findFirstXmlBlock is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:extractDirectXmlChildren",
+      "type": "function",
+      "name": "extractDirectXmlChildren",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "extractDirectXmlChildren is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:readXmlStartTag",
+      "type": "function",
+      "name": "readXmlStartTag",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "readXmlStartTag is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:findMatchingXmlClose",
+      "type": "function",
+      "name": "findMatchingXmlClose",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "findMatchingXmlClose is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:unescapeBasicXmlEntities",
+      "type": "function",
+      "name": "unescapeBasicXmlEntities",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "unescapeBasicXmlEntities is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:parseJSONObjectFromText",
+      "type": "function",
+      "name": "parseJSONObjectFromText",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "parseJSONObjectFromText is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:normalizeJsonString",
+      "type": "function",
+      "name": "normalizeJsonString",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "normalizeJsonString is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:truncateToCompleteSentence",
+      "type": "function",
+      "name": "truncateToCompleteSentence",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "truncateToCompleteSentence is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:splitChunks",
+      "type": "function",
+      "name": "splitChunks",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "splitChunks is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:trimTokens",
+      "type": "function",
+      "name": "trimTokens",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "trimTokens is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:safeReplacer",
+      "type": "function",
+      "name": "safeReplacer",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "safeReplacer is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:parseBooleanFromText",
+      "type": "function",
+      "name": "parseBooleanFromText",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "parseBooleanFromText is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:validateUuid",
+      "type": "function",
+      "name": "validateUuid",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "validateUuid is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:stringToUuid",
+      "type": "function",
+      "name": "stringToUuid",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "stringToUuid is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:prewarmUuidCache",
+      "type": "function",
+      "name": "prewarmUuidCache",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "prewarmUuidCache is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:checkWebCrypto",
+      "type": "function",
+      "name": "checkWebCrypto",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "checkWebCrypto is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:getCachedSha1",
+      "type": "function",
+      "name": "getCachedSha1",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "getCachedSha1 is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:sha1BytesAsync",
+      "type": "function",
+      "name": "sha1BytesAsync",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "sha1BytesAsync is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:sha1Bytes",
+      "type": "function",
+      "name": "sha1Bytes",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "sha1Bytes is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:utf8Encode",
+      "type": "function",
+      "name": "utf8Encode",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "utf8Encode is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:bytesToUuid",
+      "type": "function",
+      "name": "bytesToUuid",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "bytesToUuid is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils.ts:getContentTypeFromMimeType",
+      "type": "function",
+      "name": "getContentTypeFromMimeType",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "summary": "getContentTypeFromMimeType is a function defined in eliza/packages/core/src/utils.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/utils/__tests__/streaming-field-events.test.ts",
+      "type": "file",
+      "name": "streaming-field-events.test.ts",
+      "filePath": "eliza/packages/core/src/utils/__tests__/streaming-field-events.test.ts",
+      "summary": "streaming-field-events.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 223 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/__tests__/streaming-field-events.test.ts:feed",
+      "type": "function",
+      "name": "feed",
+      "filePath": "eliza/packages/core/src/utils/__tests__/streaming-field-events.test.ts",
+      "summary": "feed is a function defined in eliza/packages/core/src/utils/__tests__/streaming-field-events.test.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/utils/action-results.ts",
+      "type": "file",
+      "name": "action-results.ts",
+      "filePath": "eliza/packages/core/src/utils/action-results.ts",
+      "summary": "action-results.ts is a typescript source file in the Milady codebase. It contains 9 functions, 1 imports.",
+      "languageNotes": "typescript; code; 257 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/action-results.ts:estimateActionResultTokens",
+      "type": "function",
+      "name": "estimateActionResultTokens",
+      "filePath": "eliza/packages/core/src/utils/action-results.ts",
+      "summary": "estimateActionResultTokens is a function defined in eliza/packages/core/src/utils/action-results.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/action-results.ts:getActionResultActionName",
+      "type": "function",
+      "name": "getActionResultActionName",
+      "filePath": "eliza/packages/core/src/utils/action-results.ts",
+      "summary": "getActionResultActionName is a function defined in eliza/packages/core/src/utils/action-results.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/action-results.ts:stringifyActionResultError",
+      "type": "function",
+      "name": "stringifyActionResultError",
+      "filePath": "eliza/packages/core/src/utils/action-results.ts",
+      "summary": "stringifyActionResultError is a function defined in eliza/packages/core/src/utils/action-results.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/action-results.ts:getReferenceFromData",
+      "type": "function",
+      "name": "getReferenceFromData",
+      "filePath": "eliza/packages/core/src/utils/action-results.ts",
+      "summary": "getReferenceFromData is a function defined in eliza/packages/core/src/utils/action-results.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/action-results.ts:getActionResultReference",
+      "type": "function",
+      "name": "getActionResultReference",
+      "filePath": "eliza/packages/core/src/utils/action-results.ts",
+      "summary": "getActionResultReference is a function defined in eliza/packages/core/src/utils/action-results.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/action-results.ts:truncateMiddle",
+      "type": "function",
+      "name": "truncateMiddle",
+      "filePath": "eliza/packages/core/src/utils/action-results.ts",
+      "summary": "truncateMiddle is a function defined in eliza/packages/core/src/utils/action-results.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/action-results.ts:collectActionResultSizeWarnings",
+      "type": "function",
+      "name": "collectActionResultSizeWarnings",
+      "filePath": "eliza/packages/core/src/utils/action-results.ts",
+      "summary": "collectActionResultSizeWarnings is a function defined in eliza/packages/core/src/utils/action-results.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/action-results.ts:trimActionResultForPromptState",
+      "type": "function",
+      "name": "trimActionResultForPromptState",
+      "filePath": "eliza/packages/core/src/utils/action-results.ts",
+      "summary": "trimActionResultForPromptState is a function defined in eliza/packages/core/src/utils/action-results.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/action-results.ts:formatActionResultsForPrompt",
+      "type": "function",
+      "name": "formatActionResultsForPrompt",
+      "filePath": "eliza/packages/core/src/utils/action-results.ts",
+      "summary": "formatActionResultsForPrompt is a function defined in eliza/packages/core/src/utils/action-results.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/utils/action-validation.ts",
+      "type": "file",
+      "name": "action-validation.ts",
+      "filePath": "eliza/packages/core/src/utils/action-validation.ts",
+      "summary": "action-validation.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 21 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/action-validation.ts:hasActionContext",
+      "type": "function",
+      "name": "hasActionContext",
+      "filePath": "eliza/packages/core/src/utils/action-validation.ts",
+      "summary": "hasActionContext is a function defined in eliza/packages/core/src/utils/action-validation.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/utils/batch-queue.ts",
+      "type": "file",
+      "name": "batch-queue.ts",
+      "filePath": "eliza/packages/core/src/utils/batch-queue.ts",
+      "summary": "batch-queue.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 32 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/utils/batch-queue/task-drain.test.ts",
+      "type": "file",
+      "name": "task-drain.test.ts",
+      "filePath": "eliza/packages/core/src/utils/batch-queue/task-drain.test.ts",
+      "summary": "task-drain.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 94 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/batch-queue/task-drain.test.ts:makeTask",
+      "type": "function",
+      "name": "makeTask",
+      "filePath": "eliza/packages/core/src/utils/batch-queue/task-drain.test.ts",
+      "summary": "makeTask is a function defined in eliza/packages/core/src/utils/batch-queue/task-drain.test.ts."
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/utils/batch-queue/task-drain.ts",
+      "type": "file",
+      "name": "task-drain.ts",
+      "filePath": "eliza/packages/core/src/utils/batch-queue/task-drain.ts",
+      "summary": "task-drain.ts is a typescript source file in the Milady codebase. It contains 1 class, 3 imports.",
+      "languageNotes": "typescript; code; 211 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/core/src/utils/batch-queue/task-drain.ts:TaskDrain",
+      "type": "class",
+      "name": "TaskDrain",
+      "filePath": "eliza/packages/core/src/utils/batch-queue/task-drain.ts",
+      "summary": "TaskDrain is a class or type declared in eliza/packages/core/src/utils/batch-queue/task-drain.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/utils/boolean.ts",
+      "type": "file",
+      "name": "boolean.ts",
+      "filePath": "eliza/packages/core/src/utils/boolean.ts",
+      "summary": "boolean.ts is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 94 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/boolean.ts:parseBooleanValue",
+      "type": "function",
+      "name": "parseBooleanValue",
+      "filePath": "eliza/packages/core/src/utils/boolean.ts",
+      "summary": "parseBooleanValue is a function defined in eliza/packages/core/src/utils/boolean.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/boolean.ts:parseBooleanText",
+      "type": "function",
+      "name": "parseBooleanText",
+      "filePath": "eliza/packages/core/src/utils/boolean.ts",
+      "summary": "parseBooleanText is a function defined in eliza/packages/core/src/utils/boolean.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/utils/buffer.ts",
+      "type": "file",
+      "name": "buffer.ts",
+      "filePath": "eliza/packages/core/src/utils/buffer.ts",
+      "summary": "buffer.ts is a typescript source file in the Milady codebase. It contains 13 functions.",
+      "languageNotes": "typescript; code; 281 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/buffer.ts:hasNativeBuffer",
+      "type": "function",
+      "name": "hasNativeBuffer",
+      "filePath": "eliza/packages/core/src/utils/buffer.ts",
+      "summary": "hasNativeBuffer is a function defined in eliza/packages/core/src/utils/buffer.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/buffer.ts:fromHex",
+      "type": "function",
+      "name": "fromHex",
+      "filePath": "eliza/packages/core/src/utils/buffer.ts",
+      "summary": "fromHex is a function defined in eliza/packages/core/src/utils/buffer.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/buffer.ts:fromString",
+      "type": "function",
+      "name": "fromString",
+      "filePath": "eliza/packages/core/src/utils/buffer.ts",
+      "summary": "fromString is a function defined in eliza/packages/core/src/utils/buffer.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/buffer.ts:toHex",
+      "type": "function",
+      "name": "toHex",
+      "filePath": "eliza/packages/core/src/utils/buffer.ts",
+      "summary": "toHex is a function defined in eliza/packages/core/src/utils/buffer.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/buffer.ts:bufferToString",
+      "type": "function",
+      "name": "bufferToString",
+      "filePath": "eliza/packages/core/src/utils/buffer.ts",
+      "summary": "bufferToString is a function defined in eliza/packages/core/src/utils/buffer.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/buffer.ts:isBuffer",
+      "type": "function",
+      "name": "isBuffer",
+      "filePath": "eliza/packages/core/src/utils/buffer.ts",
+      "summary": "isBuffer is a function defined in eliza/packages/core/src/utils/buffer.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/buffer.ts:alloc",
+      "type": "function",
+      "name": "alloc",
+      "filePath": "eliza/packages/core/src/utils/buffer.ts",
+      "summary": "alloc is a function defined in eliza/packages/core/src/utils/buffer.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/buffer.ts:fromBytes",
+      "type": "function",
+      "name": "fromBytes",
+      "filePath": "eliza/packages/core/src/utils/buffer.ts",
+      "summary": "fromBytes is a function defined in eliza/packages/core/src/utils/buffer.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/buffer.ts:concat",
+      "type": "function",
+      "name": "concat",
+      "filePath": "eliza/packages/core/src/utils/buffer.ts",
+      "summary": "concat is a function defined in eliza/packages/core/src/utils/buffer.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/buffer.ts:slice",
+      "type": "function",
+      "name": "slice",
+      "filePath": "eliza/packages/core/src/utils/buffer.ts",
+      "summary": "slice is a function defined in eliza/packages/core/src/utils/buffer.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/buffer.ts:equals",
+      "type": "function",
+      "name": "equals",
+      "filePath": "eliza/packages/core/src/utils/buffer.ts",
+      "summary": "equals is a function defined in eliza/packages/core/src/utils/buffer.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/buffer.ts:byteLength",
+      "type": "function",
+      "name": "byteLength",
+      "filePath": "eliza/packages/core/src/utils/buffer.ts",
+      "summary": "byteLength is a function defined in eliza/packages/core/src/utils/buffer.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/buffer.ts:randomBytes",
+      "type": "function",
+      "name": "randomBytes",
+      "filePath": "eliza/packages/core/src/utils/buffer.ts",
+      "summary": "randomBytes is a function defined in eliza/packages/core/src/utils/buffer.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/utils/confirmation.ts",
+      "type": "file",
+      "name": "confirmation.ts",
+      "filePath": "eliza/packages/core/src/utils/confirmation.ts",
+      "summary": "confirmation.ts is a typescript source file in the Milady codebase. It contains 4 functions, 3 imports.",
+      "languageNotes": "typescript; code; 191 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/confirmation.ts:buildCacheKey",
+      "type": "function",
+      "name": "buildCacheKey",
+      "filePath": "eliza/packages/core/src/utils/confirmation.ts",
+      "summary": "buildCacheKey is a function defined in eliza/packages/core/src/utils/confirmation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/confirmation.ts:readUserText",
+      "type": "function",
+      "name": "readUserText",
+      "filePath": "eliza/packages/core/src/utils/confirmation.ts",
+      "summary": "readUserText is a function defined in eliza/packages/core/src/utils/confirmation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/confirmation.ts:requireConfirmation",
+      "type": "function",
+      "name": "requireConfirmation",
+      "filePath": "eliza/packages/core/src/utils/confirmation.ts",
+      "summary": "requireConfirmation is a function defined in eliza/packages/core/src/utils/confirmation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/confirmation.ts:clearPendingConfirmation",
+      "type": "function",
+      "name": "clearPendingConfirmation",
+      "filePath": "eliza/packages/core/src/utils/confirmation.ts",
+      "summary": "clearPendingConfirmation is a function defined in eliza/packages/core/src/utils/confirmation.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/utils/context-catalog.ts",
+      "type": "file",
+      "name": "context-catalog.ts",
+      "filePath": "eliza/packages/core/src/utils/context-catalog.ts",
+      "summary": "context-catalog.ts is a typescript source file in the Milady codebase. It contains 3 functions, 1 imports.",
+      "languageNotes": "typescript; code; 248 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/context-catalog.ts:normalizeContexts",
+      "type": "function",
+      "name": "normalizeContexts",
+      "filePath": "eliza/packages/core/src/utils/context-catalog.ts",
+      "summary": "normalizeContexts is a function defined in eliza/packages/core/src/utils/context-catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/context-catalog.ts:resolveActionContexts",
+      "type": "function",
+      "name": "resolveActionContexts",
+      "filePath": "eliza/packages/core/src/utils/context-catalog.ts",
+      "summary": "resolveActionContexts is a function defined in eliza/packages/core/src/utils/context-catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/context-catalog.ts:resolveProviderContexts",
+      "type": "function",
+      "name": "resolveProviderContexts",
+      "filePath": "eliza/packages/core/src/utils/context-catalog.ts",
+      "summary": "resolveProviderContexts is a function defined in eliza/packages/core/src/utils/context-catalog.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "type": "file",
+      "name": "context-routing.ts",
+      "filePath": "eliza/packages/core/src/utils/context-routing.ts",
+      "summary": "context-routing.ts is a typescript source file in the Milady codebase. It contains 21 functions, 6 imports.",
+      "languageNotes": "typescript; code; 464 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/context-routing.ts:normalizeContext",
+      "type": "function",
+      "name": "normalizeContext",
+      "filePath": "eliza/packages/core/src/utils/context-routing.ts",
+      "summary": "normalizeContext is a function defined in eliza/packages/core/src/utils/context-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/context-routing.ts:dedupeStringValues",
+      "type": "function",
+      "name": "dedupeStringValues",
+      "filePath": "eliza/packages/core/src/utils/context-routing.ts",
+      "summary": "dedupeStringValues is a function defined in eliza/packages/core/src/utils/context-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/context-routing.ts:parseDelimitedList",
+      "type": "function",
+      "name": "parseDelimitedList",
+      "filePath": "eliza/packages/core/src/utils/context-routing.ts",
+      "summary": "parseDelimitedList is a function defined in eliza/packages/core/src/utils/context-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/context-routing.ts:parseContextList",
+      "type": "function",
+      "name": "parseContextList",
+      "filePath": "eliza/packages/core/src/utils/context-routing.ts",
+      "summary": "parseContextList is a function defined in eliza/packages/core/src/utils/context-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/context-routing.ts:isPageScopedRoutingContext",
+      "type": "function",
+      "name": "isPageScopedRoutingContext",
+      "filePath": "eliza/packages/core/src/utils/context-routing.ts",
+      "summary": "isPageScopedRoutingContext is a function defined in eliza/packages/core/src/utils/context-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/context-routing.ts:normalizeRoutingContexts",
+      "type": "function",
+      "name": "normalizeRoutingContexts",
+      "filePath": "eliza/packages/core/src/utils/context-routing.ts",
+      "summary": "normalizeRoutingContexts is a function defined in eliza/packages/core/src/utils/context-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/context-routing.ts:getExplicitRoutingContexts",
+      "type": "function",
+      "name": "getExplicitRoutingContexts",
+      "filePath": "eliza/packages/core/src/utils/context-routing.ts",
+      "summary": "getExplicitRoutingContexts is a function defined in eliza/packages/core/src/utils/context-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/context-routing.ts:routingContextsOverlap",
+      "type": "function",
+      "name": "routingContextsOverlap",
+      "filePath": "eliza/packages/core/src/utils/context-routing.ts",
+      "summary": "routingContextsOverlap is a function defined in eliza/packages/core/src/utils/context-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/context-routing.ts:shouldSurfaceContextCapabilities",
+      "type": "function",
+      "name": "shouldSurfaceContextCapabilities",
+      "filePath": "eliza/packages/core/src/utils/context-routing.ts",
+      "summary": "shouldSurfaceContextCapabilities is a function defined in eliza/packages/core/src/utils/context-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/context-routing.ts:parseContextRoutingMetadata",
+      "type": "function",
+      "name": "parseContextRoutingMetadata",
+      "filePath": "eliza/packages/core/src/utils/context-routing.ts",
+      "summary": "parseContextRoutingMetadata is a function defined in eliza/packages/core/src/utils/context-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/context-routing.ts:getContextRoutingFromState",
+      "type": "function",
+      "name": "getContextRoutingFromState",
+      "filePath": "eliza/packages/core/src/utils/context-routing.ts",
+      "summary": "getContextRoutingFromState is a function defined in eliza/packages/core/src/utils/context-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/context-routing.ts:getContextRoutingFromMessage",
+      "type": "function",
+      "name": "getContextRoutingFromMessage",
+      "filePath": "eliza/packages/core/src/utils/context-routing.ts",
+      "summary": "getContextRoutingFromMessage is a function defined in eliza/packages/core/src/utils/context-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/context-routing.ts:mergeContextRouting",
+      "type": "function",
+      "name": "mergeContextRouting",
+      "filePath": "eliza/packages/core/src/utils/context-routing.ts",
+      "summary": "mergeContextRouting is a function defined in eliza/packages/core/src/utils/context-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/context-routing.ts:getActiveRoutingContexts",
+      "type": "function",
+      "name": "getActiveRoutingContexts",
+      "filePath": "eliza/packages/core/src/utils/context-routing.ts",
+      "summary": "getActiveRoutingContexts is a function defined in eliza/packages/core/src/utils/context-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/context-routing.ts:getActiveRoutingContextsForTurn",
+      "type": "function",
+      "name": "getActiveRoutingContextsForTurn",
+      "filePath": "eliza/packages/core/src/utils/context-routing.ts",
+      "summary": "getActiveRoutingContextsForTurn is a function defined in eliza/packages/core/src/utils/context-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/context-routing.ts:shouldIncludeByContext",
+      "type": "function",
+      "name": "shouldIncludeByContext",
+      "filePath": "eliza/packages/core/src/utils/context-routing.ts",
+      "summary": "shouldIncludeByContext is a function defined in eliza/packages/core/src/utils/context-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/context-routing.ts:setContextRoutingMetadata",
+      "type": "function",
+      "name": "setContextRoutingMetadata",
+      "filePath": "eliza/packages/core/src/utils/context-routing.ts",
+      "summary": "setContextRoutingMetadata is a function defined in eliza/packages/core/src/utils/context-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/context-routing.ts:deriveAvailableContexts",
+      "type": "function",
+      "name": "deriveAvailableContexts",
+      "filePath": "eliza/packages/core/src/utils/context-routing.ts",
+      "summary": "deriveAvailableContexts is a function defined in eliza/packages/core/src/utils/context-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/context-routing.ts:inferContextRoutingFromText",
+      "type": "function",
+      "name": "inferContextRoutingFromText",
+      "filePath": "eliza/packages/core/src/utils/context-routing.ts",
+      "summary": "inferContextRoutingFromText is a function defined in eliza/packages/core/src/utils/context-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/context-routing.ts:inferContextRoutingFromMessage",
+      "type": "function",
+      "name": "inferContextRoutingFromMessage",
+      "filePath": "eliza/packages/core/src/utils/context-routing.ts",
+      "summary": "inferContextRoutingFromMessage is a function defined in eliza/packages/core/src/utils/context-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/context-routing.ts:attachAvailableContexts",
+      "type": "function",
+      "name": "attachAvailableContexts",
+      "filePath": "eliza/packages/core/src/utils/context-routing.ts",
+      "summary": "attachAvailableContexts is a function defined in eliza/packages/core/src/utils/context-routing.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "type": "file",
+      "name": "crypto-compat.ts",
+      "filePath": "eliza/packages/core/src/utils/crypto-compat.ts",
+      "summary": "crypto-compat.ts is a typescript source file in the Milady codebase. It contains 23 functions, 1 imports.",
+      "languageNotes": "typescript; code; 578 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/crypto-compat.ts:normalizeEncoding",
+      "type": "function",
+      "name": "normalizeEncoding",
+      "filePath": "eliza/packages/core/src/utils/crypto-compat.ts",
+      "summary": "normalizeEncoding is a function defined in eliza/packages/core/src/utils/crypto-compat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/crypto-compat.ts:toOwnedUint8Array",
+      "type": "function",
+      "name": "toOwnedUint8Array",
+      "filePath": "eliza/packages/core/src/utils/crypto-compat.ts",
+      "summary": "toOwnedUint8Array is a function defined in eliza/packages/core/src/utils/crypto-compat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/crypto-compat.ts:toUint8Array",
+      "type": "function",
+      "name": "toUint8Array",
+      "filePath": "eliza/packages/core/src/utils/crypto-compat.ts",
+      "summary": "toUint8Array is a function defined in eliza/packages/core/src/utils/crypto-compat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/crypto-compat.ts:toEncodedString",
+      "type": "function",
+      "name": "toEncodedString",
+      "filePath": "eliza/packages/core/src/utils/crypto-compat.ts",
+      "summary": "toEncodedString is a function defined in eliza/packages/core/src/utils/crypto-compat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/crypto-compat.ts:concatBytes",
+      "type": "function",
+      "name": "concatBytes",
+      "filePath": "eliza/packages/core/src/utils/crypto-compat.ts",
+      "summary": "concatBytes is a function defined in eliza/packages/core/src/utils/crypto-compat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/crypto-compat.ts:sliceBytes",
+      "type": "function",
+      "name": "sliceBytes",
+      "filePath": "eliza/packages/core/src/utils/crypto-compat.ts",
+      "summary": "sliceBytes is a function defined in eliza/packages/core/src/utils/crypto-compat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/crypto-compat.ts:getWebCryptoSubtle",
+      "type": "function",
+      "name": "getWebCryptoSubtle",
+      "filePath": "eliza/packages/core/src/utils/crypto-compat.ts",
+      "summary": "getWebCryptoSubtle is a function defined in eliza/packages/core/src/utils/crypto-compat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/crypto-compat.ts:getSyncHashFactory",
+      "type": "function",
+      "name": "getSyncHashFactory",
+      "filePath": "eliza/packages/core/src/utils/crypto-compat.ts",
+      "summary": "getSyncHashFactory is a function defined in eliza/packages/core/src/utils/crypto-compat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/crypto-compat.ts:webCryptoHash",
+      "type": "function",
+      "name": "webCryptoHash",
+      "filePath": "eliza/packages/core/src/utils/crypto-compat.ts",
+      "summary": "webCryptoHash is a function defined in eliza/packages/core/src/utils/crypto-compat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/crypto-compat.ts:webCryptoEncrypt",
+      "type": "function",
+      "name": "webCryptoEncrypt",
+      "filePath": "eliza/packages/core/src/utils/crypto-compat.ts",
+      "summary": "webCryptoEncrypt is a function defined in eliza/packages/core/src/utils/crypto-compat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/crypto-compat.ts:webCryptoDecrypt",
+      "type": "function",
+      "name": "webCryptoDecrypt",
+      "filePath": "eliza/packages/core/src/utils/crypto-compat.ts",
+      "summary": "webCryptoDecrypt is a function defined in eliza/packages/core/src/utils/crypto-compat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/crypto-compat.ts:applyPkcs7Padding",
+      "type": "function",
+      "name": "applyPkcs7Padding",
+      "filePath": "eliza/packages/core/src/utils/crypto-compat.ts",
+      "summary": "applyPkcs7Padding is a function defined in eliza/packages/core/src/utils/crypto-compat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/crypto-compat.ts:removePkcs7Padding",
+      "type": "function",
+      "name": "removePkcs7Padding",
+      "filePath": "eliza/packages/core/src/utils/crypto-compat.ts",
+      "summary": "removePkcs7Padding is a function defined in eliza/packages/core/src/utils/crypto-compat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/crypto-compat.ts:validateKeyAndIv",
+      "type": "function",
+      "name": "validateKeyAndIv",
+      "filePath": "eliza/packages/core/src/utils/crypto-compat.ts",
+      "summary": "validateKeyAndIv is a function defined in eliza/packages/core/src/utils/crypto-compat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/crypto-compat.ts:validateKeyAndGcmIv",
+      "type": "function",
+      "name": "validateKeyAndGcmIv",
+      "filePath": "eliza/packages/core/src/utils/crypto-compat.ts",
+      "summary": "validateKeyAndGcmIv is a function defined in eliza/packages/core/src/utils/crypto-compat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/crypto-compat.ts:createHash",
+      "type": "function",
+      "name": "createHash",
+      "filePath": "eliza/packages/core/src/utils/crypto-compat.ts",
+      "summary": "createHash is a function defined in eliza/packages/core/src/utils/crypto-compat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/crypto-compat.ts:createHashAsync",
+      "type": "function",
+      "name": "createHashAsync",
+      "filePath": "eliza/packages/core/src/utils/crypto-compat.ts",
+      "summary": "createHashAsync is a function defined in eliza/packages/core/src/utils/crypto-compat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/crypto-compat.ts:createCipheriv",
+      "type": "function",
+      "name": "createCipheriv",
+      "filePath": "eliza/packages/core/src/utils/crypto-compat.ts",
+      "summary": "createCipheriv is a function defined in eliza/packages/core/src/utils/crypto-compat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/crypto-compat.ts:createDecipheriv",
+      "type": "function",
+      "name": "createDecipheriv",
+      "filePath": "eliza/packages/core/src/utils/crypto-compat.ts",
+      "summary": "createDecipheriv is a function defined in eliza/packages/core/src/utils/crypto-compat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/crypto-compat.ts:encryptAsync",
+      "type": "function",
+      "name": "encryptAsync",
+      "filePath": "eliza/packages/core/src/utils/crypto-compat.ts",
+      "summary": "encryptAsync is a function defined in eliza/packages/core/src/utils/crypto-compat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/crypto-compat.ts:decryptAsync",
+      "type": "function",
+      "name": "decryptAsync",
+      "filePath": "eliza/packages/core/src/utils/crypto-compat.ts",
+      "summary": "decryptAsync is a function defined in eliza/packages/core/src/utils/crypto-compat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/crypto-compat.ts:encryptAes256Gcm",
+      "type": "function",
+      "name": "encryptAes256Gcm",
+      "filePath": "eliza/packages/core/src/utils/crypto-compat.ts",
+      "summary": "encryptAes256Gcm is a function defined in eliza/packages/core/src/utils/crypto-compat.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/utils/crypto-compat.ts:decryptAes256Gcm",
+      "type": "function",
+      "name": "decryptAes256Gcm",
+      "filePath": "eliza/packages/core/src/utils/crypto-compat.ts",
+      "summary": "decryptAes256Gcm is a function defined in eliza/packages/core/src/utils/crypto-compat.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/pipeline-hooks.ts",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:withPipelinePhase",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/pipeline-hooks.ts",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:defaultPipelineHookSchedule",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/pipeline-hooks.ts",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:defaultPipelineHookMutatesPrimary",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/pipeline-hooks.ts",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:pipelineHookMetricRoomId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/pipeline-hooks.ts",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:sortPipelineHooksByPosition",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/pipeline-hooks.ts",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:resolvePipelineHookSpec",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/pipeline-hooks.ts",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:incomingPipelineHookContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/pipeline-hooks.ts",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:preShouldRespondPipelineHookContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/pipeline-hooks.ts",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:parallelWithShouldRespondPipelineHookContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/pipeline-hooks.ts",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:outgoingPipelineHookContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/pipeline-hooks.ts",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:preModelPipelineHookContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/pipeline-hooks.ts",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:postModelPipelineHookContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/pipeline-hooks.ts",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:afterMemoryPersistedPipelineHookContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/pipeline-hooks.ts",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:modelStreamChunkPipelineHookContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/pipeline-hooks.ts",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:modelStreamEndPipelineHookContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/types/pipeline-hooks.ts:resolvePipelineHookSpec",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:defaultPipelineHookSchedule",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/types/pipeline-hooks.ts:resolvePipelineHookSpec",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:defaultPipelineHookMutatesPrimary",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/types/pipeline-hooks.ts:incomingPipelineHookContext",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:withPipelinePhase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/types/pipeline-hooks.ts:preShouldRespondPipelineHookContext",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:withPipelinePhase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/types/pipeline-hooks.ts:parallelWithShouldRespondPipelineHookContext",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:withPipelinePhase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/types/pipeline-hooks.ts:outgoingPipelineHookContext",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:withPipelinePhase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/types/pipeline-hooks.ts:preModelPipelineHookContext",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:withPipelinePhase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/types/pipeline-hooks.ts:postModelPipelineHookContext",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:withPipelinePhase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/types/pipeline-hooks.ts:afterMemoryPersistedPipelineHookContext",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:withPipelinePhase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/types/pipeline-hooks.ts:modelStreamChunkPipelineHookContext",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:withPipelinePhase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/types/pipeline-hooks.ts:modelStreamEndPipelineHookContext",
+      "target": "function:eliza/packages/core/src/types/pipeline-hooks.ts:withPipelinePhase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/plugin.ts",
+      "target": "class:eliza/packages/core/src/types/plugin.ts:PermissionNarrowedRejection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/primitives.ts",
+      "target": "function:eliza/packages/core/src/types/primitives.ts:asUUID",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/prompt-batcher.ts",
+      "target": "class:eliza/packages/core/src/types/prompt-batcher.ts:BatcherDisposedError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/prompt-optimization-score-card.ts",
+      "target": "class:eliza/packages/core/src/types/prompt-optimization-score-card.ts:ScoreCard",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/search.ts",
+      "target": "class:eliza/packages/core/src/types/search.ts:SearchCategoryRegistryError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/service.ts",
+      "target": "function:eliza/packages/core/src/types/service.ts:getTypedService",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/service.ts",
+      "target": "function:eliza/packages/core/src/types/service.ts:createServiceError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/setup.ts",
+      "target": "function:eliza/packages/core/src/types/setup.ts:getStepIndex",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/setup.ts",
+      "target": "function:eliza/packages/core/src/types/setup.ts:getNextStep",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/setup.ts",
+      "target": "function:eliza/packages/core/src/types/setup.ts:getPreviousStep",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/setup.ts",
+      "target": "function:eliza/packages/core/src/types/setup.ts:isStepCompleted",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/setup.ts",
+      "target": "function:eliza/packages/core/src/types/setup.ts:calculateProgress",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/types/setup.ts:getNextStep",
+      "target": "function:eliza/packages/core/src/types/setup.ts:getStepIndex",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/types/setup.ts:getPreviousStep",
+      "target": "function:eliza/packages/core/src/types/setup.ts:getStepIndex",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/tools.ts",
+      "target": "function:eliza/packages/core/src/types/tools.ts:normalizeToolName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/tools.ts",
+      "target": "function:eliza/packages/core/src/types/tools.ts:normalizeToolList",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/tools.ts",
+      "target": "function:eliza/packages/core/src/types/tools.ts:expandToolGroups",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/tools.ts",
+      "target": "function:eliza/packages/core/src/types/tools.ts:resolveToolProfilePolicy",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/tools.ts",
+      "target": "function:eliza/packages/core/src/types/tools.ts:collectExplicitAllowlist",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/tools.ts",
+      "target": "function:eliza/packages/core/src/types/tools.ts:buildPluginToolGroups",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/tools.ts",
+      "target": "function:eliza/packages/core/src/types/tools.ts:expandPluginGroups",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/tools.ts",
+      "target": "function:eliza/packages/core/src/types/tools.ts:expandPolicyWithPluginGroups",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/tools.ts",
+      "target": "function:eliza/packages/core/src/types/tools.ts:stripPluginOnlyAllowlist",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/tools.ts",
+      "target": "function:eliza/packages/core/src/types/tools.ts:mergeToolPolicies",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/tools.ts",
+      "target": "function:eliza/packages/core/src/types/tools.ts:isToolAllowedByPolicy",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/types/tools.ts:expandToolGroups",
+      "target": "function:eliza/packages/core/src/types/tools.ts:normalizeToolList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/types/tools.ts:buildPluginToolGroups",
+      "target": "function:eliza/packages/core/src/types/tools.ts:normalizeToolName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/types/tools.ts:expandPluginGroups",
+      "target": "function:eliza/packages/core/src/types/tools.ts:normalizeToolName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/types/tools.ts:expandPolicyWithPluginGroups",
+      "target": "function:eliza/packages/core/src/types/tools.ts:expandPluginGroups",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/types/tools.ts:expandPolicyWithPluginGroups",
+      "target": "function:eliza/packages/core/src/types/tools.ts:expandPluginGroups",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/types/tools.ts:stripPluginOnlyAllowlist",
+      "target": "function:eliza/packages/core/src/types/tools.ts:normalizeToolList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/types/tools.ts:stripPluginOnlyAllowlist",
+      "target": "function:eliza/packages/core/src/types/tools.ts:expandToolGroups",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/types/tools.ts:isToolAllowedByPolicy",
+      "target": "function:eliza/packages/core/src/types/tools.ts:normalizeToolName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/types/tools.ts:isToolAllowedByPolicy",
+      "target": "function:eliza/packages/core/src/types/tools.ts:expandToolGroups",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/types/tools.ts:isToolAllowedByPolicy",
+      "target": "function:eliza/packages/core/src/types/tools.ts:expandToolGroups",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:isRestrictedCSPEnvironment",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:simpleTemplateReplace",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:upgradeDoubleToTriple",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:getCompiledTemplate",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:resolvePromptSeed",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:composePrompt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:composePromptFromState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:addHeader",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:composeRandomUser",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:formatPosts",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:formatMessages",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:parseKeyValueXml",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:findFirstXmlBlock",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:extractDirectXmlChildren",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:readXmlStartTag",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:findMatchingXmlClose",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:unescapeBasicXmlEntities",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:parseJSONObjectFromText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:normalizeJsonString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:truncateToCompleteSentence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:splitChunks",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:trimTokens",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:safeReplacer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:parseBooleanFromText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:validateUuid",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:stringToUuid",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:prewarmUuidCache",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:checkWebCrypto",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:getCachedSha1",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:sha1BytesAsync",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:sha1Bytes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:utf8Encode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:bytesToUuid",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "function:eliza/packages/core/src/utils.ts:getContentTypeFromMimeType",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:getCompiledTemplate",
+      "target": "function:eliza/packages/core/src/utils.ts:upgradeDoubleToTriple",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:composePrompt",
+      "target": "function:eliza/packages/core/src/utils.ts:isRestrictedCSPEnvironment",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:composePrompt",
+      "target": "function:eliza/packages/core/src/utils.ts:upgradeDoubleToTriple",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:composePrompt",
+      "target": "function:eliza/packages/core/src/utils.ts:simpleTemplateReplace",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:composePrompt",
+      "target": "function:eliza/packages/core/src/utils.ts:getCompiledTemplate",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:composePrompt",
+      "target": "function:eliza/packages/core/src/utils.ts:composeRandomUser",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:composePrompt",
+      "target": "function:eliza/packages/core/src/utils.ts:resolvePromptSeed",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:composePromptFromState",
+      "target": "function:eliza/packages/core/src/utils.ts:isRestrictedCSPEnvironment",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:composePromptFromState",
+      "target": "function:eliza/packages/core/src/utils.ts:upgradeDoubleToTriple",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:composePromptFromState",
+      "target": "function:eliza/packages/core/src/utils.ts:simpleTemplateReplace",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:composePromptFromState",
+      "target": "function:eliza/packages/core/src/utils.ts:getCompiledTemplate",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:composePromptFromState",
+      "target": "function:eliza/packages/core/src/utils.ts:composeRandomUser",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:composePromptFromState",
+      "target": "function:eliza/packages/core/src/utils.ts:resolvePromptSeed",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:parseKeyValueXml",
+      "target": "function:eliza/packages/core/src/utils.ts:findFirstXmlBlock",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:parseKeyValueXml",
+      "target": "function:eliza/packages/core/src/utils.ts:extractDirectXmlChildren",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:findFirstXmlBlock",
+      "target": "function:eliza/packages/core/src/utils.ts:readXmlStartTag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:findFirstXmlBlock",
+      "target": "function:eliza/packages/core/src/utils.ts:findMatchingXmlClose",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:extractDirectXmlChildren",
+      "target": "function:eliza/packages/core/src/utils.ts:readXmlStartTag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:extractDirectXmlChildren",
+      "target": "function:eliza/packages/core/src/utils.ts:findMatchingXmlClose",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:extractDirectXmlChildren",
+      "target": "function:eliza/packages/core/src/utils.ts:unescapeBasicXmlEntities",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:findMatchingXmlClose",
+      "target": "function:eliza/packages/core/src/utils.ts:readXmlStartTag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:stringToUuid",
+      "target": "function:eliza/packages/core/src/utils.ts:validateUuid",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:stringToUuid",
+      "target": "function:eliza/packages/core/src/utils.ts:getCachedSha1",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:stringToUuid",
+      "target": "function:eliza/packages/core/src/utils.ts:bytesToUuid",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:prewarmUuidCache",
+      "target": "function:eliza/packages/core/src/utils.ts:checkWebCrypto",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:prewarmUuidCache",
+      "target": "function:eliza/packages/core/src/utils.ts:sha1BytesAsync",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:getCachedSha1",
+      "target": "function:eliza/packages/core/src/utils.ts:sha1Bytes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:getCachedSha1",
+      "target": "function:eliza/packages/core/src/utils.ts:checkWebCrypto",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:getCachedSha1",
+      "target": "function:eliza/packages/core/src/utils.ts:sha1BytesAsync",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:sha1BytesAsync",
+      "target": "function:eliza/packages/core/src/utils.ts:checkWebCrypto",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:sha1BytesAsync",
+      "target": "function:eliza/packages/core/src/utils.ts:sha1Bytes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils.ts:sha1Bytes",
+      "target": "function:eliza/packages/core/src/utils.ts:utf8Encode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/__tests__/streaming-field-events.test.ts",
+      "target": "function:eliza/packages/core/src/utils/__tests__/streaming-field-events.test.ts:feed",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/action-results.ts",
+      "target": "function:eliza/packages/core/src/utils/action-results.ts:estimateActionResultTokens",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/action-results.ts",
+      "target": "function:eliza/packages/core/src/utils/action-results.ts:getActionResultActionName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/action-results.ts",
+      "target": "function:eliza/packages/core/src/utils/action-results.ts:stringifyActionResultError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/action-results.ts",
+      "target": "function:eliza/packages/core/src/utils/action-results.ts:getReferenceFromData",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/action-results.ts",
+      "target": "function:eliza/packages/core/src/utils/action-results.ts:getActionResultReference",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/action-results.ts",
+      "target": "function:eliza/packages/core/src/utils/action-results.ts:truncateMiddle",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/action-results.ts",
+      "target": "function:eliza/packages/core/src/utils/action-results.ts:collectActionResultSizeWarnings",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/action-results.ts",
+      "target": "function:eliza/packages/core/src/utils/action-results.ts:trimActionResultForPromptState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/action-results.ts",
+      "target": "function:eliza/packages/core/src/utils/action-results.ts:formatActionResultsForPrompt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/action-results.ts:getActionResultReference",
+      "target": "function:eliza/packages/core/src/utils/action-results.ts:getReferenceFromData",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/action-results.ts:collectActionResultSizeWarnings",
+      "target": "function:eliza/packages/core/src/utils/action-results.ts:getActionResultActionName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/action-results.ts:collectActionResultSizeWarnings",
+      "target": "function:eliza/packages/core/src/utils/action-results.ts:stringifyActionResultError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/action-results.ts:collectActionResultSizeWarnings",
+      "target": "function:eliza/packages/core/src/utils/action-results.ts:estimateActionResultTokens",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/action-results.ts:trimActionResultForPromptState",
+      "target": "function:eliza/packages/core/src/utils/action-results.ts:getActionResultReference",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/action-results.ts:trimActionResultForPromptState",
+      "target": "function:eliza/packages/core/src/utils/action-results.ts:getActionResultReference",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/action-results.ts:trimActionResultForPromptState",
+      "target": "function:eliza/packages/core/src/utils/action-results.ts:truncateMiddle",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/action-results.ts:trimActionResultForPromptState",
+      "target": "function:eliza/packages/core/src/utils/action-results.ts:stringifyActionResultError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/action-results.ts:trimActionResultForPromptState",
+      "target": "function:eliza/packages/core/src/utils/action-results.ts:truncateMiddle",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/action-results.ts:formatActionResultsForPrompt",
+      "target": "function:eliza/packages/core/src/utils/action-results.ts:getActionResultActionName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/action-results.ts:formatActionResultsForPrompt",
+      "target": "function:eliza/packages/core/src/utils/action-results.ts:stringifyActionResultError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/action-results.ts:formatActionResultsForPrompt",
+      "target": "function:eliza/packages/core/src/utils/action-results.ts:getActionResultReference",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/action-results.ts:formatActionResultsForPrompt",
+      "target": "function:eliza/packages/core/src/utils/action-results.ts:getActionResultReference",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/action-validation.ts",
+      "target": "function:eliza/packages/core/src/utils/action-validation.ts:hasActionContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/batch-queue/task-drain.test.ts",
+      "target": "function:eliza/packages/core/src/utils/batch-queue/task-drain.test.ts:makeTask",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/batch-queue/task-drain.ts",
+      "target": "class:eliza/packages/core/src/utils/batch-queue/task-drain.ts:TaskDrain",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/boolean.ts",
+      "target": "function:eliza/packages/core/src/utils/boolean.ts:parseBooleanValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/boolean.ts",
+      "target": "function:eliza/packages/core/src/utils/boolean.ts:parseBooleanText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/boolean.ts:parseBooleanText",
+      "target": "function:eliza/packages/core/src/utils/boolean.ts:parseBooleanValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/buffer.ts",
+      "target": "function:eliza/packages/core/src/utils/buffer.ts:hasNativeBuffer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/buffer.ts",
+      "target": "function:eliza/packages/core/src/utils/buffer.ts:fromHex",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/buffer.ts",
+      "target": "function:eliza/packages/core/src/utils/buffer.ts:fromString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/buffer.ts",
+      "target": "function:eliza/packages/core/src/utils/buffer.ts:toHex",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/buffer.ts",
+      "target": "function:eliza/packages/core/src/utils/buffer.ts:bufferToString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/buffer.ts",
+      "target": "function:eliza/packages/core/src/utils/buffer.ts:isBuffer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/buffer.ts",
+      "target": "function:eliza/packages/core/src/utils/buffer.ts:alloc",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/buffer.ts",
+      "target": "function:eliza/packages/core/src/utils/buffer.ts:fromBytes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/buffer.ts",
+      "target": "function:eliza/packages/core/src/utils/buffer.ts:concat",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/buffer.ts",
+      "target": "function:eliza/packages/core/src/utils/buffer.ts:slice",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/buffer.ts",
+      "target": "function:eliza/packages/core/src/utils/buffer.ts:equals",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/buffer.ts",
+      "target": "function:eliza/packages/core/src/utils/buffer.ts:byteLength",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/buffer.ts",
+      "target": "function:eliza/packages/core/src/utils/buffer.ts:randomBytes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/buffer.ts:fromHex",
+      "target": "function:eliza/packages/core/src/utils/buffer.ts:hasNativeBuffer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/buffer.ts:fromString",
+      "target": "function:eliza/packages/core/src/utils/buffer.ts:hasNativeBuffer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/buffer.ts:toHex",
+      "target": "function:eliza/packages/core/src/utils/buffer.ts:hasNativeBuffer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/buffer.ts:bufferToString",
+      "target": "function:eliza/packages/core/src/utils/buffer.ts:hasNativeBuffer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/buffer.ts:bufferToString",
+      "target": "function:eliza/packages/core/src/utils/buffer.ts:toHex",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/buffer.ts:isBuffer",
+      "target": "function:eliza/packages/core/src/utils/buffer.ts:hasNativeBuffer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/buffer.ts:alloc",
+      "target": "function:eliza/packages/core/src/utils/buffer.ts:hasNativeBuffer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/buffer.ts:fromBytes",
+      "target": "function:eliza/packages/core/src/utils/buffer.ts:hasNativeBuffer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/buffer.ts:concat",
+      "target": "function:eliza/packages/core/src/utils/buffer.ts:hasNativeBuffer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/buffer.ts:slice",
+      "target": "function:eliza/packages/core/src/utils/buffer.ts:hasNativeBuffer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/confirmation.ts",
+      "target": "function:eliza/packages/core/src/utils/confirmation.ts:buildCacheKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/confirmation.ts",
+      "target": "function:eliza/packages/core/src/utils/confirmation.ts:readUserText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/confirmation.ts",
+      "target": "function:eliza/packages/core/src/utils/confirmation.ts:requireConfirmation",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/confirmation.ts",
+      "target": "function:eliza/packages/core/src/utils/confirmation.ts:clearPendingConfirmation",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/confirmation.ts:requireConfirmation",
+      "target": "function:eliza/packages/core/src/utils/confirmation.ts:buildCacheKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/confirmation.ts:requireConfirmation",
+      "target": "function:eliza/packages/core/src/utils/confirmation.ts:readUserText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/confirmation.ts:clearPendingConfirmation",
+      "target": "function:eliza/packages/core/src/utils/confirmation.ts:buildCacheKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/context-catalog.ts",
+      "target": "function:eliza/packages/core/src/utils/context-catalog.ts:normalizeContexts",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/context-catalog.ts",
+      "target": "function:eliza/packages/core/src/utils/context-catalog.ts:resolveActionContexts",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/context-catalog.ts",
+      "target": "function:eliza/packages/core/src/utils/context-catalog.ts:resolveProviderContexts",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-catalog.ts:resolveActionContexts",
+      "target": "function:eliza/packages/core/src/utils/context-catalog.ts:normalizeContexts",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-catalog.ts:resolveProviderContexts",
+      "target": "function:eliza/packages/core/src/utils/context-catalog.ts:normalizeContexts",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:normalizeContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:dedupeStringValues",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:parseDelimitedList",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:parseContextList",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:isPageScopedRoutingContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:normalizeRoutingContexts",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:getExplicitRoutingContexts",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:routingContextsOverlap",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:shouldSurfaceContextCapabilities",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:parseContextRoutingMetadata",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:getContextRoutingFromState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:getContextRoutingFromMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:mergeContextRouting",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:getActiveRoutingContexts",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:getActiveRoutingContextsForTurn",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:shouldIncludeByContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:setContextRoutingMetadata",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:deriveAvailableContexts",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:inferContextRoutingFromText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:inferContextRoutingFromMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:attachAvailableContexts",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:parseDelimitedList",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:dedupeStringValues",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:parseDelimitedList",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:dedupeStringValues",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:parseContextList",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:dedupeStringValues",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:parseContextList",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:parseDelimitedList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:parseContextList",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:normalizeContext",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:normalizeRoutingContexts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:dedupeStringValues",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:normalizeRoutingContexts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:normalizeContext",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:getExplicitRoutingContexts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:normalizeRoutingContexts",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:getExplicitRoutingContexts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:isPageScopedRoutingContext",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:routingContextsOverlap",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:normalizeRoutingContexts",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:routingContextsOverlap",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:normalizeRoutingContexts",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:shouldSurfaceContextCapabilities",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:normalizeRoutingContexts",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:shouldSurfaceContextCapabilities",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:getExplicitRoutingContexts",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:shouldSurfaceContextCapabilities",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:routingContextsOverlap",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:parseContextRoutingMetadata",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:normalizeContext",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:parseContextRoutingMetadata",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:parseContextList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:getContextRoutingFromState",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:parseContextRoutingMetadata",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:getContextRoutingFromMessage",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:parseContextRoutingMetadata",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:mergeContextRouting",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:getContextRoutingFromState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:mergeContextRouting",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:getContextRoutingFromMessage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:mergeContextRouting",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:dedupeStringValues",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:getActiveRoutingContextsForTurn",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:getActiveRoutingContexts",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:getActiveRoutingContextsForTurn",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:mergeContextRouting",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:deriveAvailableContexts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:normalizeContext",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:deriveAvailableContexts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:normalizeContext",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:inferContextRoutingFromMessage",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:inferContextRoutingFromText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/context-routing.ts:attachAvailableContexts",
+      "target": "function:eliza/packages/core/src/utils/context-routing.ts:deriveAvailableContexts",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:normalizeEncoding",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:toOwnedUint8Array",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:toUint8Array",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:toEncodedString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:concatBytes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:sliceBytes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:getWebCryptoSubtle",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:getSyncHashFactory",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:webCryptoHash",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:webCryptoEncrypt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:webCryptoDecrypt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:applyPkcs7Padding",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:removePkcs7Padding",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:validateKeyAndIv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:validateKeyAndGcmIv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:createHash",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:createHashAsync",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:createCipheriv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:createDecipheriv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:encryptAsync",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:decryptAsync",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:encryptAes256Gcm",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:decryptAes256Gcm",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:toUint8Array",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:normalizeEncoding",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:toUint8Array",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:toOwnedUint8Array",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:toUint8Array",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:toOwnedUint8Array",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:toUint8Array",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:toOwnedUint8Array",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:toEncodedString",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:normalizeEncoding",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:concatBytes",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:toOwnedUint8Array",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:sliceBytes",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:toOwnedUint8Array",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:webCryptoHash",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:getWebCryptoSubtle",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:webCryptoEncrypt",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:validateKeyAndIv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:webCryptoEncrypt",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:getWebCryptoSubtle",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:webCryptoDecrypt",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:validateKeyAndIv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:webCryptoDecrypt",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:getWebCryptoSubtle",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:applyPkcs7Padding",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:concatBytes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:removePkcs7Padding",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:sliceBytes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:createHash",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:getSyncHashFactory",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:createHashAsync",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:webCryptoHash",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:createCipheriv",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:validateKeyAndIv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:createDecipheriv",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:validateKeyAndIv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:encryptAsync",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:validateKeyAndIv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:encryptAsync",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:webCryptoEncrypt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:decryptAsync",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:validateKeyAndIv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:decryptAsync",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:webCryptoDecrypt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:encryptAes256Gcm",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:validateKeyAndGcmIv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:encryptAes256Gcm",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:sliceBytes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:encryptAes256Gcm",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:sliceBytes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:decryptAes256Gcm",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:validateKeyAndGcmIv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/utils/crypto-compat.ts:decryptAes256Gcm",
+      "target": "function:eliza/packages/core/src/utils/crypto-compat.ts:concatBytes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/pipeline-hooks.ts",
+      "target": "file:eliza/packages/core/src/types/environment.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/pipeline-hooks.ts",
+      "target": "file:eliza/packages/core/src/types/memory.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/pipeline-hooks.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/pipeline-hooks.ts",
+      "target": "file:eliza/packages/core/src/types/state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/plugin-manifest.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/plugin-store.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/plugin.ts",
+      "target": "file:eliza/packages/core/src/api/route-helpers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/plugin.ts",
+      "target": "file:eliza/packages/core/src/runtime/response-handler-evaluators.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/plugin.ts",
+      "target": "file:eliza/packages/core/src/runtime/response-handler-field-evaluator.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/plugin.ts",
+      "target": "file:eliza/packages/core/src/types/agent.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/plugin.ts",
+      "target": "file:eliza/packages/core/src/types/components.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/plugin.ts",
+      "target": "file:eliza/packages/core/src/types/database.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/plugin.ts",
+      "target": "file:eliza/packages/core/src/types/evaluator.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/plugin.ts",
+      "target": "file:eliza/packages/core/src/types/events.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/plugin.ts",
+      "target": "file:eliza/packages/core/src/types/model.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/plugin.ts",
+      "target": "file:eliza/packages/core/src/types/payment.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/plugin.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/plugin.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/plugin.ts",
+      "target": "file:eliza/packages/core/src/types/service.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/plugin.ts",
+      "target": "file:eliza/packages/core/src/types/testing.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/prompt-batcher.ts",
+      "target": "file:eliza/packages/core/src/types/memory.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/prompt-batcher.ts",
+      "target": "file:eliza/packages/core/src/types/model.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/prompt-batcher.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/prompt-batcher.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/prompt-batcher.ts",
+      "target": "file:eliza/packages/core/src/types/state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/prompt-optimization-hooks.ts",
+      "target": "file:eliza/packages/core/src/types/prompt-optimization-trace.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/prompt-optimization-hooks.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/prompt-optimization-hooks.ts",
+      "target": "file:eliza/packages/core/src/types/state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/prompt-optimization-score-card.ts",
+      "target": "file:eliza/packages/core/src/types/prompt-optimization-trace.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/prompt-optimization-trace.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/runtime/context-registry.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/runtime/response-handler-evaluators.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/runtime/response-handler-field-evaluator.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/runtime/response-handler-field-registry.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/runtime/room-handler-queue.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/runtime/turn-controller.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/types/agent.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/types/components.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/types/database.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/types/environment.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/types/evaluator.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/types/events.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/types/memory.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/types/message-service.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/types/messaging.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/types/model.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/types/pairing.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/types/plugin.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/types/search.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/types/service.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/types/state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/types/task.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/types/tools.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/runtime.ts",
+      "target": "file:eliza/packages/core/src/utils/prompt-batcher.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/search.ts",
+      "target": "file:eliza/packages/core/src/types/components.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/search.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/search.ts",
+      "target": "file:eliza/packages/core/src/types/service.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/service-interfaces.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/service-interfaces.ts",
+      "target": "file:eliza/packages/core/src/types/service.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/service.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/service.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/settings.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/setup.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/state.ts",
+      "target": "file:eliza/packages/core/src/types/components.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/state.ts",
+      "target": "file:eliza/packages/core/src/types/environment.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/streaming.ts",
+      "target": "file:eliza/packages/core/src/types/components.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/streaming.ts",
+      "target": "file:eliza/packages/core/src/types/context-object.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/streaming.ts",
+      "target": "file:eliza/packages/core/src/types/model.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/task.ts",
+      "target": "file:eliza/packages/core/src/types/memory.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/task.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/task.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/task.ts",
+      "target": "file:eliza/packages/core/src/types/state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/task.ts",
+      "target": "file:eliza/packages/core/src/types/trigger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/tee.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/testing.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/tools.ts",
+      "target": "file:eliza/packages/core/src/types/channel-config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/trigger.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "file:eliza/packages/core/src/types/agent.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "file:eliza/packages/core/src/types/environment.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "file:eliza/packages/core/src/types/memory.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "file:eliza/packages/core/src/types/model.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "file:eliza/packages/core/src/types/state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "file:eliza/packages/core/src/utils/deterministic.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "file:eliza/packages/core/src/utils/json-llm.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "file:eliza/packages/core/src/utils/recursive-character-text-splitter.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils.ts",
+      "target": "file:eliza/packages/core/src/utils/time-format.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils/__tests__/streaming-field-events.test.ts",
+      "target": "file:eliza/packages/core/src/types/state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils/__tests__/streaming-field-events.test.ts",
+      "target": "file:eliza/packages/core/src/utils/streaming.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils/action-results.ts",
+      "target": "file:eliza/packages/core/src/types/components.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils/action-validation.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils/action-validation.ts",
+      "target": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils/batch-queue/task-drain.test.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils/batch-queue/task-drain.test.ts",
+      "target": "file:eliza/packages/core/src/types/task.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils/batch-queue/task-drain.test.ts",
+      "target": "file:eliza/packages/core/src/utils/batch-queue/task-drain.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils/confirmation.ts",
+      "target": "file:eliza/packages/core/src/types/components.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils/confirmation.ts",
+      "target": "file:eliza/packages/core/src/types/memory.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils/confirmation.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils/context-catalog.ts",
+      "target": "file:eliza/packages/core/src/types/components.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "file:eliza/packages/core/src/types/components.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "file:eliza/packages/core/src/types/memory.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "file:eliza/packages/core/src/types/state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "file:eliza/packages/core/src/utils/context-catalog.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils/context-routing.ts",
+      "target": "file:eliza/packages/core/src/utils/message-text.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/utils/crypto-compat.ts",
+      "target": "file:eliza/packages/core/src/utils/buffer.ts",
+      "type": "imports"
+    }
+  ]
+}

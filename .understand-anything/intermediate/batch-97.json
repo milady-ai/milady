@@ -1,0 +1,1539 @@
+{
+  "batchIndex": 97,
+  "nodes": [
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/utils/desktop-workspace.ts",
+      "type": "file",
+      "name": "desktop-workspace.ts",
+      "filePath": "eliza/packages/ui/src/utils/desktop-workspace.ts",
+      "summary": "desktop-workspace.ts is a typescript source file in the Milady codebase. It contains 7 functions, 1 imports.",
+      "languageNotes": "typescript; code; 369 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:unsupportedSnapshot",
+      "type": "function",
+      "name": "unsupportedSnapshot",
+      "filePath": "eliza/packages/ui/src/utils/desktop-workspace.ts",
+      "summary": "unsupportedSnapshot is a function defined in eliza/packages/ui/src/utils/desktop-workspace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:requestDesktopBridge",
+      "type": "function",
+      "name": "requestDesktopBridge",
+      "filePath": "eliza/packages/ui/src/utils/desktop-workspace.ts",
+      "summary": "requestDesktopBridge is a function defined in eliza/packages/ui/src/utils/desktop-workspace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:openDesktopSettingsWindow",
+      "type": "function",
+      "name": "openDesktopSettingsWindow",
+      "filePath": "eliza/packages/ui/src/utils/desktop-workspace.ts",
+      "summary": "openDesktopSettingsWindow is a function defined in eliza/packages/ui/src/utils/desktop-workspace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:openDesktopSurfaceWindow",
+      "type": "function",
+      "name": "openDesktopSurfaceWindow",
+      "filePath": "eliza/packages/ui/src/utils/desktop-workspace.ts",
+      "summary": "openDesktopSurfaceWindow is a function defined in eliza/packages/ui/src/utils/desktop-workspace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:loadDesktopWorkspaceSnapshot",
+      "type": "function",
+      "name": "loadDesktopWorkspaceSnapshot",
+      "filePath": "eliza/packages/ui/src/utils/desktop-workspace.ts",
+      "summary": "loadDesktopWorkspaceSnapshot is a function defined in eliza/packages/ui/src/utils/desktop-workspace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:formatBounds",
+      "type": "function",
+      "name": "formatBounds",
+      "filePath": "eliza/packages/ui/src/utils/desktop-workspace.ts",
+      "summary": "formatBounds is a function defined in eliza/packages/ui/src/utils/desktop-workspace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:formatDesktopWorkspaceSummary",
+      "type": "function",
+      "name": "formatDesktopWorkspaceSummary",
+      "filePath": "eliza/packages/ui/src/utils/desktop-workspace.ts",
+      "summary": "formatDesktopWorkspaceSummary is a function defined in eliza/packages/ui/src/utils/desktop-workspace.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/utils/documents-upload-image.ts",
+      "type": "file",
+      "name": "documents-upload-image.ts",
+      "filePath": "eliza/packages/ui/src/utils/documents-upload-image.ts",
+      "summary": "documents-upload-image.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 7 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/utils/errors.ts",
+      "type": "file",
+      "name": "errors.ts",
+      "filePath": "eliza/packages/ui/src/utils/errors.ts",
+      "summary": "errors.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 5 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/utils/format.ts",
+      "type": "file",
+      "name": "format.ts",
+      "filePath": "eliza/packages/ui/src/utils/format.ts",
+      "summary": "format.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 8 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/utils/host-capabilities.ts",
+      "type": "file",
+      "name": "host-capabilities.ts",
+      "filePath": "eliza/packages/ui/src/utils/host-capabilities.ts",
+      "summary": "host-capabilities.ts is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 123 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/host-capabilities.ts:detectUiHostCapabilities",
+      "type": "function",
+      "name": "detectUiHostCapabilities",
+      "filePath": "eliza/packages/ui/src/utils/host-capabilities.ts",
+      "summary": "detectUiHostCapabilities is a function defined in eliza/packages/ui/src/utils/host-capabilities.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/host-capabilities.ts:intervalHostWarning",
+      "type": "function",
+      "name": "intervalHostWarning",
+      "filePath": "eliza/packages/ui/src/utils/host-capabilities.ts",
+      "summary": "intervalHostWarning is a function defined in eliza/packages/ui/src/utils/host-capabilities.ts."
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/utils/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/ui/src/utils/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 43 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/utils/labels.ts",
+      "type": "file",
+      "name": "labels.ts",
+      "filePath": "eliza/packages/ui/src/utils/labels.ts",
+      "summary": "labels.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/utils/openExternalUrl.ts",
+      "type": "file",
+      "name": "openExternalUrl.ts",
+      "filePath": "eliza/packages/ui/src/utils/openExternalUrl.ts",
+      "summary": "openExternalUrl.ts is a typescript source file in the Milady codebase. It contains 6 functions, 1 imports.",
+      "languageNotes": "typescript; code; 127 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/openExternalUrl.ts:isCapacitorGlobal",
+      "type": "function",
+      "name": "isCapacitorGlobal",
+      "filePath": "eliza/packages/ui/src/utils/openExternalUrl.ts",
+      "summary": "isCapacitorGlobal is a function defined in eliza/packages/ui/src/utils/openExternalUrl.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/openExternalUrl.ts:getCapacitorBrowser",
+      "type": "function",
+      "name": "getCapacitorBrowser",
+      "filePath": "eliza/packages/ui/src/utils/openExternalUrl.ts",
+      "summary": "getCapacitorBrowser is a function defined in eliza/packages/ui/src/utils/openExternalUrl.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/openExternalUrl.ts:openExternalUrl",
+      "type": "function",
+      "name": "openExternalUrl",
+      "filePath": "eliza/packages/ui/src/utils/openExternalUrl.ts",
+      "summary": "openExternalUrl is a function defined in eliza/packages/ui/src/utils/openExternalUrl.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/openExternalUrl.ts:closeExternalBrowser",
+      "type": "function",
+      "name": "closeExternalBrowser",
+      "filePath": "eliza/packages/ui/src/utils/openExternalUrl.ts",
+      "summary": "closeExternalBrowser is a function defined in eliza/packages/ui/src/utils/openExternalUrl.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/openExternalUrl.ts:preOpenWindow",
+      "type": "function",
+      "name": "preOpenWindow",
+      "filePath": "eliza/packages/ui/src/utils/openExternalUrl.ts",
+      "summary": "preOpenWindow is a function defined in eliza/packages/ui/src/utils/openExternalUrl.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/openExternalUrl.ts:navigatePreOpenedWindow",
+      "type": "function",
+      "name": "navigatePreOpenedWindow",
+      "filePath": "eliza/packages/ui/src/utils/openExternalUrl.ts",
+      "summary": "navigatePreOpenedWindow is a function defined in eliza/packages/ui/src/utils/openExternalUrl.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/utils/subscription-auth.ts",
+      "type": "file",
+      "name": "subscription-auth.ts",
+      "filePath": "eliza/packages/ui/src/utils/subscription-auth.ts",
+      "summary": "subscription-auth.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 4 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/utils/task-schedule.test.ts",
+      "type": "file",
+      "name": "task-schedule.test.ts",
+      "filePath": "eliza/packages/ui/src/utils/task-schedule.test.ts",
+      "summary": "task-schedule.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 58 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/utils/task-schedule.ts",
+      "type": "file",
+      "name": "task-schedule.ts",
+      "filePath": "eliza/packages/ui/src/utils/task-schedule.ts",
+      "summary": "task-schedule.ts is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 49 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/task-schedule.ts:encodeScheduleTags",
+      "type": "function",
+      "name": "encodeScheduleTags",
+      "filePath": "eliza/packages/ui/src/utils/task-schedule.ts",
+      "summary": "encodeScheduleTags is a function defined in eliza/packages/ui/src/utils/task-schedule.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/task-schedule.ts:decodeScheduleTags",
+      "type": "function",
+      "name": "decodeScheduleTags",
+      "filePath": "eliza/packages/ui/src/utils/task-schedule.ts",
+      "summary": "decodeScheduleTags is a function defined in eliza/packages/ui/src/utils/task-schedule.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/utils/trajectory-format.ts",
+      "type": "file",
+      "name": "trajectory-format.ts",
+      "filePath": "eliza/packages/ui/src/utils/trajectory-format.ts",
+      "summary": "trajectory-format.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 5 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/utils/workflow-json.test.ts",
+      "type": "file",
+      "name": "workflow-json.test.ts",
+      "filePath": "eliza/packages/ui/src/utils/workflow-json.test.ts",
+      "summary": "workflow-json.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 105 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/utils/workflow-json.ts",
+      "type": "file",
+      "name": "workflow-json.ts",
+      "filePath": "eliza/packages/ui/src/utils/workflow-json.ts",
+      "summary": "workflow-json.ts is a typescript source file in the Milady codebase. It contains 6 functions, 1 imports.",
+      "languageNotes": "typescript; code; 181 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/workflow-json.ts:isObject",
+      "type": "function",
+      "name": "isObject",
+      "filePath": "eliza/packages/ui/src/utils/workflow-json.ts",
+      "summary": "isObject is a function defined in eliza/packages/ui/src/utils/workflow-json.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/workflow-json.ts:lineFromOffset",
+      "type": "function",
+      "name": "lineFromOffset",
+      "filePath": "eliza/packages/ui/src/utils/workflow-json.ts",
+      "summary": "lineFromOffset is a function defined in eliza/packages/ui/src/utils/workflow-json.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/workflow-json.ts:parseWorkflowJson",
+      "type": "function",
+      "name": "parseWorkflowJson",
+      "filePath": "eliza/packages/ui/src/utils/workflow-json.ts",
+      "summary": "parseWorkflowJson is a function defined in eliza/packages/ui/src/utils/workflow-json.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/workflow-json.ts:workflowToJsonText",
+      "type": "function",
+      "name": "workflowToJsonText",
+      "filePath": "eliza/packages/ui/src/utils/workflow-json.ts",
+      "summary": "workflowToJsonText is a function defined in eliza/packages/ui/src/utils/workflow-json.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/workflow-json.ts:toWriteNode",
+      "type": "function",
+      "name": "toWriteNode",
+      "filePath": "eliza/packages/ui/src/utils/workflow-json.ts",
+      "summary": "toWriteNode is a function defined in eliza/packages/ui/src/utils/workflow-json.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/workflow-json.ts:toWriteRequest",
+      "type": "function",
+      "name": "toWriteRequest",
+      "filePath": "eliza/packages/ui/src/utils/workflow-json.ts",
+      "summary": "toWriteRequest is a function defined in eliza/packages/ui/src/utils/workflow-json.ts."
+    },
+    {
+      "tags": [
+        "voice"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/voice/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "eliza/packages/ui/src/voice/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 8 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/widgets/WidgetHost.tsx",
+      "type": "file",
+      "name": "WidgetHost.tsx",
+      "filePath": "eliza/packages/ui/src/widgets/WidgetHost.tsx",
+      "summary": "WidgetHost.tsx is a typescript source file in the Milady codebase. It contains 1 function, 1 class, 5 imports.",
+      "languageNotes": "typescript; code; 146 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/widgets/WidgetHost.tsx:WidgetHost",
+      "type": "function",
+      "name": "WidgetHost",
+      "filePath": "eliza/packages/ui/src/widgets/WidgetHost.tsx",
+      "summary": "WidgetHost is a function defined in eliza/packages/ui/src/widgets/WidgetHost.tsx."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/ui/src/widgets/WidgetHost.tsx:WidgetErrorBoundary",
+      "type": "class",
+      "name": "WidgetErrorBoundary",
+      "filePath": "eliza/packages/ui/src/widgets/WidgetHost.tsx",
+      "summary": "WidgetErrorBoundary is a class or type declared in eliza/packages/ui/src/widgets/WidgetHost.tsx."
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/widgets/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/ui/src/widgets/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 20 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/widgets/registry-store.ts",
+      "type": "file",
+      "name": "registry-store.ts",
+      "filePath": "eliza/packages/ui/src/widgets/registry-store.ts",
+      "summary": "registry-store.ts is a typescript source file in the Milady codebase. It contains 5 functions, 2 imports.",
+      "languageNotes": "typescript; code; 58 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/widgets/registry-store.ts:getComponentRegistry",
+      "type": "function",
+      "name": "getComponentRegistry",
+      "filePath": "eliza/packages/ui/src/widgets/registry-store.ts",
+      "summary": "getComponentRegistry is a function defined in eliza/packages/ui/src/widgets/registry-store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/widgets/registry-store.ts:registerWidgetComponent",
+      "type": "function",
+      "name": "registerWidgetComponent",
+      "filePath": "eliza/packages/ui/src/widgets/registry-store.ts",
+      "summary": "registerWidgetComponent is a function defined in eliza/packages/ui/src/widgets/registry-store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/widgets/registry-store.ts:getWidgetComponent",
+      "type": "function",
+      "name": "getWidgetComponent",
+      "filePath": "eliza/packages/ui/src/widgets/registry-store.ts",
+      "summary": "getWidgetComponent is a function defined in eliza/packages/ui/src/widgets/registry-store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/widgets/registry-store.ts:seedLegacyWidgets",
+      "type": "function",
+      "name": "seedLegacyWidgets",
+      "filePath": "eliza/packages/ui/src/widgets/registry-store.ts",
+      "summary": "seedLegacyWidgets is a function defined in eliza/packages/ui/src/widgets/registry-store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/widgets/registry-store.ts:registerBuiltinWidgets",
+      "type": "function",
+      "name": "registerBuiltinWidgets",
+      "filePath": "eliza/packages/ui/src/widgets/registry-store.ts",
+      "summary": "registerBuiltinWidgets is a function defined in eliza/packages/ui/src/widgets/registry-store.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/widgets/registry.ts",
+      "type": "file",
+      "name": "registry.ts",
+      "filePath": "eliza/packages/ui/src/widgets/registry.ts",
+      "summary": "registry.ts is a typescript source file in the Milady codebase. It contains 4 functions, 9 imports.",
+      "languageNotes": "typescript; code; 260 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/widgets/registry.ts:registerBuiltinWidgetDeclarations",
+      "type": "function",
+      "name": "registerBuiltinWidgetDeclarations",
+      "filePath": "eliza/packages/ui/src/widgets/registry.ts",
+      "summary": "registerBuiltinWidgetDeclarations is a function defined in eliza/packages/ui/src/widgets/registry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/widgets/registry.ts:isWidgetEnabled",
+      "type": "function",
+      "name": "isWidgetEnabled",
+      "filePath": "eliza/packages/ui/src/widgets/registry.ts",
+      "summary": "isWidgetEnabled is a function defined in eliza/packages/ui/src/widgets/registry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/widgets/registry.ts:resolveWidgetsForSlot",
+      "type": "function",
+      "name": "resolveWidgetsForSlot",
+      "filePath": "eliza/packages/ui/src/widgets/registry.ts",
+      "summary": "resolveWidgetsForSlot is a function defined in eliza/packages/ui/src/widgets/registry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/widgets/registry.ts:resolveChatSidebarWidgets",
+      "type": "function",
+      "name": "resolveChatSidebarWidgets",
+      "filePath": "eliza/packages/ui/src/widgets/registry.ts",
+      "summary": "resolveChatSidebarWidgets is a function defined in eliza/packages/ui/src/widgets/registry.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/widgets/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "eliza/packages/ui/src/widgets/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase. It contains 4 imports.",
+      "languageNotes": "typescript; code; 51 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/widgets/useChatSidebarVisibility.ts",
+      "type": "file",
+      "name": "useChatSidebarVisibility.ts",
+      "filePath": "eliza/packages/ui/src/widgets/useChatSidebarVisibility.ts",
+      "summary": "useChatSidebarVisibility.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 83 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/widgets/useChatSidebarVisibility.ts:useChatSidebarVisibility",
+      "type": "function",
+      "name": "useChatSidebarVisibility",
+      "filePath": "eliza/packages/ui/src/widgets/useChatSidebarVisibility.ts",
+      "summary": "useChatSidebarVisibility is a function defined in eliza/packages/ui/src/widgets/useChatSidebarVisibility.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/widgets/visibility.ts",
+      "type": "file",
+      "name": "visibility.ts",
+      "filePath": "eliza/packages/ui/src/widgets/visibility.ts",
+      "summary": "visibility.ts is a typescript source file in the Milady codebase. It contains 7 functions.",
+      "languageNotes": "typescript; code; 120 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/widgets/visibility.ts:widgetVisibilityKey",
+      "type": "function",
+      "name": "widgetVisibilityKey",
+      "filePath": "eliza/packages/ui/src/widgets/visibility.ts",
+      "summary": "widgetVisibilityKey is a function defined in eliza/packages/ui/src/widgets/visibility.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/widgets/visibility.ts:tryLocalStorage",
+      "type": "function",
+      "name": "tryLocalStorage",
+      "filePath": "eliza/packages/ui/src/widgets/visibility.ts",
+      "summary": "tryLocalStorage is a function defined in eliza/packages/ui/src/widgets/visibility.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/widgets/visibility.ts:sanitizeOverrides",
+      "type": "function",
+      "name": "sanitizeOverrides",
+      "filePath": "eliza/packages/ui/src/widgets/visibility.ts",
+      "summary": "sanitizeOverrides is a function defined in eliza/packages/ui/src/widgets/visibility.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/widgets/visibility.ts:loadChatSidebarVisibility",
+      "type": "function",
+      "name": "loadChatSidebarVisibility",
+      "filePath": "eliza/packages/ui/src/widgets/visibility.ts",
+      "summary": "loadChatSidebarVisibility is a function defined in eliza/packages/ui/src/widgets/visibility.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/widgets/visibility.ts:saveChatSidebarVisibility",
+      "type": "function",
+      "name": "saveChatSidebarVisibility",
+      "filePath": "eliza/packages/ui/src/widgets/visibility.ts",
+      "summary": "saveChatSidebarVisibility is a function defined in eliza/packages/ui/src/widgets/visibility.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/widgets/visibility.ts:isWidgetVisible",
+      "type": "function",
+      "name": "isWidgetVisible",
+      "filePath": "eliza/packages/ui/src/widgets/visibility.ts",
+      "summary": "isWidgetVisible is a function defined in eliza/packages/ui/src/widgets/visibility.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/widgets/visibility.ts:applyChatSidebarVisibility",
+      "type": "function",
+      "name": "applyChatSidebarVisibility",
+      "filePath": "eliza/packages/ui/src/widgets/visibility.ts",
+      "summary": "applyChatSidebarVisibility is a function defined in eliza/packages/ui/src/widgets/visibility.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/desktop-workspace.ts",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:unsupportedSnapshot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/desktop-workspace.ts",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:requestDesktopBridge",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/desktop-workspace.ts",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:openDesktopSettingsWindow",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/desktop-workspace.ts",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:openDesktopSurfaceWindow",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/desktop-workspace.ts",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:loadDesktopWorkspaceSnapshot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/desktop-workspace.ts",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:formatBounds",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/desktop-workspace.ts",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:formatDesktopWorkspaceSummary",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:loadDesktopWorkspaceSnapshot",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:unsupportedSnapshot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:loadDesktopWorkspaceSnapshot",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:requestDesktopBridge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:loadDesktopWorkspaceSnapshot",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:requestDesktopBridge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:loadDesktopWorkspaceSnapshot",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:requestDesktopBridge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:loadDesktopWorkspaceSnapshot",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:requestDesktopBridge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:loadDesktopWorkspaceSnapshot",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:requestDesktopBridge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:loadDesktopWorkspaceSnapshot",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:requestDesktopBridge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:loadDesktopWorkspaceSnapshot",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:requestDesktopBridge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:loadDesktopWorkspaceSnapshot",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:requestDesktopBridge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:loadDesktopWorkspaceSnapshot",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:requestDesktopBridge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:loadDesktopWorkspaceSnapshot",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:requestDesktopBridge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:loadDesktopWorkspaceSnapshot",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:requestDesktopBridge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:loadDesktopWorkspaceSnapshot",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:requestDesktopBridge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:loadDesktopWorkspaceSnapshot",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:requestDesktopBridge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:loadDesktopWorkspaceSnapshot",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:requestDesktopBridge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:loadDesktopWorkspaceSnapshot",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:requestDesktopBridge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:loadDesktopWorkspaceSnapshot",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:requestDesktopBridge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:loadDesktopWorkspaceSnapshot",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:requestDesktopBridge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:loadDesktopWorkspaceSnapshot",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:requestDesktopBridge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:formatDesktopWorkspaceSummary",
+      "target": "function:eliza/packages/ui/src/utils/desktop-workspace.ts:formatBounds",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/host-capabilities.ts",
+      "target": "function:eliza/packages/ui/src/utils/host-capabilities.ts:detectUiHostCapabilities",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/host-capabilities.ts",
+      "target": "function:eliza/packages/ui/src/utils/host-capabilities.ts:intervalHostWarning",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/openExternalUrl.ts",
+      "target": "function:eliza/packages/ui/src/utils/openExternalUrl.ts:isCapacitorGlobal",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/openExternalUrl.ts",
+      "target": "function:eliza/packages/ui/src/utils/openExternalUrl.ts:getCapacitorBrowser",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/openExternalUrl.ts",
+      "target": "function:eliza/packages/ui/src/utils/openExternalUrl.ts:openExternalUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/openExternalUrl.ts",
+      "target": "function:eliza/packages/ui/src/utils/openExternalUrl.ts:closeExternalBrowser",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/openExternalUrl.ts",
+      "target": "function:eliza/packages/ui/src/utils/openExternalUrl.ts:preOpenWindow",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/openExternalUrl.ts",
+      "target": "function:eliza/packages/ui/src/utils/openExternalUrl.ts:navigatePreOpenedWindow",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/openExternalUrl.ts:getCapacitorBrowser",
+      "target": "function:eliza/packages/ui/src/utils/openExternalUrl.ts:isCapacitorGlobal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/openExternalUrl.ts:openExternalUrl",
+      "target": "function:eliza/packages/ui/src/utils/openExternalUrl.ts:getCapacitorBrowser",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/openExternalUrl.ts:closeExternalBrowser",
+      "target": "function:eliza/packages/ui/src/utils/openExternalUrl.ts:getCapacitorBrowser",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/openExternalUrl.ts:navigatePreOpenedWindow",
+      "target": "function:eliza/packages/ui/src/utils/openExternalUrl.ts:openExternalUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/task-schedule.ts",
+      "target": "function:eliza/packages/ui/src/utils/task-schedule.ts:encodeScheduleTags",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/task-schedule.ts",
+      "target": "function:eliza/packages/ui/src/utils/task-schedule.ts:decodeScheduleTags",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/workflow-json.ts",
+      "target": "function:eliza/packages/ui/src/utils/workflow-json.ts:isObject",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/workflow-json.ts",
+      "target": "function:eliza/packages/ui/src/utils/workflow-json.ts:lineFromOffset",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/workflow-json.ts",
+      "target": "function:eliza/packages/ui/src/utils/workflow-json.ts:parseWorkflowJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/workflow-json.ts",
+      "target": "function:eliza/packages/ui/src/utils/workflow-json.ts:workflowToJsonText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/workflow-json.ts",
+      "target": "function:eliza/packages/ui/src/utils/workflow-json.ts:toWriteNode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/workflow-json.ts",
+      "target": "function:eliza/packages/ui/src/utils/workflow-json.ts:toWriteRequest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/workflow-json.ts:parseWorkflowJson",
+      "target": "function:eliza/packages/ui/src/utils/workflow-json.ts:lineFromOffset",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/workflow-json.ts:parseWorkflowJson",
+      "target": "function:eliza/packages/ui/src/utils/workflow-json.ts:isObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/workflow-json.ts:parseWorkflowJson",
+      "target": "function:eliza/packages/ui/src/utils/workflow-json.ts:isObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/workflow-json.ts:parseWorkflowJson",
+      "target": "function:eliza/packages/ui/src/utils/workflow-json.ts:isObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/workflow-json.ts:parseWorkflowJson",
+      "target": "function:eliza/packages/ui/src/utils/workflow-json.ts:isObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/widgets/WidgetHost.tsx",
+      "target": "function:eliza/packages/ui/src/widgets/WidgetHost.tsx:WidgetHost",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/widgets/WidgetHost.tsx",
+      "target": "class:eliza/packages/ui/src/widgets/WidgetHost.tsx:WidgetErrorBoundary",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/widgets/registry-store.ts",
+      "target": "function:eliza/packages/ui/src/widgets/registry-store.ts:getComponentRegistry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/widgets/registry-store.ts",
+      "target": "function:eliza/packages/ui/src/widgets/registry-store.ts:registerWidgetComponent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/widgets/registry-store.ts",
+      "target": "function:eliza/packages/ui/src/widgets/registry-store.ts:getWidgetComponent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/widgets/registry-store.ts",
+      "target": "function:eliza/packages/ui/src/widgets/registry-store.ts:seedLegacyWidgets",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/widgets/registry-store.ts",
+      "target": "function:eliza/packages/ui/src/widgets/registry-store.ts:registerBuiltinWidgets",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/widgets/registry-store.ts:registerWidgetComponent",
+      "target": "function:eliza/packages/ui/src/widgets/registry-store.ts:getComponentRegistry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/widgets/registry-store.ts:getWidgetComponent",
+      "target": "function:eliza/packages/ui/src/widgets/registry-store.ts:getComponentRegistry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/widgets/registry-store.ts:seedLegacyWidgets",
+      "target": "function:eliza/packages/ui/src/widgets/registry-store.ts:registerWidgetComponent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/widgets/registry-store.ts:registerBuiltinWidgets",
+      "target": "function:eliza/packages/ui/src/widgets/registry-store.ts:seedLegacyWidgets",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/widgets/registry.ts",
+      "target": "function:eliza/packages/ui/src/widgets/registry.ts:registerBuiltinWidgetDeclarations",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/widgets/registry.ts",
+      "target": "function:eliza/packages/ui/src/widgets/registry.ts:isWidgetEnabled",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/widgets/registry.ts",
+      "target": "function:eliza/packages/ui/src/widgets/registry.ts:resolveWidgetsForSlot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/widgets/registry.ts",
+      "target": "function:eliza/packages/ui/src/widgets/registry.ts:resolveChatSidebarWidgets",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/widgets/registry.ts:resolveWidgetsForSlot",
+      "target": "function:eliza/packages/ui/src/widgets/registry.ts:isWidgetEnabled",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/widgets/registry.ts:resolveChatSidebarWidgets",
+      "target": "function:eliza/packages/ui/src/widgets/registry.ts:resolveWidgetsForSlot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/widgets/useChatSidebarVisibility.ts",
+      "target": "function:eliza/packages/ui/src/widgets/useChatSidebarVisibility.ts:useChatSidebarVisibility",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/widgets/visibility.ts",
+      "target": "function:eliza/packages/ui/src/widgets/visibility.ts:widgetVisibilityKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/widgets/visibility.ts",
+      "target": "function:eliza/packages/ui/src/widgets/visibility.ts:tryLocalStorage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/widgets/visibility.ts",
+      "target": "function:eliza/packages/ui/src/widgets/visibility.ts:sanitizeOverrides",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/widgets/visibility.ts",
+      "target": "function:eliza/packages/ui/src/widgets/visibility.ts:loadChatSidebarVisibility",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/widgets/visibility.ts",
+      "target": "function:eliza/packages/ui/src/widgets/visibility.ts:saveChatSidebarVisibility",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/widgets/visibility.ts",
+      "target": "function:eliza/packages/ui/src/widgets/visibility.ts:isWidgetVisible",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/widgets/visibility.ts",
+      "target": "function:eliza/packages/ui/src/widgets/visibility.ts:applyChatSidebarVisibility",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/widgets/visibility.ts:loadChatSidebarVisibility",
+      "target": "function:eliza/packages/ui/src/widgets/visibility.ts:tryLocalStorage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/widgets/visibility.ts:loadChatSidebarVisibility",
+      "target": "function:eliza/packages/ui/src/widgets/visibility.ts:sanitizeOverrides",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/widgets/visibility.ts:saveChatSidebarVisibility",
+      "target": "function:eliza/packages/ui/src/widgets/visibility.ts:tryLocalStorage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/widgets/visibility.ts:saveChatSidebarVisibility",
+      "target": "function:eliza/packages/ui/src/widgets/visibility.ts:sanitizeOverrides",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/widgets/visibility.ts:isWidgetVisible",
+      "target": "function:eliza/packages/ui/src/widgets/visibility.ts:widgetVisibilityKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/widgets/visibility.ts:applyChatSidebarVisibility",
+      "target": "function:eliza/packages/ui/src/widgets/visibility.ts:isWidgetVisible",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/utils/desktop-workspace.ts",
+      "target": "file:eliza/packages/ui/src/bridge/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/utils/openExternalUrl.ts",
+      "target": "file:eliza/packages/ui/src/bridge/electrobun-rpc.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/utils/task-schedule.test.ts",
+      "target": "file:eliza/packages/ui/src/utils/task-schedule.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/utils/workflow-json.test.ts",
+      "target": "file:eliza/packages/ui/src/utils/workflow-json.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/utils/workflow-json.ts",
+      "target": "file:eliza/packages/ui/src/api/client-types-chat.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/widgets/WidgetHost.tsx",
+      "target": "file:eliza/packages/ui/src/hooks/useActivityEvents.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/widgets/WidgetHost.tsx",
+      "target": "file:eliza/packages/ui/src/state/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/widgets/WidgetHost.tsx",
+      "target": "file:eliza/packages/ui/src/state/useDeveloperMode.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/widgets/WidgetHost.tsx",
+      "target": "file:eliza/packages/ui/src/widgets/registry.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/widgets/WidgetHost.tsx",
+      "target": "file:eliza/packages/ui/src/widgets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/widgets/registry-store.ts",
+      "target": "file:eliza/packages/ui/src/components/chat/widgets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/widgets/registry-store.ts",
+      "target": "file:eliza/packages/ui/src/widgets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/widgets/registry.ts",
+      "target": "file:eliza/packages/ui/src/api/client-types-config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/widgets/registry.ts",
+      "target": "file:eliza/packages/ui/src/components/character/MusicLibraryCharacterWidget.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/widgets/registry.ts",
+      "target": "file:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/widgets/registry.ts",
+      "target": "file:eliza/packages/ui/src/components/chat/widgets/browser-status.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/widgets/registry.ts",
+      "target": "file:eliza/packages/ui/src/components/chat/widgets/music-player.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/widgets/registry.ts",
+      "target": "file:eliza/packages/ui/src/components/chat/widgets/todo.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/widgets/registry.ts",
+      "target": "file:eliza/packages/ui/src/components/chat/widgets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/widgets/registry.ts",
+      "target": "file:eliza/packages/ui/src/widgets/registry-store.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/widgets/registry.ts",
+      "target": "file:eliza/packages/ui/src/widgets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/widgets/types.ts",
+      "target": "file:eliza/packages/core/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/widgets/types.ts",
+      "target": "file:eliza/packages/ui/src/api/client-types-config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/widgets/types.ts",
+      "target": "file:eliza/packages/ui/src/config/ui-spec.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/widgets/types.ts",
+      "target": "file:eliza/packages/ui/src/hooks/useActivityEvents.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/widgets/useChatSidebarVisibility.ts",
+      "target": "file:eliza/packages/ui/src/widgets/visibility.ts",
+      "type": "imports"
+    }
+  ]
+}

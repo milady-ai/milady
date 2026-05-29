@@ -1,0 +1,4797 @@
+{
+  "batchIndex": 292,
+  "nodes": [
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/lib/duet-bridge.d.mts",
+      "type": "file",
+      "name": "duet-bridge.d.mts",
+      "filePath": "eliza/packages/app-core/scripts/lib/duet-bridge.d.mts",
+      "summary": "duet-bridge.d.mts is a mts source file in the Milady codebase.",
+      "languageNotes": "mts; code; 63 lines"
+    },
+    {
+      "tags": [
+        "api",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/maintain-cloud-api-production-gateway.mjs",
+      "type": "file",
+      "name": "maintain-cloud-api-production-gateway.mjs",
+      "filePath": "eliza/packages/app-core/scripts/maintain-cloud-api-production-gateway.mjs",
+      "summary": "maintain-cloud-api-production-gateway.mjs is a javascript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "javascript; code; 54 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/maintain-cloud-api-production-gateway.mjs:run",
+      "type": "function",
+      "name": "run",
+      "filePath": "eliza/packages/app-core/scripts/maintain-cloud-api-production-gateway.mjs",
+      "summary": "run is a function defined in eliza/packages/app-core/scripts/maintain-cloud-api-production-gateway.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/maintain-cloud-api-production-gateway.mjs:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/packages/app-core/scripts/maintain-cloud-api-production-gateway.mjs",
+      "summary": "main is a function defined in eliza/packages/app-core/scripts/maintain-cloud-api-production-gateway.mjs."
+    },
+    {
+      "tags": [
+        "voice",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "type": "file",
+      "name": "prepare.mjs",
+      "filePath": "eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "summary": "prepare.mjs is a javascript source file in the Milady codebase. It contains 16 functions.",
+      "languageNotes": "javascript; code; 2460 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:run",
+      "type": "function",
+      "name": "run",
+      "filePath": "eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "summary": "run is a function defined in eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:copyDirRecursive",
+      "type": "function",
+      "name": "copyDirRecursive",
+      "filePath": "eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "summary": "copyDirRecursive is a function defined in eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceBetween",
+      "type": "function",
+      "name": "replaceBetween",
+      "filePath": "eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "summary": "replaceBetween is a function defined in eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:writeElizaFfiAdapter",
+      "type": "function",
+      "name": "writeElizaFfiAdapter",
+      "filePath": "eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "summary": "writeElizaFfiAdapter is a function defined in eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:hasFunctionDeclaration",
+      "type": "function",
+      "name": "hasFunctionDeclaration",
+      "filePath": "eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "summary": "hasFunctionDeclaration is a function defined in eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:hasFunctionDefinition",
+      "type": "function",
+      "name": "hasFunctionDefinition",
+      "filePath": "eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "summary": "hasFunctionDefinition is a function defined in eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:inspectPreparedOmnivoiceSurface",
+      "type": "function",
+      "name": "inspectPreparedOmnivoiceSurface",
+      "filePath": "eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "summary": "inspectPreparedOmnivoiceSurface is a function defined in eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceOmnivoiceAnchor",
+      "type": "function",
+      "name": "replaceOmnivoiceAnchor",
+      "filePath": "eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "summary": "replaceOmnivoiceAnchor is a function defined in eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyOmnivoiceReferenceEncodeApi",
+      "type": "function",
+      "name": "applyOmnivoiceReferenceEncodeApi",
+      "filePath": "eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "summary": "applyOmnivoiceReferenceEncodeApi is a function defined in eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaGgmlCompatibility",
+      "type": "function",
+      "name": "applyElizaGgmlCompatibility",
+      "filePath": "eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "summary": "applyElizaGgmlCompatibility is a function defined in eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:ensureOmnivoiceCheckout",
+      "type": "function",
+      "name": "ensureOmnivoiceCheckout",
+      "filePath": "eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "summary": "ensureOmnivoiceCheckout is a function defined in eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:readOmnivoiceGgmlSubmoduleCommit",
+      "type": "function",
+      "name": "readOmnivoiceGgmlSubmoduleCommit",
+      "filePath": "eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "summary": "readOmnivoiceGgmlSubmoduleCommit is a function defined in eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyPatches",
+      "type": "function",
+      "name": "applyPatches",
+      "filePath": "eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "summary": "applyPatches is a function defined in eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceRequired",
+      "type": "function",
+      "name": "replaceRequired",
+      "filePath": "eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "summary": "replaceRequired is a function defined in eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaQwen3AsrMtmdSupport",
+      "type": "function",
+      "name": "applyElizaQwen3AsrMtmdSupport",
+      "filePath": "eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "summary": "applyElizaQwen3AsrMtmdSupport is a function defined in eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:prepareOmnivoiceFusion",
+      "type": "function",
+      "name": "prepareOmnivoiceFusion",
+      "filePath": "eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "summary": "prepareOmnivoiceFusion is a function defined in eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs."
+    },
+    {
+      "tags": [
+        "desktop",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/scripts/package-electrobun-linux.mjs",
+      "type": "file",
+      "name": "package-electrobun-linux.mjs",
+      "filePath": "eliza/packages/app-core/scripts/package-electrobun-linux.mjs",
+      "summary": "package-electrobun-linux.mjs is a javascript source file in the Milady codebase. It contains 8 functions.",
+      "languageNotes": "javascript; code; 273 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:sh",
+      "type": "function",
+      "name": "sh",
+      "filePath": "eliza/packages/app-core/scripts/package-electrobun-linux.mjs",
+      "summary": "sh is a function defined in eliza/packages/app-core/scripts/package-electrobun-linux.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:latestBuildDir",
+      "type": "function",
+      "name": "latestBuildDir",
+      "filePath": "eliza/packages/app-core/scripts/package-electrobun-linux.mjs",
+      "summary": "latestBuildDir is a function defined in eliza/packages/app-core/scripts/package-electrobun-linux.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:findExecutable",
+      "type": "function",
+      "name": "findExecutable",
+      "filePath": "eliza/packages/app-core/scripts/package-electrobun-linux.mjs",
+      "summary": "findExecutable is a function defined in eliza/packages/app-core/scripts/package-electrobun-linux.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:writeDesktopFile",
+      "type": "function",
+      "name": "writeDesktopFile",
+      "filePath": "eliza/packages/app-core/scripts/package-electrobun-linux.mjs",
+      "summary": "writeDesktopFile is a function defined in eliza/packages/app-core/scripts/package-electrobun-linux.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:stagePackageRoot",
+      "type": "function",
+      "name": "stagePackageRoot",
+      "filePath": "eliza/packages/app-core/scripts/package-electrobun-linux.mjs",
+      "summary": "stagePackageRoot is a function defined in eliza/packages/app-core/scripts/package-electrobun-linux.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:buildDeb",
+      "type": "function",
+      "name": "buildDeb",
+      "filePath": "eliza/packages/app-core/scripts/package-electrobun-linux.mjs",
+      "summary": "buildDeb is a function defined in eliza/packages/app-core/scripts/package-electrobun-linux.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:buildRpm",
+      "type": "function",
+      "name": "buildRpm",
+      "filePath": "eliza/packages/app-core/scripts/package-electrobun-linux.mjs",
+      "summary": "buildRpm is a function defined in eliza/packages/app-core/scripts/package-electrobun-linux.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:buildAppImage",
+      "type": "function",
+      "name": "buildAppImage",
+      "filePath": "eliza/packages/app-core/scripts/package-electrobun-linux.mjs",
+      "summary": "buildAppImage is a function defined in eliza/packages/app-core/scripts/package-electrobun-linux.mjs."
+    },
+    {
+      "tags": [
+        "voice"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/scripts/patches/llama-mobile-kokoro-tts.patch",
+      "type": "file",
+      "name": "llama-mobile-kokoro-tts.patch",
+      "filePath": "eliza/packages/app-core/scripts/patches/llama-mobile-kokoro-tts.patch",
+      "summary": "llama-mobile-kokoro-tts.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 480 lines"
+    },
+    {
+      "tags": [
+        "api",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "type": "file",
+      "name": "playwright-ui-smoke-api-stub.mjs",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "playwright-ui-smoke-api-stub.mjs is a javascript source file in the Milady codebase. It contains 31 functions.",
+      "languageNotes": "javascript; code; 2899 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:readSmokeVrm",
+      "type": "function",
+      "name": "readSmokeVrm",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "readSmokeVrm is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:stubCatalogApp",
+      "type": "function",
+      "name": "stubCatalogApp",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "stubCatalogApp is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:parsePositiveInt",
+      "type": "function",
+      "name": "parsePositiveInt",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "parsePositiveInt is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:createStubConversation",
+      "type": "function",
+      "name": "createStubConversation",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "createStubConversation is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:findStubConversation",
+      "type": "function",
+      "name": "findStubConversation",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "findStubConversation is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:createStubMessage",
+      "type": "function",
+      "name": "createStubMessage",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "createStubMessage is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:appendStubMessage",
+      "type": "function",
+      "name": "appendStubMessage",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "appendStubMessage is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:cleanupEmptyStubConversations",
+      "type": "function",
+      "name": "cleanupEmptyStubConversations",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "cleanupEmptyStubConversations is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:buildRuntimeSnapshot",
+      "type": "function",
+      "name": "buildRuntimeSnapshot",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "buildRuntimeSnapshot is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:nowIso",
+      "type": "function",
+      "name": "nowIso",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "nowIso is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:normalizeStubBrowserUrl",
+      "type": "function",
+      "name": "normalizeStubBrowserUrl",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "normalizeStubBrowserUrl is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:inferStubBrowserTitle",
+      "type": "function",
+      "name": "inferStubBrowserTitle",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "inferStubBrowserTitle is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:browserWorkspaceSnapshot",
+      "type": "function",
+      "name": "browserWorkspaceSnapshot",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "browserWorkspaceSnapshot is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:showBrowserWorkspaceTab",
+      "type": "function",
+      "name": "showBrowserWorkspaceTab",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "showBrowserWorkspaceTab is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:applyCors",
+      "type": "function",
+      "name": "applyCors",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "applyCors is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:sendJson",
+      "type": "function",
+      "name": "sendJson",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "sendJson is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:sendEmpty",
+      "type": "function",
+      "name": "sendEmpty",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "sendEmpty is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:sendBinary",
+      "type": "function",
+      "name": "sendBinary",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "sendBinary is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:contentTypeForSmokeViewAsset",
+      "type": "function",
+      "name": "contentTypeForSmokeViewAsset",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "contentTypeForSmokeViewAsset is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:convertNamedImportsToDestructuring",
+      "type": "function",
+      "name": "convertNamedImportsToDestructuring",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "convertNamedImportsToDestructuring is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:buildHostExternalImportReplacement",
+      "type": "function",
+      "name": "buildHostExternalImportReplacement",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "buildHostExternalImportReplacement is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:rewriteHostExternalImports",
+      "type": "function",
+      "name": "rewriteHostExternalImports",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "rewriteHostExternalImports is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:parseHostExternalSpecifiers",
+      "type": "function",
+      "name": "parseHostExternalSpecifiers",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "parseHostExternalSpecifiers is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:smokeViewByRequest",
+      "type": "function",
+      "name": "smokeViewByRequest",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "smokeViewByRequest is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:sendSmokeViewAsset",
+      "type": "function",
+      "name": "sendSmokeViewAsset",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "sendSmokeViewAsset is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:sendSseHeaders",
+      "type": "function",
+      "name": "sendSseHeaders",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "sendSseHeaders is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:writeSseEvent",
+      "type": "function",
+      "name": "writeSseEvent",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "writeSseEvent is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:readJsonBody",
+      "type": "function",
+      "name": "readJsonBody",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "readJsonBody is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:workbenchOverview",
+      "type": "function",
+      "name": "workbenchOverview",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "workbenchOverview is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:streamSettings",
+      "type": "function",
+      "name": "streamSettings",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "streamSettings is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:shutdown",
+      "type": "function",
+      "name": "shutdown",
+      "filePath": "eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "summary": "shutdown is a function defined in eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "type": "file",
+      "name": "pre-review-local.mjs",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "pre-review-local.mjs is a javascript source file in the Milady codebase. It contains 25 functions.",
+      "languageNotes": "javascript; code; 599 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:isSourceCode",
+      "type": "function",
+      "name": "isSourceCode",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "isSourceCode is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:isTestExempt",
+      "type": "function",
+      "name": "isTestExempt",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "isTestExempt is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:extractAddedDiffLines",
+      "type": "function",
+      "name": "extractAddedDiffLines",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "extractAddedDiffLines is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:extractRemovedDiffLines",
+      "type": "function",
+      "name": "extractRemovedDiffLines",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "extractRemovedDiffLines is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:countPatternMatches",
+      "type": "function",
+      "name": "countPatternMatches",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "countPatternMatches is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:normalizeExecError",
+      "type": "function",
+      "name": "normalizeExecError",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "normalizeExecError is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runCommand",
+      "type": "function",
+      "name": "runCommand",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "runCommand is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runCommandArgs",
+      "type": "function",
+      "name": "runCommandArgs",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "runCommandArgs is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:getBaseRef",
+      "type": "function",
+      "name": "getBaseRef",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "getBaseRef is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:firstFailureTitle",
+      "type": "function",
+      "name": "firstFailureTitle",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "firstFailureTitle is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:classificationFromInputs",
+      "type": "function",
+      "name": "classificationFromInputs",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "classificationFromInputs is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:scopeVerdictFor",
+      "type": "function",
+      "name": "scopeVerdictFor",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "scopeVerdictFor is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:decisionFromFindings",
+      "type": "function",
+      "name": "decisionFromFindings",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "decisionFromFindings is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:scanDiffTextForBlockedPatterns",
+      "type": "function",
+      "name": "scanDiffTextForBlockedPatterns",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "scanDiffTextForBlockedPatterns is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:readDiffForFiles",
+      "type": "function",
+      "name": "readDiffForFiles",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "readDiffForFiles is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:scanForBlockedDiffPatterns",
+      "type": "function",
+      "name": "scanForBlockedDiffPatterns",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "scanForBlockedDiffPatterns is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:resolveRunnableTestFiles",
+      "type": "function",
+      "name": "resolveRunnableTestFiles",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "resolveRunnableTestFiles is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:buildRepoTestCommand",
+      "type": "function",
+      "name": "buildRepoTestCommand",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "buildRepoTestCommand is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:shouldRunTargetedRegressionTests",
+      "type": "function",
+      "name": "shouldRunTargetedRegressionTests",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "shouldRunTargetedRegressionTests is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:splitRunnableTestFiles",
+      "type": "function",
+      "name": "splitRunnableTestFiles",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "splitRunnableTestFiles is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:collectChangedFiles",
+      "type": "function",
+      "name": "collectChangedFiles",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "collectChangedFiles is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:collectCommitMessage",
+      "type": "function",
+      "name": "collectCommitMessage",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "collectCommitMessage is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runChecks",
+      "type": "function",
+      "name": "runChecks",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "runChecks is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:printResult",
+      "type": "function",
+      "name": "printResult",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "printResult is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:isMainModule",
+      "type": "function",
+      "name": "isMainModule",
+      "filePath": "eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "summary": "isMainModule is a function defined in eliza/packages/app-core/scripts/pre-review-local.mjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "type": "file",
+      "name": "prepare-package-dist.mjs",
+      "filePath": "eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "summary": "prepare-package-dist.mjs is a javascript source file in the Milady codebase. It contains 18 functions.",
+      "languageNotes": "javascript; code; 358 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:collectWorkspaceVersions",
+      "type": "function",
+      "name": "collectWorkspaceVersions",
+      "filePath": "eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "summary": "collectWorkspaceVersions is a function defined in eliza/packages/app-core/scripts/prepare-package-dist.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:walk",
+      "type": "function",
+      "name": "walk",
+      "filePath": "eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "summary": "walk is a function defined in eliza/packages/app-core/scripts/prepare-package-dist.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:normalizePrefix",
+      "type": "function",
+      "name": "normalizePrefix",
+      "filePath": "eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "summary": "normalizePrefix is a function defined in eliza/packages/app-core/scripts/prepare-package-dist.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:getRootEntry",
+      "type": "function",
+      "name": "getRootEntry",
+      "filePath": "eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "summary": "getRootEntry is a function defined in eliza/packages/app-core/scripts/prepare-package-dist.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:rewriteWorkspaceDeps",
+      "type": "function",
+      "name": "rewriteWorkspaceDeps",
+      "filePath": "eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "summary": "rewriteWorkspaceDeps is a function defined in eliza/packages/app-core/scripts/prepare-package-dist.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:getInstalledPackageVersion",
+      "type": "function",
+      "name": "getInstalledPackageVersion",
+      "filePath": "eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "summary": "getInstalledPackageVersion is a function defined in eliza/packages/app-core/scripts/prepare-package-dist.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:normalizeWorkspaceVersion",
+      "type": "function",
+      "name": "normalizeWorkspaceVersion",
+      "filePath": "eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "summary": "normalizeWorkspaceVersion is a function defined in eliza/packages/app-core/scripts/prepare-package-dist.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformBin",
+      "type": "function",
+      "name": "transformBin",
+      "filePath": "eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "summary": "transformBin is a function defined in eliza/packages/app-core/scripts/prepare-package-dist.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformExports",
+      "type": "function",
+      "name": "transformExports",
+      "filePath": "eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "summary": "transformExports is a function defined in eliza/packages/app-core/scripts/prepare-package-dist.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformExportTarget",
+      "type": "function",
+      "name": "transformExportTarget",
+      "filePath": "eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "summary": "transformExportTarget is a function defined in eliza/packages/app-core/scripts/prepare-package-dist.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformModulePath",
+      "type": "function",
+      "name": "transformModulePath",
+      "filePath": "eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "summary": "transformModulePath is a function defined in eliza/packages/app-core/scripts/prepare-package-dist.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformTypesPath",
+      "type": "function",
+      "name": "transformTypesPath",
+      "filePath": "eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "summary": "transformTypesPath is a function defined in eliza/packages/app-core/scripts/prepare-package-dist.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformAssetPath",
+      "type": "function",
+      "name": "transformAssetPath",
+      "filePath": "eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "summary": "transformAssetPath is a function defined in eliza/packages/app-core/scripts/prepare-package-dist.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:stripSrcPrefix",
+      "type": "function",
+      "name": "stripSrcPrefix",
+      "filePath": "eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "summary": "stripSrcPrefix is a function defined in eliza/packages/app-core/scripts/prepare-package-dist.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:replaceSourceExtension",
+      "type": "function",
+      "name": "replaceSourceExtension",
+      "filePath": "eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "summary": "replaceSourceExtension is a function defined in eliza/packages/app-core/scripts/prepare-package-dist.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:isAssetPath",
+      "type": "function",
+      "name": "isAssetPath",
+      "filePath": "eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "summary": "isAssetPath is a function defined in eliza/packages/app-core/scripts/prepare-package-dist.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:withLeadingDot",
+      "type": "function",
+      "name": "withLeadingDot",
+      "filePath": "eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "summary": "withLeadingDot is a function defined in eliza/packages/app-core/scripts/prepare-package-dist.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:cleanUndefined",
+      "type": "function",
+      "name": "cleanUndefined",
+      "filePath": "eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "summary": "cleanUndefined is a function defined in eliza/packages/app-core/scripts/prepare-package-dist.mjs."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/publish-local-plugins-next.mjs",
+      "type": "file",
+      "name": "publish-local-plugins-next.mjs",
+      "filePath": "eliza/packages/app-core/scripts/publish-local-plugins-next.mjs",
+      "summary": "publish-local-plugins-next.mjs is a javascript source file in the Milady codebase. It contains 4 functions.",
+      "languageNotes": "javascript; code; 122 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/publish-local-plugins-next.mjs:readPackageJson",
+      "type": "function",
+      "name": "readPackageJson",
+      "filePath": "eliza/packages/app-core/scripts/publish-local-plugins-next.mjs",
+      "summary": "readPackageJson is a function defined in eliza/packages/app-core/scripts/publish-local-plugins-next.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/publish-local-plugins-next.mjs:runCommand",
+      "type": "function",
+      "name": "runCommand",
+      "filePath": "eliza/packages/app-core/scripts/publish-local-plugins-next.mjs",
+      "summary": "runCommand is a function defined in eliza/packages/app-core/scripts/publish-local-plugins-next.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/publish-local-plugins-next.mjs:discoverPluginRoots",
+      "type": "function",
+      "name": "discoverPluginRoots",
+      "filePath": "eliza/packages/app-core/scripts/publish-local-plugins-next.mjs",
+      "summary": "discoverPluginRoots is a function defined in eliza/packages/app-core/scripts/publish-local-plugins-next.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/publish-local-plugins-next.mjs:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/packages/app-core/scripts/publish-local-plugins-next.mjs",
+      "summary": "main is a function defined in eliza/packages/app-core/scripts/publish-local-plugins-next.mjs."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/release-workflow-drift.test.ts",
+      "type": "file",
+      "name": "release-workflow-drift.test.ts",
+      "filePath": "eliza/packages/app-core/scripts/release-workflow-drift.test.ts",
+      "summary": "release-workflow-drift.test.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 57 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/release-workflow-drift.test.ts:readRepoFile",
+      "type": "function",
+      "name": "readRepoFile",
+      "filePath": "eliza/packages/app-core/scripts/release-workflow-drift.test.ts",
+      "summary": "readRepoFile is a function defined in eliza/packages/app-core/scripts/release-workflow-drift.test.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/report-coverage-surfaces.mjs",
+      "type": "file",
+      "name": "report-coverage-surfaces.mjs",
+      "filePath": "eliza/packages/app-core/scripts/report-coverage-surfaces.mjs",
+      "summary": "report-coverage-surfaces.mjs is a javascript source file in the Milady codebase. It contains 5 functions, 1 imports.",
+      "languageNotes": "javascript; code; 121 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/report-coverage-surfaces.mjs:normaliseRelativePath",
+      "type": "function",
+      "name": "normaliseRelativePath",
+      "filePath": "eliza/packages/app-core/scripts/report-coverage-surfaces.mjs",
+      "summary": "normaliseRelativePath is a function defined in eliza/packages/app-core/scripts/report-coverage-surfaces.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/report-coverage-surfaces.mjs:globToRegExp",
+      "type": "function",
+      "name": "globToRegExp",
+      "filePath": "eliza/packages/app-core/scripts/report-coverage-surfaces.mjs",
+      "summary": "globToRegExp is a function defined in eliza/packages/app-core/scripts/report-coverage-surfaces.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/report-coverage-surfaces.mjs:createMetricBucket",
+      "type": "function",
+      "name": "createMetricBucket",
+      "filePath": "eliza/packages/app-core/scripts/report-coverage-surfaces.mjs",
+      "summary": "createMetricBucket is a function defined in eliza/packages/app-core/scripts/report-coverage-surfaces.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/report-coverage-surfaces.mjs:addMetric",
+      "type": "function",
+      "name": "addMetric",
+      "filePath": "eliza/packages/app-core/scripts/report-coverage-surfaces.mjs",
+      "summary": "addMetric is a function defined in eliza/packages/app-core/scripts/report-coverage-surfaces.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/report-coverage-surfaces.mjs:percentage",
+      "type": "function",
+      "name": "percentage",
+      "filePath": "eliza/packages/app-core/scripts/report-coverage-surfaces.mjs",
+      "summary": "percentage is a function defined in eliza/packages/app-core/scripts/report-coverage-surfaces.mjs."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/rt.mjs",
+      "type": "file",
+      "name": "rt.mjs",
+      "filePath": "eliza/packages/app-core/scripts/rt.mjs",
+      "summary": "rt.mjs is a javascript source file in the Milady codebase.",
+      "languageNotes": "javascript; code; 29 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/run-biome-check.mjs",
+      "type": "file",
+      "name": "run-biome-check.mjs",
+      "filePath": "eliza/packages/app-core/scripts/run-biome-check.mjs",
+      "summary": "run-biome-check.mjs is a javascript source file in the Milady codebase. It contains 6 functions.",
+      "languageNotes": "javascript; code; 191 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/run-biome-check.mjs:findRepoRoot",
+      "type": "function",
+      "name": "findRepoRoot",
+      "filePath": "eliza/packages/app-core/scripts/run-biome-check.mjs",
+      "summary": "findRepoRoot is a function defined in eliza/packages/app-core/scripts/run-biome-check.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/run-biome-check.mjs:normalisePath",
+      "type": "function",
+      "name": "normalisePath",
+      "filePath": "eliza/packages/app-core/scripts/run-biome-check.mjs",
+      "summary": "normalisePath is a function defined in eliza/packages/app-core/scripts/run-biome-check.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/run-biome-check.mjs:isNestedBiomeRoot",
+      "type": "function",
+      "name": "isNestedBiomeRoot",
+      "filePath": "eliza/packages/app-core/scripts/run-biome-check.mjs",
+      "summary": "isNestedBiomeRoot is a function defined in eliza/packages/app-core/scripts/run-biome-check.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/run-biome-check.mjs:collectBiomeFiles",
+      "type": "function",
+      "name": "collectBiomeFiles",
+      "filePath": "eliza/packages/app-core/scripts/run-biome-check.mjs",
+      "summary": "collectBiomeFiles is a function defined in eliza/packages/app-core/scripts/run-biome-check.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/run-biome-check.mjs:getBiomeFiles",
+      "type": "function",
+      "name": "getBiomeFiles",
+      "filePath": "eliza/packages/app-core/scripts/run-biome-check.mjs",
+      "summary": "getBiomeFiles is a function defined in eliza/packages/app-core/scripts/run-biome-check.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/run-biome-check.mjs:chunk",
+      "type": "function",
+      "name": "chunk",
+      "filePath": "eliza/packages/app-core/scripts/run-biome-check.mjs",
+      "summary": "chunk is a function defined in eliza/packages/app-core/scripts/run-biome-check.mjs."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/run-coding-agent-e2e.mjs",
+      "type": "file",
+      "name": "run-coding-agent-e2e.mjs",
+      "filePath": "eliza/packages/app-core/scripts/run-coding-agent-e2e.mjs",
+      "summary": "run-coding-agent-e2e.mjs is a javascript source file in the Milady codebase.",
+      "languageNotes": "javascript; code; 46 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/run-desktop-playwright.mjs",
+      "type": "file",
+      "name": "run-desktop-playwright.mjs",
+      "filePath": "eliza/packages/app-core/scripts/run-desktop-playwright.mjs",
+      "summary": "run-desktop-playwright.mjs is a javascript source file in the Milady codebase.",
+      "languageNotes": "javascript; code; 35 lines"
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs",
+      "type": "file",
+      "name": "run-local-plugin-live-smoke.mjs",
+      "filePath": "eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs",
+      "summary": "run-local-plugin-live-smoke.mjs is a javascript source file in the Milady codebase. It contains 7 functions.",
+      "languageNotes": "javascript; code; 254 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs:readJson",
+      "type": "function",
+      "name": "readJson",
+      "filePath": "eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs",
+      "summary": "readJson is a function defined in eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs:normalizePluginNpmName",
+      "type": "function",
+      "name": "normalizePluginNpmName",
+      "filePath": "eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs",
+      "summary": "normalizePluginNpmName is a function defined in eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs:derivePluginId",
+      "type": "function",
+      "name": "derivePluginId",
+      "filePath": "eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs",
+      "summary": "derivePluginId is a function defined in eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs:resolvePackageRoot",
+      "type": "function",
+      "name": "resolvePackageRoot",
+      "filePath": "eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs",
+      "summary": "resolvePackageRoot is a function defined in eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs:resolvePluginCandidates",
+      "type": "function",
+      "name": "resolvePluginCandidates",
+      "filePath": "eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs",
+      "summary": "resolvePluginCandidates is a function defined in eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs:resolvePluginFilter",
+      "type": "function",
+      "name": "resolvePluginFilter",
+      "filePath": "eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs",
+      "summary": "resolvePluginFilter is a function defined in eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs:ensureRuntimePackageBuilt",
+      "type": "function",
+      "name": "ensureRuntimePackageBuilt",
+      "filePath": "eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs",
+      "summary": "ensureRuntimePackageBuilt is a function defined in eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/run-node-tsx.mjs",
+      "type": "file",
+      "name": "run-node-tsx.mjs",
+      "filePath": "eliza/packages/app-core/scripts/run-node-tsx.mjs",
+      "summary": "run-node-tsx.mjs is a javascript source file in the Milady codebase. It contains 4 functions.",
+      "languageNotes": "javascript; code; 125 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/run-node-tsx.mjs:isRealNodeExecutable",
+      "type": "function",
+      "name": "isRealNodeExecutable",
+      "filePath": "eliza/packages/app-core/scripts/run-node-tsx.mjs",
+      "summary": "isRealNodeExecutable is a function defined in eliza/packages/app-core/scripts/run-node-tsx.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/run-node-tsx.mjs:resolveNodeCmd",
+      "type": "function",
+      "name": "resolveNodeCmd",
+      "filePath": "eliza/packages/app-core/scripts/run-node-tsx.mjs",
+      "summary": "resolveNodeCmd is a function defined in eliza/packages/app-core/scripts/run-node-tsx.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/run-node-tsx.mjs:withWorkspaceNodePath",
+      "type": "function",
+      "name": "withWorkspaceNodePath",
+      "filePath": "eliza/packages/app-core/scripts/run-node-tsx.mjs",
+      "summary": "withWorkspaceNodePath is a function defined in eliza/packages/app-core/scripts/run-node-tsx.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/run-node-tsx.mjs:forwardSignal",
+      "type": "function",
+      "name": "forwardSignal",
+      "filePath": "eliza/packages/app-core/scripts/run-node-tsx.mjs",
+      "summary": "forwardSignal is a function defined in eliza/packages/app-core/scripts/run-node-tsx.mjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/run-playwright.mjs",
+      "type": "file",
+      "name": "run-playwright.mjs",
+      "filePath": "eliza/packages/app-core/scripts/run-playwright.mjs",
+      "summary": "run-playwright.mjs is a javascript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "javascript; code; 66 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/run-playwright.mjs:resolveBunCommand",
+      "type": "function",
+      "name": "resolveBunCommand",
+      "filePath": "eliza/packages/app-core/scripts/run-playwright.mjs",
+      "summary": "resolveBunCommand is a function defined in eliza/packages/app-core/scripts/run-playwright.mjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/run-with-env.mjs",
+      "type": "file",
+      "name": "run-with-env.mjs",
+      "filePath": "eliza/packages/app-core/scripts/run-with-env.mjs",
+      "summary": "run-with-env.mjs is a javascript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "javascript; code; 60 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/run-with-env.mjs:shouldSuppressNodeWarnings",
+      "type": "function",
+      "name": "shouldSuppressNodeWarnings",
+      "filePath": "eliza/packages/app-core/scripts/run-with-env.mjs",
+      "summary": "shouldSuppressNodeWarnings is a function defined in eliza/packages/app-core/scripts/run-with-env.mjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs",
+      "type": "file",
+      "name": "sanitize-npm-package-metadata.mjs",
+      "filePath": "eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs",
+      "summary": "sanitize-npm-package-metadata.mjs is a javascript source file in the Milady codebase. It contains 7 functions.",
+      "languageNotes": "javascript; code; 165 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:isPlainObject",
+      "type": "function",
+      "name": "isPlainObject",
+      "filePath": "eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs",
+      "summary": "isPlainObject is a function defined in eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:isStringMap",
+      "type": "function",
+      "name": "isStringMap",
+      "filePath": "eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs",
+      "summary": "isStringMap is a function defined in eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:hasLocalProtocol",
+      "type": "function",
+      "name": "hasLocalProtocol",
+      "filePath": "eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs",
+      "summary": "hasLocalProtocol is a function defined in eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:collectDirectDependencySpecs",
+      "type": "function",
+      "name": "collectDirectDependencySpecs",
+      "filePath": "eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs",
+      "summary": "collectDirectDependencySpecs is a function defined in eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:removalReason",
+      "type": "function",
+      "name": "removalReason",
+      "filePath": "eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs",
+      "summary": "removalReason is a function defined in eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:sanitizeNpmPackageMetadata",
+      "type": "function",
+      "name": "sanitizeNpmPackageMetadata",
+      "filePath": "eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs",
+      "summary": "sanitizeNpmPackageMetadata is a function defined in eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:isDirectRun",
+      "type": "function",
+      "name": "isDirectRun",
+      "filePath": "eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs",
+      "summary": "isDirectRun is a function defined in eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/set-package-version.mjs",
+      "type": "file",
+      "name": "set-package-version.mjs",
+      "filePath": "eliza/packages/app-core/scripts/set-package-version.mjs",
+      "summary": "set-package-version.mjs is a javascript source file in the Milady codebase.",
+      "languageNotes": "javascript; code; 13 lines"
+    },
+    {
+      "tags": [
+        "api",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/smoke-api-status.mjs",
+      "type": "file",
+      "name": "smoke-api-status.mjs",
+      "filePath": "eliza/packages/app-core/scripts/smoke-api-status.mjs",
+      "summary": "smoke-api-status.mjs is a javascript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "javascript; code; 113 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/smoke-api-status.mjs:resolveBaseUrls",
+      "type": "function",
+      "name": "resolveBaseUrls",
+      "filePath": "eliza/packages/app-core/scripts/smoke-api-status.mjs",
+      "summary": "resolveBaseUrls is a function defined in eliza/packages/app-core/scripts/smoke-api-status.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/smoke-api-status.mjs:runSmokeApiStatus",
+      "type": "function",
+      "name": "runSmokeApiStatus",
+      "filePath": "eliza/packages/app-core/scripts/smoke-api-status.mjs",
+      "summary": "runSmokeApiStatus is a function defined in eliza/packages/app-core/scripts/smoke-api-status.mjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/scripts/smoke-lifeops.mjs",
+      "type": "file",
+      "name": "smoke-lifeops.mjs",
+      "filePath": "eliza/packages/app-core/scripts/smoke-lifeops.mjs",
+      "summary": "smoke-lifeops.mjs is a javascript source file in the Milady codebase. It contains 11 functions.",
+      "languageNotes": "javascript; code; 305 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:parseTruthy",
+      "type": "function",
+      "name": "parseTruthy",
+      "filePath": "eliza/packages/app-core/scripts/smoke-lifeops.mjs",
+      "summary": "parseTruthy is a function defined in eliza/packages/app-core/scripts/smoke-lifeops.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:resolveLifeOpsBaseUrls",
+      "type": "function",
+      "name": "resolveLifeOpsBaseUrls",
+      "filePath": "eliza/packages/app-core/scripts/smoke-lifeops.mjs",
+      "summary": "resolveLifeOpsBaseUrls is a function defined in eliza/packages/app-core/scripts/smoke-lifeops.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:resolveLifeOpsAuthHeaders",
+      "type": "function",
+      "name": "resolveLifeOpsAuthHeaders",
+      "filePath": "eliza/packages/app-core/scripts/smoke-lifeops.mjs",
+      "summary": "resolveLifeOpsAuthHeaders is a function defined in eliza/packages/app-core/scripts/smoke-lifeops.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:fetchJson",
+      "type": "function",
+      "name": "fetchJson",
+      "filePath": "eliza/packages/app-core/scripts/smoke-lifeops.mjs",
+      "summary": "fetchJson is a function defined in eliza/packages/app-core/scripts/smoke-lifeops.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:fail",
+      "type": "function",
+      "name": "fail",
+      "filePath": "eliza/packages/app-core/scripts/smoke-lifeops.mjs",
+      "summary": "fail is a function defined in eliza/packages/app-core/scripts/smoke-lifeops.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:hasOverviewShape",
+      "type": "function",
+      "name": "hasOverviewShape",
+      "filePath": "eliza/packages/app-core/scripts/smoke-lifeops.mjs",
+      "summary": "hasOverviewShape is a function defined in eliza/packages/app-core/scripts/smoke-lifeops.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:hasBrowserSessionsShape",
+      "type": "function",
+      "name": "hasBrowserSessionsShape",
+      "filePath": "eliza/packages/app-core/scripts/smoke-lifeops.mjs",
+      "summary": "hasBrowserSessionsShape is a function defined in eliza/packages/app-core/scripts/smoke-lifeops.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:hasGoogleStatusShape",
+      "type": "function",
+      "name": "hasGoogleStatusShape",
+      "filePath": "eliza/packages/app-core/scripts/smoke-lifeops.mjs",
+      "summary": "hasGoogleStatusShape is a function defined in eliza/packages/app-core/scripts/smoke-lifeops.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:hasNextContextShape",
+      "type": "function",
+      "name": "hasNextContextShape",
+      "filePath": "eliza/packages/app-core/scripts/smoke-lifeops.mjs",
+      "summary": "hasNextContextShape is a function defined in eliza/packages/app-core/scripts/smoke-lifeops.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:hasGmailTriageShape",
+      "type": "function",
+      "name": "hasGmailTriageShape",
+      "filePath": "eliza/packages/app-core/scripts/smoke-lifeops.mjs",
+      "summary": "hasGmailTriageShape is a function defined in eliza/packages/app-core/scripts/smoke-lifeops.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:runSmokeLifeOps",
+      "type": "function",
+      "name": "runSmokeLifeOps",
+      "filePath": "eliza/packages/app-core/scripts/smoke-lifeops.mjs",
+      "summary": "runSmokeLifeOps is a function defined in eliza/packages/app-core/scripts/smoke-lifeops.mjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "type": "file",
+      "name": "sms-gateway-status.mjs",
+      "filePath": "eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "summary": "sms-gateway-status.mjs is a javascript source file in the Milady codebase. It contains 12 functions.",
+      "languageNotes": "javascript; code; 194 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:runAudit",
+      "type": "function",
+      "name": "runAudit",
+      "filePath": "eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "summary": "runAudit is a function defined in eliza/packages/app-core/scripts/sms-gateway-status.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:has",
+      "type": "function",
+      "name": "has",
+      "filePath": "eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "summary": "has is a function defined in eliza/packages/app-core/scripts/sms-gateway-status.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:auditEvidencePath",
+      "type": "function",
+      "name": "auditEvidencePath",
+      "filePath": "eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "summary": "auditEvidencePath is a function defined in eliza/packages/app-core/scripts/sms-gateway-status.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:readAuditEvidence",
+      "type": "function",
+      "name": "readAuditEvidence",
+      "filePath": "eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "summary": "readAuditEvidence is a function defined in eliza/packages/app-core/scripts/sms-gateway-status.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:findRequirement",
+      "type": "function",
+      "name": "findRequirement",
+      "filePath": "eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "summary": "findRequirement is a function defined in eliza/packages/app-core/scripts/sms-gateway-status.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:supplementalSummary",
+      "type": "function",
+      "name": "supplementalSummary",
+      "filePath": "eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "summary": "supplementalSummary is a function defined in eliza/packages/app-core/scripts/sms-gateway-status.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:printHomepageEvidence",
+      "type": "function",
+      "name": "printHomepageEvidence",
+      "filePath": "eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "summary": "printHomepageEvidence is a function defined in eliza/packages/app-core/scripts/sms-gateway-status.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:printAndroidEvidence",
+      "type": "function",
+      "name": "printAndroidEvidence",
+      "filePath": "eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "summary": "printAndroidEvidence is a function defined in eliza/packages/app-core/scripts/sms-gateway-status.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:printBlueBubblesEvidence",
+      "type": "function",
+      "name": "printBlueBubblesEvidence",
+      "filePath": "eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "summary": "printBlueBubblesEvidence is a function defined in eliza/packages/app-core/scripts/sms-gateway-status.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:buildBlockerBundle",
+      "type": "function",
+      "name": "buildBlockerBundle",
+      "filePath": "eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "summary": "buildBlockerBundle is a function defined in eliza/packages/app-core/scripts/sms-gateway-status.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:writeBlockerBundle",
+      "type": "function",
+      "name": "writeBlockerBundle",
+      "filePath": "eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "summary": "writeBlockerBundle is a function defined in eliza/packages/app-core/scripts/sms-gateway-status.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "summary": "main is a function defined in eliza/packages/app-core/scripts/sms-gateway-status.mjs."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/startup-integration-script-drift.test.ts",
+      "type": "file",
+      "name": "startup-integration-script-drift.test.ts",
+      "filePath": "eliza/packages/app-core/scripts/startup-integration-script-drift.test.ts",
+      "summary": "startup-integration-script-drift.test.ts is a typescript source file in the Milady codebase. It contains 3 functions.",
+      "languageNotes": "typescript; code; 145 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/startup-integration-script-drift.test.ts:expectScript",
+      "type": "function",
+      "name": "expectScript",
+      "filePath": "eliza/packages/app-core/scripts/startup-integration-script-drift.test.ts",
+      "summary": "expectScript is a function defined in eliza/packages/app-core/scripts/startup-integration-script-drift.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/startup-integration-script-drift.test.ts:extractTestPaths",
+      "type": "function",
+      "name": "extractTestPaths",
+      "filePath": "eliza/packages/app-core/scripts/startup-integration-script-drift.test.ts",
+      "summary": "extractTestPaths is a function defined in eliza/packages/app-core/scripts/startup-integration-script-drift.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/startup-integration-script-drift.test.ts:hasWorkflows",
+      "type": "function",
+      "name": "hasWorkflows",
+      "filePath": "eliza/packages/app-core/scripts/startup-integration-script-drift.test.ts",
+      "summary": "hasWorkflows is a function defined in eliza/packages/app-core/scripts/startup-integration-script-drift.test.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/maintain-cloud-api-production-gateway.mjs",
+      "target": "function:eliza/packages/app-core/scripts/maintain-cloud-api-production-gateway.mjs:run",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/maintain-cloud-api-production-gateway.mjs",
+      "target": "function:eliza/packages/app-core/scripts/maintain-cloud-api-production-gateway.mjs:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/maintain-cloud-api-production-gateway.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/maintain-cloud-api-production-gateway.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/maintain-cloud-api-production-gateway.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/maintain-cloud-api-production-gateway.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:run",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:copyDirRecursive",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceBetween",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:writeElizaFfiAdapter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:hasFunctionDeclaration",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:hasFunctionDefinition",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:inspectPreparedOmnivoiceSurface",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceOmnivoiceAnchor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyOmnivoiceReferenceEncodeApi",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaGgmlCompatibility",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:ensureOmnivoiceCheckout",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:readOmnivoiceGgmlSubmoduleCommit",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyPatches",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceRequired",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaQwen3AsrMtmdSupport",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:prepareOmnivoiceFusion",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:inspectPreparedOmnivoiceSurface",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:hasFunctionDeclaration",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:inspectPreparedOmnivoiceSurface",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:hasFunctionDefinition",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:inspectPreparedOmnivoiceSurface",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:hasFunctionDeclaration",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyOmnivoiceReferenceEncodeApi",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceOmnivoiceAnchor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyOmnivoiceReferenceEncodeApi",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceOmnivoiceAnchor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyOmnivoiceReferenceEncodeApi",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceOmnivoiceAnchor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyOmnivoiceReferenceEncodeApi",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceOmnivoiceAnchor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyOmnivoiceReferenceEncodeApi",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceOmnivoiceAnchor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaGgmlCompatibility",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceBetween",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaGgmlCompatibility",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceBetween",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaGgmlCompatibility",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyOmnivoiceReferenceEncodeApi",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaGgmlCompatibility",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:writeElizaFfiAdapter",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:ensureOmnivoiceCheckout",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:ensureOmnivoiceCheckout",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:ensureOmnivoiceCheckout",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:ensureOmnivoiceCheckout",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:ensureOmnivoiceCheckout",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:ensureOmnivoiceCheckout",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyPatches",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyPatches",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaQwen3AsrMtmdSupport",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceRequired",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaQwen3AsrMtmdSupport",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceRequired",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaQwen3AsrMtmdSupport",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceRequired",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaQwen3AsrMtmdSupport",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceRequired",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaQwen3AsrMtmdSupport",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceRequired",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaQwen3AsrMtmdSupport",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceRequired",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaQwen3AsrMtmdSupport",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceRequired",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaQwen3AsrMtmdSupport",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceRequired",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaQwen3AsrMtmdSupport",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceRequired",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaQwen3AsrMtmdSupport",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceRequired",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaQwen3AsrMtmdSupport",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceRequired",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaQwen3AsrMtmdSupport",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceRequired",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaQwen3AsrMtmdSupport",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceRequired",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaQwen3AsrMtmdSupport",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceRequired",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaQwen3AsrMtmdSupport",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceRequired",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaQwen3AsrMtmdSupport",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:replaceRequired",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:prepareOmnivoiceFusion",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:ensureOmnivoiceCheckout",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:prepareOmnivoiceFusion",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:readOmnivoiceGgmlSubmoduleCommit",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:prepareOmnivoiceFusion",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:copyDirRecursive",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:prepareOmnivoiceFusion",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaGgmlCompatibility",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:prepareOmnivoiceFusion",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:inspectPreparedOmnivoiceSurface",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:prepareOmnivoiceFusion",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:copyDirRecursive",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:prepareOmnivoiceFusion",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyElizaQwen3AsrMtmdSupport",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:prepareOmnivoiceFusion",
+      "target": "function:eliza/packages/app-core/scripts/omnivoice-fuse/prepare.mjs:applyPatches",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/package-electrobun-linux.mjs",
+      "target": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:sh",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/package-electrobun-linux.mjs",
+      "target": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:latestBuildDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/package-electrobun-linux.mjs",
+      "target": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:findExecutable",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/package-electrobun-linux.mjs",
+      "target": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:writeDesktopFile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/package-electrobun-linux.mjs",
+      "target": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:stagePackageRoot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/package-electrobun-linux.mjs",
+      "target": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:buildDeb",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/package-electrobun-linux.mjs",
+      "target": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:buildRpm",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/package-electrobun-linux.mjs",
+      "target": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:buildAppImage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:stagePackageRoot",
+      "target": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:findExecutable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:stagePackageRoot",
+      "target": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:writeDesktopFile",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:buildDeb",
+      "target": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:stagePackageRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:buildDeb",
+      "target": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:sh",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:buildRpm",
+      "target": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:stagePackageRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:buildRpm",
+      "target": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:sh",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:buildAppImage",
+      "target": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:stagePackageRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:buildAppImage",
+      "target": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:sh",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:buildAppImage",
+      "target": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:sh",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:buildAppImage",
+      "target": "function:eliza/packages/app-core/scripts/package-electrobun-linux.mjs:sh",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:readSmokeVrm",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:stubCatalogApp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:parsePositiveInt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:createStubConversation",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:findStubConversation",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:createStubMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:appendStubMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:cleanupEmptyStubConversations",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:buildRuntimeSnapshot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:nowIso",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:normalizeStubBrowserUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:inferStubBrowserTitle",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:browserWorkspaceSnapshot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:showBrowserWorkspaceTab",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:applyCors",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:sendJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:sendEmpty",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:sendBinary",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:contentTypeForSmokeViewAsset",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:convertNamedImportsToDestructuring",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:buildHostExternalImportReplacement",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:rewriteHostExternalImports",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:parseHostExternalSpecifiers",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:smokeViewByRequest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:sendSmokeViewAsset",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:sendSseHeaders",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:writeSseEvent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:readJsonBody",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:workbenchOverview",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:streamSettings",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:shutdown",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:createStubConversation",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:nowIso",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:appendStubMessage",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:findStubConversation",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:appendStubMessage",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:nowIso",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:buildRuntimeSnapshot",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:parsePositiveInt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:buildRuntimeSnapshot",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:parsePositiveInt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:buildRuntimeSnapshot",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:parsePositiveInt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:buildRuntimeSnapshot",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:parsePositiveInt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:showBrowserWorkspaceTab",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:nowIso",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:showBrowserWorkspaceTab",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:nowIso",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:sendJson",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:applyCors",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:sendEmpty",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:applyCors",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:sendBinary",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:applyCors",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:buildHostExternalImportReplacement",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:convertNamedImportsToDestructuring",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:buildHostExternalImportReplacement",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:convertNamedImportsToDestructuring",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:rewriteHostExternalImports",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:buildHostExternalImportReplacement",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:sendSmokeViewAsset",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:sendJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:sendSmokeViewAsset",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:sendJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:sendSmokeViewAsset",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:parseHostExternalSpecifiers",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:sendSmokeViewAsset",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:contentTypeForSmokeViewAsset",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:sendSmokeViewAsset",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:rewriteHostExternalImports",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:sendSmokeViewAsset",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:sendBinary",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:sendSmokeViewAsset",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:contentTypeForSmokeViewAsset",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:sendSseHeaders",
+      "target": "function:eliza/packages/app-core/scripts/playwright-ui-smoke-api-stub.mjs:applyCors",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:isSourceCode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:isTestExempt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:extractAddedDiffLines",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:extractRemovedDiffLines",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:countPatternMatches",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:normalizeExecError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runCommandArgs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:getBaseRef",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:firstFailureTitle",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:classificationFromInputs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:scopeVerdictFor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:decisionFromFindings",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:scanDiffTextForBlockedPatterns",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:readDiffForFiles",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:scanForBlockedDiffPatterns",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:resolveRunnableTestFiles",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:buildRepoTestCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:shouldRunTargetedRegressionTests",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:splitRunnableTestFiles",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:collectChangedFiles",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:collectCommitMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runChecks",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:printResult",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/pre-review-local.mjs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:isMainModule",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runCommand",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:normalizeExecError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runCommandArgs",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:normalizeExecError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:getBaseRef",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runCommandArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:getBaseRef",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runCommandArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:scanDiffTextForBlockedPatterns",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:extractAddedDiffLines",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:scanDiffTextForBlockedPatterns",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:extractRemovedDiffLines",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:scanDiffTextForBlockedPatterns",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:countPatternMatches",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:scanDiffTextForBlockedPatterns",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:countPatternMatches",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:readDiffForFiles",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runCommandArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:scanForBlockedDiffPatterns",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:isSourceCode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:scanForBlockedDiffPatterns",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:readDiffForFiles",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:scanForBlockedDiffPatterns",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:scanDiffTextForBlockedPatterns",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:collectChangedFiles",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runCommandArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:collectChangedFiles",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:firstFailureTitle",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:collectCommitMessage",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runCommandArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:collectCommitMessage",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runCommandArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:collectCommitMessage",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runCommandArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runChecks",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:getBaseRef",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runChecks",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runCommandArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runChecks",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:collectCommitMessage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runChecks",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:classificationFromInputs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runChecks",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:shouldRunTargetedRegressionTests",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runChecks",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:scopeVerdictFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runChecks",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:collectChangedFiles",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runChecks",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:scanForBlockedDiffPatterns",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runChecks",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runCommand",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runChecks",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:resolveRunnableTestFiles",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runChecks",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:splitRunnableTestFiles",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runChecks",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:buildRepoTestCommand",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runChecks",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runCommand",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:runChecks",
+      "target": "function:eliza/packages/app-core/scripts/pre-review-local.mjs:decisionFromFindings",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:collectWorkspaceVersions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:walk",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:normalizePrefix",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:getRootEntry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:rewriteWorkspaceDeps",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:getInstalledPackageVersion",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:normalizeWorkspaceVersion",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformBin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformExports",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformExportTarget",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformModulePath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformTypesPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformAssetPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:stripSrcPrefix",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:replaceSourceExtension",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:isAssetPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:withLeadingDot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/prepare-package-dist.mjs",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:cleanUndefined",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:collectWorkspaceVersions",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:walk",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:rewriteWorkspaceDeps",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:getInstalledPackageVersion",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:rewriteWorkspaceDeps",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:normalizeWorkspaceVersion",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformBin",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformModulePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformBin",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformModulePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformExports",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformExportTarget",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformExportTarget",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:isAssetPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformExportTarget",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformAssetPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformExportTarget",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformTypesPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformExportTarget",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformModulePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformExportTarget",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformModulePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformExportTarget",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:isAssetPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformExportTarget",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformAssetPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformExportTarget",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformTypesPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformExportTarget",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformModulePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformModulePath",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:withLeadingDot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformModulePath",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:replaceSourceExtension",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformModulePath",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:stripSrcPrefix",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformTypesPath",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:withLeadingDot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformTypesPath",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:replaceSourceExtension",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformTypesPath",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:stripSrcPrefix",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformAssetPath",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:withLeadingDot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:transformAssetPath",
+      "target": "function:eliza/packages/app-core/scripts/prepare-package-dist.mjs:stripSrcPrefix",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/publish-local-plugins-next.mjs",
+      "target": "function:eliza/packages/app-core/scripts/publish-local-plugins-next.mjs:readPackageJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/publish-local-plugins-next.mjs",
+      "target": "function:eliza/packages/app-core/scripts/publish-local-plugins-next.mjs:runCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/publish-local-plugins-next.mjs",
+      "target": "function:eliza/packages/app-core/scripts/publish-local-plugins-next.mjs:discoverPluginRoots",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/publish-local-plugins-next.mjs",
+      "target": "function:eliza/packages/app-core/scripts/publish-local-plugins-next.mjs:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/publish-local-plugins-next.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/publish-local-plugins-next.mjs:discoverPluginRoots",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/publish-local-plugins-next.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/publish-local-plugins-next.mjs:readPackageJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/publish-local-plugins-next.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/publish-local-plugins-next.mjs:runCommand",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/release-workflow-drift.test.ts",
+      "target": "function:eliza/packages/app-core/scripts/release-workflow-drift.test.ts:readRepoFile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/report-coverage-surfaces.mjs",
+      "target": "function:eliza/packages/app-core/scripts/report-coverage-surfaces.mjs:normaliseRelativePath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/report-coverage-surfaces.mjs",
+      "target": "function:eliza/packages/app-core/scripts/report-coverage-surfaces.mjs:globToRegExp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/report-coverage-surfaces.mjs",
+      "target": "function:eliza/packages/app-core/scripts/report-coverage-surfaces.mjs:createMetricBucket",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/report-coverage-surfaces.mjs",
+      "target": "function:eliza/packages/app-core/scripts/report-coverage-surfaces.mjs:addMetric",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/report-coverage-surfaces.mjs",
+      "target": "function:eliza/packages/app-core/scripts/report-coverage-surfaces.mjs:percentage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/run-biome-check.mjs",
+      "target": "function:eliza/packages/app-core/scripts/run-biome-check.mjs:findRepoRoot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/run-biome-check.mjs",
+      "target": "function:eliza/packages/app-core/scripts/run-biome-check.mjs:normalisePath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/run-biome-check.mjs",
+      "target": "function:eliza/packages/app-core/scripts/run-biome-check.mjs:isNestedBiomeRoot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/run-biome-check.mjs",
+      "target": "function:eliza/packages/app-core/scripts/run-biome-check.mjs:collectBiomeFiles",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/run-biome-check.mjs",
+      "target": "function:eliza/packages/app-core/scripts/run-biome-check.mjs:getBiomeFiles",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/run-biome-check.mjs",
+      "target": "function:eliza/packages/app-core/scripts/run-biome-check.mjs:chunk",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/run-biome-check.mjs:collectBiomeFiles",
+      "target": "function:eliza/packages/app-core/scripts/run-biome-check.mjs:normalisePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/run-biome-check.mjs:collectBiomeFiles",
+      "target": "function:eliza/packages/app-core/scripts/run-biome-check.mjs:isNestedBiomeRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/run-biome-check.mjs:collectBiomeFiles",
+      "target": "function:eliza/packages/app-core/scripts/run-biome-check.mjs:isNestedBiomeRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/run-biome-check.mjs:collectBiomeFiles",
+      "target": "function:eliza/packages/app-core/scripts/run-biome-check.mjs:normalisePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/run-biome-check.mjs:getBiomeFiles",
+      "target": "function:eliza/packages/app-core/scripts/run-biome-check.mjs:collectBiomeFiles",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs",
+      "target": "function:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs:readJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs",
+      "target": "function:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs:normalizePluginNpmName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs",
+      "target": "function:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs:derivePluginId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs",
+      "target": "function:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs:resolvePackageRoot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs",
+      "target": "function:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs:resolvePluginCandidates",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs",
+      "target": "function:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs:resolvePluginFilter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs",
+      "target": "function:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs:ensureRuntimePackageBuilt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs:derivePluginId",
+      "target": "function:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs:normalizePluginNpmName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs:resolvePluginCandidates",
+      "target": "function:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs:readJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs:resolvePluginCandidates",
+      "target": "function:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs:resolvePackageRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs:resolvePluginFilter",
+      "target": "function:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs:readJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs:resolvePluginFilter",
+      "target": "function:eliza/packages/app-core/scripts/run-local-plugin-live-smoke.mjs:derivePluginId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/run-node-tsx.mjs",
+      "target": "function:eliza/packages/app-core/scripts/run-node-tsx.mjs:isRealNodeExecutable",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/run-node-tsx.mjs",
+      "target": "function:eliza/packages/app-core/scripts/run-node-tsx.mjs:resolveNodeCmd",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/run-node-tsx.mjs",
+      "target": "function:eliza/packages/app-core/scripts/run-node-tsx.mjs:withWorkspaceNodePath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/run-node-tsx.mjs",
+      "target": "function:eliza/packages/app-core/scripts/run-node-tsx.mjs:forwardSignal",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/run-node-tsx.mjs:resolveNodeCmd",
+      "target": "function:eliza/packages/app-core/scripts/run-node-tsx.mjs:isRealNodeExecutable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/run-node-tsx.mjs:resolveNodeCmd",
+      "target": "function:eliza/packages/app-core/scripts/run-node-tsx.mjs:isRealNodeExecutable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/run-node-tsx.mjs:resolveNodeCmd",
+      "target": "function:eliza/packages/app-core/scripts/run-node-tsx.mjs:isRealNodeExecutable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/run-node-tsx.mjs:resolveNodeCmd",
+      "target": "function:eliza/packages/app-core/scripts/run-node-tsx.mjs:isRealNodeExecutable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/run-node-tsx.mjs:resolveNodeCmd",
+      "target": "function:eliza/packages/app-core/scripts/run-node-tsx.mjs:isRealNodeExecutable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/run-playwright.mjs",
+      "target": "function:eliza/packages/app-core/scripts/run-playwright.mjs:resolveBunCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/run-with-env.mjs",
+      "target": "function:eliza/packages/app-core/scripts/run-with-env.mjs:shouldSuppressNodeWarnings",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs",
+      "target": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:isPlainObject",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs",
+      "target": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:isStringMap",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs",
+      "target": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:hasLocalProtocol",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs",
+      "target": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:collectDirectDependencySpecs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs",
+      "target": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:removalReason",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs",
+      "target": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:sanitizeNpmPackageMetadata",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs",
+      "target": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:isDirectRun",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:isStringMap",
+      "target": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:isPlainObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:hasLocalProtocol",
+      "target": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:isPlainObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:collectDirectDependencySpecs",
+      "target": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:isStringMap",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:removalReason",
+      "target": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:hasLocalProtocol",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:sanitizeNpmPackageMetadata",
+      "target": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:isPlainObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:sanitizeNpmPackageMetadata",
+      "target": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:collectDirectDependencySpecs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:sanitizeNpmPackageMetadata",
+      "target": "function:eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs:removalReason",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/smoke-api-status.mjs",
+      "target": "function:eliza/packages/app-core/scripts/smoke-api-status.mjs:resolveBaseUrls",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/smoke-api-status.mjs",
+      "target": "function:eliza/packages/app-core/scripts/smoke-api-status.mjs:runSmokeApiStatus",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/smoke-api-status.mjs:runSmokeApiStatus",
+      "target": "function:eliza/packages/app-core/scripts/smoke-api-status.mjs:resolveBaseUrls",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/smoke-lifeops.mjs",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:parseTruthy",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/smoke-lifeops.mjs",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:resolveLifeOpsBaseUrls",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/smoke-lifeops.mjs",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:resolveLifeOpsAuthHeaders",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/smoke-lifeops.mjs",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:fetchJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/smoke-lifeops.mjs",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:fail",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/smoke-lifeops.mjs",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:hasOverviewShape",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/smoke-lifeops.mjs",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:hasBrowserSessionsShape",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/smoke-lifeops.mjs",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:hasGoogleStatusShape",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/smoke-lifeops.mjs",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:hasNextContextShape",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/smoke-lifeops.mjs",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:hasGmailTriageShape",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/smoke-lifeops.mjs",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:runSmokeLifeOps",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:runSmokeLifeOps",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:resolveLifeOpsBaseUrls",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:runSmokeLifeOps",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:resolveLifeOpsAuthHeaders",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:runSmokeLifeOps",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:parseTruthy",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:runSmokeLifeOps",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:parseTruthy",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:runSmokeLifeOps",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:fetchJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:runSmokeLifeOps",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:fail",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:runSmokeLifeOps",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:hasOverviewShape",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:runSmokeLifeOps",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:fetchJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:runSmokeLifeOps",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:hasBrowserSessionsShape",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:runSmokeLifeOps",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:fetchJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:runSmokeLifeOps",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:hasGoogleStatusShape",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:runSmokeLifeOps",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:fetchJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:runSmokeLifeOps",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:hasNextContextShape",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:runSmokeLifeOps",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:fetchJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:runSmokeLifeOps",
+      "target": "function:eliza/packages/app-core/scripts/smoke-lifeops.mjs:hasGmailTriageShape",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:runAudit",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:has",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:auditEvidencePath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:readAuditEvidence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:findRequirement",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:supplementalSummary",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:printHomepageEvidence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:printAndroidEvidence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:printBlueBubblesEvidence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:buildBlockerBundle",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:writeBlockerBundle",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/sms-gateway-status.mjs",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:printHomepageEvidence",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:supplementalSummary",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:printAndroidEvidence",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:supplementalSummary",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:printBlueBubblesEvidence",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:supplementalSummary",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:printBlueBubblesEvidence",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:supplementalSummary",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:writeBlockerBundle",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:buildBlockerBundle",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:runAudit",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:auditEvidencePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:readAuditEvidence",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:writeBlockerBundle",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:has",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:has",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:printHomepageEvidence",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:findRequirement",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:has",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:has",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:printAndroidEvidence",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:findRequirement",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:has",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:printBlueBubblesEvidence",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/sms-gateway-status.mjs:findRequirement",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/startup-integration-script-drift.test.ts",
+      "target": "function:eliza/packages/app-core/scripts/startup-integration-script-drift.test.ts:expectScript",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/startup-integration-script-drift.test.ts",
+      "target": "function:eliza/packages/app-core/scripts/startup-integration-script-drift.test.ts:extractTestPaths",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/startup-integration-script-drift.test.ts",
+      "target": "function:eliza/packages/app-core/scripts/startup-integration-script-drift.test.ts:hasWorkflows",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/scripts/report-coverage-surfaces.mjs",
+      "target": "file:eliza/packages/app-core/scripts/coverage-policy.mjs",
+      "type": "imports"
+    }
+  ]
+}

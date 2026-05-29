@@ -160,7 +160,7 @@ These are leaf hooks consumed by `AppContext.tsx`. Per scoping advice
 #### Plugin auto-enable + paths + env
 
 - [!] `config/plugin-auto-enable.ts` — 69 LOC. Maps env var presence → which plugins to auto-register. dedup:overlaps with `runtime/eliza.ts`'s plugin-auto-enable logic (Layer 3 finding). Same data, two locations.
-- [x] `config/config-paths.ts` — 90 LOC. Resolves `~/.milady/milady.json` etc. Server-side only. Clean.
+- [x] `config/config-paths.ts` — 90 LOC. Resolves `~/.local/state/milady/milady.json` etc. Server-side only. Clean.
 - [!] `config/env-vars.ts` — 69 LOC. Env-var registry. dedup:should be the canonical source for the env vars listed in `CLAUDE.md`'s "Environment variables" section — verify alignment.
 - [!] `config/runtime-overrides.ts` — 71 LOC. Runtime-only env overrides (`process.env` reads). boundaries:browser-safe? Audit needs to confirm the file is server-side only.
 - [!] `config/api-key-prefix-hints.ts` — 35 LOC. Maps API-key prefixes (`sk-`, `pk-`, `mr-`) to provider IDs. Clean. dedup:provider-detection logic likely also lives in `vault/inventory.ts:PROVIDER_KEY_PATTERNS` (Layer 5a finding) — three places encode provider hints (here, vault inventory, and the brand-env aliases).

@@ -1,0 +1,66 @@
+{
+  "batchIndex": 165,
+  "nodes": [
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:apps/app/.env.example",
+      "type": "config",
+      "name": ".env.example",
+      "filePath": "apps/app/.env.example",
+      "summary": ".env.example configures config settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "config; config; 19 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:apps/app/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "apps/app/README.md",
+      "summary": "README.md documents apps/app with 150 lines of reference material.",
+      "languageNotes": "markdown; docs; 150 lines"
+    },
+    {
+      "tags": [
+        "frontend"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/app/index.html",
+      "type": "file",
+      "name": "index.html",
+      "filePath": "apps/app/index.html",
+      "summary": "index.html is a html source file in the Milady codebase.",
+      "languageNotes": "html; markup; 144 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:apps/app/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "apps/app/package.json",
+      "summary": "package.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 88 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:apps/app/tsconfig.json",
+      "type": "config",
+      "name": "tsconfig.json",
+      "filePath": "apps/app/tsconfig.json",
+      "summary": "tsconfig.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 215 lines"
+    }
+  ],
+  "edges": []
+}

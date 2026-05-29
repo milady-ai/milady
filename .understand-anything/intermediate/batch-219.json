@@ -1,0 +1,266 @@
+{
+  "batchIndex": 219,
+  "nodes": [
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/better-tires-pull.md",
+      "type": "document",
+      "name": "better-tires-pull.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/better-tires-pull.md",
+      "summary": "better-tires-pull.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset with 5 lines of reference material.",
+      "languageNotes": "markdown; docs; 5 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/blue-jars-lay.md",
+      "type": "document",
+      "name": "blue-jars-lay.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/blue-jars-lay.md",
+      "summary": "blue-jars-lay.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset with 5 lines of reference material.",
+      "languageNotes": "markdown; docs; 5 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/bright-cooks-brush.md",
+      "type": "document",
+      "name": "bright-cooks-brush.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/bright-cooks-brush.md",
+      "summary": "bright-cooks-brush.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset with 5 lines of reference material.",
+      "languageNotes": "markdown; docs; 5 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/chatty-dryers-joke.md",
+      "type": "document",
+      "name": "chatty-dryers-joke.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/chatty-dryers-joke.md",
+      "summary": "chatty-dryers-joke.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset with 5 lines of reference material.",
+      "languageNotes": "markdown; docs; 5 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/config.json",
+      "type": "config",
+      "name": "config.json",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/config.json",
+      "summary": "config.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 12 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/curly-pandas-flow.md",
+      "type": "document",
+      "name": "curly-pandas-flow.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/curly-pandas-flow.md",
+      "summary": "curly-pandas-flow.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset with 5 lines of reference material.",
+      "languageNotes": "markdown; docs; 5 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/flat-flies-hear.md",
+      "type": "document",
+      "name": "flat-flies-hear.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/flat-flies-hear.md",
+      "summary": "flat-flies-hear.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset with 5 lines of reference material.",
+      "languageNotes": "markdown; docs; 5 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/floppy-symbols-burn.md",
+      "type": "document",
+      "name": "floppy-symbols-burn.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/floppy-symbols-burn.md",
+      "summary": "floppy-symbols-burn.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset with 5 lines of reference material.",
+      "languageNotes": "markdown; docs; 5 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/fruity-coats-smash.md",
+      "type": "document",
+      "name": "fruity-coats-smash.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/fruity-coats-smash.md",
+      "summary": "fruity-coats-smash.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset with 5 lines of reference material.",
+      "languageNotes": "markdown; docs; 5 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/gentle-apples-dance.md",
+      "type": "document",
+      "name": "gentle-apples-dance.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/gentle-apples-dance.md",
+      "summary": "gentle-apples-dance.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset with 5 lines of reference material.",
+      "languageNotes": "markdown; docs; 5 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/happy-pants-decide.md",
+      "type": "document",
+      "name": "happy-pants-decide.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/happy-pants-decide.md",
+      "summary": "happy-pants-decide.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset with 5 lines of reference material.",
+      "languageNotes": "markdown; docs; 5 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/heavy-pots-reply.md",
+      "type": "document",
+      "name": "heavy-pots-reply.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/heavy-pots-reply.md",
+      "summary": "heavy-pots-reply.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset with 5 lines of reference material.",
+      "languageNotes": "markdown; docs; 5 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/legal-cameras-sin.md",
+      "type": "document",
+      "name": "legal-cameras-sin.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/legal-cameras-sin.md",
+      "summary": "legal-cameras-sin.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset with 5 lines of reference material.",
+      "languageNotes": "markdown; docs; 5 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/rare-bushes-march.md",
+      "type": "document",
+      "name": "rare-bushes-march.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/rare-bushes-march.md",
+      "summary": "rare-bushes-march.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset with 5 lines of reference material.",
+      "languageNotes": "markdown; docs; 5 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/red-gifts-appear.md",
+      "type": "document",
+      "name": "red-gifts-appear.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/red-gifts-appear.md",
+      "summary": "red-gifts-appear.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset with 5 lines of reference material.",
+      "languageNotes": "markdown; docs; 5 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/silver-falcons-lay.md",
+      "type": "document",
+      "name": "silver-falcons-lay.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/silver-falcons-lay.md",
+      "summary": "silver-falcons-lay.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset with 5 lines of reference material.",
+      "languageNotes": "markdown; docs; 5 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/smooth-cows-notice.md",
+      "type": "document",
+      "name": "smooth-cows-notice.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/smooth-cows-notice.md",
+      "summary": "smooth-cows-notice.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset with 5 lines of reference material.",
+      "languageNotes": "markdown; docs; 5 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/some-dolls-shine.md",
+      "type": "document",
+      "name": "some-dolls-shine.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/some-dolls-shine.md",
+      "summary": "some-dolls-shine.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset with 5 lines of reference material.",
+      "languageNotes": "markdown; docs; 5 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/spicy-seals-bake.md",
+      "type": "document",
+      "name": "spicy-seals-bake.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/spicy-seals-bake.md",
+      "summary": "spicy-seals-bake.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset with 5 lines of reference material.",
+      "languageNotes": "markdown; docs; 5 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/sweet-houses-cheer.md",
+      "type": "document",
+      "name": "sweet-houses-cheer.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset/sweet-houses-cheer.md",
+      "summary": "sweet-houses-cheer.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.changeset with 5 lines of reference material.",
+      "languageNotes": "markdown; docs; 5 lines"
+    }
+  ],
+  "edges": []
+}

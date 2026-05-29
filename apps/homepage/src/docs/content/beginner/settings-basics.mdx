@@ -34,7 +34,7 @@ The character's personality is *not* a behavior filter or a safety layer. It's a
 
 Worth looking at once even if you don't change anything:
 
-- **Where data lives.** A read-only field showing your `~/.milady/` directory. Back this up if you care about your conversations.
+- **Where data lives.** A read-only field showing your `~/.local/state/milady/` directory. Back this up if you care about your conversations.
 - **Telemetry.** Off by default on desktop. If you ever opt in, it's anonymized diagnostic data — no conversation contents.
 - **Prompt capture.** Off by default. This is a developer-only debug feature that dumps full prompts to disk. Never turn it on unless you're actively debugging, and never share the capture files — they contain raw user input.
 
@@ -66,7 +66,7 @@ Every other settings section exists for a reason, but none of them matter on day
 
 **Everything in Settings is reversible.** Nothing you can click here will delete your data, break your install, or do something that can't be undone. Poke around. Turn things on, see what happens, turn them off.
 
-The one exception: if you manually edit `~/.milady/milady.json` outside the app, you can put it in a state where it won't start. If you do that, just delete or rename `milady.json` and Milady will regenerate it with defaults on next launch. Your conversations and character files are stored separately and stay safe.
+The one exception: if you manually edit `~/.local/state/milady/milady.json` outside the app, you can put it in a state where it won't start. If you do that, just delete or rename `milady.json` and Milady will regenerate it with defaults on next launch. Your conversations and character files are stored separately and stay safe.
 
 ## What's next
 

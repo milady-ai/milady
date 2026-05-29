@@ -210,7 +210,7 @@ Keep: existing vault crypto, dev-endpoint loopback+token model, macOS codesign+n
 | M-1 | **Customer-data consent gate.** Define training-data policy: zero customer data in training **unless** explicit opt-in + DPA carve-out. Audit `datasets.yaml` (training/datasets.yaml:75-153); remove any non-opt-in sources or wire to consent flag. PI1.1 / C1.1 violation if left as-is. | 5d |
 | M-2 | Training-data lineage manifest. Every model artifact records its training-data manifest hash. Extend `scripts/manifest/eliza1_manifest.py`. | 3d |
 | M-3 | Sign model artifacts (GPG or sigstore) before HF push. Verify on download in `OptimizedPromptService` and any model loader. | 3d |
-| M-4 | HMAC + integrity-tag on DSPy optimized-prompts in `~/.milady/optimized-prompts/<task>/`. Reject on mismatch. (`packages/core/src/services/optimized-prompt.ts:40-677`.) | 2d |
+| M-4 | HMAC + integrity-tag on DSPy optimized-prompts in `~/.local/state/milady/optimized-prompts/<task>/`. Reject on mismatch. (`packages/core/src/services/optimized-prompt.ts:40-677`.) | 2d |
 | M-5 | Make `--strict` mandatory in privacy filter (`scripts/privacy_filter_trajectories.py`). Prove TS-runtime equivalent path (or remove the TS bypass). | 2d |
 | M-6 | Training infra credential hygiene: `HF_TOKEN`, `VAST_API_KEY`, AWS creds via secrets manager (not env), rotation cadence (90d), audit log of use. | 2d |
 | M-7 | Nightly trajectory collection: opt-in + retention policy + purge job. (Overlaps L-2 client-side and X-1 audit log.) | 2d |

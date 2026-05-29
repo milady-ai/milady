@@ -1,0 +1,2394 @@
+{
+  "batchIndex": 96,
+  "nodes": [
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/agent/src/services/tee-key-release.test.ts",
+      "type": "file",
+      "name": "tee-key-release.test.ts",
+      "filePath": "eliza/packages/agent/src/services/tee-key-release.test.ts",
+      "summary": "tee-key-release.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 312 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-key-release.test.ts:evidence",
+      "type": "function",
+      "name": "evidence",
+      "filePath": "eliza/packages/agent/src/services/tee-key-release.test.ts",
+      "summary": "evidence is a function defined in eliza/packages/agent/src/services/tee-key-release.test.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/agent/src/services/tee-key-release.ts",
+      "type": "file",
+      "name": "tee-key-release.ts",
+      "filePath": "eliza/packages/agent/src/services/tee-key-release.ts",
+      "summary": "tee-key-release.ts is a typescript source file in the Milady codebase. It contains 12 functions, 2 classes, 2 imports.",
+      "languageNotes": "typescript; code; 497 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-key-release.ts:deriveWrapKey",
+      "type": "function",
+      "name": "deriveWrapKey",
+      "filePath": "eliza/packages/agent/src/services/tee-key-release.ts",
+      "summary": "deriveWrapKey is a function defined in eliza/packages/agent/src/services/tee-key-release.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-key-release.ts:wrapTeeReleaseKey",
+      "type": "function",
+      "name": "wrapTeeReleaseKey",
+      "filePath": "eliza/packages/agent/src/services/tee-key-release.ts",
+      "summary": "wrapTeeReleaseKey is a function defined in eliza/packages/agent/src/services/tee-key-release.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-key-release.ts:unwrapTeeReleaseKey",
+      "type": "function",
+      "name": "unwrapTeeReleaseKey",
+      "filePath": "eliza/packages/agent/src/services/tee-key-release.ts",
+      "summary": "unwrapTeeReleaseKey is a function defined in eliza/packages/agent/src/services/tee-key-release.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-key-release.ts:parseWrappedTeeKey",
+      "type": "function",
+      "name": "parseWrappedTeeKey",
+      "filePath": "eliza/packages/agent/src/services/tee-key-release.ts",
+      "summary": "parseWrappedTeeKey is a function defined in eliza/packages/agent/src/services/tee-key-release.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-key-release.ts:createReportDataBinding",
+      "type": "function",
+      "name": "createReportDataBinding",
+      "filePath": "eliza/packages/agent/src/services/tee-key-release.ts",
+      "summary": "createReportDataBinding is a function defined in eliza/packages/agent/src/services/tee-key-release.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-key-release.ts:collectEvidenceBoundToReportData",
+      "type": "function",
+      "name": "collectEvidenceBoundToReportData",
+      "filePath": "eliza/packages/agent/src/services/tee-key-release.ts",
+      "summary": "collectEvidenceBoundToReportData is a function defined in eliza/packages/agent/src/services/tee-key-release.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-key-release.ts:assertEvidenceReportDataMatches",
+      "type": "function",
+      "name": "assertEvidenceReportDataMatches",
+      "filePath": "eliza/packages/agent/src/services/tee-key-release.ts",
+      "summary": "assertEvidenceReportDataMatches is a function defined in eliza/packages/agent/src/services/tee-key-release.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-key-release.ts:deriveKeyMaterial",
+      "type": "function",
+      "name": "deriveKeyMaterial",
+      "filePath": "eliza/packages/agent/src/services/tee-key-release.ts",
+      "summary": "deriveKeyMaterial is a function defined in eliza/packages/agent/src/services/tee-key-release.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-key-release.ts:readJsonResponse",
+      "type": "function",
+      "name": "readJsonResponse",
+      "filePath": "eliza/packages/agent/src/services/tee-key-release.ts",
+      "summary": "readJsonResponse is a function defined in eliza/packages/agent/src/services/tee-key-release.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-key-release.ts:constantTimeStringEquals",
+      "type": "function",
+      "name": "constantTimeStringEquals",
+      "filePath": "eliza/packages/agent/src/services/tee-key-release.ts",
+      "summary": "constantTimeStringEquals is a function defined in eliza/packages/agent/src/services/tee-key-release.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-key-release.ts:normalizeBaseUrl",
+      "type": "function",
+      "name": "normalizeBaseUrl",
+      "filePath": "eliza/packages/agent/src/services/tee-key-release.ts",
+      "summary": "normalizeBaseUrl is a function defined in eliza/packages/agent/src/services/tee-key-release.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-key-release.ts:assertSecureTransportEnv",
+      "type": "function",
+      "name": "assertSecureTransportEnv",
+      "filePath": "eliza/packages/agent/src/services/tee-key-release.ts",
+      "summary": "assertSecureTransportEnv is a function defined in eliza/packages/agent/src/services/tee-key-release.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/agent/src/services/tee-key-release.ts:LocalTeeKeyReleaseClient",
+      "type": "class",
+      "name": "LocalTeeKeyReleaseClient",
+      "filePath": "eliza/packages/agent/src/services/tee-key-release.ts",
+      "summary": "LocalTeeKeyReleaseClient is a class or type declared in eliza/packages/agent/src/services/tee-key-release.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/agent/src/services/tee-key-release.ts:HttpTeeKeyReleaseClient",
+      "type": "class",
+      "name": "HttpTeeKeyReleaseClient",
+      "filePath": "eliza/packages/agent/src/services/tee-key-release.ts",
+      "summary": "HttpTeeKeyReleaseClient is a class or type declared in eliza/packages/agent/src/services/tee-key-release.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/agent/src/services/tee-model-key-boot.test.ts",
+      "type": "file",
+      "name": "tee-model-key-boot.test.ts",
+      "filePath": "eliza/packages/agent/src/services/tee-model-key-boot.test.ts",
+      "summary": "tee-model-key-boot.test.ts is a typescript source file in the Milady codebase. It contains 3 functions, 5 imports.",
+      "languageNotes": "typescript; code; 326 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-model-key-boot.test.ts:policy",
+      "type": "function",
+      "name": "policy",
+      "filePath": "eliza/packages/agent/src/services/tee-model-key-boot.test.ts",
+      "summary": "policy is a function defined in eliza/packages/agent/src/services/tee-model-key-boot.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-model-key-boot.test.ts:sealWith",
+      "type": "function",
+      "name": "sealWith",
+      "filePath": "eliza/packages/agent/src/services/tee-model-key-boot.test.ts",
+      "summary": "sealWith is a function defined in eliza/packages/agent/src/services/tee-model-key-boot.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-model-key-boot.test.ts:fixtureKeyReleaseClient",
+      "type": "function",
+      "name": "fixtureKeyReleaseClient",
+      "filePath": "eliza/packages/agent/src/services/tee-model-key-boot.test.ts",
+      "summary": "fixtureKeyReleaseClient is a function defined in eliza/packages/agent/src/services/tee-model-key-boot.test.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/agent/src/services/tee-model-key-boot.ts",
+      "type": "file",
+      "name": "tee-model-key-boot.ts",
+      "filePath": "eliza/packages/agent/src/services/tee-model-key-boot.ts",
+      "summary": "tee-model-key-boot.ts is a typescript source file in the Milady codebase. It contains 4 functions, 5 imports.",
+      "languageNotes": "typescript; code; 152 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-model-key-boot.ts:confidentialWeightsEnabled",
+      "type": "function",
+      "name": "confidentialWeightsEnabled",
+      "filePath": "eliza/packages/agent/src/services/tee-model-key-boot.ts",
+      "summary": "confidentialWeightsEnabled is a function defined in eliza/packages/agent/src/services/tee-model-key-boot.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-model-key-boot.ts:prepareConfidentialModelWeights",
+      "type": "function",
+      "name": "prepareConfidentialModelWeights",
+      "filePath": "eliza/packages/agent/src/services/tee-model-key-boot.ts",
+      "summary": "prepareConfidentialModelWeights is a function defined in eliza/packages/agent/src/services/tee-model-key-boot.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-model-key-boot.ts:prepareConfidentialModelWeightsStreaming",
+      "type": "function",
+      "name": "prepareConfidentialModelWeightsStreaming",
+      "filePath": "eliza/packages/agent/src/services/tee-model-key-boot.ts",
+      "summary": "prepareConfidentialModelWeightsStreaming is a function defined in eliza/packages/agent/src/services/tee-model-key-boot.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-model-key-boot.ts:assertBootGateAllowsModelKey",
+      "type": "function",
+      "name": "assertBootGateAllowsModelKey",
+      "filePath": "eliza/packages/agent/src/services/tee-model-key-boot.ts",
+      "summary": "assertBootGateAllowsModelKey is a function defined in eliza/packages/agent/src/services/tee-model-key-boot.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/agent/src/services/tee-npu-gate.test.ts",
+      "type": "file",
+      "name": "tee-npu-gate.test.ts",
+      "filePath": "eliza/packages/agent/src/services/tee-npu-gate.test.ts",
+      "summary": "tee-npu-gate.test.ts is a typescript source file in the Milady codebase. It contains 6 functions, 3 imports.",
+      "languageNotes": "typescript; code; 353 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-npu-gate.test.ts:baseLocalPolicy",
+      "type": "function",
+      "name": "baseLocalPolicy",
+      "filePath": "eliza/packages/agent/src/services/tee-npu-gate.test.ts",
+      "summary": "baseLocalPolicy is a function defined in eliza/packages/agent/src/services/tee-npu-gate.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-npu-gate.test.ts:cloudPolicy",
+      "type": "function",
+      "name": "cloudPolicy",
+      "filePath": "eliza/packages/agent/src/services/tee-npu-gate.test.ts",
+      "summary": "cloudPolicy is a function defined in eliza/packages/agent/src/services/tee-npu-gate.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-npu-gate.test.ts:localEvidence",
+      "type": "function",
+      "name": "localEvidence",
+      "filePath": "eliza/packages/agent/src/services/tee-npu-gate.test.ts",
+      "summary": "localEvidence is a function defined in eliza/packages/agent/src/services/tee-npu-gate.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-npu-gate.test.ts:cloudEvidence",
+      "type": "function",
+      "name": "cloudEvidence",
+      "filePath": "eliza/packages/agent/src/services/tee-npu-gate.test.ts",
+      "summary": "cloudEvidence is a function defined in eliza/packages/agent/src/services/tee-npu-gate.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-npu-gate.test.ts:sealWith",
+      "type": "function",
+      "name": "sealWith",
+      "filePath": "eliza/packages/agent/src/services/tee-npu-gate.test.ts",
+      "summary": "sealWith is a function defined in eliza/packages/agent/src/services/tee-npu-gate.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-npu-gate.test.ts:fixtureKeyReleaseClient",
+      "type": "function",
+      "name": "fixtureKeyReleaseClient",
+      "filePath": "eliza/packages/agent/src/services/tee-npu-gate.test.ts",
+      "summary": "fixtureKeyReleaseClient is a function defined in eliza/packages/agent/src/services/tee-npu-gate.test.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/agent/src/services/tee-policy.test.ts",
+      "type": "file",
+      "name": "tee-policy.test.ts",
+      "filePath": "eliza/packages/agent/src/services/tee-policy.test.ts",
+      "summary": "tee-policy.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 189 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/agent/src/services/tee-policy.ts",
+      "type": "file",
+      "name": "tee-policy.ts",
+      "filePath": "eliza/packages/agent/src/services/tee-policy.ts",
+      "summary": "tee-policy.ts is a typescript source file in the Milady codebase. It contains 5 functions, 1 imports.",
+      "languageNotes": "typescript; code; 342 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/agent/src/services/tee-policy.ts:evaluateTeeEvidencePolicy",
+      "type": "function",
+      "name": "evaluateTeeEvidencePolicy",
+      "filePath": "eliza/packages/agent/src/services/tee-policy.ts",
+      "summary": "evaluateTeeEvidencePolicy is a function defined in eliza/packages/agent/src/services/tee-policy.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-policy.ts:detectSimulatedEvidence",
+      "type": "function",
+      "name": "detectSimulatedEvidence",
+      "filePath": "eliza/packages/agent/src/services/tee-policy.ts",
+      "summary": "detectSimulatedEvidence is a function defined in eliza/packages/agent/src/services/tee-policy.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-policy.ts:isSimulatedVerifier",
+      "type": "function",
+      "name": "isSimulatedVerifier",
+      "filePath": "eliza/packages/agent/src/services/tee-policy.ts",
+      "summary": "isSimulatedVerifier is a function defined in eliza/packages/agent/src/services/tee-policy.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-policy.ts:evaluateNonce",
+      "type": "function",
+      "name": "evaluateNonce",
+      "filePath": "eliza/packages/agent/src/services/tee-policy.ts",
+      "summary": "evaluateNonce is a function defined in eliza/packages/agent/src/services/tee-policy.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-policy.ts:evaluateTimestamp",
+      "type": "function",
+      "name": "evaluateTimestamp",
+      "filePath": "eliza/packages/agent/src/services/tee-policy.ts",
+      "summary": "evaluateTimestamp is a function defined in eliza/packages/agent/src/services/tee-policy.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/agent/src/services/tee-production-profile.test.ts",
+      "type": "file",
+      "name": "tee-production-profile.test.ts",
+      "filePath": "eliza/packages/agent/src/services/tee-production-profile.test.ts",
+      "summary": "tee-production-profile.test.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 124 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/agent/src/services/tee-production-profile.ts",
+      "type": "file",
+      "name": "tee-production-profile.ts",
+      "filePath": "eliza/packages/agent/src/services/tee-production-profile.ts",
+      "summary": "tee-production-profile.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 102 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-production-profile.ts:teeProductionProfile",
+      "type": "function",
+      "name": "teeProductionProfile",
+      "filePath": "eliza/packages/agent/src/services/tee-production-profile.ts",
+      "summary": "teeProductionProfile is a function defined in eliza/packages/agent/src/services/tee-production-profile.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-production-profile.ts:mergeTeeProductionProfile",
+      "type": "function",
+      "name": "mergeTeeProductionProfile",
+      "filePath": "eliza/packages/agent/src/services/tee-production-profile.ts",
+      "summary": "mergeTeeProductionProfile is a function defined in eliza/packages/agent/src/services/tee-production-profile.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/agent/src/services/tee-release-policy.test.ts",
+      "type": "file",
+      "name": "tee-release-policy.test.ts",
+      "filePath": "eliza/packages/agent/src/services/tee-release-policy.test.ts",
+      "summary": "tee-release-policy.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 88 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/agent/src/services/tee-release-policy.ts",
+      "type": "file",
+      "name": "tee-release-policy.ts",
+      "filePath": "eliza/packages/agent/src/services/tee-release-policy.ts",
+      "summary": "tee-release-policy.ts is a typescript source file in the Milady codebase. It contains 4 functions, 2 imports.",
+      "languageNotes": "typescript; code; 85 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-release-policy.ts:teePolicyFromReleaseManifest",
+      "type": "function",
+      "name": "teePolicyFromReleaseManifest",
+      "filePath": "eliza/packages/agent/src/services/tee-release-policy.ts",
+      "summary": "teePolicyFromReleaseManifest is a function defined in eliza/packages/agent/src/services/tee-release-policy.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-release-policy.ts:normalizeProviders",
+      "type": "function",
+      "name": "normalizeProviders",
+      "filePath": "eliza/packages/agent/src/services/tee-release-policy.ts",
+      "summary": "normalizeProviders is a function defined in eliza/packages/agent/src/services/tee-release-policy.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-release-policy.ts:normalizeMeasurements",
+      "type": "function",
+      "name": "normalizeMeasurements",
+      "filePath": "eliza/packages/agent/src/services/tee-release-policy.ts",
+      "summary": "normalizeMeasurements is a function defined in eliza/packages/agent/src/services/tee-release-policy.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-release-policy.ts:normalizeClaims",
+      "type": "function",
+      "name": "normalizeClaims",
+      "filePath": "eliza/packages/agent/src/services/tee-release-policy.ts",
+      "summary": "normalizeClaims is a function defined in eliza/packages/agent/src/services/tee-release-policy.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/agent/src/services/tee-revocation-signature.test.ts",
+      "type": "file",
+      "name": "tee-revocation-signature.test.ts",
+      "filePath": "eliza/packages/agent/src/services/tee-revocation-signature.test.ts",
+      "summary": "tee-revocation-signature.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 109 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-revocation-signature.test.ts:ed25519Authority",
+      "type": "function",
+      "name": "ed25519Authority",
+      "filePath": "eliza/packages/agent/src/services/tee-revocation-signature.test.ts",
+      "summary": "ed25519Authority is a function defined in eliza/packages/agent/src/services/tee-revocation-signature.test.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/agent/src/services/tee-revocation.test.ts",
+      "type": "file",
+      "name": "tee-revocation.test.ts",
+      "filePath": "eliza/packages/agent/src/services/tee-revocation.test.ts",
+      "summary": "tee-revocation.test.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 81 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/agent/src/services/tee-revocation.ts",
+      "type": "file",
+      "name": "tee-revocation.ts",
+      "filePath": "eliza/packages/agent/src/services/tee-revocation.ts",
+      "summary": "tee-revocation.ts is a typescript source file in the Milady codebase. It contains 10 functions, 2 imports.",
+      "languageNotes": "typescript; code; 247 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-revocation.ts:verifyTeeRevocationManifest",
+      "type": "function",
+      "name": "verifyTeeRevocationManifest",
+      "filePath": "eliza/packages/agent/src/services/tee-revocation.ts",
+      "summary": "verifyTeeRevocationManifest is a function defined in eliza/packages/agent/src/services/tee-revocation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-revocation.ts:canonicalizeRevocationBody",
+      "type": "function",
+      "name": "canonicalizeRevocationBody",
+      "filePath": "eliza/packages/agent/src/services/tee-revocation.ts",
+      "summary": "canonicalizeRevocationBody is a function defined in eliza/packages/agent/src/services/tee-revocation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-revocation.ts:stableStringify",
+      "type": "function",
+      "name": "stableStringify",
+      "filePath": "eliza/packages/agent/src/services/tee-revocation.ts",
+      "summary": "stableStringify is a function defined in eliza/packages/agent/src/services/tee-revocation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-revocation.ts:mergeTeeRevocationsIntoPolicy",
+      "type": "function",
+      "name": "mergeTeeRevocationsIntoPolicy",
+      "filePath": "eliza/packages/agent/src/services/tee-revocation.ts",
+      "summary": "mergeTeeRevocationsIntoPolicy is a function defined in eliza/packages/agent/src/services/tee-revocation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-revocation.ts:normalizeTeeRevocationManifest",
+      "type": "function",
+      "name": "normalizeTeeRevocationManifest",
+      "filePath": "eliza/packages/agent/src/services/tee-revocation.ts",
+      "summary": "normalizeTeeRevocationManifest is a function defined in eliza/packages/agent/src/services/tee-revocation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-revocation.ts:normalizeRevocationValue",
+      "type": "function",
+      "name": "normalizeRevocationValue",
+      "filePath": "eliza/packages/agent/src/services/tee-revocation.ts",
+      "summary": "normalizeRevocationValue is a function defined in eliza/packages/agent/src/services/tee-revocation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-revocation.ts:mergeRevokedMeasurements",
+      "type": "function",
+      "name": "mergeRevokedMeasurements",
+      "filePath": "eliza/packages/agent/src/services/tee-revocation.ts",
+      "summary": "mergeRevokedMeasurements is a function defined in eliza/packages/agent/src/services/tee-revocation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-revocation.ts:mergeNumbers",
+      "type": "function",
+      "name": "mergeNumbers",
+      "filePath": "eliza/packages/agent/src/services/tee-revocation.ts",
+      "summary": "mergeNumbers is a function defined in eliza/packages/agent/src/services/tee-revocation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-revocation.ts:dedupeStrings",
+      "type": "function",
+      "name": "dedupeStrings",
+      "filePath": "eliza/packages/agent/src/services/tee-revocation.ts",
+      "summary": "dedupeStrings is a function defined in eliza/packages/agent/src/services/tee-revocation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-revocation.ts:dedupeNumbers",
+      "type": "function",
+      "name": "dedupeNumbers",
+      "filePath": "eliza/packages/agent/src/services/tee-revocation.ts",
+      "summary": "dedupeNumbers is a function defined in eliza/packages/agent/src/services/tee-revocation.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/agent/src/services/tee-runtime-config.test.ts",
+      "type": "file",
+      "name": "tee-runtime-config.test.ts",
+      "filePath": "eliza/packages/agent/src/services/tee-runtime-config.test.ts",
+      "summary": "tee-runtime-config.test.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 150 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/agent/src/services/tee-runtime-config.ts",
+      "type": "file",
+      "name": "tee-runtime-config.ts",
+      "filePath": "eliza/packages/agent/src/services/tee-runtime-config.ts",
+      "summary": "tee-runtime-config.ts is a typescript source file in the Milady codebase. It contains 8 functions, 3 imports.",
+      "languageNotes": "typescript; code; 210 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:resolveTeeRuntimePolicy",
+      "type": "function",
+      "name": "resolveTeeRuntimePolicy",
+      "filePath": "eliza/packages/agent/src/services/tee-runtime-config.ts",
+      "summary": "resolveTeeRuntimePolicy is a function defined in eliza/packages/agent/src/services/tee-runtime-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:normalizeRuntimePolicy",
+      "type": "function",
+      "name": "normalizeRuntimePolicy",
+      "filePath": "eliza/packages/agent/src/services/tee-runtime-config.ts",
+      "summary": "normalizeRuntimePolicy is a function defined in eliza/packages/agent/src/services/tee-runtime-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:withRuntimeRevocations",
+      "type": "function",
+      "name": "withRuntimeRevocations",
+      "filePath": "eliza/packages/agent/src/services/tee-runtime-config.ts",
+      "summary": "withRuntimeRevocations is a function defined in eliza/packages/agent/src/services/tee-runtime-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:verifiedRevocationManifest",
+      "type": "function",
+      "name": "verifiedRevocationManifest",
+      "filePath": "eliza/packages/agent/src/services/tee-runtime-config.ts",
+      "summary": "verifiedRevocationManifest is a function defined in eliza/packages/agent/src/services/tee-runtime-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:resolveRevocationAuthorities",
+      "type": "function",
+      "name": "resolveRevocationAuthorities",
+      "filePath": "eliza/packages/agent/src/services/tee-runtime-config.ts",
+      "summary": "resolveRevocationAuthorities is a function defined in eliza/packages/agent/src/services/tee-runtime-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:decodePublicKeyPem",
+      "type": "function",
+      "name": "decodePublicKeyPem",
+      "filePath": "eliza/packages/agent/src/services/tee-runtime-config.ts",
+      "summary": "decodePublicKeyPem is a function defined in eliza/packages/agent/src/services/tee-runtime-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:runtimePolicyOptions",
+      "type": "function",
+      "name": "runtimePolicyOptions",
+      "filePath": "eliza/packages/agent/src/services/tee-runtime-config.ts",
+      "summary": "runtimePolicyOptions is a function defined in eliza/packages/agent/src/services/tee-runtime-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:parseOptionalPositiveInteger",
+      "type": "function",
+      "name": "parseOptionalPositiveInteger",
+      "filePath": "eliza/packages/agent/src/services/tee-runtime-config.ts",
+      "summary": "parseOptionalPositiveInteger is a function defined in eliza/packages/agent/src/services/tee-runtime-config.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/agent/src/services/tee-sealed-volume.test.ts",
+      "type": "file",
+      "name": "tee-sealed-volume.test.ts",
+      "filePath": "eliza/packages/agent/src/services/tee-sealed-volume.test.ts",
+      "summary": "tee-sealed-volume.test.ts is a typescript source file in the Milady codebase. It contains 4 functions, 5 imports.",
+      "languageNotes": "typescript; code; 255 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-sealed-volume.test.ts:evidenceWith",
+      "type": "function",
+      "name": "evidenceWith",
+      "filePath": "eliza/packages/agent/src/services/tee-sealed-volume.test.ts",
+      "summary": "evidenceWith is a function defined in eliza/packages/agent/src/services/tee-sealed-volume.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-sealed-volume.test.ts:providerFor",
+      "type": "function",
+      "name": "providerFor",
+      "filePath": "eliza/packages/agent/src/services/tee-sealed-volume.test.ts",
+      "summary": "providerFor is a function defined in eliza/packages/agent/src/services/tee-sealed-volume.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-sealed-volume.test.ts:clientFor",
+      "type": "function",
+      "name": "clientFor",
+      "filePath": "eliza/packages/agent/src/services/tee-sealed-volume.test.ts",
+      "summary": "clientFor is a function defined in eliza/packages/agent/src/services/tee-sealed-volume.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-sealed-volume.test.ts:policy",
+      "type": "function",
+      "name": "policy",
+      "filePath": "eliza/packages/agent/src/services/tee-sealed-volume.test.ts",
+      "summary": "policy is a function defined in eliza/packages/agent/src/services/tee-sealed-volume.test.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/agent/src/services/tee-sealed-volume.ts",
+      "type": "file",
+      "name": "tee-sealed-volume.ts",
+      "filePath": "eliza/packages/agent/src/services/tee-sealed-volume.ts",
+      "summary": "tee-sealed-volume.ts is a typescript source file in the Milady codebase. It contains 6 functions, 4 imports.",
+      "languageNotes": "typescript; code; 257 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-sealed-volume.ts:unsealStateVolumeKey",
+      "type": "function",
+      "name": "unsealStateVolumeKey",
+      "filePath": "eliza/packages/agent/src/services/tee-sealed-volume.ts",
+      "summary": "unsealStateVolumeKey is a function defined in eliza/packages/agent/src/services/tee-sealed-volume.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-sealed-volume.ts:sealVolumeMetadata",
+      "type": "function",
+      "name": "sealVolumeMetadata",
+      "filePath": "eliza/packages/agent/src/services/tee-sealed-volume.ts",
+      "summary": "sealVolumeMetadata is a function defined in eliza/packages/agent/src/services/tee-sealed-volume.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-sealed-volume.ts:openSealedVolumeMetadata",
+      "type": "function",
+      "name": "openSealedVolumeMetadata",
+      "filePath": "eliza/packages/agent/src/services/tee-sealed-volume.ts",
+      "summary": "openSealedVolumeMetadata is a function defined in eliza/packages/agent/src/services/tee-sealed-volume.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-sealed-volume.ts:keyFromHex",
+      "type": "function",
+      "name": "keyFromHex",
+      "filePath": "eliza/packages/agent/src/services/tee-sealed-volume.ts",
+      "summary": "keyFromHex is a function defined in eliza/packages/agent/src/services/tee-sealed-volume.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-sealed-volume.ts:digestsEqual",
+      "type": "function",
+      "name": "digestsEqual",
+      "filePath": "eliza/packages/agent/src/services/tee-sealed-volume.ts",
+      "summary": "digestsEqual is a function defined in eliza/packages/agent/src/services/tee-sealed-volume.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-sealed-volume.ts:assertPolicyGatesRequiredMeasurements",
+      "type": "function",
+      "name": "assertPolicyGatesRequiredMeasurements",
+      "filePath": "eliza/packages/agent/src/services/tee-sealed-volume.ts",
+      "summary": "assertPolicyGatesRequiredMeasurements is a function defined in eliza/packages/agent/src/services/tee-sealed-volume.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/agent/src/services/tee-signer-backend.test.ts",
+      "type": "file",
+      "name": "tee-signer-backend.test.ts",
+      "filePath": "eliza/packages/agent/src/services/tee-signer-backend.test.ts",
+      "summary": "tee-signer-backend.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 70 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-signer-backend.test.ts:signerBackend",
+      "type": "function",
+      "name": "signerBackend",
+      "filePath": "eliza/packages/agent/src/services/tee-signer-backend.test.ts",
+      "summary": "signerBackend is a function defined in eliza/packages/agent/src/services/tee-signer-backend.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/tee-signer-backend.test.ts:evidence",
+      "type": "function",
+      "name": "evidence",
+      "filePath": "eliza/packages/agent/src/services/tee-signer-backend.test.ts",
+      "summary": "evidence is a function defined in eliza/packages/agent/src/services/tee-signer-backend.test.ts."
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/agent/src/services/tee-signer-backend.ts",
+      "type": "file",
+      "name": "tee-signer-backend.ts",
+      "filePath": "eliza/packages/agent/src/services/tee-signer-backend.ts",
+      "summary": "tee-signer-backend.ts is a typescript source file in the Milady codebase. It contains 1 class, 3 imports.",
+      "languageNotes": "typescript; code; 46 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/agent/src/services/tee-signer-backend.ts:TeeSignerBackend",
+      "type": "class",
+      "name": "TeeSignerBackend",
+      "filePath": "eliza/packages/agent/src/services/tee-signer-backend.ts",
+      "summary": "TeeSignerBackend is a class or type declared in eliza/packages/agent/src/services/tee-signer-backend.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/agent/src/services/vault-signer-backend.test.ts",
+      "type": "file",
+      "name": "vault-signer-backend.test.ts",
+      "filePath": "eliza/packages/agent/src/services/vault-signer-backend.test.ts",
+      "summary": "vault-signer-backend.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 4 imports.",
+      "languageNotes": "typescript; code; 91 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/vault-signer-backend.test.ts:vaultWith",
+      "type": "function",
+      "name": "vaultWith",
+      "filePath": "eliza/packages/agent/src/services/vault-signer-backend.test.ts",
+      "summary": "vaultWith is a function defined in eliza/packages/agent/src/services/vault-signer-backend.test.ts."
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/agent/src/services/vault-signer-backend.ts",
+      "type": "file",
+      "name": "vault-signer-backend.ts",
+      "filePath": "eliza/packages/agent/src/services/vault-signer-backend.ts",
+      "summary": "vault-signer-backend.ts is a typescript source file in the Milady codebase. It contains 1 class, 3 imports.",
+      "languageNotes": "typescript; code; 78 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/agent/src/services/vault-signer-backend.ts:VaultSignerBackend",
+      "type": "class",
+      "name": "VaultSignerBackend",
+      "filePath": "eliza/packages/agent/src/services/vault-signer-backend.ts",
+      "summary": "VaultSignerBackend is a class or type declared in eliza/packages/agent/src/services/vault-signer-backend.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-key-release.test.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-key-release.test.ts:evidence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-key-release.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-key-release.ts:deriveWrapKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-key-release.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-key-release.ts:wrapTeeReleaseKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-key-release.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-key-release.ts:unwrapTeeReleaseKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-key-release.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-key-release.ts:parseWrappedTeeKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-key-release.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-key-release.ts:createReportDataBinding",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-key-release.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-key-release.ts:collectEvidenceBoundToReportData",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-key-release.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-key-release.ts:assertEvidenceReportDataMatches",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-key-release.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-key-release.ts:deriveKeyMaterial",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-key-release.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-key-release.ts:readJsonResponse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-key-release.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-key-release.ts:constantTimeStringEquals",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-key-release.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-key-release.ts:normalizeBaseUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-key-release.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-key-release.ts:assertSecureTransportEnv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-key-release.ts",
+      "target": "class:eliza/packages/agent/src/services/tee-key-release.ts:LocalTeeKeyReleaseClient",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-key-release.ts",
+      "target": "class:eliza/packages/agent/src/services/tee-key-release.ts:HttpTeeKeyReleaseClient",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-key-release.ts:wrapTeeReleaseKey",
+      "target": "function:eliza/packages/agent/src/services/tee-key-release.ts:deriveWrapKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-key-release.ts:unwrapTeeReleaseKey",
+      "target": "function:eliza/packages/agent/src/services/tee-key-release.ts:deriveWrapKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-key-release.ts:assertEvidenceReportDataMatches",
+      "target": "function:eliza/packages/agent/src/services/tee-key-release.ts:constantTimeStringEquals",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-model-key-boot.test.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-model-key-boot.test.ts:policy",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-model-key-boot.test.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-model-key-boot.test.ts:sealWith",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-model-key-boot.test.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-model-key-boot.test.ts:fixtureKeyReleaseClient",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-model-key-boot.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-model-key-boot.ts:confidentialWeightsEnabled",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-model-key-boot.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-model-key-boot.ts:prepareConfidentialModelWeights",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-model-key-boot.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-model-key-boot.ts:prepareConfidentialModelWeightsStreaming",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-model-key-boot.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-model-key-boot.ts:assertBootGateAllowsModelKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-model-key-boot.ts:prepareConfidentialModelWeights",
+      "target": "function:eliza/packages/agent/src/services/tee-model-key-boot.ts:confidentialWeightsEnabled",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-model-key-boot.ts:prepareConfidentialModelWeights",
+      "target": "function:eliza/packages/agent/src/services/tee-model-key-boot.ts:assertBootGateAllowsModelKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-model-key-boot.ts:prepareConfidentialModelWeightsStreaming",
+      "target": "function:eliza/packages/agent/src/services/tee-model-key-boot.ts:confidentialWeightsEnabled",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-model-key-boot.ts:prepareConfidentialModelWeightsStreaming",
+      "target": "function:eliza/packages/agent/src/services/tee-model-key-boot.ts:assertBootGateAllowsModelKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-npu-gate.test.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-npu-gate.test.ts:baseLocalPolicy",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-npu-gate.test.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-npu-gate.test.ts:cloudPolicy",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-npu-gate.test.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-npu-gate.test.ts:localEvidence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-npu-gate.test.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-npu-gate.test.ts:cloudEvidence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-npu-gate.test.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-npu-gate.test.ts:sealWith",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-npu-gate.test.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-npu-gate.test.ts:fixtureKeyReleaseClient",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-policy.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-policy.ts:evaluateTeeEvidencePolicy",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-policy.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-policy.ts:detectSimulatedEvidence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-policy.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-policy.ts:isSimulatedVerifier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-policy.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-policy.ts:evaluateNonce",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-policy.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-policy.ts:evaluateTimestamp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-policy.ts:evaluateTeeEvidencePolicy",
+      "target": "function:eliza/packages/agent/src/services/tee-policy.ts:detectSimulatedEvidence",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-policy.ts:evaluateTeeEvidencePolicy",
+      "target": "function:eliza/packages/agent/src/services/tee-policy.ts:evaluateNonce",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-policy.ts:evaluateTeeEvidencePolicy",
+      "target": "function:eliza/packages/agent/src/services/tee-policy.ts:evaluateTimestamp",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-policy.ts:detectSimulatedEvidence",
+      "target": "function:eliza/packages/agent/src/services/tee-policy.ts:isSimulatedVerifier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-production-profile.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-production-profile.ts:teeProductionProfile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-production-profile.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-production-profile.ts:mergeTeeProductionProfile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-production-profile.ts:mergeTeeProductionProfile",
+      "target": "function:eliza/packages/agent/src/services/tee-production-profile.ts:teeProductionProfile",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-release-policy.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-release-policy.ts:teePolicyFromReleaseManifest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-release-policy.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-release-policy.ts:normalizeProviders",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-release-policy.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-release-policy.ts:normalizeMeasurements",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-release-policy.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-release-policy.ts:normalizeClaims",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-release-policy.ts:teePolicyFromReleaseManifest",
+      "target": "function:eliza/packages/agent/src/services/tee-release-policy.ts:normalizeProviders",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-release-policy.ts:teePolicyFromReleaseManifest",
+      "target": "function:eliza/packages/agent/src/services/tee-release-policy.ts:normalizeMeasurements",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-release-policy.ts:teePolicyFromReleaseManifest",
+      "target": "function:eliza/packages/agent/src/services/tee-release-policy.ts:normalizeClaims",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-revocation-signature.test.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-revocation-signature.test.ts:ed25519Authority",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-revocation.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-revocation.ts:verifyTeeRevocationManifest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-revocation.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-revocation.ts:canonicalizeRevocationBody",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-revocation.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-revocation.ts:stableStringify",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-revocation.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-revocation.ts:mergeTeeRevocationsIntoPolicy",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-revocation.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-revocation.ts:normalizeTeeRevocationManifest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-revocation.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-revocation.ts:normalizeRevocationValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-revocation.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-revocation.ts:mergeRevokedMeasurements",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-revocation.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-revocation.ts:mergeNumbers",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-revocation.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-revocation.ts:dedupeStrings",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-revocation.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-revocation.ts:dedupeNumbers",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-revocation.ts:verifyTeeRevocationManifest",
+      "target": "function:eliza/packages/agent/src/services/tee-revocation.ts:canonicalizeRevocationBody",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-revocation.ts:canonicalizeRevocationBody",
+      "target": "function:eliza/packages/agent/src/services/tee-revocation.ts:stableStringify",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-revocation.ts:mergeTeeRevocationsIntoPolicy",
+      "target": "function:eliza/packages/agent/src/services/tee-revocation.ts:normalizeTeeRevocationManifest",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-revocation.ts:mergeTeeRevocationsIntoPolicy",
+      "target": "function:eliza/packages/agent/src/services/tee-revocation.ts:mergeRevokedMeasurements",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-revocation.ts:mergeTeeRevocationsIntoPolicy",
+      "target": "function:eliza/packages/agent/src/services/tee-revocation.ts:mergeNumbers",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-revocation.ts:normalizeTeeRevocationManifest",
+      "target": "function:eliza/packages/agent/src/services/tee-revocation.ts:normalizeRevocationValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-revocation.ts:normalizeTeeRevocationManifest",
+      "target": "function:eliza/packages/agent/src/services/tee-revocation.ts:dedupeStrings",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-revocation.ts:normalizeTeeRevocationManifest",
+      "target": "function:eliza/packages/agent/src/services/tee-revocation.ts:dedupeNumbers",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-revocation.ts:normalizeTeeRevocationManifest",
+      "target": "function:eliza/packages/agent/src/services/tee-revocation.ts:normalizeRevocationValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-revocation.ts:mergeRevokedMeasurements",
+      "target": "function:eliza/packages/agent/src/services/tee-revocation.ts:dedupeStrings",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-revocation.ts:mergeRevokedMeasurements",
+      "target": "function:eliza/packages/agent/src/services/tee-revocation.ts:dedupeStrings",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-revocation.ts:mergeNumbers",
+      "target": "function:eliza/packages/agent/src/services/tee-revocation.ts:dedupeNumbers",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-runtime-config.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:resolveTeeRuntimePolicy",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-runtime-config.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:normalizeRuntimePolicy",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-runtime-config.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:withRuntimeRevocations",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-runtime-config.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:verifiedRevocationManifest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-runtime-config.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:resolveRevocationAuthorities",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-runtime-config.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:decodePublicKeyPem",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-runtime-config.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:runtimePolicyOptions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-runtime-config.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:parseOptionalPositiveInteger",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:resolveTeeRuntimePolicy",
+      "target": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:withRuntimeRevocations",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:resolveTeeRuntimePolicy",
+      "target": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:normalizeRuntimePolicy",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:resolveTeeRuntimePolicy",
+      "target": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:withRuntimeRevocations",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:resolveTeeRuntimePolicy",
+      "target": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:normalizeRuntimePolicy",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:resolveTeeRuntimePolicy",
+      "target": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:withRuntimeRevocations",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:resolveTeeRuntimePolicy",
+      "target": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:runtimePolicyOptions",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:resolveTeeRuntimePolicy",
+      "target": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:withRuntimeRevocations",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:resolveTeeRuntimePolicy",
+      "target": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:runtimePolicyOptions",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:resolveTeeRuntimePolicy",
+      "target": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:withRuntimeRevocations",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:resolveTeeRuntimePolicy",
+      "target": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:runtimePolicyOptions",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:normalizeRuntimePolicy",
+      "target": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:runtimePolicyOptions",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:withRuntimeRevocations",
+      "target": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:verifiedRevocationManifest",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:withRuntimeRevocations",
+      "target": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:verifiedRevocationManifest",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:verifiedRevocationManifest",
+      "target": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:resolveRevocationAuthorities",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:resolveRevocationAuthorities",
+      "target": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:decodePublicKeyPem",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:runtimePolicyOptions",
+      "target": "function:eliza/packages/agent/src/services/tee-runtime-config.ts:parseOptionalPositiveInteger",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-sealed-volume.test.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-sealed-volume.test.ts:evidenceWith",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-sealed-volume.test.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-sealed-volume.test.ts:providerFor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-sealed-volume.test.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-sealed-volume.test.ts:clientFor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-sealed-volume.test.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-sealed-volume.test.ts:policy",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-sealed-volume.test.ts:clientFor",
+      "target": "function:eliza/packages/agent/src/services/tee-sealed-volume.test.ts:providerFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-sealed-volume.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-sealed-volume.ts:unsealStateVolumeKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-sealed-volume.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-sealed-volume.ts:sealVolumeMetadata",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-sealed-volume.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-sealed-volume.ts:openSealedVolumeMetadata",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-sealed-volume.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-sealed-volume.ts:keyFromHex",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-sealed-volume.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-sealed-volume.ts:digestsEqual",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-sealed-volume.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-sealed-volume.ts:assertPolicyGatesRequiredMeasurements",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-sealed-volume.ts:unsealStateVolumeKey",
+      "target": "function:eliza/packages/agent/src/services/tee-sealed-volume.ts:assertPolicyGatesRequiredMeasurements",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-sealed-volume.ts:sealVolumeMetadata",
+      "target": "function:eliza/packages/agent/src/services/tee-sealed-volume.ts:keyFromHex",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-sealed-volume.ts:openSealedVolumeMetadata",
+      "target": "function:eliza/packages/agent/src/services/tee-sealed-volume.ts:keyFromHex",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/services/tee-sealed-volume.ts:openSealedVolumeMetadata",
+      "target": "function:eliza/packages/agent/src/services/tee-sealed-volume.ts:digestsEqual",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-signer-backend.test.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-signer-backend.test.ts:signerBackend",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-signer-backend.test.ts",
+      "target": "function:eliza/packages/agent/src/services/tee-signer-backend.test.ts:evidence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/tee-signer-backend.ts",
+      "target": "class:eliza/packages/agent/src/services/tee-signer-backend.ts:TeeSignerBackend",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/vault-signer-backend.test.ts",
+      "target": "function:eliza/packages/agent/src/services/vault-signer-backend.test.ts:vaultWith",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/vault-signer-backend.ts",
+      "target": "class:eliza/packages/agent/src/services/vault-signer-backend.ts:VaultSignerBackend",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-key-release.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-key-release.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-key-release.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-evidence.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-key-release.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-policy.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-model-key-boot.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-boot-gate-state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-model-key-boot.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-confidential-inference.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-model-key-boot.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-key-release.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-model-key-boot.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-model-key-boot.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-model-key-boot.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-policy.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-model-key-boot.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-boot-gate-state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-model-key-boot.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-confidential-inference.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-model-key-boot.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-evidence.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-model-key-boot.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-key-release.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-model-key-boot.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-policy.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-npu-gate.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-confidential-inference.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-npu-gate.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-key-release.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-npu-gate.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-policy.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-policy.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-policy.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-policy.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-evidence.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-production-profile.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-policy.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-production-profile.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-production-profile.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-production-profile.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-evidence.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-production-profile.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-policy.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-release-policy.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-release-policy.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-release-policy.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-evidence.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-release-policy.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-policy.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-revocation-signature.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-revocation.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-revocation.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-policy.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-revocation.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-revocation.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-revocation.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-evidence.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-revocation.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-policy.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-runtime-config.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-revocation.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-runtime-config.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-runtime-config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-runtime-config.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-policy.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-runtime-config.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-release-policy.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-runtime-config.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-revocation.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-sealed-volume.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-boot-gate-state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-sealed-volume.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-evidence.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-sealed-volume.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-key-release.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-sealed-volume.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-policy.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-sealed-volume.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-sealed-volume.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-sealed-volume.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-boot-gate-state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-sealed-volume.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-evidence.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-sealed-volume.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-key-release.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-sealed-volume.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-policy.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-signer-backend.test.ts",
+      "target": "file:eliza/packages/agent/src/services/remote-signing-service.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-signer-backend.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-signer-backend.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-signer-backend.ts",
+      "target": "file:eliza/packages/agent/src/services/remote-signing-service.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-signer-backend.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-evidence.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/tee-signer-backend.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-policy.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/vault-signer-backend.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-boot-gate-state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/vault-signer-backend.test.ts",
+      "target": "file:eliza/packages/agent/src/services/tee-boot-gate.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/vault-signer-backend.test.ts",
+      "target": "file:eliza/packages/agent/src/services/vault-signer-backend.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/vault-signer-backend.test.ts",
+      "target": "file:eliza/packages/vault/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/vault-signer-backend.ts",
+      "target": "file:eliza/packages/agent/src/runtime/agent-wallets.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/vault-signer-backend.ts",
+      "target": "file:eliza/packages/agent/src/services/remote-signing-service.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/services/vault-signer-backend.ts",
+      "target": "file:eliza/packages/vault/src/index.ts",
+      "type": "imports"
+    }
+  ]
+}

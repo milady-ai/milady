@@ -1,0 +1,202 @@
+{
+  "batchIndex": 251,
+  "nodes": [
+    {
+      "tags": [
+        "documentation",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:eliza/plugins/plugin-local-inference/native/verify/fixtures/dac_conv_t1d_parity.README.md",
+      "type": "document",
+      "name": "dac_conv_t1d_parity.README.md",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/fixtures/dac_conv_t1d_parity.README.md",
+      "summary": "dac_conv_t1d_parity.README.md documents eliza/plugins/plugin-local-inference/native/verify/fixtures with 113 lines of reference material.",
+      "languageNotes": "markdown; docs; 113 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/plugins/plugin-local-inference/native/verify/fixtures/fused_attn_qjl_polar.json",
+      "type": "config",
+      "name": "fused_attn_qjl_polar.json",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/fixtures/fused_attn_qjl_polar.json",
+      "summary": "fused_attn_qjl_polar.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 41 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/plugins/plugin-local-inference/native/verify/fixtures/fused_attn_qjl_polar_causal.json",
+      "type": "config",
+      "name": "fused_attn_qjl_polar_causal.json",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/fixtures/fused_attn_qjl_polar_causal.json",
+      "summary": "fused_attn_qjl_polar_causal.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 27 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/plugins/plugin-local-inference/native/verify/fixtures/fused_attn_qjl_tbq.json",
+      "type": "config",
+      "name": "fused_attn_qjl_tbq.json",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/fixtures/fused_attn_qjl_tbq.json",
+      "summary": "fused_attn_qjl_tbq.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 40 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/plugins/plugin-local-inference/native/verify/fixtures/fused_attn_qjl_tbq_causal.json",
+      "type": "config",
+      "name": "fused_attn_qjl_tbq_causal.json",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/fixtures/fused_attn_qjl_tbq_causal.json",
+      "summary": "fused_attn_qjl_tbq_causal.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 26 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/plugins/plugin-local-inference/native/verify/fixtures/istft.json",
+      "type": "config",
+      "name": "istft.json",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/fixtures/istft.json",
+      "summary": "istft.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 16 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/plugins/plugin-local-inference/native/verify/fixtures/polar.json",
+      "type": "config",
+      "name": "polar.json",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/fixtures/polar.json",
+      "summary": "polar.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 10 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/plugins/plugin-local-inference/native/verify/fixtures/polar_preht.json",
+      "type": "config",
+      "name": "polar_preht.json",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/fixtures/polar_preht.json",
+      "summary": "polar_preht.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 13 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/plugins/plugin-local-inference/native/verify/fixtures/polar_qjl.json",
+      "type": "config",
+      "name": "polar_qjl.json",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/fixtures/polar_qjl.json",
+      "summary": "polar_qjl.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 10 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/plugins/plugin-local-inference/native/verify/fixtures/qjl.json",
+      "type": "config",
+      "name": "qjl.json",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/fixtures/qjl.json",
+      "summary": "qjl.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 12 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/plugins/plugin-local-inference/native/verify/fixtures/text_lm_kquant_parity.README.md",
+      "type": "document",
+      "name": "text_lm_kquant_parity.README.md",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/fixtures/text_lm_kquant_parity.README.md",
+      "summary": "text_lm_kquant_parity.README.md documents eliza/plugins/plugin-local-inference/native/verify/fixtures with 67 lines of reference material.",
+      "languageNotes": "markdown; docs; 67 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/plugins/plugin-local-inference/native/verify/fixtures/turbo3.json",
+      "type": "config",
+      "name": "turbo3.json",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/fixtures/turbo3.json",
+      "summary": "turbo3.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 10 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/plugins/plugin-local-inference/native/verify/fixtures/turbo3_tcq.json",
+      "type": "config",
+      "name": "turbo3_tcq.json",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/fixtures/turbo3_tcq.json",
+      "summary": "turbo3_tcq.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 10 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/plugins/plugin-local-inference/native/verify/fixtures/turbo4.json",
+      "type": "config",
+      "name": "turbo4.json",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/fixtures/turbo4.json",
+      "summary": "turbo4.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 10 lines"
+    }
+  ],
+  "edges": []
+}

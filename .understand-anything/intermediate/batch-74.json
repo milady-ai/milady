@@ -1,0 +1,3485 @@
+{
+  "batchIndex": 74,
+  "nodes": [
+    {
+      "tags": [
+        "test",
+        "plugin",
+        "api",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-api.real.test.ts",
+      "type": "file",
+      "name": "cloud-api.real.test.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/cloud-api.real.test.ts",
+      "summary": "cloud-api.real.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 277 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-api.real.test.ts:setResponse",
+      "type": "function",
+      "name": "setResponse",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/cloud-api.real.test.ts",
+      "summary": "setResponse is a function defined in eliza/plugins/plugin-elizacloud/__tests__/cloud-api.real.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-api.real.test.ts:setTextResponse",
+      "type": "function",
+      "name": "setTextResponse",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/cloud-api.real.test.ts",
+      "summary": "setTextResponse is a function defined in eliza/plugins/plugin-elizacloud/__tests__/cloud-api.real.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-billing-routes.test.ts",
+      "type": "file",
+      "name": "cloud-billing-routes.test.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/cloud-billing-routes.test.ts",
+      "summary": "cloud-billing-routes.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "typescript; code; 118 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-billing-routes.test.ts:listen",
+      "type": "function",
+      "name": "listen",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/cloud-billing-routes.test.ts",
+      "summary": "listen is a function defined in eliza/plugins/plugin-elizacloud/__tests__/cloud-billing-routes.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-billing-routes.test.ts:close",
+      "type": "function",
+      "name": "close",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/cloud-billing-routes.test.ts",
+      "summary": "close is a function defined in eliza/plugins/plugin-elizacloud/__tests__/cloud-billing-routes.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-coding-container-routes.test.ts",
+      "type": "file",
+      "name": "cloud-coding-container-routes.test.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/cloud-coding-container-routes.test.ts",
+      "summary": "cloud-coding-container-routes.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 220 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-coding-container-routes.test.ts:requestWithBody",
+      "type": "function",
+      "name": "requestWithBody",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/cloud-coding-container-routes.test.ts",
+      "summary": "requestWithBody is a function defined in eliza/plugins/plugin-elizacloud/__tests__/cloud-coding-container-routes.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-coding-container-routes.test.ts:responseSink",
+      "type": "function",
+      "name": "responseSink",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/cloud-coding-container-routes.test.ts",
+      "summary": "responseSink is a function defined in eliza/plugins/plugin-elizacloud/__tests__/cloud-coding-container-routes.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-container-coding-service.test.ts",
+      "type": "file",
+      "name": "cloud-container-coding-service.test.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/cloud-container-coding-service.test.ts",
+      "summary": "cloud-container-coding-service.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 161 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-container-coding-service.test.ts:serviceWithClient",
+      "type": "function",
+      "name": "serviceWithClient",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/cloud-container-coding-service.test.ts",
+      "summary": "serviceWithClient is a function defined in eliza/plugins/plugin-elizacloud/__tests__/cloud-container-coding-service.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-credential-provider.test.ts",
+      "type": "file",
+      "name": "cloud-credential-provider.test.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/cloud-credential-provider.test.ts",
+      "summary": "cloud-credential-provider.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 223 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-credential-provider.test.ts:makeRuntime",
+      "type": "function",
+      "name": "makeRuntime",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/cloud-credential-provider.test.ts",
+      "summary": "makeRuntime is a function defined in eliza/plugins/plugin-elizacloud/__tests__/cloud-credential-provider.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-credential-provider.test.ts:instantiate",
+      "type": "function",
+      "name": "instantiate",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/cloud-credential-provider.test.ts",
+      "summary": "instantiate is a function defined in eliza/plugins/plugin-elizacloud/__tests__/cloud-credential-provider.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-route-plugin.test.ts",
+      "type": "file",
+      "name": "cloud-route-plugin.test.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/cloud-route-plugin.test.ts",
+      "summary": "cloud-route-plugin.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 27 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-services.real.test.ts",
+      "type": "file",
+      "name": "cloud-services.real.test.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/cloud-services.real.test.ts",
+      "summary": "cloud-services.real.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 377 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-services.real.test.ts:route",
+      "type": "function",
+      "name": "route",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/cloud-services.real.test.ts",
+      "summary": "route is a function defined in eliza/plugins/plugin-elizacloud/__tests__/cloud-services.real.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "plugin",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-transcription-contract.test.ts",
+      "type": "file",
+      "name": "cloud-transcription-contract.test.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/cloud-transcription-contract.test.ts",
+      "summary": "cloud-transcription-contract.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 46 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-transcription-contract.test.ts:makeRuntime",
+      "type": "function",
+      "name": "makeRuntime",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/cloud-transcription-contract.test.ts",
+      "summary": "makeRuntime is a function defined in eliza/plugins/plugin-elizacloud/__tests__/cloud-transcription-contract.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-tts-roundtrip.test.ts",
+      "type": "file",
+      "name": "cloud-tts-roundtrip.test.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/cloud-tts-roundtrip.test.ts",
+      "summary": "cloud-tts-roundtrip.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 170 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-tts-roundtrip.test.ts:makeRuntime",
+      "type": "function",
+      "name": "makeRuntime",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/cloud-tts-roundtrip.test.ts",
+      "summary": "makeRuntime is a function defined in eliza/plugins/plugin-elizacloud/__tests__/cloud-tts-roundtrip.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-tts-roundtrip.test.ts:makeFakeClient",
+      "type": "function",
+      "name": "makeFakeClient",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/cloud-tts-roundtrip.test.ts",
+      "summary": "makeFakeClient is a function defined in eliza/plugins/plugin-elizacloud/__tests__/cloud-tts-roundtrip.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-elizacloud/__tests__/integration/research-model.real.test.ts",
+      "type": "file",
+      "name": "research-model.real.test.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/integration/research-model.real.test.ts",
+      "summary": "research-model.real.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 140 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/__tests__/integration/research-model.real.test.ts:createRuntime",
+      "type": "function",
+      "name": "createRuntime",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/integration/research-model.real.test.ts",
+      "summary": "createRuntime is a function defined in eliza/plugins/plugin-elizacloud/__tests__/integration/research-model.real.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-elizacloud/__tests__/text-native-plumbing.test.ts",
+      "type": "file",
+      "name": "text-native-plumbing.test.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/text-native-plumbing.test.ts",
+      "summary": "text-native-plumbing.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 192 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/__tests__/text-native-plumbing.test.ts:runtime",
+      "type": "function",
+      "name": "runtime",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/text-native-plumbing.test.ts",
+      "summary": "runtime is a function defined in eliza/plugins/plugin-elizacloud/__tests__/text-native-plumbing.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-elizacloud/__tests__/unit/home-remote-runner-access-url.test.ts",
+      "type": "file",
+      "name": "home-remote-runner-access-url.test.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/__tests__/unit/home-remote-runner-access-url.test.ts",
+      "summary": "home-remote-runner-access-url.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 109 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/cloud-providers/cloud-status.ts",
+      "type": "file",
+      "name": "cloud-status.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud-providers/cloud-status.ts",
+      "summary": "cloud-status.ts is a typescript source file in the Milady codebase. It contains 4 imports.",
+      "languageNotes": "typescript; code; 75 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/cloud-providers/container-health.ts",
+      "type": "file",
+      "name": "container-health.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud-providers/container-health.ts",
+      "summary": "container-health.ts is a typescript source file in the Milady codebase. It contains 3 imports.",
+      "languageNotes": "typescript; code; 68 lines"
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/cloud-providers/credit-balance.ts",
+      "type": "file",
+      "name": "credit-balance.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud-providers/credit-balance.ts",
+      "summary": "credit-balance.ts is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 70 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud-providers/credit-balance.ts:format",
+      "type": "function",
+      "name": "format",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud-providers/credit-balance.ts",
+      "summary": "format is a function defined in eliza/plugins/plugin-elizacloud/src/cloud-providers/credit-balance.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/cloud-providers/model-registry.ts",
+      "type": "file",
+      "name": "model-registry.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud-providers/model-registry.ts",
+      "summary": "model-registry.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 74 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud-providers/model-registry.ts:formatModels",
+      "type": "function",
+      "name": "formatModels",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud-providers/model-registry.ts",
+      "summary": "formatModels is a function defined in eliza/plugins/plugin-elizacloud/src/cloud-providers/model-registry.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.test.ts",
+      "type": "file",
+      "name": "cloud-voice-catalog.test.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.test.ts",
+      "summary": "cloud-voice-catalog.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 254 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.test.ts:makeRuntime",
+      "type": "function",
+      "name": "makeRuntime",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.test.ts",
+      "summary": "makeRuntime is a function defined in eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.test.ts:makeFakeClient",
+      "type": "function",
+      "name": "makeFakeClient",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.test.ts",
+      "summary": "makeFakeClient is a function defined in eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.test.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "type": "file",
+      "name": "cloud-voice-catalog.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "summary": "cloud-voice-catalog.ts is a typescript source file in the Milady codebase. It contains 12 functions, 3 imports.",
+      "languageNotes": "typescript; code; 246 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:clientFactory",
+      "type": "function",
+      "name": "clientFactory",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "summary": "clientFactory is a function defined in eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:setCloudVoiceClientFactoryForTesting",
+      "type": "function",
+      "name": "setCloudVoiceClientFactoryForTesting",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "summary": "setCloudVoiceClientFactoryForTesting is a function defined in eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:resetCloudVoiceCatalogCacheForTesting",
+      "type": "function",
+      "name": "resetCloudVoiceCatalogCacheForTesting",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "summary": "resetCloudVoiceCatalogCacheForTesting is a function defined in eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:cacheKeyFor",
+      "type": "function",
+      "name": "cacheKeyFor",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "summary": "cacheKeyFor is a function defined in eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:pickString",
+      "type": "function",
+      "name": "pickString",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "summary": "pickString is a function defined in eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:pickStringFromAny",
+      "type": "function",
+      "name": "pickStringFromAny",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "summary": "pickStringFromAny is a function defined in eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:asRecord",
+      "type": "function",
+      "name": "asRecord",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "summary": "asRecord is a function defined in eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:normalizeVoiceEntry",
+      "type": "function",
+      "name": "normalizeVoiceEntry",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "summary": "normalizeVoiceEntry is a function defined in eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:extractVoiceArray",
+      "type": "function",
+      "name": "extractVoiceArray",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "summary": "extractVoiceArray is a function defined in eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:dedupeById",
+      "type": "function",
+      "name": "dedupeById",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "summary": "dedupeById is a function defined in eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:fetchEndpointVoices",
+      "type": "function",
+      "name": "fetchEndpointVoices",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "summary": "fetchEndpointVoices is a function defined in eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:fetchCloudVoiceCatalog",
+      "type": "function",
+      "name": "fetchCloudVoiceCatalog",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "summary": "fetchCloudVoiceCatalog is a function defined in eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/cloud/auth-service-types.ts",
+      "type": "file",
+      "name": "auth-service-types.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/auth-service-types.ts",
+      "summary": "auth-service-types.ts is a typescript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "typescript; code; 24 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/auth-service-types.ts:isCloudAuthApiKeyService",
+      "type": "function",
+      "name": "isCloudAuthApiKeyService",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/auth-service-types.ts",
+      "summary": "isCloudAuthApiKeyService is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/auth-service-types.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/auth-service-types.ts:normalizeCloudApiKey",
+      "type": "function",
+      "name": "normalizeCloudApiKey",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/auth-service-types.ts",
+      "summary": "normalizeCloudApiKey is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/auth-service-types.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "api",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts",
+      "type": "file",
+      "name": "cloud-api-key.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts",
+      "summary": "cloud-api-key.ts is a typescript source file in the Milady codebase. It contains 4 functions, 1 imports.",
+      "languageNotes": "typescript; code; 80 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts:normalizeCloudSecret",
+      "type": "function",
+      "name": "normalizeCloudSecret",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts",
+      "summary": "normalizeCloudSecret is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts:resolveRuntimeCloudApiKey",
+      "type": "function",
+      "name": "resolveRuntimeCloudApiKey",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts",
+      "summary": "resolveRuntimeCloudApiKey is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts:resolveCloudApiBaseUrl",
+      "type": "function",
+      "name": "resolveCloudApiBaseUrl",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts",
+      "summary": "resolveCloudApiBaseUrl is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts:resolveCloudApiKey",
+      "type": "function",
+      "name": "resolveCloudApiKey",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts",
+      "summary": "resolveCloudApiKey is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "type": "file",
+      "name": "cloud-wallet.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "summary": "cloud-wallet.ts is a typescript source file in the Milady codebase. It contains 11 functions, 1 class, 2 imports.",
+      "languageNotes": "typescript; code; 341 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:ensureFlag",
+      "type": "function",
+      "name": "ensureFlag",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "summary": "ensureFlag is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:normalizePrivateKey",
+      "type": "function",
+      "name": "normalizePrivateKey",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "summary": "normalizePrivateKey is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:getOrCreateClientAddressKey",
+      "type": "function",
+      "name": "getOrCreateClientAddressKey",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "summary": "getOrCreateClientAddressKey is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:inflightKey",
+      "type": "function",
+      "name": "inflightKey",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "summary": "inflightKey is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:provisionOne",
+      "type": "function",
+      "name": "provisionOne",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "summary": "provisionOne is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:isMissingCloudWalletError",
+      "type": "function",
+      "name": "isMissingCloudWalletError",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "summary": "isMissingCloudWalletError is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:formatProvisionWarning",
+      "type": "function",
+      "name": "formatProvisionWarning",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "summary": "formatProvisionWarning is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:provisionCloudWalletsBestEffort",
+      "type": "function",
+      "name": "provisionCloudWalletsBestEffort",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "summary": "provisionCloudWalletsBestEffort is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:provisionCloudWallets",
+      "type": "function",
+      "name": "provisionCloudWallets",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "summary": "provisionCloudWallets is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:persistCloudWalletCache",
+      "type": "function",
+      "name": "persistCloudWalletCache",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "summary": "persistCloudWalletCache is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:__resetCloudWalletModuleForTests",
+      "type": "function",
+      "name": "__resetCloudWalletModuleForTests",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "summary": "__resetCloudWalletModuleForTests is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:CloudWalletFlagDisabledError",
+      "type": "class",
+      "name": "CloudWalletFlagDisabledError",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "summary": "CloudWalletFlagDisabledError is a class or type declared in eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts."
+    },
+    {
+      "tags": [
+        "entry-point",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase. It contains 1 function, 16 imports.",
+      "languageNotes": "typescript; code; 410 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/index.ts:getProcessEnv",
+      "type": "function",
+      "name": "getProcessEnv",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/index.ts",
+      "summary": "getProcessEnv is a function defined in eliza/plugins/plugin-elizacloud/src/index.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/init.ts",
+      "type": "file",
+      "name": "init.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/init.ts",
+      "summary": "init.ts is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 39 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/init.ts:initializeOpenAI",
+      "type": "function",
+      "name": "initializeOpenAI",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/init.ts",
+      "summary": "initializeOpenAI is a function defined in eliza/plugins/plugin-elizacloud/src/init.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "type": "file",
+      "name": "cloud-connection.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "summary": "cloud-connection.ts is a typescript source file in the Milady codebase. It contains 16 functions, 1 class, 3 imports.",
+      "languageNotes": "typescript; code; 661 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:cloudCreditsHttpErrorMessage",
+      "type": "function",
+      "name": "cloudCreditsHttpErrorMessage",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "summary": "cloudCreditsHttpErrorMessage is a function defined in eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:asRuntimeCloud",
+      "type": "function",
+      "name": "asRuntimeCloud",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "summary": "asRuntimeCloud is a function defined in eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:getCloudAuth",
+      "type": "function",
+      "name": "getCloudAuth",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "summary": "getCloudAuth is a function defined in eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:resolvePersistedCloudIdentity",
+      "type": "function",
+      "name": "resolvePersistedCloudIdentity",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "summary": "resolvePersistedCloudIdentity is a function defined in eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:resolveCloudApiBaseUrl",
+      "type": "function",
+      "name": "resolveCloudApiBaseUrl",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "summary": "resolveCloudApiBaseUrl is a function defined in eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:resolveCloudApiKey",
+      "type": "function",
+      "name": "resolveCloudApiKey",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "summary": "resolveCloudApiKey is a function defined in eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:resolveCloudConnectionSnapshot",
+      "type": "function",
+      "name": "resolveCloudConnectionSnapshot",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "summary": "resolveCloudConnectionSnapshot is a function defined in eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:coerceCloudBalance",
+      "type": "function",
+      "name": "coerceCloudBalance",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "summary": "coerceCloudBalance is a function defined in eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:fetchCloudCreditsByApiKey",
+      "type": "function",
+      "name": "fetchCloudCreditsByApiKey",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "summary": "fetchCloudCreditsByApiKey is a function defined in eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:withCreditFlags",
+      "type": "function",
+      "name": "withCreditFlags",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "summary": "withCreditFlags is a function defined in eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:fetchCloudCredits",
+      "type": "function",
+      "name": "fetchCloudCredits",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "summary": "fetchCloudCredits is a function defined in eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:clearCloudAuthService",
+      "type": "function",
+      "name": "clearCloudAuthService",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "summary": "clearCloudAuthService is a function defined in eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:clearCloudEnv",
+      "type": "function",
+      "name": "clearCloudEnv",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "summary": "clearCloudEnv is a function defined in eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:clearRuntimeCloudState",
+      "type": "function",
+      "name": "clearRuntimeCloudState",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "summary": "clearRuntimeCloudState is a function defined in eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:disconnectCloudConnection",
+      "type": "function",
+      "name": "disconnectCloudConnection",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "summary": "disconnectCloudConnection is a function defined in eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:isCloudStatusReasonApiKeyOnly",
+      "type": "function",
+      "name": "isCloudStatusReasonApiKeyOnly",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "summary": "isCloudStatusReasonApiKeyOnly is a function defined in eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:CloudCreditsAuthRejectedError",
+      "type": "class",
+      "name": "CloudCreditsAuthRejectedError",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "summary": "CloudCreditsAuthRejectedError is a class or type declared in eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts."
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/lib/cloud-secrets.ts",
+      "type": "file",
+      "name": "cloud-secrets.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/cloud-secrets.ts",
+      "summary": "cloud-secrets.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 14 lines"
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts",
+      "type": "file",
+      "name": "config-env.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/config-env.ts",
+      "summary": "config-env.ts is a typescript source file in the Milady codebase. It contains 9 functions, 1 imports.",
+      "languageNotes": "typescript; code; 168 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:parseConfigEnv",
+      "type": "function",
+      "name": "parseConfigEnv",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/config-env.ts",
+      "summary": "parseConfigEnv is a function defined in eliza/plugins/plugin-elizacloud/src/lib/config-env.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:serialiseConfigEnv",
+      "type": "function",
+      "name": "serialiseConfigEnv",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/config-env.ts",
+      "summary": "serialiseConfigEnv is a function defined in eliza/plugins/plugin-elizacloud/src/lib/config-env.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:encodeValue",
+      "type": "function",
+      "name": "encodeValue",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/config-env.ts",
+      "summary": "encodeValue is a function defined in eliza/plugins/plugin-elizacloud/src/lib/config-env.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:validateKey",
+      "type": "function",
+      "name": "validateKey",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/config-env.ts",
+      "summary": "validateKey is a function defined in eliza/plugins/plugin-elizacloud/src/lib/config-env.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:readIfExists",
+      "type": "function",
+      "name": "readIfExists",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/config-env.ts",
+      "summary": "readIfExists is a function defined in eliza/plugins/plugin-elizacloud/src/lib/config-env.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:writeAtomic",
+      "type": "function",
+      "name": "writeAtomic",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/config-env.ts",
+      "summary": "writeAtomic is a function defined in eliza/plugins/plugin-elizacloud/src/lib/config-env.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:serialise",
+      "type": "function",
+      "name": "serialise",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/config-env.ts",
+      "summary": "serialise is a function defined in eliza/plugins/plugin-elizacloud/src/lib/config-env.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:resolveConfigEnvPath",
+      "type": "function",
+      "name": "resolveConfigEnvPath",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/config-env.ts",
+      "summary": "resolveConfigEnvPath is a function defined in eliza/plugins/plugin-elizacloud/src/lib/config-env.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:persistConfigEnv",
+      "type": "function",
+      "name": "persistConfigEnv",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/config-env.ts",
+      "summary": "persistConfigEnv is a function defined in eliza/plugins/plugin-elizacloud/src/lib/config-env.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts",
+      "type": "file",
+      "name": "config-like.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/config-like.ts",
+      "summary": "config-like.ts is a typescript source file in the Milady codebase. It contains 8 functions, 1 imports.",
+      "languageNotes": "typescript; code; 149 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:ensureLinkedAccounts",
+      "type": "function",
+      "name": "ensureLinkedAccounts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/config-like.ts",
+      "summary": "ensureLinkedAccounts is a function defined in eliza/plugins/plugin-elizacloud/src/lib/config-like.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:ensureServiceRouting",
+      "type": "function",
+      "name": "ensureServiceRouting",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/config-like.ts",
+      "summary": "ensureServiceRouting is a function defined in eliza/plugins/plugin-elizacloud/src/lib/config-like.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:persistDeploymentTarget",
+      "type": "function",
+      "name": "persistDeploymentTarget",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/config-like.ts",
+      "summary": "persistDeploymentTarget is a function defined in eliza/plugins/plugin-elizacloud/src/lib/config-like.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:persistLinkedAccounts",
+      "type": "function",
+      "name": "persistLinkedAccounts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/config-like.ts",
+      "summary": "persistLinkedAccounts is a function defined in eliza/plugins/plugin-elizacloud/src/lib/config-like.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:persistServiceRouting",
+      "type": "function",
+      "name": "persistServiceRouting",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/config-like.ts",
+      "summary": "persistServiceRouting is a function defined in eliza/plugins/plugin-elizacloud/src/lib/config-like.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:applyCanonicalSetupConfig",
+      "type": "function",
+      "name": "applyCanonicalSetupConfig",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/config-like.ts",
+      "summary": "applyCanonicalSetupConfig is a function defined in eliza/plugins/plugin-elizacloud/src/lib/config-like.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:normalizeEnvValue",
+      "type": "function",
+      "name": "normalizeEnvValue",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/config-like.ts",
+      "summary": "normalizeEnvValue is a function defined in eliza/plugins/plugin-elizacloud/src/lib/config-like.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:isTimeoutError",
+      "type": "function",
+      "name": "isTimeoutError",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/config-like.ts",
+      "summary": "isTimeoutError is a function defined in eliza/plugins/plugin-elizacloud/src/lib/config-like.ts."
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/lib/credential-type-map.ts",
+      "type": "file",
+      "name": "credential-type-map.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/credential-type-map.ts",
+      "summary": "credential-type-map.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 130 lines"
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/lib/feature-flags.ts",
+      "type": "file",
+      "name": "feature-flags.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/feature-flags.ts",
+      "summary": "feature-flags.ts is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 26 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/feature-flags.ts:readBoolFlag",
+      "type": "function",
+      "name": "readBoolFlag",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/feature-flags.ts",
+      "summary": "readBoolFlag is a function defined in eliza/plugins/plugin-elizacloud/src/lib/feature-flags.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/feature-flags.ts:isCloudWalletEnabled",
+      "type": "function",
+      "name": "isCloudWalletEnabled",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/feature-flags.ts",
+      "summary": "isCloudWalletEnabled is a function defined in eliza/plugins/plugin-elizacloud/src/lib/feature-flags.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/lib/http.ts",
+      "type": "file",
+      "name": "http.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/http.ts",
+      "summary": "http.ts is a typescript source file in the Milady codebase. It contains 5 functions.",
+      "languageNotes": "typescript; code; 122 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/http.ts:scrubStackFields",
+      "type": "function",
+      "name": "scrubStackFields",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/http.ts",
+      "summary": "scrubStackFields is a function defined in eliza/plugins/plugin-elizacloud/src/lib/http.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/http.ts:sendJson",
+      "type": "function",
+      "name": "sendJson",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/http.ts",
+      "summary": "sendJson is a function defined in eliza/plugins/plugin-elizacloud/src/lib/http.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/http.ts:sendJsonError",
+      "type": "function",
+      "name": "sendJsonError",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/http.ts",
+      "summary": "sendJsonError is a function defined in eliza/plugins/plugin-elizacloud/src/lib/http.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/http.ts:readRequestBody",
+      "type": "function",
+      "name": "readRequestBody",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/http.ts",
+      "summary": "readRequestBody is a function defined in eliza/plugins/plugin-elizacloud/src/lib/http.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/http.ts:readJsonBody",
+      "type": "function",
+      "name": "readJsonBody",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/http.ts",
+      "summary": "readJsonBody is a function defined in eliza/plugins/plugin-elizacloud/src/lib/http.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/lib/state-paths.ts",
+      "type": "file",
+      "name": "state-paths.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/state-paths.ts",
+      "summary": "state-paths.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 28 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/lib/state-paths.ts:resolveConfigPath",
+      "type": "function",
+      "name": "resolveConfigPath",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/state-paths.ts",
+      "summary": "resolveConfigPath is a function defined in eliza/plugins/plugin-elizacloud/src/lib/state-paths.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts",
+      "type": "file",
+      "name": "embeddings.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/models/embeddings.ts",
+      "summary": "embeddings.ts is a typescript source file in the Milady codebase. It contains 5 functions, 4 imports.",
+      "languageNotes": "typescript; code; 251 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:extractRateLimitInfo",
+      "type": "function",
+      "name": "extractRateLimitInfo",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/models/embeddings.ts",
+      "summary": "extractRateLimitInfo is a function defined in eliza/plugins/plugin-elizacloud/src/models/embeddings.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:getEmbeddingConfig",
+      "type": "function",
+      "name": "getEmbeddingConfig",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/models/embeddings.ts",
+      "summary": "getEmbeddingConfig is a function defined in eliza/plugins/plugin-elizacloud/src/models/embeddings.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:createErrorVector",
+      "type": "function",
+      "name": "createErrorVector",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/models/embeddings.ts",
+      "summary": "createErrorVector is a function defined in eliza/plugins/plugin-elizacloud/src/models/embeddings.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:handleTextEmbedding",
+      "type": "function",
+      "name": "handleTextEmbedding",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/models/embeddings.ts",
+      "summary": "handleTextEmbedding is a function defined in eliza/plugins/plugin-elizacloud/src/models/embeddings.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:handleBatchTextEmbedding",
+      "type": "function",
+      "name": "handleBatchTextEmbedding",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/models/embeddings.ts",
+      "summary": "handleBatchTextEmbedding is a function defined in eliza/plugins/plugin-elizacloud/src/models/embeddings.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/models/image.ts",
+      "type": "file",
+      "name": "image.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/models/image.ts",
+      "summary": "image.ts is a typescript source file in the Milady codebase. It contains 2 functions, 5 imports.",
+      "languageNotes": "typescript; code; 228 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/models/image.ts:handleImageGeneration",
+      "type": "function",
+      "name": "handleImageGeneration",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/models/image.ts",
+      "summary": "handleImageGeneration is a function defined in eliza/plugins/plugin-elizacloud/src/models/image.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/models/image.ts:handleImageDescription",
+      "type": "function",
+      "name": "handleImageDescription",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/models/image.ts",
+      "summary": "handleImageDescription is a function defined in eliza/plugins/plugin-elizacloud/src/models/image.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-api.real.test.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-api.real.test.ts:setResponse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-api.real.test.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-api.real.test.ts:setTextResponse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-billing-routes.test.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-billing-routes.test.ts:listen",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-billing-routes.test.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-billing-routes.test.ts:close",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-coding-container-routes.test.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-coding-container-routes.test.ts:requestWithBody",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-coding-container-routes.test.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-coding-container-routes.test.ts:responseSink",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-container-coding-service.test.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-container-coding-service.test.ts:serviceWithClient",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-credential-provider.test.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-credential-provider.test.ts:makeRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-credential-provider.test.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-credential-provider.test.ts:instantiate",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-services.real.test.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-services.real.test.ts:route",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-transcription-contract.test.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-transcription-contract.test.ts:makeRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-tts-roundtrip.test.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-tts-roundtrip.test.ts:makeRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-tts-roundtrip.test.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/__tests__/cloud-tts-roundtrip.test.ts:makeFakeClient",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/integration/research-model.real.test.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/__tests__/integration/research-model.real.test.ts:createRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/text-native-plumbing.test.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/__tests__/text-native-plumbing.test.ts:runtime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-providers/credit-balance.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-providers/credit-balance.ts:format",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-providers/model-registry.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-providers/model-registry.ts:formatModels",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.test.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.test.ts:makeRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.test.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.test.ts:makeFakeClient",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:clientFactory",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:setCloudVoiceClientFactoryForTesting",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:resetCloudVoiceCatalogCacheForTesting",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:cacheKeyFor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:pickString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:pickStringFromAny",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:asRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:normalizeVoiceEntry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:extractVoiceArray",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:dedupeById",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:fetchEndpointVoices",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:fetchCloudVoiceCatalog",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:pickStringFromAny",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:pickString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:normalizeVoiceEntry",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:asRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:normalizeVoiceEntry",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:pickStringFromAny",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:normalizeVoiceEntry",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:pickStringFromAny",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:normalizeVoiceEntry",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:pickStringFromAny",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:normalizeVoiceEntry",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:pickStringFromAny",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:normalizeVoiceEntry",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:asRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:normalizeVoiceEntry",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:pickStringFromAny",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:normalizeVoiceEntry",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:pickStringFromAny",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:normalizeVoiceEntry",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:pickStringFromAny",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:normalizeVoiceEntry",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:pickStringFromAny",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:extractVoiceArray",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:asRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:fetchEndpointVoices",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:clientFactory",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:fetchEndpointVoices",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:extractVoiceArray",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:fetchEndpointVoices",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:normalizeVoiceEntry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:fetchCloudVoiceCatalog",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:cacheKeyFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:fetchCloudVoiceCatalog",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:fetchEndpointVoices",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:fetchCloudVoiceCatalog",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:fetchEndpointVoices",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:fetchCloudVoiceCatalog",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts:dedupeById",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/auth-service-types.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/auth-service-types.ts:isCloudAuthApiKeyService",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/auth-service-types.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/auth-service-types.ts:normalizeCloudApiKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts:normalizeCloudSecret",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts:resolveRuntimeCloudApiKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts:resolveCloudApiBaseUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts:resolveCloudApiKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts:resolveRuntimeCloudApiKey",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts:normalizeCloudSecret",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts:resolveRuntimeCloudApiKey",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts:normalizeCloudSecret",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts:resolveCloudApiBaseUrl",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts:normalizeCloudSecret",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts:resolveCloudApiKey",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts:normalizeCloudSecret",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts:resolveCloudApiKey",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts:resolveRuntimeCloudApiKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:ensureFlag",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:normalizePrivateKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:getOrCreateClientAddressKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:inflightKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:provisionOne",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:isMissingCloudWalletError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:formatProvisionWarning",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:provisionCloudWalletsBestEffort",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:provisionCloudWallets",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:persistCloudWalletCache",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:__resetCloudWalletModuleForTests",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "target": "class:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:CloudWalletFlagDisabledError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:getOrCreateClientAddressKey",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:ensureFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:getOrCreateClientAddressKey",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:normalizePrivateKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:provisionOne",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:isMissingCloudWalletError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:provisionCloudWalletsBestEffort",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:ensureFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:provisionCloudWalletsBestEffort",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:inflightKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:provisionCloudWalletsBestEffort",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:provisionOne",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:provisionCloudWalletsBestEffort",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:formatProvisionWarning",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:provisionCloudWallets",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:provisionCloudWalletsBestEffort",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:persistCloudWalletCache",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts:ensureFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/index.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/index.ts:getProcessEnv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/init.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/init.ts:initializeOpenAI",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:cloudCreditsHttpErrorMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:asRuntimeCloud",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:getCloudAuth",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:resolvePersistedCloudIdentity",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:resolveCloudApiBaseUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:resolveCloudApiKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:resolveCloudConnectionSnapshot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:coerceCloudBalance",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:fetchCloudCreditsByApiKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:withCreditFlags",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:fetchCloudCredits",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:clearCloudAuthService",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:clearCloudEnv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:clearRuntimeCloudState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:disconnectCloudConnection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:isCloudStatusReasonApiKeyOnly",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "target": "class:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:CloudCreditsAuthRejectedError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:getCloudAuth",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:asRuntimeCloud",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:resolvePersistedCloudIdentity",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:asRuntimeCloud",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:resolveCloudConnectionSnapshot",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:resolveCloudApiKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:resolveCloudConnectionSnapshot",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:getCloudAuth",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:resolveCloudConnectionSnapshot",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:resolvePersistedCloudIdentity",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:fetchCloudCreditsByApiKey",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:cloudCreditsHttpErrorMessage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:fetchCloudCreditsByApiKey",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:cloudCreditsHttpErrorMessage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:fetchCloudCreditsByApiKey",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:coerceCloudBalance",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:fetchCloudCreditsByApiKey",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:coerceCloudBalance",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:fetchCloudCredits",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:resolveCloudConnectionSnapshot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:fetchCloudCredits",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:coerceCloudBalance",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:fetchCloudCredits",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:coerceCloudBalance",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:fetchCloudCredits",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:withCreditFlags",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:fetchCloudCredits",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:resolveCloudApiBaseUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:fetchCloudCredits",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:fetchCloudCreditsByApiKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:fetchCloudCredits",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:withCreditFlags",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:clearRuntimeCloudState",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:asRuntimeCloud",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:disconnectCloudConnection",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:clearCloudAuthService",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:disconnectCloudConnection",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:getCloudAuth",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:disconnectCloudConnection",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:clearCloudEnv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:disconnectCloudConnection",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts:clearRuntimeCloudState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:parseConfigEnv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:serialiseConfigEnv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:encodeValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:validateKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:readIfExists",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:writeAtomic",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:serialise",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:resolveConfigEnvPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:persistConfigEnv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:persistConfigEnv",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:validateKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:persistConfigEnv",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:serialise",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:persistConfigEnv",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:resolveConfigEnvPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:persistConfigEnv",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:readIfExists",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:persistConfigEnv",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:parseConfigEnv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:persistConfigEnv",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:encodeValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:persistConfigEnv",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:writeAtomic",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:persistConfigEnv",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts:serialiseConfigEnv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:ensureLinkedAccounts",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:ensureServiceRouting",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:persistDeploymentTarget",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:persistLinkedAccounts",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:persistServiceRouting",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:applyCanonicalSetupConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:normalizeEnvValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:isTimeoutError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:persistLinkedAccounts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:ensureLinkedAccounts",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:persistServiceRouting",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:ensureServiceRouting",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:applyCanonicalSetupConfig",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:persistDeploymentTarget",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:applyCanonicalSetupConfig",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:persistLinkedAccounts",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:applyCanonicalSetupConfig",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts:persistServiceRouting",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/feature-flags.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/feature-flags.ts:readBoolFlag",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/feature-flags.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/feature-flags.ts:isCloudWalletEnabled",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/feature-flags.ts:isCloudWalletEnabled",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/feature-flags.ts:readBoolFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/http.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/http.ts:scrubStackFields",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/http.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/http.ts:sendJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/http.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/http.ts:sendJsonError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/http.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/http.ts:readRequestBody",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/http.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/http.ts:readJsonBody",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/http.ts:sendJson",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/http.ts:scrubStackFields",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/http.ts:sendJsonError",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/http.ts:sendJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/http.ts:readJsonBody",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/http.ts:sendJsonError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/http.ts:readJsonBody",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/http.ts:readRequestBody",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/http.ts:readJsonBody",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/http.ts:sendJsonError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/http.ts:readJsonBody",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/http.ts:sendJsonError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/lib/http.ts:readJsonBody",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/http.ts:sendJsonError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/state-paths.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/lib/state-paths.ts:resolveConfigPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:extractRateLimitInfo",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:getEmbeddingConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:createErrorVector",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:handleTextEmbedding",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:handleBatchTextEmbedding",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:handleTextEmbedding",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:getEmbeddingConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:handleTextEmbedding",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:createErrorVector",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:handleTextEmbedding",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:createErrorVector",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:handleTextEmbedding",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:createErrorVector",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:handleTextEmbedding",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:handleBatchTextEmbedding",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:handleBatchTextEmbedding",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:getEmbeddingConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:handleBatchTextEmbedding",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:createErrorVector",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:handleBatchTextEmbedding",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:extractRateLimitInfo",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:handleBatchTextEmbedding",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:createErrorVector",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:handleBatchTextEmbedding",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:createErrorVector",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:handleBatchTextEmbedding",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:createErrorVector",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:handleBatchTextEmbedding",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts:createErrorVector",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/models/image.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/models/image.ts:handleImageGeneration",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/models/image.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/models/image.ts:handleImageDescription",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-api.real.test.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/types/cloud.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-api.real.test.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-api.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-billing-routes.test.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/routes/cloud-billing-routes.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-coding-container-routes.test.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/routes/cloud-coding-container-routes.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-coding-container-routes.test.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/types/cloud.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-container-coding-service.test.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/services/cloud-container.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-container-coding-service.test.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/types/cloud.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-credential-provider.test.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/lib/credential-type-map.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-credential-provider.test.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/services/cloud-credential-provider.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-route-plugin.test.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/plugin.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-services.real.test.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/types/cloud.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-services.real.test.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-api.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-transcription-contract.test.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-transcription-contract.test.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/models/transcription.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-tts-roundtrip.test.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/cloud-tts-roundtrip.test.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/models/speech.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/integration/research-model.real.test.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/models/research.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/text-native-plumbing.test.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/text-native-plumbing.test.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/models/text.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/__tests__/unit/home-remote-runner-access-url.test.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/routes/home-remote-runner-access-url.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-providers/cloud-status.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-providers/cloud-status.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/services/cloud-auth.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-providers/cloud-status.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/services/cloud-bridge.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-providers/cloud-status.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/services/cloud-container.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-providers/container-health.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-providers/container-health.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/services/cloud-auth.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-providers/container-health.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/services/cloud-container.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-providers/credit-balance.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-providers/credit-balance.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/services/cloud-auth.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-providers/credit-balance.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/types/cloud.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-providers/model-registry.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-providers/model-registry.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/services/cloud-model-registry.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.test.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.test.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/utils/config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud-voice-catalog.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/utils/sdk-client.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/auth-service-types.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/cloud-api-key.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/lib/feature-flags.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/index.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/index.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/cloud-providers/cloud-status.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/index.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/cloud-providers/container-health.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/index.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/cloud-providers/credit-balance.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/index.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/cloud-providers/model-registry.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/index.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/init.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/index.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/models/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/index.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/services/cloud-auth.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/index.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/services/cloud-backup.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/index.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/services/cloud-bootstrap.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/index.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/services/cloud-bridge.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/index.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/services/cloud-container.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/index.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/services/cloud-credential-provider.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/index.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/services/cloud-managed-gateway-relay.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/index.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/services/cloud-model-registry.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/index.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/utils/sdk-client.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/init.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/init.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/utils/config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/init.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/utils/sdk-client.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/lib/cloud-secrets.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/cloud-connection.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/config-env.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/lib/state-paths.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/config-like.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/lib/state-paths.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/utils/config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/utils/events.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/models/embeddings.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/utils/sdk-client.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/models/image.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/models/image.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/utils/config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/models/image.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/utils/events.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/models/image.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/utils/helpers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/models/image.ts",
+      "target": "file:eliza/plugins/plugin-elizacloud/src/utils/sdk-client.ts",
+      "type": "imports"
+    }
+  ]
+}

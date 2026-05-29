@@ -1,0 +1,306 @@
+{
+  "batchIndex": 286,
+  "nodes": [
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/MenuBarStatusView.swift",
+      "type": "file",
+      "name": "MenuBarStatusView.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/MenuBarStatusView.swift",
+      "summary": "MenuBarStatusView.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 313 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/ModelRoutesView.swift",
+      "type": "file",
+      "name": "ModelRoutesView.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/ModelRoutesView.swift",
+      "summary": "ModelRoutesView.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 49 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/PermissionsView.swift",
+      "type": "file",
+      "name": "PermissionsView.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/PermissionsView.swift",
+      "summary": "PermissionsView.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 172 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/PluginsView.swift",
+      "type": "file",
+      "name": "PluginsView.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/PluginsView.swift",
+      "summary": "PluginsView.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 58 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/ReleaseView.swift",
+      "type": "file",
+      "name": "ReleaseView.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/ReleaseView.swift",
+      "summary": "ReleaseView.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 32 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/RuntimeOverviewView.swift",
+      "type": "file",
+      "name": "RuntimeOverviewView.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/RuntimeOverviewView.swift",
+      "summary": "RuntimeOverviewView.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 137 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/SidebarView.swift",
+      "type": "file",
+      "name": "SidebarView.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/SidebarView.swift",
+      "summary": "SidebarView.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 38 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/ThemeCustomizationView.swift",
+      "type": "file",
+      "name": "ThemeCustomizationView.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/ThemeCustomizationView.swift",
+      "summary": "ThemeCustomizationView.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 136 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/UpdatesView.swift",
+      "type": "file",
+      "name": "UpdatesView.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/UpdatesView.swift",
+      "summary": "UpdatesView.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 28 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/VaultView.swift",
+      "type": "file",
+      "name": "VaultView.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/VaultView.swift",
+      "summary": "VaultView.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 43 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/WalletsView.swift",
+      "type": "file",
+      "name": "WalletsView.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/WalletsView.swift",
+      "summary": "WalletsView.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 324 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/WebConsoleView.swift",
+      "type": "file",
+      "name": "WebConsoleView.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/WebConsoleView.swift",
+      "summary": "WebConsoleView.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 83 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/WelcomeView.swift",
+      "type": "file",
+      "name": "WelcomeView.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/WelcomeView.swift",
+      "summary": "WelcomeView.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 78 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/WorkspacesView.swift",
+      "type": "file",
+      "name": "WorkspacesView.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/WorkspacesView.swift",
+      "summary": "WorkspacesView.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 57 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMacCore/Models/AgentProfile.swift",
+      "type": "file",
+      "name": "AgentProfile.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMacCore/Models/AgentProfile.swift",
+      "summary": "AgentProfile.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 41 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMacCore/Models/AppSection.swift",
+      "type": "file",
+      "name": "AppSection.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMacCore/Models/AppSection.swift",
+      "summary": "AppSection.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 203 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMacCore/Models/CapabilitySummary.swift",
+      "type": "file",
+      "name": "CapabilitySummary.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMacCore/Models/CapabilitySummary.swift",
+      "summary": "CapabilitySummary.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 54 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMacCore/Models/ConnectorProfile.swift",
+      "type": "file",
+      "name": "ConnectorProfile.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMacCore/Models/ConnectorProfile.swift",
+      "summary": "ConnectorProfile.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 41 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMacCore/Models/DiagnosticItem.swift",
+      "type": "file",
+      "name": "DiagnosticItem.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMacCore/Models/DiagnosticItem.swift",
+      "summary": "DiagnosticItem.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 38 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMacCore/Models/ModelRoute.swift",
+      "type": "file",
+      "name": "ModelRoute.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMacCore/Models/ModelRoute.swift",
+      "summary": "ModelRoute.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 41 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMacCore/Models/RuntimeCommand.swift",
+      "type": "file",
+      "name": "RuntimeCommand.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMacCore/Models/RuntimeCommand.swift",
+      "summary": "RuntimeCommand.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 44 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMacCore/Models/RuntimeConfiguration.swift",
+      "type": "file",
+      "name": "RuntimeConfiguration.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMacCore/Models/RuntimeConfiguration.swift",
+      "summary": "RuntimeConfiguration.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 86 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMacCore/Models/RuntimeLaunchMode.swift",
+      "type": "file",
+      "name": "RuntimeLaunchMode.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMacCore/Models/RuntimeLaunchMode.swift",
+      "summary": "RuntimeLaunchMode.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 20 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMacCore/Models/RuntimeStatus.swift",
+      "type": "file",
+      "name": "RuntimeStatus.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMacCore/Models/RuntimeStatus.swift",
+      "summary": "RuntimeStatus.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 54 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMacCore/Models/RuntimeTelemetry.swift",
+      "type": "file",
+      "name": "RuntimeTelemetry.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMacCore/Models/RuntimeTelemetry.swift",
+      "summary": "RuntimeTelemetry.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 466 lines"
+    }
+  ],
+  "edges": []
+}

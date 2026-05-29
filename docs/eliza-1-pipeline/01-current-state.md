@@ -341,7 +341,7 @@ Coverage matrix:
 - Bridge HTTP endpoints `/api/coding-agents/<sessionId>/{parent-context,memory,
   active-workspaces}` are **read-only**: sub-agent pulls context, parent does
   not push state.
-- Workspace logs (`~/.milady/workspaces/<sessionId>/.claude/session-logs/`) are
+- Workspace logs (`~/.local/state/milady/workspaces/<sessionId>/.claude/session-logs/`) are
   **written by the sub-agent and never read by the parent**. This is the
   single biggest capture gap.
 

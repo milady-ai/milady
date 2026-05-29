@@ -1,0 +1,570 @@
+{
+  "batchIndex": 289,
+  "nodes": [
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/build-native-plugins.mjs",
+      "type": "file",
+      "name": "build-native-plugins.mjs",
+      "filePath": "eliza/packages/app-core/scripts/build-native-plugins.mjs",
+      "summary": "build-native-plugins.mjs is a javascript source file in the Milady codebase. It contains 8 functions, 1 imports.",
+      "languageNotes": "javascript; code; 219 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:shouldBuildPluginForHost",
+      "type": "function",
+      "name": "shouldBuildPluginForHost",
+      "filePath": "eliza/packages/app-core/scripts/build-native-plugins.mjs",
+      "summary": "shouldBuildPluginForHost is a function defined in eliza/packages/app-core/scripts/build-native-plugins.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:pluginDirFor",
+      "type": "function",
+      "name": "pluginDirFor",
+      "filePath": "eliza/packages/app-core/scripts/build-native-plugins.mjs",
+      "summary": "pluginDirFor is a function defined in eliza/packages/app-core/scripts/build-native-plugins.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:readPluginPackageJson",
+      "type": "function",
+      "name": "readPluginPackageJson",
+      "filePath": "eliza/packages/app-core/scripts/build-native-plugins.mjs",
+      "summary": "readPluginPackageJson is a function defined in eliza/packages/app-core/scripts/build-native-plugins.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:run",
+      "type": "function",
+      "name": "run",
+      "filePath": "eliza/packages/app-core/scripts/build-native-plugins.mjs",
+      "summary": "run is a function defined in eliza/packages/app-core/scripts/build-native-plugins.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:logVerbose",
+      "type": "function",
+      "name": "logVerbose",
+      "filePath": "eliza/packages/app-core/scripts/build-native-plugins.mjs",
+      "summary": "logVerbose is a function defined in eliza/packages/app-core/scripts/build-native-plugins.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:hasPackageDependency",
+      "type": "function",
+      "name": "hasPackageDependency",
+      "filePath": "eliza/packages/app-core/scripts/build-native-plugins.mjs",
+      "summary": "hasPackageDependency is a function defined in eliza/packages/app-core/scripts/build-native-plugins.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:buildWorkspaceRuntimePackagesForPlugins",
+      "type": "function",
+      "name": "buildWorkspaceRuntimePackagesForPlugins",
+      "filePath": "eliza/packages/app-core/scripts/build-native-plugins.mjs",
+      "summary": "buildWorkspaceRuntimePackagesForPlugins is a function defined in eliza/packages/app-core/scripts/build-native-plugins.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/packages/app-core/scripts/build-native-plugins.mjs",
+      "summary": "main is a function defined in eliza/packages/app-core/scripts/build-native-plugins.mjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/build-win.mjs",
+      "type": "file",
+      "name": "build-win.mjs",
+      "filePath": "eliza/packages/app-core/scripts/build-win.mjs",
+      "summary": "build-win.mjs is a javascript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "javascript; code; 82 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/build-win.mjs:run",
+      "type": "function",
+      "name": "run",
+      "filePath": "eliza/packages/app-core/scripts/build-win.mjs",
+      "summary": "run is a function defined in eliza/packages/app-core/scripts/build-win.mjs."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0001-config-add-riscv64-arch.patch",
+      "type": "file",
+      "name": "0001-config-add-riscv64-arch.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0001-config-add-riscv64-arch.patch",
+      "summary": "0001-config-add-riscv64-arch.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 98 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0002-flags-add-riscv64-march-mabi.patch",
+      "type": "file",
+      "name": "0002-flags-add-riscv64-march-mabi.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0002-flags-add-riscv64-march-mabi.patch",
+      "summary": "0002-flags-add-riscv64-march-mabi.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 31 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0003-zig-add-riscv64-target-triple-and-cpu.patch",
+      "type": "file",
+      "name": "0003-zig-add-riscv64-target-triple-and-cpu.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0003-zig-add-riscv64-target-triple-and-cpu.patch",
+      "summary": "0003-zig-add-riscv64-target-triple-and-cpu.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 39 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0004-webkit-force-local-mode-on-riscv64.patch",
+      "type": "file",
+      "name": "0004-webkit-force-local-mode-on-riscv64.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0004-webkit-force-local-mode-on-riscv64.patch",
+      "summary": "0004-webkit-force-local-mode-on-riscv64.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 47 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0005-tinycc-disable-on-riscv64.patch",
+      "type": "file",
+      "name": "0005-tinycc-disable-on-riscv64.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0005-tinycc-disable-on-riscv64.patch",
+      "summary": "0005-tinycc-disable-on-riscv64.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 29 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0006-build-add-riscv64-cli-validation.patch",
+      "type": "file",
+      "name": "0006-build-add-riscv64-cli-validation.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0006-build-add-riscv64-cli-validation.patch",
+      "summary": "0006-build-add-riscv64-cli-validation.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 29 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0007-deps-per-dep-riscv64-checks.patch",
+      "type": "file",
+      "name": "0007-deps-per-dep-riscv64-checks.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0007-deps-per-dep-riscv64-checks.patch",
+      "summary": "0007-deps-per-dep-riscv64-checks.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 38 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0008-source-stabilize-riscv64-musl-build.patch",
+      "type": "file",
+      "name": "0008-source-stabilize-riscv64-musl-build.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0008-source-stabilize-riscv64-musl-build.patch",
+      "summary": "0008-source-stabilize-riscv64-musl-build.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 251 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0009-disable-wasm-streaming-hooks-for-c-loop.patch",
+      "type": "file",
+      "name": "0009-disable-wasm-streaming-hooks-for-c-loop.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0009-disable-wasm-streaming-hooks-for-c-loop.patch",
+      "summary": "0009-disable-wasm-streaming-hooks-for-c-loop.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 162 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0010-disable-inspector-profiler-for-riscv64-c-loop.patch",
+      "type": "file",
+      "name": "0010-disable-inspector-profiler-for-riscv64-c-loop.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0010-disable-inspector-profiler-for-riscv64-c-loop.patch",
+      "summary": "0010-disable-inspector-profiler-for-riscv64-c-loop.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 103 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0011-process-arch-add-riscv64.patch",
+      "type": "file",
+      "name": "0011-process-arch-add-riscv64.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0011-process-arch-add-riscv64.patch",
+      "summary": "0011-process-arch-add-riscv64.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 23 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0012-cpu-features-add-riscv64-fallback.patch",
+      "type": "file",
+      "name": "0012-cpu-features-add-riscv64-fallback.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0012-cpu-features-add-riscv64-fallback.patch",
+      "summary": "0012-cpu-features-add-riscv64-fallback.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 13 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0013-disable-console-inspector-hooks-for-riscv64-c-loop.patch",
+      "type": "file",
+      "name": "0013-disable-console-inspector-hooks-for-riscv64-c-loop.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0013-disable-console-inspector-hooks-for-riscv64-c-loop.patch",
+      "summary": "0013-disable-console-inspector-hooks-for-riscv64-c-loop.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 43 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0014-disable-custom-inspector-dispatchers-on-riscv64.patch",
+      "type": "file",
+      "name": "0014-disable-custom-inspector-dispatchers-on-riscv64.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0014-disable-custom-inspector-dispatchers-on-riscv64.patch",
+      "summary": "0014-disable-custom-inspector-dispatchers-on-riscv64.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 127 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0015-disable-jsc-profiler-builtins-on-riscv64.patch",
+      "type": "file",
+      "name": "0015-disable-jsc-profiler-builtins-on-riscv64.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0015-disable-jsc-profiler-builtins-on-riscv64.patch",
+      "summary": "0015-disable-jsc-profiler-builtins-on-riscv64.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 75 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0016-node-vm-disable-jit-cached-data-on-riscv64-c-loop.patch",
+      "type": "file",
+      "name": "0016-node-vm-disable-jit-cached-data-on-riscv64-c-loop.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0016-node-vm-disable-jit-cached-data-on-riscv64-c-loop.patch",
+      "summary": "0016-node-vm-disable-jit-cached-data-on-riscv64-c-loop.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 96 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0017-disable-performance-domjit-signature-on-riscv64-c-loop.patch",
+      "type": "file",
+      "name": "0017-disable-performance-domjit-signature-on-riscv64-c-loop.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0017-disable-performance-domjit-signature-on-riscv64-c-loop.patch",
+      "summary": "0017-disable-performance-domjit-signature-on-riscv64-c-loop.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 34 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0018-fix-serialized-script-identifier-big-endian-path.patch",
+      "type": "file",
+      "name": "0018-fix-serialized-script-identifier-big-endian-path.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0018-fix-serialized-script-identifier-big-endian-path.patch",
+      "summary": "0018-fix-serialized-script-identifier-big-endian-path.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 19 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0019-add-wtf-timer-fire-bridge-for-c-loop.patch",
+      "type": "file",
+      "name": "0019-add-wtf-timer-fire-bridge-for-c-loop.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0019-add-wtf-timer-fire-bridge-for-c-loop.patch",
+      "summary": "0019-add-wtf-timer-fire-bridge-for-c-loop.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 24 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0020-run-riscv64-smoke-test-under-qemu.patch",
+      "type": "file",
+      "name": "0020-run-riscv64-smoke-test-under-qemu.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0020-run-riscv64-smoke-test-under-qemu.patch",
+      "summary": "0020-run-riscv64-smoke-test-under-qemu.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 13 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0021-fix-riscv64-linux-open-flags.patch",
+      "type": "file",
+      "name": "0021-fix-riscv64-linux-open-flags.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/bun-patches/0021-fix-riscv64-linux-open-flags.patch",
+      "summary": "0021-fix-riscv64-linux-open-flags.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 25 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:eliza/packages/app-core/scripts/bun-riscv64/bun-patches/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/bun-patches/README.md",
+      "summary": "README.md documents eliza/packages/app-core/scripts/bun-riscv64/bun-patches with 127 lines of reference material.",
+      "languageNotes": "markdown; docs; 127 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/webkit-patches/0001-cherry-pick-llint-riscv64.recipe",
+      "type": "file",
+      "name": "0001-cherry-pick-llint-riscv64.recipe",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/webkit-patches/0001-cherry-pick-llint-riscv64.recipe",
+      "summary": "0001-cherry-pick-llint-riscv64.recipe is a recipe source file in the Milady codebase.",
+      "languageNotes": "recipe; code; 155 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/build-native-plugins.mjs",
+      "target": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:shouldBuildPluginForHost",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/build-native-plugins.mjs",
+      "target": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:pluginDirFor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/build-native-plugins.mjs",
+      "target": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:readPluginPackageJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/build-native-plugins.mjs",
+      "target": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:run",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/build-native-plugins.mjs",
+      "target": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:logVerbose",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/build-native-plugins.mjs",
+      "target": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:hasPackageDependency",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/build-native-plugins.mjs",
+      "target": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:buildWorkspaceRuntimePackagesForPlugins",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/build-native-plugins.mjs",
+      "target": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:readPluginPackageJson",
+      "target": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:pluginDirFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:buildWorkspaceRuntimePackagesForPlugins",
+      "target": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:hasPackageDependency",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:buildWorkspaceRuntimePackagesForPlugins",
+      "target": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:readPluginPackageJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:logVerbose",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:shouldBuildPluginForHost",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:logVerbose",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:buildWorkspaceRuntimePackagesForPlugins",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:logVerbose",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:pluginDirFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/build-native-plugins.mjs:logVerbose",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/build-win.mjs",
+      "target": "function:eliza/packages/app-core/scripts/build-win.mjs:run",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/scripts/build-native-plugins.mjs",
+      "target": "file:eliza/packages/app-core/scripts/lib/capacitor-plugin-names.mjs",
+      "type": "imports"
+    }
+  ]
+}

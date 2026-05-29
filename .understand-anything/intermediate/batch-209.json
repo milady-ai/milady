@@ -1,0 +1,878 @@
+{
+  "batchIndex": 209,
+  "nodes": [
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/scripts/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/packages/app-core/scripts/README.md",
+      "summary": "README.md documents eliza/packages/app-core/scripts with 27 lines of reference material.",
+      "languageNotes": "markdown; docs; 27 lines"
+    },
+    {
+      "tags": [
+        "script",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/scripts/build-image.sh",
+      "type": "file",
+      "name": "build-image.sh",
+      "filePath": "eliza/packages/app-core/scripts/build-image.sh",
+      "summary": "build-image.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 461 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/build-image.sh:log",
+      "type": "function",
+      "name": "log",
+      "filePath": "eliza/packages/app-core/scripts/build-image.sh",
+      "summary": "log is a function defined in eliza/packages/app-core/scripts/build-image.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/build-image.sh:ok",
+      "type": "function",
+      "name": "ok",
+      "filePath": "eliza/packages/app-core/scripts/build-image.sh",
+      "summary": "ok is a function defined in eliza/packages/app-core/scripts/build-image.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/build-image.sh:warn",
+      "type": "function",
+      "name": "warn",
+      "filePath": "eliza/packages/app-core/scripts/build-image.sh",
+      "summary": "warn is a function defined in eliza/packages/app-core/scripts/build-image.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/build-image.sh:err",
+      "type": "function",
+      "name": "err",
+      "filePath": "eliza/packages/app-core/scripts/build-image.sh",
+      "summary": "err is a function defined in eliza/packages/app-core/scripts/build-image.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/build-image.sh:hdr",
+      "type": "function",
+      "name": "hdr",
+      "filePath": "eliza/packages/app-core/scripts/build-image.sh",
+      "summary": "hdr is a function defined in eliza/packages/app-core/scripts/build-image.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/build-image.sh:die",
+      "type": "function",
+      "name": "die",
+      "filePath": "eliza/packages/app-core/scripts/build-image.sh",
+      "summary": "die is a function defined in eliza/packages/app-core/scripts/build-image.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/build-image.sh:load_env_file",
+      "type": "function",
+      "name": "load_env_file",
+      "filePath": "eliza/packages/app-core/scripts/build-image.sh",
+      "summary": "load_env_file is a function defined in eliza/packages/app-core/scripts/build-image.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/build-image.sh:sedi",
+      "type": "function",
+      "name": "sedi",
+      "filePath": "eliza/packages/app-core/scripts/build-image.sh",
+      "summary": "sedi is a function defined in eliza/packages/app-core/scripts/build-image.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/build-image.sh:run",
+      "type": "function",
+      "name": "run",
+      "filePath": "eliza/packages/app-core/scripts/build-image.sh",
+      "summary": "run is a function defined in eliza/packages/app-core/scripts/build-image.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/build-image.sh:patch_vite",
+      "type": "function",
+      "name": "patch_vite",
+      "filePath": "eliza/packages/app-core/scripts/build-image.sh",
+      "summary": "patch_vite is a function defined in eliza/packages/app-core/scripts/build-image.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/build-image.sh:cleanup",
+      "type": "function",
+      "name": "cleanup",
+      "filePath": "eliza/packages/app-core/scripts/build-image.sh",
+      "summary": "cleanup is a function defined in eliza/packages/app-core/scripts/build-image.sh."
+    },
+    {
+      "tags": [
+        "script",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/scripts/bump-elizaos.sh",
+      "type": "file",
+      "name": "bump-elizaos.sh",
+      "filePath": "eliza/packages/app-core/scripts/bump-elizaos.sh",
+      "summary": "bump-elizaos.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 438 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/bump-elizaos.sh:log",
+      "type": "function",
+      "name": "log",
+      "filePath": "eliza/packages/app-core/scripts/bump-elizaos.sh",
+      "summary": "log is a function defined in eliza/packages/app-core/scripts/bump-elizaos.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/bump-elizaos.sh:ok",
+      "type": "function",
+      "name": "ok",
+      "filePath": "eliza/packages/app-core/scripts/bump-elizaos.sh",
+      "summary": "ok is a function defined in eliza/packages/app-core/scripts/bump-elizaos.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/bump-elizaos.sh:warn",
+      "type": "function",
+      "name": "warn",
+      "filePath": "eliza/packages/app-core/scripts/bump-elizaos.sh",
+      "summary": "warn is a function defined in eliza/packages/app-core/scripts/bump-elizaos.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/bump-elizaos.sh:err",
+      "type": "function",
+      "name": "err",
+      "filePath": "eliza/packages/app-core/scripts/bump-elizaos.sh",
+      "summary": "err is a function defined in eliza/packages/app-core/scripts/bump-elizaos.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/bump-elizaos.sh:hdr",
+      "type": "function",
+      "name": "hdr",
+      "filePath": "eliza/packages/app-core/scripts/bump-elizaos.sh",
+      "summary": "hdr is a function defined in eliza/packages/app-core/scripts/bump-elizaos.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/bump-elizaos.sh:die",
+      "type": "function",
+      "name": "die",
+      "filePath": "eliza/packages/app-core/scripts/bump-elizaos.sh",
+      "summary": "die is a function defined in eliza/packages/app-core/scripts/bump-elizaos.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/bump-elizaos.sh:normalise_version",
+      "type": "function",
+      "name": "normalise_version",
+      "filePath": "eliza/packages/app-core/scripts/bump-elizaos.sh",
+      "summary": "normalise_version is a function defined in eliza/packages/app-core/scripts/bump-elizaos.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/bump-elizaos.sh:run_pkg_update",
+      "type": "function",
+      "name": "run_pkg_update",
+      "filePath": "eliza/packages/app-core/scripts/bump-elizaos.sh",
+      "summary": "run_pkg_update is a function defined in eliza/packages/app-core/scripts/bump-elizaos.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/bump-elizaos.sh:check_core_tarball",
+      "type": "function",
+      "name": "check_core_tarball",
+      "filePath": "eliza/packages/app-core/scripts/bump-elizaos.sh",
+      "summary": "check_core_tarball is a function defined in eliza/packages/app-core/scripts/bump-elizaos.sh."
+    },
+    {
+      "tags": [
+        "script",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/scripts/deploy-image.sh",
+      "type": "file",
+      "name": "deploy-image.sh",
+      "filePath": "eliza/packages/app-core/scripts/deploy-image.sh",
+      "summary": "deploy-image.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 318 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/deploy-image.sh:log",
+      "type": "function",
+      "name": "log",
+      "filePath": "eliza/packages/app-core/scripts/deploy-image.sh",
+      "summary": "log is a function defined in eliza/packages/app-core/scripts/deploy-image.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/deploy-image.sh:ok",
+      "type": "function",
+      "name": "ok",
+      "filePath": "eliza/packages/app-core/scripts/deploy-image.sh",
+      "summary": "ok is a function defined in eliza/packages/app-core/scripts/deploy-image.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/deploy-image.sh:warn",
+      "type": "function",
+      "name": "warn",
+      "filePath": "eliza/packages/app-core/scripts/deploy-image.sh",
+      "summary": "warn is a function defined in eliza/packages/app-core/scripts/deploy-image.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/deploy-image.sh:err",
+      "type": "function",
+      "name": "err",
+      "filePath": "eliza/packages/app-core/scripts/deploy-image.sh",
+      "summary": "err is a function defined in eliza/packages/app-core/scripts/deploy-image.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/deploy-image.sh:hdr",
+      "type": "function",
+      "name": "hdr",
+      "filePath": "eliza/packages/app-core/scripts/deploy-image.sh",
+      "summary": "hdr is a function defined in eliza/packages/app-core/scripts/deploy-image.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/deploy-image.sh:die",
+      "type": "function",
+      "name": "die",
+      "filePath": "eliza/packages/app-core/scripts/deploy-image.sh",
+      "summary": "die is a function defined in eliza/packages/app-core/scripts/deploy-image.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/deploy-image.sh:ssh_run",
+      "type": "function",
+      "name": "ssh_run",
+      "filePath": "eliza/packages/app-core/scripts/deploy-image.sh",
+      "summary": "ssh_run is a function defined in eliza/packages/app-core/scripts/deploy-image.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/scripts/deploy-image.sh:deploy_container",
+      "type": "function",
+      "name": "deploy_container",
+      "filePath": "eliza/packages/app-core/scripts/deploy-image.sh",
+      "summary": "deploy_container is a function defined in eliza/packages/app-core/scripts/deploy-image.sh."
+    },
+    {
+      "tags": [
+        "script",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/scripts/docker-ci-smoke.sh",
+      "type": "file",
+      "name": "docker-ci-smoke.sh",
+      "filePath": "eliza/packages/app-core/scripts/docker-ci-smoke.sh",
+      "summary": "docker-ci-smoke.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 517 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/docker-ci-smoke.sh:log",
+      "type": "function",
+      "name": "log",
+      "filePath": "eliza/packages/app-core/scripts/docker-ci-smoke.sh",
+      "summary": "log is a function defined in eliza/packages/app-core/scripts/docker-ci-smoke.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/docker-ci-smoke.sh:on_error",
+      "type": "function",
+      "name": "on_error",
+      "filePath": "eliza/packages/app-core/scripts/docker-ci-smoke.sh",
+      "summary": "on_error is a function defined in eliza/packages/app-core/scripts/docker-ci-smoke.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/docker-ci-smoke.sh:fail",
+      "type": "function",
+      "name": "fail",
+      "filePath": "eliza/packages/app-core/scripts/docker-ci-smoke.sh",
+      "summary": "fail is a function defined in eliza/packages/app-core/scripts/docker-ci-smoke.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/docker-ci-smoke.sh:find_docker_bin",
+      "type": "function",
+      "name": "find_docker_bin",
+      "filePath": "eliza/packages/app-core/scripts/docker-ci-smoke.sh",
+      "summary": "find_docker_bin is a function defined in eliza/packages/app-core/scripts/docker-ci-smoke.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/docker-ci-smoke.sh:load_env_file",
+      "type": "function",
+      "name": "load_env_file",
+      "filePath": "eliza/packages/app-core/scripts/docker-ci-smoke.sh",
+      "summary": "load_env_file is a function defined in eliza/packages/app-core/scripts/docker-ci-smoke.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/docker-ci-smoke.sh:cleanup",
+      "type": "function",
+      "name": "cleanup",
+      "filePath": "eliza/packages/app-core/scripts/docker-ci-smoke.sh",
+      "summary": "cleanup is a function defined in eliza/packages/app-core/scripts/docker-ci-smoke.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/docker-ci-smoke.sh:probe_ok",
+      "type": "function",
+      "name": "probe_ok",
+      "filePath": "eliza/packages/app-core/scripts/docker-ci-smoke.sh",
+      "summary": "probe_ok is a function defined in eliza/packages/app-core/scripts/docker-ci-smoke.sh."
+    },
+    {
+      "tags": [
+        "script"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/docker-entrypoint.sh",
+      "type": "file",
+      "name": "docker-entrypoint.sh",
+      "filePath": "eliza/packages/app-core/scripts/docker-entrypoint.sh",
+      "summary": "docker-entrypoint.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 10 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/scripts/i18n-dynamic-keys.json",
+      "type": "config",
+      "name": "i18n-dynamic-keys.json",
+      "filePath": "eliza/packages/app-core/scripts/i18n-dynamic-keys.json",
+      "summary": "i18n-dynamic-keys.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 128 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:eliza/packages/app-core/scripts/install-android-sms-gateway.md",
+      "type": "document",
+      "name": "install-android-sms-gateway.md",
+      "filePath": "eliza/packages/app-core/scripts/install-android-sms-gateway.md",
+      "summary": "install-android-sms-gateway.md documents eliza/packages/app-core/scripts with 177 lines of reference material.",
+      "languageNotes": "markdown; docs; 177 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/scripts/plugin-index-local-additions.json",
+      "type": "config",
+      "name": "plugin-index-local-additions.json",
+      "filePath": "eliza/packages/app-core/scripts/plugin-index-local-additions.json",
+      "summary": "plugin-index-local-additions.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 12 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/scripts/plugin-metadata-overrides.json",
+      "type": "config",
+      "name": "plugin-metadata-overrides.json",
+      "filePath": "eliza/packages/app-core/scripts/plugin-metadata-overrides.json",
+      "summary": "plugin-metadata-overrides.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 165 lines"
+    },
+    {
+      "tags": [
+        "script",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/prepare-ios-cocoapods.sh",
+      "type": "file",
+      "name": "prepare-ios-cocoapods.sh",
+      "filePath": "eliza/packages/app-core/scripts/prepare-ios-cocoapods.sh",
+      "summary": "prepare-ios-cocoapods.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 68 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/prepare-ios-cocoapods.sh:resolve_pod",
+      "type": "function",
+      "name": "resolve_pod",
+      "filePath": "eliza/packages/app-core/scripts/prepare-ios-cocoapods.sh",
+      "summary": "resolve_pod is a function defined in eliza/packages/app-core/scripts/prepare-ios-cocoapods.sh."
+    },
+    {
+      "tags": [
+        "script"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/rt.sh",
+      "type": "file",
+      "name": "rt.sh",
+      "filePath": "eliza/packages/app-core/scripts/rt.sh",
+      "summary": "rt.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 4 lines"
+    },
+    {
+      "tags": [
+        "script"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/run-windows-smoke-launcher.ps1",
+      "type": "file",
+      "name": "run-windows-smoke-launcher.ps1",
+      "filePath": "eliza/packages/app-core/scripts/run-windows-smoke-launcher.ps1",
+      "summary": "run-windows-smoke-launcher.ps1 automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "powershell; script; 35 lines"
+    },
+    {
+      "tags": [
+        "script"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/sandbox-setup.sh",
+      "type": "file",
+      "name": "sandbox-setup.sh",
+      "filePath": "eliza/packages/app-core/scripts/sandbox-setup.sh",
+      "summary": "sandbox-setup.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 7 lines"
+    },
+    {
+      "tags": [
+        "script"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/worktree-env.sh",
+      "type": "file",
+      "name": "worktree-env.sh",
+      "filePath": "eliza/packages/app-core/scripts/worktree-env.sh",
+      "summary": "worktree-env.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 41 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/build-image.sh",
+      "target": "function:eliza/packages/app-core/scripts/build-image.sh:log",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/build-image.sh",
+      "target": "function:eliza/packages/app-core/scripts/build-image.sh:ok",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/build-image.sh",
+      "target": "function:eliza/packages/app-core/scripts/build-image.sh:warn",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/build-image.sh",
+      "target": "function:eliza/packages/app-core/scripts/build-image.sh:err",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/build-image.sh",
+      "target": "function:eliza/packages/app-core/scripts/build-image.sh:hdr",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/build-image.sh",
+      "target": "function:eliza/packages/app-core/scripts/build-image.sh:die",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/build-image.sh",
+      "target": "function:eliza/packages/app-core/scripts/build-image.sh:load_env_file",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/build-image.sh",
+      "target": "function:eliza/packages/app-core/scripts/build-image.sh:sedi",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/build-image.sh",
+      "target": "function:eliza/packages/app-core/scripts/build-image.sh:run",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/build-image.sh",
+      "target": "function:eliza/packages/app-core/scripts/build-image.sh:patch_vite",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/build-image.sh",
+      "target": "function:eliza/packages/app-core/scripts/build-image.sh:cleanup",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/bump-elizaos.sh",
+      "target": "function:eliza/packages/app-core/scripts/bump-elizaos.sh:log",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/bump-elizaos.sh",
+      "target": "function:eliza/packages/app-core/scripts/bump-elizaos.sh:ok",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/bump-elizaos.sh",
+      "target": "function:eliza/packages/app-core/scripts/bump-elizaos.sh:warn",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/bump-elizaos.sh",
+      "target": "function:eliza/packages/app-core/scripts/bump-elizaos.sh:err",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/bump-elizaos.sh",
+      "target": "function:eliza/packages/app-core/scripts/bump-elizaos.sh:hdr",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/bump-elizaos.sh",
+      "target": "function:eliza/packages/app-core/scripts/bump-elizaos.sh:die",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/bump-elizaos.sh",
+      "target": "function:eliza/packages/app-core/scripts/bump-elizaos.sh:normalise_version",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/bump-elizaos.sh",
+      "target": "function:eliza/packages/app-core/scripts/bump-elizaos.sh:run_pkg_update",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/bump-elizaos.sh",
+      "target": "function:eliza/packages/app-core/scripts/bump-elizaos.sh:check_core_tarball",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/deploy-image.sh",
+      "target": "function:eliza/packages/app-core/scripts/deploy-image.sh:log",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/deploy-image.sh",
+      "target": "function:eliza/packages/app-core/scripts/deploy-image.sh:ok",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/deploy-image.sh",
+      "target": "function:eliza/packages/app-core/scripts/deploy-image.sh:warn",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/deploy-image.sh",
+      "target": "function:eliza/packages/app-core/scripts/deploy-image.sh:err",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/deploy-image.sh",
+      "target": "function:eliza/packages/app-core/scripts/deploy-image.sh:hdr",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/deploy-image.sh",
+      "target": "function:eliza/packages/app-core/scripts/deploy-image.sh:die",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/deploy-image.sh",
+      "target": "function:eliza/packages/app-core/scripts/deploy-image.sh:ssh_run",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/deploy-image.sh",
+      "target": "function:eliza/packages/app-core/scripts/deploy-image.sh:deploy_container",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/docker-ci-smoke.sh",
+      "target": "function:eliza/packages/app-core/scripts/docker-ci-smoke.sh:log",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/docker-ci-smoke.sh",
+      "target": "function:eliza/packages/app-core/scripts/docker-ci-smoke.sh:on_error",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/docker-ci-smoke.sh",
+      "target": "function:eliza/packages/app-core/scripts/docker-ci-smoke.sh:fail",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/docker-ci-smoke.sh",
+      "target": "function:eliza/packages/app-core/scripts/docker-ci-smoke.sh:find_docker_bin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/docker-ci-smoke.sh",
+      "target": "function:eliza/packages/app-core/scripts/docker-ci-smoke.sh:load_env_file",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/docker-ci-smoke.sh",
+      "target": "function:eliza/packages/app-core/scripts/docker-ci-smoke.sh:cleanup",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/docker-ci-smoke.sh",
+      "target": "function:eliza/packages/app-core/scripts/docker-ci-smoke.sh:probe_ok",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/prepare-ios-cocoapods.sh",
+      "target": "function:eliza/packages/app-core/scripts/prepare-ios-cocoapods.sh:resolve_pod",
+      "type": "contains"
+    }
+  ]
+}

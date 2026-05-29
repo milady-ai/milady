@@ -1,0 +1,4672 @@
+{
+  "batchIndex": 73,
+  "nodes": [
+    {
+      "tags": [
+        "test",
+        "local-inference"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/services/local-inference/catalog.test.ts",
+      "type": "file",
+      "name": "catalog.test.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/catalog.test.ts",
+      "summary": "catalog.test.ts is a typescript source file in the Milady codebase. It contains 3 imports.",
+      "languageNotes": "typescript; code; 193 lines"
+    },
+    {
+      "tags": [
+        "local-inference"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/services/local-inference/catalog.ts",
+      "type": "file",
+      "name": "catalog.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/catalog.ts",
+      "summary": "catalog.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 24 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/services/local-inference/custom-search.ts",
+      "type": "file",
+      "name": "custom-search.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/custom-search.ts",
+      "summary": "custom-search.ts is a typescript source file in the Milady codebase. It contains 5 functions, 2 imports.",
+      "languageNotes": "typescript; code; 121 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/custom-search.ts:listLocalModelSearchProviders",
+      "type": "function",
+      "name": "listLocalModelSearchProviders",
+      "filePath": "eliza/packages/ui/src/services/local-inference/custom-search.ts",
+      "summary": "listLocalModelSearchProviders is a function defined in eliza/packages/ui/src/services/local-inference/custom-search.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/custom-search.ts:isLocalModelSearchProviderId",
+      "type": "function",
+      "name": "isLocalModelSearchProviderId",
+      "filePath": "eliza/packages/ui/src/services/local-inference/custom-search.ts",
+      "summary": "isLocalModelSearchProviderId is a function defined in eliza/packages/ui/src/services/local-inference/custom-search.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/custom-search.ts:getLocalModelSearchProvider",
+      "type": "function",
+      "name": "getLocalModelSearchProvider",
+      "filePath": "eliza/packages/ui/src/services/local-inference/custom-search.ts",
+      "summary": "getLocalModelSearchProvider is a function defined in eliza/packages/ui/src/services/local-inference/custom-search.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/custom-search.ts:wrapLocalModelSearchResults",
+      "type": "function",
+      "name": "wrapLocalModelSearchResults",
+      "filePath": "eliza/packages/ui/src/services/local-inference/custom-search.ts",
+      "summary": "wrapLocalModelSearchResults is a function defined in eliza/packages/ui/src/services/local-inference/custom-search.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/custom-search.ts:searchLocalModelProvider",
+      "type": "function",
+      "name": "searchLocalModelProvider",
+      "filePath": "eliza/packages/ui/src/services/local-inference/custom-search.ts",
+      "summary": "searchLocalModelProvider is a function defined in eliza/packages/ui/src/services/local-inference/custom-search.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/services/local-inference/device-bridge.ts",
+      "type": "file",
+      "name": "device-bridge.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/device-bridge.ts",
+      "summary": "device-bridge.ts is a typescript source file in the Milady codebase. It contains 4 functions, 1 class, 3 imports.",
+      "languageNotes": "typescript; code; 1099 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/device-bridge.ts:isWsModule",
+      "type": "function",
+      "name": "isWsModule",
+      "filePath": "eliza/packages/ui/src/services/local-inference/device-bridge.ts",
+      "summary": "isWsModule is a function defined in eliza/packages/ui/src/services/local-inference/device-bridge.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/device-bridge.ts:importWsModule",
+      "type": "function",
+      "name": "importWsModule",
+      "filePath": "eliza/packages/ui/src/services/local-inference/device-bridge.ts",
+      "summary": "importWsModule is a function defined in eliza/packages/ui/src/services/local-inference/device-bridge.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/device-bridge.ts:scoreDevice",
+      "type": "function",
+      "name": "scoreDevice",
+      "filePath": "eliza/packages/ui/src/services/local-inference/device-bridge.ts",
+      "summary": "scoreDevice is a function defined in eliza/packages/ui/src/services/local-inference/device-bridge.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/device-bridge.ts:registerDeviceBridgeLoader",
+      "type": "function",
+      "name": "registerDeviceBridgeLoader",
+      "filePath": "eliza/packages/ui/src/services/local-inference/device-bridge.ts",
+      "summary": "registerDeviceBridgeLoader is a function defined in eliza/packages/ui/src/services/local-inference/device-bridge.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/ui/src/services/local-inference/device-bridge.ts:DeviceBridge",
+      "type": "class",
+      "name": "DeviceBridge",
+      "filePath": "eliza/packages/ui/src/services/local-inference/device-bridge.ts",
+      "summary": "DeviceBridge is a class or type declared in eliza/packages/ui/src/services/local-inference/device-bridge.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/services/local-inference/dflash-doctor.ts",
+      "type": "file",
+      "name": "dflash-doctor.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-doctor.ts",
+      "summary": "dflash-doctor.ts is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 163 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/services/local-inference/dflash-doctor.ts:runDflashDoctor",
+      "type": "function",
+      "name": "runDflashDoctor",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-doctor.ts",
+      "summary": "runDflashDoctor is a function defined in eliza/packages/ui/src/services/local-inference/dflash-doctor.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/services/local-inference/dflash-server.test.ts",
+      "type": "file",
+      "name": "dflash-server.test.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-server.test.ts",
+      "summary": "dflash-server.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 132 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/dflash-server.test.ts:makeManagedBinary",
+      "type": "function",
+      "name": "makeManagedBinary",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-server.test.ts",
+      "summary": "makeManagedBinary is a function defined in eliza/packages/ui/src/services/local-inference/dflash-server.test.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "type": "file",
+      "name": "dflash-server.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "summary": "dflash-server.ts is a typescript source file in the Milady codebase. It contains 19 functions, 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 614 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:readBool",
+      "type": "function",
+      "name": "readBool",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "summary": "readBool is a function defined in eliza/packages/ui/src/services/local-inference/dflash-server.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:managedDflashBinaryPath",
+      "type": "function",
+      "name": "managedDflashBinaryPath",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "summary": "managedDflashBinaryPath is a function defined in eliza/packages/ui/src/services/local-inference/dflash-server.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:managedDflashCapabilitiesPath",
+      "type": "function",
+      "name": "managedDflashCapabilitiesPath",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "summary": "managedDflashCapabilitiesPath is a function defined in eliza/packages/ui/src/services/local-inference/dflash-server.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:readDflashBinaryCapabilities",
+      "type": "function",
+      "name": "readDflashBinaryCapabilities",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "summary": "readDflashBinaryCapabilities is a function defined in eliza/packages/ui/src/services/local-inference/dflash-server.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:isMetalDflashRuntime",
+      "type": "function",
+      "name": "isMetalDflashRuntime",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "summary": "isMetalDflashRuntime is a function defined in eliza/packages/ui/src/services/local-inference/dflash-server.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:dflashMetalAutoEnabled",
+      "type": "function",
+      "name": "dflashMetalAutoEnabled",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "summary": "dflashMetalAutoEnabled is a function defined in eliza/packages/ui/src/services/local-inference/dflash-server.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:assertCacheTypeSupportedOnBackend",
+      "type": "function",
+      "name": "assertCacheTypeSupportedOnBackend",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "summary": "assertCacheTypeSupportedOnBackend is a function defined in eliza/packages/ui/src/services/local-inference/dflash-server.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:dflashEnabled",
+      "type": "function",
+      "name": "dflashEnabled",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "summary": "dflashEnabled is a function defined in eliza/packages/ui/src/services/local-inference/dflash-server.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:dflashRequired",
+      "type": "function",
+      "name": "dflashRequired",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "summary": "dflashRequired is a function defined in eliza/packages/ui/src/services/local-inference/dflash-server.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:candidateBinaryPaths",
+      "type": "function",
+      "name": "candidateBinaryPaths",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "summary": "candidateBinaryPaths is a function defined in eliza/packages/ui/src/services/local-inference/dflash-server.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:platformKey",
+      "type": "function",
+      "name": "platformKey",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "summary": "platformKey is a function defined in eliza/packages/ui/src/services/local-inference/dflash-server.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:resolveDflashBinary",
+      "type": "function",
+      "name": "resolveDflashBinary",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "summary": "resolveDflashBinary is a function defined in eliza/packages/ui/src/services/local-inference/dflash-server.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:getDflashRuntimeStatus",
+      "type": "function",
+      "name": "getDflashRuntimeStatus",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "summary": "getDflashRuntimeStatus is a function defined in eliza/packages/ui/src/services/local-inference/dflash-server.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:normalizeGpuLayers",
+      "type": "function",
+      "name": "normalizeGpuLayers",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "summary": "normalizeGpuLayers is a function defined in eliza/packages/ui/src/services/local-inference/dflash-server.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:resolvePort",
+      "type": "function",
+      "name": "resolvePort",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "summary": "resolvePort is a function defined in eliza/packages/ui/src/services/local-inference/dflash-server.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:sleep",
+      "type": "function",
+      "name": "sleep",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "summary": "sleep is a function defined in eliza/packages/ui/src/services/local-inference/dflash-server.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:fetchJson",
+      "type": "function",
+      "name": "fetchJson",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "summary": "fetchJson is a function defined in eliza/packages/ui/src/services/local-inference/dflash-server.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:fetchText",
+      "type": "function",
+      "name": "fetchText",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "summary": "fetchText is a function defined in eliza/packages/ui/src/services/local-inference/dflash-server.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:parseDflashMetrics",
+      "type": "function",
+      "name": "parseDflashMetrics",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "summary": "parseDflashMetrics is a function defined in eliza/packages/ui/src/services/local-inference/dflash-server.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/ui/src/services/local-inference/dflash-server.ts:DflashLlamaServer",
+      "type": "class",
+      "name": "DflashLlamaServer",
+      "filePath": "eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "summary": "DflashLlamaServer is a class or type declared in eliza/packages/ui/src/services/local-inference/dflash-server.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/services/local-inference/disk-space.test.ts",
+      "type": "file",
+      "name": "disk-space.test.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/disk-space.test.ts",
+      "summary": "disk-space.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 39 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/disk-space.test.ts:probe",
+      "type": "function",
+      "name": "probe",
+      "filePath": "eliza/packages/ui/src/services/local-inference/disk-space.test.ts",
+      "summary": "probe is a function defined in eliza/packages/ui/src/services/local-inference/disk-space.test.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/services/local-inference/disk-space.ts",
+      "type": "file",
+      "name": "disk-space.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/disk-space.ts",
+      "summary": "disk-space.ts is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 53 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/disk-space.ts:probeDiskSpace",
+      "type": "function",
+      "name": "probeDiskSpace",
+      "filePath": "eliza/packages/ui/src/services/local-inference/disk-space.ts",
+      "summary": "probeDiskSpace is a function defined in eliza/packages/ui/src/services/local-inference/disk-space.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/disk-space.ts:adviseDiskSpace",
+      "type": "function",
+      "name": "adviseDiskSpace",
+      "filePath": "eliza/packages/ui/src/services/local-inference/disk-space.ts",
+      "summary": "adviseDiskSpace is a function defined in eliza/packages/ui/src/services/local-inference/disk-space.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/services/local-inference/downloader.test.ts",
+      "type": "file",
+      "name": "downloader.test.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/downloader.test.ts",
+      "summary": "downloader.test.ts is a typescript source file in the Milady codebase. It contains 4 functions, 4 imports.",
+      "languageNotes": "typescript; code; 211 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/downloader.test.ts:sha256",
+      "type": "function",
+      "name": "sha256",
+      "filePath": "eliza/packages/ui/src/services/local-inference/downloader.test.ts",
+      "summary": "sha256 is a function defined in eliza/packages/ui/src/services/local-inference/downloader.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/downloader.test.ts:bundleRemotePath",
+      "type": "function",
+      "name": "bundleRemotePath",
+      "filePath": "eliza/packages/ui/src/services/local-inference/downloader.test.ts",
+      "summary": "bundleRemotePath is a function defined in eliza/packages/ui/src/services/local-inference/downloader.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/downloader.test.ts:installFetchFixture",
+      "type": "function",
+      "name": "installFetchFixture",
+      "filePath": "eliza/packages/ui/src/services/local-inference/downloader.test.ts",
+      "summary": "installFetchFixture is a function defined in eliza/packages/ui/src/services/local-inference/downloader.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/downloader.test.ts:waitForTerminal",
+      "type": "function",
+      "name": "waitForTerminal",
+      "filePath": "eliza/packages/ui/src/services/local-inference/downloader.test.ts",
+      "summary": "waitForTerminal is a function defined in eliza/packages/ui/src/services/local-inference/downloader.test.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "type": "file",
+      "name": "downloader.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "summary": "downloader.ts is a typescript source file in the Milady codebase. It contains 11 functions, 1 class, 6 imports.",
+      "languageNotes": "typescript; code; 961 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:stagingFilename",
+      "type": "function",
+      "name": "stagingFilename",
+      "filePath": "eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "summary": "stagingFilename is a function defined in eliza/packages/ui/src/services/local-inference/downloader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:finalFilename",
+      "type": "function",
+      "name": "finalFilename",
+      "filePath": "eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "summary": "finalFilename is a function defined in eliza/packages/ui/src/services/local-inference/downloader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:bundleDirname",
+      "type": "function",
+      "name": "bundleDirname",
+      "filePath": "eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "summary": "bundleDirname is a function defined in eliza/packages/ui/src/services/local-inference/downloader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:bundleStagingFilename",
+      "type": "function",
+      "name": "bundleStagingFilename",
+      "filePath": "eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "summary": "bundleStagingFilename is a function defined in eliza/packages/ui/src/services/local-inference/downloader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:bundleTargetPath",
+      "type": "function",
+      "name": "bundleTargetPath",
+      "filePath": "eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "summary": "bundleTargetPath is a function defined in eliza/packages/ui/src/services/local-inference/downloader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:parseBundleFileEntry",
+      "type": "function",
+      "name": "parseBundleFileEntry",
+      "filePath": "eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "summary": "parseBundleFileEntry is a function defined in eliza/packages/ui/src/services/local-inference/downloader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:parseBundleManifestOrThrow",
+      "type": "function",
+      "name": "parseBundleManifestOrThrow",
+      "filePath": "eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "summary": "parseBundleManifestOrThrow is a function defined in eliza/packages/ui/src/services/local-inference/downloader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:collectBundleFiles",
+      "type": "function",
+      "name": "collectBundleFiles",
+      "filePath": "eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "summary": "collectBundleFiles is a function defined in eliza/packages/ui/src/services/local-inference/downloader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:ensureDirs",
+      "type": "function",
+      "name": "ensureDirs",
+      "filePath": "eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "summary": "ensureDirs is a function defined in eliza/packages/ui/src/services/local-inference/downloader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:terminalDownloadsPath",
+      "type": "function",
+      "name": "terminalDownloadsPath",
+      "filePath": "eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "summary": "terminalDownloadsPath is a function defined in eliza/packages/ui/src/services/local-inference/downloader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:partialSize",
+      "type": "function",
+      "name": "partialSize",
+      "filePath": "eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "summary": "partialSize is a function defined in eliza/packages/ui/src/services/local-inference/downloader.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/ui/src/services/local-inference/downloader.ts:Downloader",
+      "type": "class",
+      "name": "Downloader",
+      "filePath": "eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "summary": "Downloader is a class or type declared in eliza/packages/ui/src/services/local-inference/downloader.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/services/local-inference/engine.e2e.test.ts",
+      "type": "file",
+      "name": "engine.e2e.test.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/engine.e2e.test.ts",
+      "summary": "engine.e2e.test.ts is a typescript source file in the Milady codebase. It contains 3 functions, 2 imports.",
+      "languageNotes": "typescript; code; 114 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/engine.e2e.test.ts:isTextGenerationCandidate",
+      "type": "function",
+      "name": "isTextGenerationCandidate",
+      "filePath": "eliza/packages/ui/src/services/local-inference/engine.e2e.test.ts",
+      "summary": "isTextGenerationCandidate is a function defined in eliza/packages/ui/src/services/local-inference/engine.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/engine.e2e.test.ts:pickSmallestGguf",
+      "type": "function",
+      "name": "pickSmallestGguf",
+      "filePath": "eliza/packages/ui/src/services/local-inference/engine.e2e.test.ts",
+      "summary": "pickSmallestGguf is a function defined in eliza/packages/ui/src/services/local-inference/engine.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/engine.e2e.test.ts:runEngine",
+      "type": "function",
+      "name": "runEngine",
+      "filePath": "eliza/packages/ui/src/services/local-inference/engine.e2e.test.ts",
+      "summary": "runEngine is a function defined in eliza/packages/ui/src/services/local-inference/engine.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/services/local-inference/engine.test.ts",
+      "type": "file",
+      "name": "engine.test.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/engine.test.ts",
+      "summary": "engine.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 85 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/services/local-inference/engine.ts",
+      "type": "file",
+      "name": "engine.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/engine.ts",
+      "summary": "engine.ts is a typescript source file in the Milady codebase. It contains 7 functions, 1 class, 5 imports.",
+      "languageNotes": "typescript; code; 412 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/engine.ts:normalizeKvCacheTypeForBinding",
+      "type": "function",
+      "name": "normalizeKvCacheTypeForBinding",
+      "filePath": "eliza/packages/ui/src/services/local-inference/engine.ts",
+      "summary": "normalizeKvCacheTypeForBinding is a function defined in eliza/packages/ui/src/services/local-inference/engine.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/engine.ts:gpuLayersForKvOffload",
+      "type": "function",
+      "name": "gpuLayersForKvOffload",
+      "filePath": "eliza/packages/ui/src/services/local-inference/engine.ts",
+      "summary": "gpuLayersForKvOffload is a function defined in eliza/packages/ui/src/services/local-inference/engine.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/engine.ts:resolveGpuLayersForLoad",
+      "type": "function",
+      "name": "resolveGpuLayersForLoad",
+      "filePath": "eliza/packages/ui/src/services/local-inference/engine.ts",
+      "summary": "resolveGpuLayersForLoad is a function defined in eliza/packages/ui/src/services/local-inference/engine.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/engine.ts:resolveDflashGpuLayersForLoad",
+      "type": "function",
+      "name": "resolveDflashGpuLayersForLoad",
+      "filePath": "eliza/packages/ui/src/services/local-inference/engine.ts",
+      "summary": "resolveDflashGpuLayersForLoad is a function defined in eliza/packages/ui/src/services/local-inference/engine.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/engine.ts:getDflashTargetMetaBlockReason",
+      "type": "function",
+      "name": "getDflashTargetMetaBlockReason",
+      "filePath": "eliza/packages/ui/src/services/local-inference/engine.ts",
+      "summary": "getDflashTargetMetaBlockReason is a function defined in eliza/packages/ui/src/services/local-inference/engine.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/engine.ts:readDflashTargetMeta",
+      "type": "function",
+      "name": "readDflashTargetMeta",
+      "filePath": "eliza/packages/ui/src/services/local-inference/engine.ts",
+      "summary": "readDflashTargetMeta is a function defined in eliza/packages/ui/src/services/local-inference/engine.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/engine.ts:getDflashDrafterBlockReason",
+      "type": "function",
+      "name": "getDflashDrafterBlockReason",
+      "filePath": "eliza/packages/ui/src/services/local-inference/engine.ts",
+      "summary": "getDflashDrafterBlockReason is a function defined in eliza/packages/ui/src/services/local-inference/engine.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/ui/src/services/local-inference/engine.ts:LocalInferenceEngine",
+      "type": "class",
+      "name": "LocalInferenceEngine",
+      "filePath": "eliza/packages/ui/src/services/local-inference/engine.ts",
+      "summary": "LocalInferenceEngine is a class or type declared in eliza/packages/ui/src/services/local-inference/engine.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/services/local-inference/external-scanner.ts",
+      "type": "file",
+      "name": "external-scanner.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/external-scanner.ts",
+      "summary": "external-scanner.ts is a typescript source file in the Milady codebase. It contains 4 functions, 1 imports.",
+      "languageNotes": "typescript; code; 312 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/services/local-inference/external-scanner.ts:candidateRoots",
+      "type": "function",
+      "name": "candidateRoots",
+      "filePath": "eliza/packages/ui/src/services/local-inference/external-scanner.ts",
+      "summary": "candidateRoots is a function defined in eliza/packages/ui/src/services/local-inference/external-scanner.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/external-scanner.ts:dirExists",
+      "type": "function",
+      "name": "dirExists",
+      "filePath": "eliza/packages/ui/src/services/local-inference/external-scanner.ts",
+      "summary": "dirExists is a function defined in eliza/packages/ui/src/services/local-inference/external-scanner.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/external-scanner.ts:scanOllama",
+      "type": "function",
+      "name": "scanOllama",
+      "filePath": "eliza/packages/ui/src/services/local-inference/external-scanner.ts",
+      "summary": "scanOllama is a function defined in eliza/packages/ui/src/services/local-inference/external-scanner.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/external-scanner.ts:scanExternalModels",
+      "type": "function",
+      "name": "scanExternalModels",
+      "filePath": "eliza/packages/ui/src/services/local-inference/external-scanner.ts",
+      "summary": "scanExternalModels is a function defined in eliza/packages/ui/src/services/local-inference/external-scanner.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/services/local-inference/handler-registry.ts",
+      "type": "file",
+      "name": "handler-registry.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/handler-registry.ts",
+      "summary": "handler-registry.ts is a typescript source file in the Milady codebase. It contains 3 functions, 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 249 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/handler-registry.ts:isPatchedRegisterModel",
+      "type": "function",
+      "name": "isPatchedRegisterModel",
+      "filePath": "eliza/packages/ui/src/services/local-inference/handler-registry.ts",
+      "summary": "isPatchedRegisterModel is a function defined in eliza/packages/ui/src/services/local-inference/handler-registry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/handler-registry.ts:installPrototypePatch",
+      "type": "function",
+      "name": "installPrototypePatch",
+      "filePath": "eliza/packages/ui/src/services/local-inference/handler-registry.ts",
+      "summary": "installPrototypePatch is a function defined in eliza/packages/ui/src/services/local-inference/handler-registry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/handler-registry.ts:toPublicRegistration",
+      "type": "function",
+      "name": "toPublicRegistration",
+      "filePath": "eliza/packages/ui/src/services/local-inference/handler-registry.ts",
+      "summary": "toPublicRegistration is a function defined in eliza/packages/ui/src/services/local-inference/handler-registry.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/ui/src/services/local-inference/handler-registry.ts:HandlerRegistry",
+      "type": "class",
+      "name": "HandlerRegistry",
+      "filePath": "eliza/packages/ui/src/services/local-inference/handler-registry.ts",
+      "summary": "HandlerRegistry is a class or type declared in eliza/packages/ui/src/services/local-inference/handler-registry.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/services/local-inference/hardware.test.ts",
+      "type": "file",
+      "name": "hardware.test.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hardware.test.ts",
+      "summary": "hardware.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 76 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hardware.test.ts:makeProbe",
+      "type": "function",
+      "name": "makeProbe",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hardware.test.ts",
+      "summary": "makeProbe is a function defined in eliza/packages/ui/src/services/local-inference/hardware.test.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "type": "file",
+      "name": "hardware.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "summary": "hardware.ts is a typescript source file in the Milady codebase. It contains 14 functions, 2 imports.",
+      "languageNotes": "typescript; code; 416 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:bytesToGb",
+      "type": "function",
+      "name": "bytesToGb",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "summary": "bytesToGb is a function defined in eliza/packages/ui/src/services/local-inference/hardware.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:recommendBucket",
+      "type": "function",
+      "name": "recommendBucket",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "summary": "recommendBucket is a function defined in eliza/packages/ui/src/services/local-inference/hardware.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:loadLlamaBinding",
+      "type": "function",
+      "name": "loadLlamaBinding",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "summary": "loadLlamaBinding is a function defined in eliza/packages/ui/src/services/local-inference/hardware.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:readableEntries",
+      "type": "function",
+      "name": "readableEntries",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "summary": "readableEntries is a function defined in eliza/packages/ui/src/services/local-inference/hardware.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:pathExists",
+      "type": "function",
+      "name": "pathExists",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "summary": "pathExists is a function defined in eliza/packages/ui/src/services/local-inference/hardware.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:hasAny",
+      "type": "function",
+      "name": "hasAny",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "summary": "hasAny is a function defined in eliza/packages/ui/src/services/local-inference/hardware.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:detectOpenVinoDevices",
+      "type": "function",
+      "name": "detectOpenVinoDevices",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "summary": "detectOpenVinoDevices is a function defined in eliza/packages/ui/src/services/local-inference/hardware.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:probeHardware",
+      "type": "function",
+      "name": "probeHardware",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "summary": "probeHardware is a function defined in eliza/packages/ui/src/services/local-inference/hardware.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:assessFit",
+      "type": "function",
+      "name": "assessFit",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "summary": "assessFit is a function defined in eliza/packages/ui/src/services/local-inference/hardware.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:diskFitFromWarning",
+      "type": "function",
+      "name": "diskFitFromWarning",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "summary": "diskFitFromWarning is a function defined in eliza/packages/ui/src/services/local-inference/hardware.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:memoryReason",
+      "type": "function",
+      "name": "memoryReason",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "summary": "memoryReason is a function defined in eliza/packages/ui/src/services/local-inference/hardware.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:diskReason",
+      "type": "function",
+      "name": "diskReason",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "summary": "diskReason is a function defined in eliza/packages/ui/src/services/local-inference/hardware.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:recommendationFrom",
+      "type": "function",
+      "name": "recommendationFrom",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "summary": "recommendationFrom is a function defined in eliza/packages/ui/src/services/local-inference/hardware.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:assessFirstRunHardware",
+      "type": "function",
+      "name": "assessFirstRunHardware",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "summary": "assessFirstRunHardware is a function defined in eliza/packages/ui/src/services/local-inference/hardware.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/services/local-inference/hf-search.test.ts",
+      "type": "file",
+      "name": "hf-search.test.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hf-search.test.ts",
+      "summary": "hf-search.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 78 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hf-search.test.ts:jsonResponse",
+      "type": "function",
+      "name": "jsonResponse",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hf-search.test.ts",
+      "summary": "jsonResponse is a function defined in eliza/packages/ui/src/services/local-inference/hf-search.test.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "type": "file",
+      "name": "hf-search.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "summary": "hf-search.ts is a typescript source file in the Milady codebase. It contains 14 functions, 1 imports.",
+      "languageNotes": "typescript; code; 420 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:pickQuantFile",
+      "type": "function",
+      "name": "pickQuantFile",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "summary": "pickQuantFile is a function defined in eliza/packages/ui/src/services/local-inference/hf-search.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:extractQuantLabel",
+      "type": "function",
+      "name": "extractQuantLabel",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "summary": "extractQuantLabel is a function defined in eliza/packages/ui/src/services/local-inference/hf-search.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:inferParams",
+      "type": "function",
+      "name": "inferParams",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "summary": "inferParams is a function defined in eliza/packages/ui/src/services/local-inference/hf-search.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:inferCategory",
+      "type": "function",
+      "name": "inferCategory",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "summary": "inferCategory is a function defined in eliza/packages/ui/src/services/local-inference/hf-search.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:fetchWithTimeout",
+      "type": "function",
+      "name": "fetchWithTimeout",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "summary": "fetchWithTimeout is a function defined in eliza/packages/ui/src/services/local-inference/hf-search.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:searchHuggingFaceGguf",
+      "type": "function",
+      "name": "searchHuggingFaceGguf",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "summary": "searchHuggingFaceGguf is a function defined in eliza/packages/ui/src/services/local-inference/hf-search.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:normalizeModelScopeRepoId",
+      "type": "function",
+      "name": "normalizeModelScopeRepoId",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "summary": "normalizeModelScopeRepoId is a function defined in eliza/packages/ui/src/services/local-inference/hf-search.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:modelScopeOwnerQuery",
+      "type": "function",
+      "name": "modelScopeOwnerQuery",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "summary": "modelScopeOwnerQuery is a function defined in eliza/packages/ui/src/services/local-inference/hf-search.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:pickModelScopeGguf",
+      "type": "function",
+      "name": "pickModelScopeGguf",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "summary": "pickModelScopeGguf is a function defined in eliza/packages/ui/src/services/local-inference/hf-search.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:fetchModelScopeJson",
+      "type": "function",
+      "name": "fetchModelScopeJson",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "summary": "fetchModelScopeJson is a function defined in eliza/packages/ui/src/services/local-inference/hf-search.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:listModelScopeOwnerModels",
+      "type": "function",
+      "name": "listModelScopeOwnerModels",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "summary": "listModelScopeOwnerModels is a function defined in eliza/packages/ui/src/services/local-inference/hf-search.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:modelScopeResultForRepo",
+      "type": "function",
+      "name": "modelScopeResultForRepo",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "summary": "modelScopeResultForRepo is a function defined in eliza/packages/ui/src/services/local-inference/hf-search.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:searchModelScopeGguf",
+      "type": "function",
+      "name": "searchModelScopeGguf",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "summary": "searchModelScopeGguf is a function defined in eliza/packages/ui/src/services/local-inference/hf-search.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:searchModelHubGguf",
+      "type": "function",
+      "name": "searchModelHubGguf",
+      "filePath": "eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "summary": "searchModelHubGguf is a function defined in eliza/packages/ui/src/services/local-inference/hf-search.ts."
+    },
+    {
+      "tags": [
+        "local-inference"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/services/local-inference/load-args.ts",
+      "type": "file",
+      "name": "load-args.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/load-args.ts",
+      "summary": "load-args.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 59 lines"
+    },
+    {
+      "tags": [
+        "local-inference"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/services/local-inference/paths.ts",
+      "type": "file",
+      "name": "paths.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/paths.ts",
+      "summary": "paths.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 7 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/services/local-inference/readiness.test.ts",
+      "type": "file",
+      "name": "readiness.test.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/readiness.test.ts",
+      "summary": "readiness.test.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 87 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/services/local-inference/readiness.ts",
+      "type": "file",
+      "name": "readiness.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/readiness.ts",
+      "summary": "readiness.ts is a typescript source file in the Milady codebase. It contains 7 functions, 3 imports.",
+      "languageNotes": "typescript; code; 238 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:catalogById",
+      "type": "function",
+      "name": "catalogById",
+      "filePath": "eliza/packages/ui/src/services/local-inference/readiness.ts",
+      "summary": "catalogById is a function defined in eliza/packages/ui/src/services/local-inference/readiness.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:installedById",
+      "type": "function",
+      "name": "installedById",
+      "filePath": "eliza/packages/ui/src/services/local-inference/readiness.ts",
+      "summary": "installedById is a function defined in eliza/packages/ui/src/services/local-inference/readiness.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:latestJobByModel",
+      "type": "function",
+      "name": "latestJobByModel",
+      "filePath": "eliza/packages/ui/src/services/local-inference/readiness.ts",
+      "summary": "latestJobByModel is a function defined in eliza/packages/ui/src/services/local-inference/readiness.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:requiredModelIds",
+      "type": "function",
+      "name": "requiredModelIds",
+      "filePath": "eliza/packages/ui/src/services/local-inference/readiness.ts",
+      "summary": "requiredModelIds is a function defined in eliza/packages/ui/src/services/local-inference/readiness.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:statusFromJobs",
+      "type": "function",
+      "name": "statusFromJobs",
+      "filePath": "eliza/packages/ui/src/services/local-inference/readiness.ts",
+      "summary": "statusFromJobs is a function defined in eliza/packages/ui/src/services/local-inference/readiness.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:slotReadiness",
+      "type": "function",
+      "name": "slotReadiness",
+      "filePath": "eliza/packages/ui/src/services/local-inference/readiness.ts",
+      "summary": "slotReadiness is a function defined in eliza/packages/ui/src/services/local-inference/readiness.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:buildTextGenerationReadiness",
+      "type": "function",
+      "name": "buildTextGenerationReadiness",
+      "filePath": "eliza/packages/ui/src/services/local-inference/readiness.ts",
+      "summary": "buildTextGenerationReadiness is a function defined in eliza/packages/ui/src/services/local-inference/readiness.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/services/local-inference/recommendation.test.ts",
+      "type": "file",
+      "name": "recommendation.test.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/recommendation.test.ts",
+      "summary": "recommendation.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 332 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/recommendation.test.ts:hardware",
+      "type": "function",
+      "name": "hardware",
+      "filePath": "eliza/packages/ui/src/services/local-inference/recommendation.test.ts",
+      "summary": "hardware is a function defined in eliza/packages/ui/src/services/local-inference/recommendation.test.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "type": "file",
+      "name": "recommendation.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "summary": "recommendation.ts is a typescript source file in the Milady codebase. It contains 18 functions, 3 imports.",
+      "languageNotes": "typescript; code; 417 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:catalogById",
+      "type": "function",
+      "name": "catalogById",
+      "filePath": "eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "summary": "catalogById is a function defined in eliza/packages/ui/src/services/local-inference/recommendation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:chatCandidates",
+      "type": "function",
+      "name": "chatCandidates",
+      "filePath": "eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "summary": "chatCandidates is a function defined in eliza/packages/ui/src/services/local-inference/recommendation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:classifyRecommendationPlatform",
+      "type": "function",
+      "name": "classifyRecommendationPlatform",
+      "filePath": "eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "summary": "classifyRecommendationPlatform is a function defined in eliza/packages/ui/src/services/local-inference/recommendation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:catalogDownloadSizeGb",
+      "type": "function",
+      "name": "catalogDownloadSizeGb",
+      "filePath": "eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "summary": "catalogDownloadSizeGb is a function defined in eliza/packages/ui/src/services/local-inference/recommendation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:catalogDownloadSizeBytes",
+      "type": "function",
+      "name": "catalogDownloadSizeBytes",
+      "filePath": "eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "summary": "catalogDownloadSizeBytes is a function defined in eliza/packages/ui/src/services/local-inference/recommendation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:mobileFit",
+      "type": "function",
+      "name": "mobileFit",
+      "filePath": "eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "summary": "mobileFit is a function defined in eliza/packages/ui/src/services/local-inference/recommendation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:assessCatalogModelFit",
+      "type": "function",
+      "name": "assessCatalogModelFit",
+      "filePath": "eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "summary": "assessCatalogModelFit is a function defined in eliza/packages/ui/src/services/local-inference/recommendation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:canFit",
+      "type": "function",
+      "name": "canFit",
+      "filePath": "eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "summary": "canFit is a function defined in eliza/packages/ui/src/services/local-inference/recommendation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:kernelRequirementsSatisfied",
+      "type": "function",
+      "name": "kernelRequirementsSatisfied",
+      "filePath": "eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "summary": "kernelRequirementsSatisfied is a function defined in eliza/packages/ui/src/services/local-inference/recommendation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:modelsFromLadder",
+      "type": "function",
+      "name": "modelsFromLadder",
+      "filePath": "eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "summary": "modelsFromLadder is a function defined in eliza/packages/ui/src/services/local-inference/recommendation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:hasLongContextHeadroom",
+      "type": "function",
+      "name": "hasLongContextHeadroom",
+      "filePath": "eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "summary": "hasLongContextHeadroom is a function defined in eliza/packages/ui/src/services/local-inference/recommendation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:isLongContextModel",
+      "type": "function",
+      "name": "isLongContextModel",
+      "filePath": "eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "summary": "isLongContextModel is a function defined in eliza/packages/ui/src/services/local-inference/recommendation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:fallbackCandidates",
+      "type": "function",
+      "name": "fallbackCandidates",
+      "filePath": "eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "summary": "fallbackCandidates is a function defined in eliza/packages/ui/src/services/local-inference/recommendation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:selectRecommendedModelForSlot",
+      "type": "function",
+      "name": "selectRecommendedModelForSlot",
+      "filePath": "eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "summary": "selectRecommendedModelForSlot is a function defined in eliza/packages/ui/src/services/local-inference/recommendation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:rankLadderByLongContext",
+      "type": "function",
+      "name": "rankLadderByLongContext",
+      "filePath": "eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "summary": "rankLadderByLongContext is a function defined in eliza/packages/ui/src/services/local-inference/recommendation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:selectRecommendedModels",
+      "type": "function",
+      "name": "selectRecommendedModels",
+      "filePath": "eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "summary": "selectRecommendedModels is a function defined in eliza/packages/ui/src/services/local-inference/recommendation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:recommendForFirstRun",
+      "type": "function",
+      "name": "recommendForFirstRun",
+      "filePath": "eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "summary": "recommendForFirstRun is a function defined in eliza/packages/ui/src/services/local-inference/recommendation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:chooseSmallerFallbackModel",
+      "type": "function",
+      "name": "chooseSmallerFallbackModel",
+      "filePath": "eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "summary": "chooseSmallerFallbackModel is a function defined in eliza/packages/ui/src/services/local-inference/recommendation.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/services/local-inference/registry.test.ts",
+      "type": "file",
+      "name": "registry.test.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/registry.test.ts",
+      "summary": "registry.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 3 imports.",
+      "languageNotes": "typescript; code; 173 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/registry.test.ts:sha256",
+      "type": "function",
+      "name": "sha256",
+      "filePath": "eliza/packages/ui/src/services/local-inference/registry.test.ts",
+      "summary": "sha256 is a function defined in eliza/packages/ui/src/services/local-inference/registry.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/registry.test.ts:writeJson",
+      "type": "function",
+      "name": "writeJson",
+      "filePath": "eliza/packages/ui/src/services/local-inference/registry.test.ts",
+      "summary": "writeJson is a function defined in eliza/packages/ui/src/services/local-inference/registry.test.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/services/local-inference/registry.ts",
+      "type": "file",
+      "name": "registry.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/registry.ts",
+      "summary": "registry.ts is a typescript source file in the Milady codebase. It contains 12 functions, 4 imports.",
+      "languageNotes": "typescript; code; 306 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/registry.ts:ensureRootDir",
+      "type": "function",
+      "name": "ensureRootDir",
+      "filePath": "eliza/packages/ui/src/services/local-inference/registry.ts",
+      "summary": "ensureRootDir is a function defined in eliza/packages/ui/src/services/local-inference/registry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/registry.ts:readElizaOwned",
+      "type": "function",
+      "name": "readElizaOwned",
+      "filePath": "eliza/packages/ui/src/services/local-inference/registry.ts",
+      "summary": "readElizaOwned is a function defined in eliza/packages/ui/src/services/local-inference/registry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/registry.ts:writeElizaOwned",
+      "type": "function",
+      "name": "writeElizaOwned",
+      "filePath": "eliza/packages/ui/src/services/local-inference/registry.ts",
+      "summary": "writeElizaOwned is a function defined in eliza/packages/ui/src/services/local-inference/registry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/registry.ts:resolveBundleFilePath",
+      "type": "function",
+      "name": "resolveBundleFilePath",
+      "filePath": "eliza/packages/ui/src/services/local-inference/registry.ts",
+      "summary": "resolveBundleFilePath is a function defined in eliza/packages/ui/src/services/local-inference/registry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/registry.ts:hashFile",
+      "type": "function",
+      "name": "hashFile",
+      "filePath": "eliza/packages/ui/src/services/local-inference/registry.ts",
+      "summary": "hashFile is a function defined in eliza/packages/ui/src/services/local-inference/registry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/registry.ts:tryReadBundleManifest",
+      "type": "function",
+      "name": "tryReadBundleManifest",
+      "filePath": "eliza/packages/ui/src/services/local-inference/registry.ts",
+      "summary": "tryReadBundleManifest is a function defined in eliza/packages/ui/src/services/local-inference/registry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/registry.ts:maybeRecoverDflashCompanion",
+      "type": "function",
+      "name": "maybeRecoverDflashCompanion",
+      "filePath": "eliza/packages/ui/src/services/local-inference/registry.ts",
+      "summary": "maybeRecoverDflashCompanion is a function defined in eliza/packages/ui/src/services/local-inference/registry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/registry.ts:recoverDflashCompanions",
+      "type": "function",
+      "name": "recoverDflashCompanions",
+      "filePath": "eliza/packages/ui/src/services/local-inference/registry.ts",
+      "summary": "recoverDflashCompanions is a function defined in eliza/packages/ui/src/services/local-inference/registry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/registry.ts:listInstalledModels",
+      "type": "function",
+      "name": "listInstalledModels",
+      "filePath": "eliza/packages/ui/src/services/local-inference/registry.ts",
+      "summary": "listInstalledModels is a function defined in eliza/packages/ui/src/services/local-inference/registry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/registry.ts:upsertElizaModel",
+      "type": "function",
+      "name": "upsertElizaModel",
+      "filePath": "eliza/packages/ui/src/services/local-inference/registry.ts",
+      "summary": "upsertElizaModel is a function defined in eliza/packages/ui/src/services/local-inference/registry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/registry.ts:touchElizaModel",
+      "type": "function",
+      "name": "touchElizaModel",
+      "filePath": "eliza/packages/ui/src/services/local-inference/registry.ts",
+      "summary": "touchElizaModel is a function defined in eliza/packages/ui/src/services/local-inference/registry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/services/local-inference/registry.ts:removeElizaModel",
+      "type": "function",
+      "name": "removeElizaModel",
+      "filePath": "eliza/packages/ui/src/services/local-inference/registry.ts",
+      "summary": "removeElizaModel is a function defined in eliza/packages/ui/src/services/local-inference/registry.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "class"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/services/local-inference/routing-policy.ts",
+      "type": "file",
+      "name": "routing-policy.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/routing-policy.ts",
+      "summary": "routing-policy.ts is a typescript source file in the Milady codebase. It contains 2 classes, 2 imports.",
+      "languageNotes": "typescript; code; 228 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/ui/src/services/local-inference/routing-policy.ts:RingBuffer",
+      "type": "class",
+      "name": "RingBuffer",
+      "filePath": "eliza/packages/ui/src/services/local-inference/routing-policy.ts",
+      "summary": "RingBuffer is a class or type declared in eliza/packages/ui/src/services/local-inference/routing-policy.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/ui/src/services/local-inference/routing-policy.ts:PolicyEngine",
+      "type": "class",
+      "name": "PolicyEngine",
+      "filePath": "eliza/packages/ui/src/services/local-inference/routing-policy.ts",
+      "summary": "PolicyEngine is a class or type declared in eliza/packages/ui/src/services/local-inference/routing-policy.ts."
+    },
+    {
+      "tags": [
+        "local-inference"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/services/local-inference/routing-preferences.ts",
+      "type": "file",
+      "name": "routing-preferences.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/routing-preferences.ts",
+      "summary": "routing-preferences.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 15 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "class"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/services/local-inference/service.ts",
+      "type": "file",
+      "name": "service.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/service.ts",
+      "summary": "service.ts is a typescript source file in the Milady codebase. It contains 1 class, 16 imports.",
+      "languageNotes": "typescript; code; 308 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/ui/src/services/local-inference/service.ts:LocalInferenceService",
+      "type": "class",
+      "name": "LocalInferenceService",
+      "filePath": "eliza/packages/ui/src/services/local-inference/service.ts",
+      "summary": "LocalInferenceService is a class or type declared in eliza/packages/ui/src/services/local-inference/service.ts."
+    },
+    {
+      "tags": [
+        "local-inference"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/services/local-inference/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 40 lines"
+    },
+    {
+      "tags": [
+        "local-inference"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/services/local-inference/verify.ts",
+      "type": "file",
+      "name": "verify.ts",
+      "filePath": "eliza/packages/ui/src/services/local-inference/verify.ts",
+      "summary": "verify.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 13 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/custom-search.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/custom-search.ts:listLocalModelSearchProviders",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/custom-search.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/custom-search.ts:isLocalModelSearchProviderId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/custom-search.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/custom-search.ts:getLocalModelSearchProvider",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/custom-search.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/custom-search.ts:wrapLocalModelSearchResults",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/custom-search.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/custom-search.ts:searchLocalModelProvider",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/custom-search.ts:wrapLocalModelSearchResults",
+      "target": "function:eliza/packages/ui/src/services/local-inference/custom-search.ts:getLocalModelSearchProvider",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/custom-search.ts:searchLocalModelProvider",
+      "target": "function:eliza/packages/ui/src/services/local-inference/custom-search.ts:getLocalModelSearchProvider",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/custom-search.ts:searchLocalModelProvider",
+      "target": "function:eliza/packages/ui/src/services/local-inference/custom-search.ts:wrapLocalModelSearchResults",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/device-bridge.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/device-bridge.ts:isWsModule",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/device-bridge.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/device-bridge.ts:importWsModule",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/device-bridge.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/device-bridge.ts:scoreDevice",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/device-bridge.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/device-bridge.ts:registerDeviceBridgeLoader",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/device-bridge.ts",
+      "target": "class:eliza/packages/ui/src/services/local-inference/device-bridge.ts:DeviceBridge",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/device-bridge.ts:importWsModule",
+      "target": "function:eliza/packages/ui/src/services/local-inference/device-bridge.ts:isWsModule",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-doctor.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-doctor.ts:runDflashDoctor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-server.test.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.test.ts:makeManagedBinary",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:readBool",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:managedDflashBinaryPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:managedDflashCapabilitiesPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:readDflashBinaryCapabilities",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:isMetalDflashRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:dflashMetalAutoEnabled",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:assertCacheTypeSupportedOnBackend",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:dflashEnabled",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:dflashRequired",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:candidateBinaryPaths",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:platformKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:resolveDflashBinary",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:getDflashRuntimeStatus",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:normalizeGpuLayers",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:resolvePort",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:sleep",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:fetchJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:fetchText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:parseDflashMetrics",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "target": "class:eliza/packages/ui/src/services/local-inference/dflash-server.ts:DflashLlamaServer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:managedDflashBinaryPath",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:platformKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:managedDflashCapabilitiesPath",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:platformKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:readDflashBinaryCapabilities",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:managedDflashCapabilitiesPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:isMetalDflashRuntime",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:platformKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:dflashMetalAutoEnabled",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:readBool",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:dflashMetalAutoEnabled",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:readBool",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:assertCacheTypeSupportedOnBackend",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:isMetalDflashRuntime",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:dflashEnabled",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:readBool",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:dflashEnabled",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:readBool",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:dflashEnabled",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:managedDflashBinaryPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:dflashEnabled",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:isMetalDflashRuntime",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:dflashEnabled",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:dflashMetalAutoEnabled",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:dflashRequired",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:readBool",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:candidateBinaryPaths",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:managedDflashBinaryPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:candidateBinaryPaths",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:readBool",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:resolveDflashBinary",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:candidateBinaryPaths",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:getDflashRuntimeStatus",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:resolveDflashBinary",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:getDflashRuntimeStatus",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:readDflashBinaryCapabilities",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:getDflashRuntimeStatus",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:dflashEnabled",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:getDflashRuntimeStatus",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:managedDflashBinaryPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:getDflashRuntimeStatus",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:isMetalDflashRuntime",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:getDflashRuntimeStatus",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:dflashRequired",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:getDflashRuntimeStatus",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:dflashRequired",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:getDflashRuntimeStatus",
+      "target": "function:eliza/packages/ui/src/services/local-inference/dflash-server.ts:dflashRequired",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/disk-space.test.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/disk-space.test.ts:probe",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/disk-space.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/disk-space.ts:probeDiskSpace",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/disk-space.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/disk-space.ts:adviseDiskSpace",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.test.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/downloader.test.ts:sha256",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.test.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/downloader.test.ts:bundleRemotePath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.test.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/downloader.test.ts:installFetchFixture",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.test.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/downloader.test.ts:waitForTerminal",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:stagingFilename",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:finalFilename",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:bundleDirname",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:bundleStagingFilename",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:bundleTargetPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:parseBundleFileEntry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:parseBundleManifestOrThrow",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:collectBundleFiles",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:ensureDirs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:terminalDownloadsPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:partialSize",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "target": "class:eliza/packages/ui/src/services/local-inference/downloader.ts:Downloader",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:bundleStagingFilename",
+      "target": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:stagingFilename",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:parseBundleManifestOrThrow",
+      "target": "function:eliza/packages/ui/src/services/local-inference/downloader.ts:parseBundleFileEntry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/engine.e2e.test.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/engine.e2e.test.ts:isTextGenerationCandidate",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/engine.e2e.test.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/engine.e2e.test.ts:pickSmallestGguf",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/engine.e2e.test.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/engine.e2e.test.ts:runEngine",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/engine.e2e.test.ts:pickSmallestGguf",
+      "target": "function:eliza/packages/ui/src/services/local-inference/engine.e2e.test.ts:isTextGenerationCandidate",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/engine.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/engine.ts:normalizeKvCacheTypeForBinding",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/engine.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/engine.ts:gpuLayersForKvOffload",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/engine.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/engine.ts:resolveGpuLayersForLoad",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/engine.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/engine.ts:resolveDflashGpuLayersForLoad",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/engine.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/engine.ts:getDflashTargetMetaBlockReason",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/engine.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/engine.ts:readDflashTargetMeta",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/engine.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/engine.ts:getDflashDrafterBlockReason",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/engine.ts",
+      "target": "class:eliza/packages/ui/src/services/local-inference/engine.ts:LocalInferenceEngine",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/engine.ts:resolveGpuLayersForLoad",
+      "target": "function:eliza/packages/ui/src/services/local-inference/engine.ts:gpuLayersForKvOffload",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/engine.ts:resolveDflashGpuLayersForLoad",
+      "target": "function:eliza/packages/ui/src/services/local-inference/engine.ts:resolveGpuLayersForLoad",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/engine.ts:getDflashDrafterBlockReason",
+      "target": "function:eliza/packages/ui/src/services/local-inference/engine.ts:readDflashTargetMeta",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/engine.ts:getDflashDrafterBlockReason",
+      "target": "function:eliza/packages/ui/src/services/local-inference/engine.ts:getDflashTargetMetaBlockReason",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/external-scanner.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/external-scanner.ts:candidateRoots",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/external-scanner.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/external-scanner.ts:dirExists",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/external-scanner.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/external-scanner.ts:scanOllama",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/external-scanner.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/external-scanner.ts:scanExternalModels",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/external-scanner.ts:scanOllama",
+      "target": "function:eliza/packages/ui/src/services/local-inference/external-scanner.ts:dirExists",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/external-scanner.ts:scanOllama",
+      "target": "function:eliza/packages/ui/src/services/local-inference/external-scanner.ts:dirExists",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/external-scanner.ts:scanExternalModels",
+      "target": "function:eliza/packages/ui/src/services/local-inference/external-scanner.ts:candidateRoots",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/external-scanner.ts:scanExternalModels",
+      "target": "function:eliza/packages/ui/src/services/local-inference/external-scanner.ts:dirExists",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/external-scanner.ts:scanExternalModels",
+      "target": "function:eliza/packages/ui/src/services/local-inference/external-scanner.ts:scanOllama",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/handler-registry.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/handler-registry.ts:isPatchedRegisterModel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/handler-registry.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/handler-registry.ts:installPrototypePatch",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/handler-registry.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/handler-registry.ts:toPublicRegistration",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/handler-registry.ts",
+      "target": "class:eliza/packages/ui/src/services/local-inference/handler-registry.ts:HandlerRegistry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/handler-registry.ts:installPrototypePatch",
+      "target": "function:eliza/packages/ui/src/services/local-inference/handler-registry.ts:isPatchedRegisterModel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hardware.test.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.test.ts:makeProbe",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:bytesToGb",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:recommendBucket",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:loadLlamaBinding",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:readableEntries",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:pathExists",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:hasAny",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:detectOpenVinoDevices",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:probeHardware",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:assessFit",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:diskFitFromWarning",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:memoryReason",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:diskReason",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:recommendationFrom",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:assessFirstRunHardware",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:readableEntries",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:pathExists",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:hasAny",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:pathExists",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:detectOpenVinoDevices",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:hasAny",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:detectOpenVinoDevices",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:readableEntries",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:detectOpenVinoDevices",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:readableEntries",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:detectOpenVinoDevices",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:hasAny",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:probeHardware",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:detectOpenVinoDevices",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:probeHardware",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:loadLlamaBinding",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:probeHardware",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:bytesToGb",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:probeHardware",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:bytesToGb",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:probeHardware",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:recommendBucket",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:probeHardware",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:bytesToGb",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:probeHardware",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:bytesToGb",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:probeHardware",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:recommendBucket",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:probeHardware",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:bytesToGb",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:probeHardware",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:bytesToGb",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:probeHardware",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:recommendBucket",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:assessFirstRunHardware",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:probeHardware",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:assessFirstRunHardware",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:assessFit",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:assessFirstRunHardware",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:diskFitFromWarning",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:assessFirstRunHardware",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:memoryReason",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:assessFirstRunHardware",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:diskReason",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:assessFirstRunHardware",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hardware.ts:recommendationFrom",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hf-search.test.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.test.ts:jsonResponse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:pickQuantFile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:extractQuantLabel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:inferParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:inferCategory",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:fetchWithTimeout",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:searchHuggingFaceGguf",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:normalizeModelScopeRepoId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:modelScopeOwnerQuery",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:pickModelScopeGguf",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:fetchModelScopeJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:listModelScopeOwnerModels",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:modelScopeResultForRepo",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:searchModelScopeGguf",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:searchModelHubGguf",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:searchHuggingFaceGguf",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:fetchWithTimeout",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:searchHuggingFaceGguf",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:fetchWithTimeout",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:searchHuggingFaceGguf",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:pickQuantFile",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:searchHuggingFaceGguf",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:inferParams",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:searchHuggingFaceGguf",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:extractQuantLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:searchHuggingFaceGguf",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:inferCategory",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:pickModelScopeGguf",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:pickQuantFile",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:fetchModelScopeJson",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:fetchWithTimeout",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:modelScopeResultForRepo",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:pickModelScopeGguf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:modelScopeResultForRepo",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:inferParams",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:modelScopeResultForRepo",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:extractQuantLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:searchModelScopeGguf",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:normalizeModelScopeRepoId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:searchModelScopeGguf",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:listModelScopeOwnerModels",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:searchModelScopeGguf",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:modelScopeOwnerQuery",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:searchModelScopeGguf",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:modelScopeResultForRepo",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:searchModelHubGguf",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:searchModelScopeGguf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:searchModelHubGguf",
+      "target": "function:eliza/packages/ui/src/services/local-inference/hf-search.ts:searchHuggingFaceGguf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/readiness.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:catalogById",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/readiness.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:installedById",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/readiness.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:latestJobByModel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/readiness.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:requiredModelIds",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/readiness.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:statusFromJobs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/readiness.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:slotReadiness",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/readiness.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:buildTextGenerationReadiness",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:slotReadiness",
+      "target": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:requiredModelIds",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:slotReadiness",
+      "target": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:statusFromJobs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:buildTextGenerationReadiness",
+      "target": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:catalogById",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:buildTextGenerationReadiness",
+      "target": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:installedById",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:buildTextGenerationReadiness",
+      "target": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:latestJobByModel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:buildTextGenerationReadiness",
+      "target": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:slotReadiness",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:buildTextGenerationReadiness",
+      "target": "function:eliza/packages/ui/src/services/local-inference/readiness.ts:slotReadiness",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.test.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.test.ts:hardware",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:catalogById",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:chatCandidates",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:classifyRecommendationPlatform",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:catalogDownloadSizeGb",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:catalogDownloadSizeBytes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:mobileFit",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:assessCatalogModelFit",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:canFit",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:kernelRequirementsSatisfied",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:modelsFromLadder",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:hasLongContextHeadroom",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:isLongContextModel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:fallbackCandidates",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:selectRecommendedModelForSlot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:rankLadderByLongContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:selectRecommendedModels",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:recommendForFirstRun",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:chooseSmallerFallbackModel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:catalogDownloadSizeGb",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:catalogById",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:catalogDownloadSizeBytes",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:catalogDownloadSizeGb",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:mobileFit",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:catalogDownloadSizeGb",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:assessCatalogModelFit",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:catalogById",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:assessCatalogModelFit",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:classifyRecommendationPlatform",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:assessCatalogModelFit",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:mobileFit",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:assessCatalogModelFit",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:catalogDownloadSizeGb",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:canFit",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:assessCatalogModelFit",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:modelsFromLadder",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:catalogById",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:fallbackCandidates",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:chatCandidates",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:fallbackCandidates",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:canFit",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:fallbackCandidates",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:hasLongContextHeadroom",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:fallbackCandidates",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:isLongContextModel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:fallbackCandidates",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:isLongContextModel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:fallbackCandidates",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:catalogDownloadSizeGb",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:fallbackCandidates",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:catalogDownloadSizeGb",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:selectRecommendedModelForSlot",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:classifyRecommendationPlatform",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:selectRecommendedModelForSlot",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:modelsFromLadder",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:selectRecommendedModelForSlot",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:canFit",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:selectRecommendedModelForSlot",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:kernelRequirementsSatisfied",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:selectRecommendedModelForSlot",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:hasLongContextHeadroom",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:selectRecommendedModelForSlot",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:rankLadderByLongContext",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:selectRecommendedModelForSlot",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:fallbackCandidates",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:selectRecommendedModelForSlot",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:kernelRequirementsSatisfied",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:selectRecommendedModelForSlot",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:assessCatalogModelFit",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:rankLadderByLongContext",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:isLongContextModel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:selectRecommendedModels",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:selectRecommendedModelForSlot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:selectRecommendedModels",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:selectRecommendedModelForSlot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:recommendForFirstRun",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:catalogById",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:chooseSmallerFallbackModel",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:catalogById",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:chooseSmallerFallbackModel",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:catalogDownloadSizeGb",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:chooseSmallerFallbackModel",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:classifyRecommendationPlatform",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:chooseSmallerFallbackModel",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:modelsFromLadder",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:chooseSmallerFallbackModel",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:catalogDownloadSizeGb",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:chooseSmallerFallbackModel",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:canFit",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:chooseSmallerFallbackModel",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:fallbackCandidates",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:chooseSmallerFallbackModel",
+      "target": "function:eliza/packages/ui/src/services/local-inference/recommendation.ts:catalogDownloadSizeGb",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/registry.test.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.test.ts:sha256",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/registry.test.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.test.ts:writeJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/registry.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:ensureRootDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/registry.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:readElizaOwned",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/registry.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:writeElizaOwned",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/registry.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:resolveBundleFilePath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/registry.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:hashFile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/registry.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:tryReadBundleManifest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/registry.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:maybeRecoverDflashCompanion",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/registry.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:recoverDflashCompanions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/registry.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:listInstalledModels",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/registry.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:upsertElizaModel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/registry.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:touchElizaModel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/registry.ts",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:removeElizaModel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/registry.ts:writeElizaOwned",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:ensureRootDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/registry.ts:maybeRecoverDflashCompanion",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:tryReadBundleManifest",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/registry.ts:maybeRecoverDflashCompanion",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:resolveBundleFilePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/registry.ts:maybeRecoverDflashCompanion",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:hashFile",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/registry.ts:recoverDflashCompanions",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:maybeRecoverDflashCompanion",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/registry.ts:recoverDflashCompanions",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:writeElizaOwned",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/registry.ts:listInstalledModels",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:readElizaOwned",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/registry.ts:listInstalledModels",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:recoverDflashCompanions",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/registry.ts:upsertElizaModel",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:readElizaOwned",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/registry.ts:upsertElizaModel",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:writeElizaOwned",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/registry.ts:touchElizaModel",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:readElizaOwned",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/registry.ts:touchElizaModel",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:writeElizaOwned",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/registry.ts:removeElizaModel",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:readElizaOwned",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/services/local-inference/registry.ts:removeElizaModel",
+      "target": "function:eliza/packages/ui/src/services/local-inference/registry.ts:writeElizaOwned",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/routing-policy.ts",
+      "target": "class:eliza/packages/ui/src/services/local-inference/routing-policy.ts:RingBuffer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/routing-policy.ts",
+      "target": "class:eliza/packages/ui/src/services/local-inference/routing-policy.ts:PolicyEngine",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/services/local-inference/service.ts",
+      "target": "class:eliza/packages/ui/src/services/local-inference/service.ts:LocalInferenceService",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/catalog.test.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/catalog.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/catalog.test.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/catalog.test.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/service.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/custom-search.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/custom-search.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/device-bridge.ts",
+      "target": "file:eliza/packages/core/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/device-bridge.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/active-model.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/device-bridge.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/paths.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-doctor.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/catalog.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-doctor.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-doctor.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/registry.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-server.test.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/paths.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/disk-space.test.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/disk-space.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.test.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/catalog.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.test.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.test.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/registry.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.test.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/assignments.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/catalog.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/paths.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/registry.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/verify.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/engine.e2e.test.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/external-scanner.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/engine.e2e.test.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/engine.test.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/engine.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/engine.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/catalog.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/engine.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/engine.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/load-args.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/engine.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/registry.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/engine.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/external-scanner.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/handler-registry.ts",
+      "target": "file:eliza/packages/core/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hardware.test.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hardware.test.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/disk-space.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hf-search.test.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/catalog.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hf-search.test.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/readiness.test.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/readiness.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/readiness.test.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/readiness.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/catalog.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/readiness.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/readiness.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.test.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/catalog.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.test.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.test.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/catalog.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/registry.test.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/catalog.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/registry.test.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/registry.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/registry.test.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/registry.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/catalog.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/registry.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/external-scanner.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/registry.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/paths.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/registry.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/routing-policy.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/handler-registry.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/routing-policy.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/routing-preferences.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/service.ts",
+      "target": "file:eliza/packages/core/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/service.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/active-model.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/service.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/assignments.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/service.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/bundled-models.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/service.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/catalog-policy.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/service.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/catalog.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/service.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/custom-search.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/service.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/dflash-server.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/service.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/downloader.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/service.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/hardware.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/service.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/hf-search.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/service.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/readiness.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/service.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/service.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/registry.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/service.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/services/local-inference/service.ts",
+      "target": "file:eliza/packages/ui/src/services/local-inference/verify.ts",
+      "type": "imports"
+    }
+  ]
+}

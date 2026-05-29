@@ -1,0 +1,306 @@
+{
+  "batchIndex": 302,
+  "nodes": [
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC1155/extensions/ERC1155Crosschain.sol",
+      "type": "file",
+      "name": "ERC1155Crosschain.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC1155/extensions/ERC1155Crosschain.sol",
+      "summary": "ERC1155Crosschain.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 53 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC1155/extensions/ERC1155Pausable.sol",
+      "type": "file",
+      "name": "ERC1155Pausable.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC1155/extensions/ERC1155Pausable.sol",
+      "summary": "ERC1155Pausable.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 38 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC1155/extensions/ERC1155Supply.sol",
+      "type": "file",
+      "name": "ERC1155Supply.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC1155/extensions/ERC1155Supply.sol",
+      "summary": "ERC1155Supply.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 88 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol",
+      "type": "file",
+      "name": "ERC1155URIStorage.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol",
+      "summary": "ERC1155URIStorage.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 58 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC1155/extensions/IERC1155MetadataURI.sol",
+      "type": "file",
+      "name": "IERC1155MetadataURI.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC1155/extensions/IERC1155MetadataURI.sol",
+      "summary": "IERC1155MetadataURI.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 20 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC1155/IERC1155.sol",
+      "type": "file",
+      "name": "IERC1155.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC1155/IERC1155.sol",
+      "summary": "IERC1155.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 123 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC1155/IERC1155Receiver.sol",
+      "type": "file",
+      "name": "IERC1155Receiver.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC1155/IERC1155Receiver.sol",
+      "summary": "IERC1155Receiver.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 59 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC1155/README.adoc",
+      "type": "file",
+      "name": "README.adoc",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC1155/README.adoc",
+      "summary": "README.adoc is a adoc source file in the Milady codebase.",
+      "languageNotes": "adoc; code; 46 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC1155/utils/ERC1155Holder.sol",
+      "type": "file",
+      "name": "ERC1155Holder.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC1155/utils/ERC1155Holder.sol",
+      "summary": "ERC1155Holder.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 42 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC1155/utils/ERC1155Utils.sol",
+      "type": "file",
+      "name": "ERC1155Utils.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC1155/utils/ERC1155Utils.sol",
+      "summary": "ERC1155Utils.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 88 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
+      "type": "file",
+      "name": "ERC20.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
+      "summary": "ERC20.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 305 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/draft-ERC20Bridgeable.sol",
+      "type": "file",
+      "name": "draft-ERC20Bridgeable.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/draft-ERC20Bridgeable.sol",
+      "summary": "draft-ERC20Bridgeable.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 51 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/draft-ERC20TemporaryApproval.sol",
+      "type": "file",
+      "name": "draft-ERC20TemporaryApproval.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/draft-ERC20TemporaryApproval.sol",
+      "summary": "draft-ERC20TemporaryApproval.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 119 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC1363.sol",
+      "type": "file",
+      "name": "ERC1363.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC1363.sol",
+      "summary": "ERC1363.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 135 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Burnable.sol",
+      "type": "file",
+      "name": "ERC20Burnable.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Burnable.sol",
+      "summary": "ERC20Burnable.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 39 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Capped.sol",
+      "type": "file",
+      "name": "ERC20Capped.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Capped.sol",
+      "summary": "ERC20Capped.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 54 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Crosschain.sol",
+      "type": "file",
+      "name": "ERC20Crosschain.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Crosschain.sol",
+      "summary": "ERC20Crosschain.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 39 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20FlashMint.sol",
+      "type": "file",
+      "name": "ERC20FlashMint.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20FlashMint.sol",
+      "summary": "ERC20FlashMint.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 130 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Pausable.sol",
+      "type": "file",
+      "name": "ERC20Pausable.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Pausable.sol",
+      "summary": "ERC20Pausable.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 33 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Permit.sol",
+      "type": "file",
+      "name": "ERC20Permit.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Permit.sol",
+      "summary": "ERC20Permit.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 77 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Votes.sol",
+      "type": "file",
+      "name": "ERC20Votes.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Votes.sol",
+      "summary": "ERC20Votes.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 83 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Wrapper.sol",
+      "type": "file",
+      "name": "ERC20Wrapper.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Wrapper.sol",
+      "summary": "ERC20Wrapper.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 89 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC4626.sol",
+      "type": "file",
+      "name": "ERC4626.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC4626.sol",
+      "summary": "ERC4626.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 315 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol",
+      "type": "file",
+      "name": "IERC20Metadata.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol",
+      "summary": "IERC20Metadata.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 26 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Permit.sol",
+      "type": "file",
+      "name": "IERC20Permit.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Permit.sol",
+      "summary": "IERC20Permit.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 90 lines"
+    }
+  ],
+  "edges": []
+}

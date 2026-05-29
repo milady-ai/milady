@@ -1,0 +1,98 @@
+{
+  "batchIndex": 180,
+  "nodes": [
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/AGENTS.md",
+      "type": "document",
+      "name": "AGENTS.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/AGENTS.md",
+      "summary": "AGENTS.md documents docs/agent-packs/electrobun-agentic-desktop-2026 with 51 lines of reference material.",
+      "languageNotes": "markdown; docs; 51 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/CLAUDE.md",
+      "type": "document",
+      "name": "CLAUDE.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/CLAUDE.md",
+      "summary": "CLAUDE.md documents docs/agent-packs/electrobun-agentic-desktop-2026 with 12 lines of reference material.",
+      "languageNotes": "markdown; docs; 12 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/LOCAL-APPLICATION.md",
+      "type": "document",
+      "name": "LOCAL-APPLICATION.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/LOCAL-APPLICATION.md",
+      "summary": "LOCAL-APPLICATION.md documents docs/agent-packs/electrobun-agentic-desktop-2026 with 22 lines of reference material.",
+      "languageNotes": "markdown; docs; 22 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "moderate",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/MANIFEST.txt",
+      "type": "document",
+      "name": "MANIFEST.txt",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/MANIFEST.txt",
+      "summary": "MANIFEST.txt documents docs/agent-packs/electrobun-agentic-desktop-2026 with 124 lines of reference material.",
+      "languageNotes": "txt; docs; 124 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/README.md",
+      "summary": "README.md documents docs/agent-packs/electrobun-agentic-desktop-2026 with 67 lines of reference material.",
+      "languageNotes": "markdown; docs; 67 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/VALIDATION.md",
+      "type": "document",
+      "name": "VALIDATION.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/VALIDATION.md",
+      "summary": "VALIDATION.md documents docs/agent-packs/electrobun-agentic-desktop-2026 with 10 lines of reference material.",
+      "languageNotes": "markdown; docs; 10 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "config:docs/agent-packs/electrobun-agentic-desktop-2026/agent-plugin.json",
+      "type": "config",
+      "name": "agent-plugin.json",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/agent-plugin.json",
+      "summary": "agent-plugin.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 67 lines"
+    }
+  ],
+  "edges": []
+}

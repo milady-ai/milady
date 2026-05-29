@@ -1,0 +1,1787 @@
+{
+  "batchIndex": 130,
+  "nodes": [
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:apps/app/test/design-review/run-design-review.ts",
+      "type": "file",
+      "name": "run-design-review.ts",
+      "filePath": "apps/app/test/design-review/run-design-review.ts",
+      "summary": "run-design-review.ts is a typescript source file in the Milady codebase. It contains 21 functions, 2 imports.",
+      "languageNotes": "typescript; code; 900 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/design-review/run-design-review.ts:parseCliArgs",
+      "type": "function",
+      "name": "parseCliArgs",
+      "filePath": "apps/app/test/design-review/run-design-review.ts",
+      "summary": "parseCliArgs is a function defined in apps/app/test/design-review/run-design-review.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/design-review/run-design-review.ts:formatViewport",
+      "type": "function",
+      "name": "formatViewport",
+      "filePath": "apps/app/test/design-review/run-design-review.ts",
+      "summary": "formatViewport is a function defined in apps/app/test/design-review/run-design-review.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/design-review/run-design-review.ts:buildCaptureSpecs",
+      "type": "function",
+      "name": "buildCaptureSpecs",
+      "filePath": "apps/app/test/design-review/run-design-review.ts",
+      "summary": "buildCaptureSpecs is a function defined in apps/app/test/design-review/run-design-review.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/design-review/run-design-review.ts:startAppServer",
+      "type": "function",
+      "name": "startAppServer",
+      "filePath": "apps/app/test/design-review/run-design-review.ts",
+      "summary": "startAppServer is a function defined in apps/app/test/design-review/run-design-review.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/design-review/run-design-review.ts:waitForReady",
+      "type": "function",
+      "name": "waitForReady",
+      "filePath": "apps/app/test/design-review/run-design-review.ts",
+      "summary": "waitForReady is a function defined in apps/app/test/design-review/run-design-review.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/design-review/run-design-review.ts:isReadyCheckVisible",
+      "type": "function",
+      "name": "isReadyCheckVisible",
+      "filePath": "apps/app/test/design-review/run-design-review.ts",
+      "summary": "isReadyCheckVisible is a function defined in apps/app/test/design-review/run-design-review.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/design-review/run-design-review.ts:resetOutputDir",
+      "type": "function",
+      "name": "resetOutputDir",
+      "filePath": "apps/app/test/design-review/run-design-review.ts",
+      "summary": "resetOutputDir is a function defined in apps/app/test/design-review/run-design-review.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/design-review/run-design-review.ts:screenshotRelativePath",
+      "type": "function",
+      "name": "screenshotRelativePath",
+      "filePath": "apps/app/test/design-review/run-design-review.ts",
+      "summary": "screenshotRelativePath is a function defined in apps/app/test/design-review/run-design-review.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/design-review/run-design-review.ts:diagnosticStem",
+      "type": "function",
+      "name": "diagnosticStem",
+      "filePath": "apps/app/test/design-review/run-design-review.ts",
+      "summary": "diagnosticStem is a function defined in apps/app/test/design-review/run-design-review.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:apps/app/test/design-review/run-design-review.ts:createPage",
+      "type": "function",
+      "name": "createPage",
+      "filePath": "apps/app/test/design-review/run-design-review.ts",
+      "summary": "createPage is a function defined in apps/app/test/design-review/run-design-review.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/design-review/run-design-review.ts:waitForTransientUi",
+      "type": "function",
+      "name": "waitForTransientUi",
+      "filePath": "apps/app/test/design-review/run-design-review.ts",
+      "summary": "waitForTransientUi is a function defined in apps/app/test/design-review/run-design-review.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/design-review/run-design-review.ts:waitForVisibleAssets",
+      "type": "function",
+      "name": "waitForVisibleAssets",
+      "filePath": "apps/app/test/design-review/run-design-review.ts",
+      "summary": "waitForVisibleAssets is a function defined in apps/app/test/design-review/run-design-review.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/design-review/run-design-review.ts:waitForNetworkQuiet",
+      "type": "function",
+      "name": "waitForNetworkQuiet",
+      "filePath": "apps/app/test/design-review/run-design-review.ts",
+      "summary": "waitForNetworkQuiet is a function defined in apps/app/test/design-review/run-design-review.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/design-review/run-design-review.ts:waitForDomQuiet",
+      "type": "function",
+      "name": "waitForDomQuiet",
+      "filePath": "apps/app/test/design-review/run-design-review.ts",
+      "summary": "waitForDomQuiet is a function defined in apps/app/test/design-review/run-design-review.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/design-review/run-design-review.ts:waitForPageSettled",
+      "type": "function",
+      "name": "waitForPageSettled",
+      "filePath": "apps/app/test/design-review/run-design-review.ts",
+      "summary": "waitForPageSettled is a function defined in apps/app/test/design-review/run-design-review.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/design-review/run-design-review.ts:applyState",
+      "type": "function",
+      "name": "applyState",
+      "filePath": "apps/app/test/design-review/run-design-review.ts",
+      "summary": "applyState is a function defined in apps/app/test/design-review/run-design-review.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/design-review/run-design-review.ts:captureOneAttempt",
+      "type": "function",
+      "name": "captureOneAttempt",
+      "filePath": "apps/app/test/design-review/run-design-review.ts",
+      "summary": "captureOneAttempt is a function defined in apps/app/test/design-review/run-design-review.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/design-review/run-design-review.ts:captureOne",
+      "type": "function",
+      "name": "captureOne",
+      "filePath": "apps/app/test/design-review/run-design-review.ts",
+      "summary": "captureOne is a function defined in apps/app/test/design-review/run-design-review.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/design-review/run-design-review.ts:escapeHtml",
+      "type": "function",
+      "name": "escapeHtml",
+      "filePath": "apps/app/test/design-review/run-design-review.ts",
+      "summary": "escapeHtml is a function defined in apps/app/test/design-review/run-design-review.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:apps/app/test/design-review/run-design-review.ts:writeGallery",
+      "type": "function",
+      "name": "writeGallery",
+      "filePath": "apps/app/test/design-review/run-design-review.ts",
+      "summary": "writeGallery is a function defined in apps/app/test/design-review/run-design-review.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/design-review/run-design-review.ts:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "apps/app/test/design-review/run-design-review.ts",
+      "summary": "main is a function defined in apps/app/test/design-review/run-design-review.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "desktop",
+        "api",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:apps/app/test/electrobun-packaged/mock-api.ts",
+      "type": "file",
+      "name": "mock-api.ts",
+      "filePath": "apps/app/test/electrobun-packaged/mock-api.ts",
+      "summary": "mock-api.ts is a typescript source file in the Milady codebase. It contains 7 functions.",
+      "languageNotes": "typescript; code; 1476 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/electrobun-packaged/mock-api.ts:applyCors",
+      "type": "function",
+      "name": "applyCors",
+      "filePath": "apps/app/test/electrobun-packaged/mock-api.ts",
+      "summary": "applyCors is a function defined in apps/app/test/electrobun-packaged/mock-api.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "function",
+      "name": "json",
+      "filePath": "apps/app/test/electrobun-packaged/mock-api.ts",
+      "summary": "json is a function defined in apps/app/test/electrobun-packaged/mock-api.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/electrobun-packaged/mock-api.ts:readJson",
+      "type": "function",
+      "name": "readJson",
+      "filePath": "apps/app/test/electrobun-packaged/mock-api.ts",
+      "summary": "readJson is a function defined in apps/app/test/electrobun-packaged/mock-api.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/electrobun-packaged/mock-api.ts:nowIso",
+      "type": "function",
+      "name": "nowIso",
+      "filePath": "apps/app/test/electrobun-packaged/mock-api.ts",
+      "summary": "nowIso is a function defined in apps/app/test/electrobun-packaged/mock-api.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/electrobun-packaged/mock-api.ts:createDefaultPermissionsState",
+      "type": "function",
+      "name": "createDefaultPermissionsState",
+      "filePath": "apps/app/test/electrobun-packaged/mock-api.ts",
+      "summary": "createDefaultPermissionsState is a function defined in apps/app/test/electrobun-packaged/mock-api.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/electrobun-packaged/mock-api.ts:mergePermissionsState",
+      "type": "function",
+      "name": "mergePermissionsState",
+      "filePath": "apps/app/test/electrobun-packaged/mock-api.ts",
+      "summary": "mergePermissionsState is a function defined in apps/app/test/electrobun-packaged/mock-api.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "type": "function",
+      "name": "startMockApiServer",
+      "filePath": "apps/app/test/electrobun-packaged/mock-api.ts",
+      "summary": "startMockApiServer is a function defined in apps/app/test/electrobun-packaged/mock-api.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/app/test/utils/get-free-port.test.ts",
+      "type": "file",
+      "name": "get-free-port.test.ts",
+      "filePath": "apps/app/test/utils/get-free-port.test.ts",
+      "summary": "get-free-port.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 26 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/app/test/utils/get-free-port.ts",
+      "type": "file",
+      "name": "get-free-port.ts",
+      "filePath": "apps/app/test/utils/get-free-port.ts",
+      "summary": "get-free-port.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 24 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/test/utils/get-free-port.ts:getFreePort",
+      "type": "function",
+      "name": "getFreePort",
+      "filePath": "apps/app/test/utils/get-free-port.ts",
+      "summary": "getFreePort is a function defined in apps/app/test/utils/get-free-port.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/design-review/run-design-review.ts",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:parseCliArgs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/design-review/run-design-review.ts",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:formatViewport",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/design-review/run-design-review.ts",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:buildCaptureSpecs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/design-review/run-design-review.ts",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:startAppServer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/design-review/run-design-review.ts",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:waitForReady",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/design-review/run-design-review.ts",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:isReadyCheckVisible",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/design-review/run-design-review.ts",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:resetOutputDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/design-review/run-design-review.ts",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:screenshotRelativePath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/design-review/run-design-review.ts",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:diagnosticStem",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/design-review/run-design-review.ts",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:createPage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/design-review/run-design-review.ts",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:waitForTransientUi",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/design-review/run-design-review.ts",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:waitForVisibleAssets",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/design-review/run-design-review.ts",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:waitForNetworkQuiet",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/design-review/run-design-review.ts",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:waitForDomQuiet",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/design-review/run-design-review.ts",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:waitForPageSettled",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/design-review/run-design-review.ts",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:applyState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/design-review/run-design-review.ts",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:captureOneAttempt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/design-review/run-design-review.ts",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:captureOne",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/design-review/run-design-review.ts",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:escapeHtml",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/design-review/run-design-review.ts",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:writeGallery",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/design-review/run-design-review.ts",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:waitForReady",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:isReadyCheckVisible",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:waitForPageSettled",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:waitForReady",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:waitForPageSettled",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:waitForTransientUi",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:waitForPageSettled",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:waitForVisibleAssets",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:waitForPageSettled",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:waitForNetworkQuiet",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:waitForPageSettled",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:waitForDomQuiet",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:captureOneAttempt",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:createPage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:captureOneAttempt",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:waitForPageSettled",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:captureOneAttempt",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:applyState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:captureOneAttempt",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:waitForTransientUi",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:captureOneAttempt",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:waitForVisibleAssets",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:captureOneAttempt",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:waitForNetworkQuiet",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:captureOneAttempt",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:waitForDomQuiet",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:captureOneAttempt",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:screenshotRelativePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:captureOneAttempt",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:formatViewport",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:captureOneAttempt",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:diagnosticStem",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:captureOne",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:captureOneAttempt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:writeGallery",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:escapeHtml",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:writeGallery",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:escapeHtml",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:writeGallery",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:escapeHtml",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:writeGallery",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:escapeHtml",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:writeGallery",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:escapeHtml",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:writeGallery",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:escapeHtml",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:writeGallery",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:escapeHtml",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:main",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:parseCliArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:main",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:buildCaptureSpecs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:main",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:resetOutputDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:main",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:startAppServer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:main",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:captureOne",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/design-review/run-design-review.ts:main",
+      "target": "function:apps/app/test/design-review/run-design-review.ts:writeGallery",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/electrobun-packaged/mock-api.ts",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:applyCors",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/electrobun-packaged/mock-api.ts",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/electrobun-packaged/mock-api.ts",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:readJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/electrobun-packaged/mock-api.ts",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:nowIso",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/electrobun-packaged/mock-api.ts",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:createDefaultPermissionsState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/electrobun-packaged/mock-api.ts",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:mergePermissionsState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/electrobun-packaged/mock-api.ts",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:applyCors",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:mergePermissionsState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:createDefaultPermissionsState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:nowIso",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:nowIso",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:applyCors",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:readJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:readJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:readJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:readJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:nowIso",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:nowIso",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:readJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:readJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:readJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:readJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:readJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:readJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:nowIso",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:readJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:nowIso",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:readJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:nowIso",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:readJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:nowIso",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/test/electrobun-packaged/mock-api.ts:startMockApiServer",
+      "target": "function:apps/app/test/electrobun-packaged/mock-api.ts:json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/test/utils/get-free-port.ts",
+      "target": "function:apps/app/test/utils/get-free-port.ts:getFreePort",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/app/test/design-review/run-design-review.ts",
+      "target": "file:apps/app/test/electrobun-packaged/mock-api.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/app/test/design-review/run-design-review.ts",
+      "target": "file:apps/app/test/utils/get-free-port.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/app/test/utils/get-free-port.test.ts",
+      "target": "file:apps/app/test/utils/get-free-port.ts",
+      "type": "imports"
+    }
+  ]
+}

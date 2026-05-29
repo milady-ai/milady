@@ -1,0 +1,4159 @@
+{
+  "batchIndex": 89,
+  "nodes": [
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:apps/homepage/src/components/layout/Sidebar.tsx",
+      "type": "file",
+      "name": "Sidebar.tsx",
+      "filePath": "apps/homepage/src/components/layout/Sidebar.tsx",
+      "summary": "Sidebar.tsx is a typescript source file in the Milady codebase. It contains 5 functions, 3 imports.",
+      "languageNotes": "typescript; code; 244 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:apps/homepage/src/components/layout/Sidebar.tsx:Sidebar",
+      "type": "function",
+      "name": "Sidebar",
+      "filePath": "apps/homepage/src/components/layout/Sidebar.tsx",
+      "summary": "Sidebar is a function defined in apps/homepage/src/components/layout/Sidebar.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/components/layout/Sidebar.tsx:NavGroup",
+      "type": "function",
+      "name": "NavGroup",
+      "filePath": "apps/homepage/src/components/layout/Sidebar.tsx",
+      "summary": "NavGroup is a function defined in apps/homepage/src/components/layout/Sidebar.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/components/layout/Sidebar.tsx:NavItemButton",
+      "type": "function",
+      "name": "NavItemButton",
+      "filePath": "apps/homepage/src/components/layout/Sidebar.tsx",
+      "summary": "NavItemButton is a function defined in apps/homepage/src/components/layout/Sidebar.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/components/layout/Sidebar.tsx:NavItemExternal",
+      "type": "function",
+      "name": "NavItemExternal",
+      "filePath": "apps/homepage/src/components/layout/Sidebar.tsx",
+      "summary": "NavItemExternal is a function defined in apps/homepage/src/components/layout/Sidebar.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/components/layout/Sidebar.tsx:OpenLocalRow",
+      "type": "function",
+      "name": "OpenLocalRow",
+      "filePath": "apps/homepage/src/components/layout/Sidebar.tsx",
+      "summary": "OpenLocalRow is a function defined in apps/homepage/src/components/layout/Sidebar.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/homepage/src/components/ui/FilterChips.tsx",
+      "type": "file",
+      "name": "FilterChips.tsx",
+      "filePath": "apps/homepage/src/components/ui/FilterChips.tsx",
+      "summary": "FilterChips.tsx is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 52 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/components/ui/FilterChips.tsx:FilterChips",
+      "type": "function",
+      "name": "FilterChips",
+      "filePath": "apps/homepage/src/components/ui/FilterChips.tsx",
+      "summary": "FilterChips is a function defined in apps/homepage/src/components/ui/FilterChips.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/homepage/src/components/ui/StatusDot.tsx",
+      "type": "file",
+      "name": "StatusDot.tsx",
+      "filePath": "apps/homepage/src/components/ui/StatusDot.tsx",
+      "summary": "StatusDot.tsx is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 46 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/components/ui/StatusDot.tsx:StatusDot",
+      "type": "function",
+      "name": "StatusDot",
+      "filePath": "apps/homepage/src/components/ui/StatusDot.tsx",
+      "summary": "StatusDot is a function defined in apps/homepage/src/components/ui/StatusDot.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:apps/homepage/src/docs/registry.ts",
+      "type": "file",
+      "name": "registry.ts",
+      "filePath": "apps/homepage/src/docs/registry.ts",
+      "summary": "registry.ts is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 683 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/docs/registry.ts:entriesForTier",
+      "type": "function",
+      "name": "entriesForTier",
+      "filePath": "apps/homepage/src/docs/registry.ts",
+      "summary": "entriesForTier is a function defined in apps/homepage/src/docs/registry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/docs/registry.ts:findAdjacent",
+      "type": "function",
+      "name": "findAdjacent",
+      "filePath": "apps/homepage/src/docs/registry.ts",
+      "summary": "findAdjacent is a function defined in apps/homepage/src/docs/registry.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/homepage/src/generated/release-data.ts",
+      "type": "file",
+      "name": "release-data.ts",
+      "filePath": "apps/homepage/src/generated/release-data.ts",
+      "summary": "release-data.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 65 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "type": "file",
+      "name": "AgentProvider.tsx",
+      "filePath": "apps/homepage/src/lib/AgentProvider.tsx",
+      "summary": "AgentProvider.tsx is a typescript source file in the Milady codebase. It contains 16 functions, 4 imports.",
+      "languageNotes": "typescript; code; 742 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/AgentProvider.tsx:createSemaphore",
+      "type": "function",
+      "name": "createSemaphore",
+      "filePath": "apps/homepage/src/lib/AgentProvider.tsx",
+      "summary": "createSemaphore is a function defined in apps/homepage/src/lib/AgentProvider.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/AgentProvider.tsx:agentsEqual",
+      "type": "function",
+      "name": "agentsEqual",
+      "filePath": "apps/homepage/src/lib/AgentProvider.tsx",
+      "summary": "agentsEqual is a function defined in apps/homepage/src/lib/AgentProvider.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/AgentProvider.tsx:collectCloudAgents",
+      "type": "function",
+      "name": "collectCloudAgents",
+      "filePath": "apps/homepage/src/lib/AgentProvider.tsx",
+      "summary": "collectCloudAgents is a function defined in apps/homepage/src/lib/AgentProvider.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/AgentProvider.tsx:fetchSandboxesForDiscovery",
+      "type": "function",
+      "name": "fetchSandboxesForDiscovery",
+      "filePath": "apps/homepage/src/lib/AgentProvider.tsx",
+      "summary": "fetchSandboxesForDiscovery is a function defined in apps/homepage/src/lib/AgentProvider.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/AgentProvider.tsx:selectOwnedSandboxes",
+      "type": "function",
+      "name": "selectOwnedSandboxes",
+      "filePath": "apps/homepage/src/lib/AgentProvider.tsx",
+      "summary": "selectOwnedSandboxes is a function defined in apps/homepage/src/lib/AgentProvider.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/AgentProvider.tsx:buildCloudAgentIndexByName",
+      "type": "function",
+      "name": "buildCloudAgentIndexByName",
+      "filePath": "apps/homepage/src/lib/AgentProvider.tsx",
+      "summary": "buildCloudAgentIndexByName is a function defined in apps/homepage/src/lib/AgentProvider.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/AgentProvider.tsx:addSandboxAgents",
+      "type": "function",
+      "name": "addSandboxAgents",
+      "filePath": "apps/homepage/src/lib/AgentProvider.tsx",
+      "summary": "addSandboxAgents is a function defined in apps/homepage/src/lib/AgentProvider.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/AgentProvider.tsx:wasDiscoveredMiladyRemote",
+      "type": "function",
+      "name": "wasDiscoveredMiladyRemote",
+      "filePath": "apps/homepage/src/lib/AgentProvider.tsx",
+      "summary": "wasDiscoveredMiladyRemote is a function defined in apps/homepage/src/lib/AgentProvider.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/AgentProvider.tsx:addManualRemoteAgents",
+      "type": "function",
+      "name": "addManualRemoteAgents",
+      "filePath": "apps/homepage/src/lib/AgentProvider.tsx",
+      "summary": "addManualRemoteAgents is a function defined in apps/homepage/src/lib/AgentProvider.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/AgentProvider.tsx:createLocalProbeClient",
+      "type": "function",
+      "name": "createLocalProbeClient",
+      "filePath": "apps/homepage/src/lib/AgentProvider.tsx",
+      "summary": "createLocalProbeClient is a function defined in apps/homepage/src/lib/AgentProvider.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/AgentProvider.tsx:probeAgent",
+      "type": "function",
+      "name": "probeAgent",
+      "filePath": "apps/homepage/src/lib/AgentProvider.tsx",
+      "summary": "probeAgent is a function defined in apps/homepage/src/lib/AgentProvider.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/AgentProvider.tsx:probeLocalAgent",
+      "type": "function",
+      "name": "probeLocalAgent",
+      "filePath": "apps/homepage/src/lib/AgentProvider.tsx",
+      "summary": "probeLocalAgent is a function defined in apps/homepage/src/lib/AgentProvider.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/AgentProvider.tsx:applyProbeResult",
+      "type": "function",
+      "name": "applyProbeResult",
+      "filePath": "apps/homepage/src/lib/AgentProvider.tsx",
+      "summary": "applyProbeResult is a function defined in apps/homepage/src/lib/AgentProvider.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/AgentProvider.tsx:mergeProbeResults",
+      "type": "function",
+      "name": "mergeProbeResults",
+      "filePath": "apps/homepage/src/lib/AgentProvider.tsx",
+      "summary": "mergeProbeResults is a function defined in apps/homepage/src/lib/AgentProvider.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:apps/homepage/src/lib/AgentProvider.tsx:AgentProvider",
+      "type": "function",
+      "name": "AgentProvider",
+      "filePath": "apps/homepage/src/lib/AgentProvider.tsx",
+      "summary": "AgentProvider is a function defined in apps/homepage/src/lib/AgentProvider.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/AgentProvider.tsx:useAgents",
+      "type": "function",
+      "name": "useAgents",
+      "filePath": "apps/homepage/src/lib/AgentProvider.tsx",
+      "summary": "useAgents is a function defined in apps/homepage/src/lib/AgentProvider.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/homepage/src/lib/asset-url.ts",
+      "type": "file",
+      "name": "asset-url.ts",
+      "filePath": "apps/homepage/src/lib/asset-url.ts",
+      "summary": "asset-url.ts is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 30 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/asset-url.ts:normalizeBaseHref",
+      "type": "function",
+      "name": "normalizeBaseHref",
+      "filePath": "apps/homepage/src/lib/asset-url.ts",
+      "summary": "normalizeBaseHref is a function defined in apps/homepage/src/lib/asset-url.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/asset-url.ts:resolveHomepageAssetUrl",
+      "type": "function",
+      "name": "resolveHomepageAssetUrl",
+      "filePath": "apps/homepage/src/lib/asset-url.ts",
+      "summary": "resolveHomepageAssetUrl is a function defined in apps/homepage/src/lib/asset-url.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/homepage/src/lib/auth.ts",
+      "type": "file",
+      "name": "auth.ts",
+      "filePath": "apps/homepage/src/lib/auth.ts",
+      "summary": "auth.ts is a typescript source file in the Milady codebase. It contains 10 functions, 1 imports.",
+      "languageNotes": "typescript; code; 106 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/auth.ts:emitAuthChanged",
+      "type": "function",
+      "name": "emitAuthChanged",
+      "filePath": "apps/homepage/src/lib/auth.ts",
+      "summary": "emitAuthChanged is a function defined in apps/homepage/src/lib/auth.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/auth.ts:getActiveTokenStorageKey",
+      "type": "function",
+      "name": "getActiveTokenStorageKey",
+      "filePath": "apps/homepage/src/lib/auth.ts",
+      "summary": "getActiveTokenStorageKey is a function defined in apps/homepage/src/lib/auth.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/auth.ts:getToken",
+      "type": "function",
+      "name": "getToken",
+      "filePath": "apps/homepage/src/lib/auth.ts",
+      "summary": "getToken is a function defined in apps/homepage/src/lib/auth.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/auth.ts:setToken",
+      "type": "function",
+      "name": "setToken",
+      "filePath": "apps/homepage/src/lib/auth.ts",
+      "summary": "setToken is a function defined in apps/homepage/src/lib/auth.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/auth.ts:clearToken",
+      "type": "function",
+      "name": "clearToken",
+      "filePath": "apps/homepage/src/lib/auth.ts",
+      "summary": "clearToken is a function defined in apps/homepage/src/lib/auth.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/auth.ts:isAuthenticated",
+      "type": "function",
+      "name": "isAuthenticated",
+      "filePath": "apps/homepage/src/lib/auth.ts",
+      "summary": "isAuthenticated is a function defined in apps/homepage/src/lib/auth.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/auth.ts:cloudLogin",
+      "type": "function",
+      "name": "cloudLogin",
+      "filePath": "apps/homepage/src/lib/auth.ts",
+      "summary": "cloudLogin is a function defined in apps/homepage/src/lib/auth.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/auth.ts:cloudLoginPoll",
+      "type": "function",
+      "name": "cloudLoginPoll",
+      "filePath": "apps/homepage/src/lib/auth.ts",
+      "summary": "cloudLoginPoll is a function defined in apps/homepage/src/lib/auth.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/auth.ts:fetchWithAuth",
+      "type": "function",
+      "name": "fetchWithAuth",
+      "filePath": "apps/homepage/src/lib/auth.ts",
+      "summary": "fetchWithAuth is a function defined in apps/homepage/src/lib/auth.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/auth.ts:consumeUrlToken",
+      "type": "function",
+      "name": "consumeUrlToken",
+      "filePath": "apps/homepage/src/lib/auth.ts",
+      "summary": "consumeUrlToken is a function defined in apps/homepage/src/lib/auth.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/homepage/src/lib/billing-types.ts",
+      "type": "file",
+      "name": "billing-types.ts",
+      "filePath": "apps/homepage/src/lib/billing-types.ts",
+      "summary": "billing-types.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 36 lines"
+    },
+    {
+      "tags": [
+        "api",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:apps/homepage/src/lib/cloud-api.ts",
+      "type": "file",
+      "name": "cloud-api.ts",
+      "filePath": "apps/homepage/src/lib/cloud-api.ts",
+      "summary": "cloud-api.ts is a typescript source file in the Milady codebase. It contains 9 functions, 3 classes, 3 imports.",
+      "languageNotes": "typescript; code; 924 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/cloud-api.ts:isJsonObject",
+      "type": "function",
+      "name": "isJsonObject",
+      "filePath": "apps/homepage/src/lib/cloud-api.ts",
+      "summary": "isJsonObject is a function defined in apps/homepage/src/lib/cloud-api.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/cloud-api.ts:isAgentRuntimeState",
+      "type": "function",
+      "name": "isAgentRuntimeState",
+      "filePath": "apps/homepage/src/lib/cloud-api.ts",
+      "summary": "isAgentRuntimeState is a function defined in apps/homepage/src/lib/cloud-api.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/cloud-api.ts:normalizeAgentState",
+      "type": "function",
+      "name": "normalizeAgentState",
+      "filePath": "apps/homepage/src/lib/cloud-api.ts",
+      "summary": "normalizeAgentState is a function defined in apps/homepage/src/lib/cloud-api.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/cloud-api.ts:isCloudAuthFailure",
+      "type": "function",
+      "name": "isCloudAuthFailure",
+      "filePath": "apps/homepage/src/lib/cloud-api.ts",
+      "summary": "isCloudAuthFailure is a function defined in apps/homepage/src/lib/cloud-api.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/cloud-api.ts:readErrorMessage",
+      "type": "function",
+      "name": "readErrorMessage",
+      "filePath": "apps/homepage/src/lib/cloud-api.ts",
+      "summary": "readErrorMessage is a function defined in apps/homepage/src/lib/cloud-api.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/cloud-api.ts:unwrapListResponse",
+      "type": "function",
+      "name": "unwrapListResponse",
+      "filePath": "apps/homepage/src/lib/cloud-api.ts",
+      "summary": "unwrapListResponse is a function defined in apps/homepage/src/lib/cloud-api.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/cloud-api.ts:unwrapDataResponse",
+      "type": "function",
+      "name": "unwrapDataResponse",
+      "filePath": "apps/homepage/src/lib/cloud-api.ts",
+      "summary": "unwrapDataResponse is a function defined in apps/homepage/src/lib/cloud-api.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/cloud-api.ts:makeUnauthenticatedHealthResponse",
+      "type": "function",
+      "name": "makeUnauthenticatedHealthResponse",
+      "filePath": "apps/homepage/src/lib/cloud-api.ts",
+      "summary": "makeUnauthenticatedHealthResponse is a function defined in apps/homepage/src/lib/cloud-api.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/cloud-api.ts:makeUnauthenticatedAgentStatus",
+      "type": "function",
+      "name": "makeUnauthenticatedAgentStatus",
+      "filePath": "apps/homepage/src/lib/cloud-api.ts",
+      "summary": "makeUnauthenticatedAgentStatus is a function defined in apps/homepage/src/lib/cloud-api.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:apps/homepage/src/lib/cloud-api.ts:CloudAgentsNotAvailableError",
+      "type": "class",
+      "name": "CloudAgentsNotAvailableError",
+      "filePath": "apps/homepage/src/lib/cloud-api.ts",
+      "summary": "CloudAgentsNotAvailableError is a class or type declared in apps/homepage/src/lib/cloud-api.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:apps/homepage/src/lib/cloud-api.ts:CloudClient",
+      "type": "class",
+      "name": "CloudClient",
+      "filePath": "apps/homepage/src/lib/cloud-api.ts",
+      "summary": "CloudClient is a class or type declared in apps/homepage/src/lib/cloud-api.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:apps/homepage/src/lib/cloud-api.ts:CloudApiClient",
+      "type": "class",
+      "name": "CloudApiClient",
+      "filePath": "apps/homepage/src/lib/cloud-api.ts",
+      "summary": "CloudApiClient is a class or type declared in apps/homepage/src/lib/cloud-api.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/homepage/src/lib/connections.ts",
+      "type": "file",
+      "name": "connections.ts",
+      "filePath": "apps/homepage/src/lib/connections.ts",
+      "summary": "connections.ts is a typescript source file in the Milady codebase. It contains 4 functions, 1 imports.",
+      "languageNotes": "typescript; code; 42 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/connections.ts:getConnections",
+      "type": "function",
+      "name": "getConnections",
+      "filePath": "apps/homepage/src/lib/connections.ts",
+      "summary": "getConnections is a function defined in apps/homepage/src/lib/connections.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/connections.ts:saveConnections",
+      "type": "function",
+      "name": "saveConnections",
+      "filePath": "apps/homepage/src/lib/connections.ts",
+      "summary": "saveConnections is a function defined in apps/homepage/src/lib/connections.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/connections.ts:addConnection",
+      "type": "function",
+      "name": "addConnection",
+      "filePath": "apps/homepage/src/lib/connections.ts",
+      "summary": "addConnection is a function defined in apps/homepage/src/lib/connections.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/connections.ts:removeConnection",
+      "type": "function",
+      "name": "removeConnection",
+      "filePath": "apps/homepage/src/lib/connections.ts",
+      "summary": "removeConnection is a function defined in apps/homepage/src/lib/connections.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/homepage/src/lib/format.ts",
+      "type": "file",
+      "name": "format.ts",
+      "filePath": "apps/homepage/src/lib/format.ts",
+      "summary": "format.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 21 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/format.ts:formatUptime",
+      "type": "function",
+      "name": "formatUptime",
+      "filePath": "apps/homepage/src/lib/format.ts",
+      "summary": "formatUptime is a function defined in apps/homepage/src/lib/format.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:apps/homepage/src/lib/open-web-ui.ts",
+      "type": "file",
+      "name": "open-web-ui.ts",
+      "filePath": "apps/homepage/src/lib/open-web-ui.ts",
+      "summary": "open-web-ui.ts is a typescript source file in the Milady codebase. It contains 11 functions, 2 imports.",
+      "languageNotes": "typescript; code; 271 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/open-web-ui.ts:readRetryAfterMs",
+      "type": "function",
+      "name": "readRetryAfterMs",
+      "filePath": "apps/homepage/src/lib/open-web-ui.ts",
+      "summary": "readRetryAfterMs is a function defined in apps/homepage/src/lib/open-web-ui.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/open-web-ui.ts:requestPairingToken",
+      "type": "function",
+      "name": "requestPairingToken",
+      "filePath": "apps/homepage/src/lib/open-web-ui.ts",
+      "summary": "requestPairingToken is a function defined in apps/homepage/src/lib/open-web-ui.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/open-web-ui.ts:delay",
+      "type": "function",
+      "name": "delay",
+      "filePath": "apps/homepage/src/lib/open-web-ui.ts",
+      "summary": "delay is a function defined in apps/homepage/src/lib/open-web-ui.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/open-web-ui.ts:redirectPopupToCloudAgent",
+      "type": "function",
+      "name": "redirectPopupToCloudAgent",
+      "filePath": "apps/homepage/src/lib/open-web-ui.ts",
+      "summary": "redirectPopupToCloudAgent is a function defined in apps/homepage/src/lib/open-web-ui.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/open-web-ui.ts:extractUuidFromUrl",
+      "type": "function",
+      "name": "extractUuidFromUrl",
+      "filePath": "apps/homepage/src/lib/open-web-ui.ts",
+      "summary": "extractUuidFromUrl is a function defined in apps/homepage/src/lib/open-web-ui.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/open-web-ui.ts:renderPopupConnectingState",
+      "type": "function",
+      "name": "renderPopupConnectingState",
+      "filePath": "apps/homepage/src/lib/open-web-ui.ts",
+      "summary": "renderPopupConnectingState is a function defined in apps/homepage/src/lib/open-web-ui.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/open-web-ui.ts:updatePopupMessage",
+      "type": "function",
+      "name": "updatePopupMessage",
+      "filePath": "apps/homepage/src/lib/open-web-ui.ts",
+      "summary": "updatePopupMessage is a function defined in apps/homepage/src/lib/open-web-ui.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/open-web-ui.ts:openWebUIWithPairingToken",
+      "type": "function",
+      "name": "openWebUIWithPairingToken",
+      "filePath": "apps/homepage/src/lib/open-web-ui.ts",
+      "summary": "openWebUIWithPairingToken is a function defined in apps/homepage/src/lib/open-web-ui.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/open-web-ui.ts:openWebUIDirect",
+      "type": "function",
+      "name": "openWebUIDirect",
+      "filePath": "apps/homepage/src/lib/open-web-ui.ts",
+      "summary": "openWebUIDirect is a function defined in apps/homepage/src/lib/open-web-ui.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/open-web-ui.ts:openWebUI",
+      "type": "function",
+      "name": "openWebUI",
+      "filePath": "apps/homepage/src/lib/open-web-ui.ts",
+      "summary": "openWebUI is a function defined in apps/homepage/src/lib/open-web-ui.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/open-web-ui.ts:showToast",
+      "type": "function",
+      "name": "showToast",
+      "filePath": "apps/homepage/src/lib/open-web-ui.ts",
+      "summary": "showToast is a function defined in apps/homepage/src/lib/open-web-ui.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:apps/homepage/src/lib/runtime-config.ts",
+      "type": "file",
+      "name": "runtime-config.ts",
+      "filePath": "apps/homepage/src/lib/runtime-config.ts",
+      "summary": "runtime-config.ts is a typescript source file in the Milady codebase. It contains 16 functions.",
+      "languageNotes": "typescript; code; 229 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/runtime-config.ts:normalizeCloudHost",
+      "type": "function",
+      "name": "normalizeCloudHost",
+      "filePath": "apps/homepage/src/lib/runtime-config.ts",
+      "summary": "normalizeCloudHost is a function defined in apps/homepage/src/lib/runtime-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/runtime-config.ts:resolveDefaultCloudBase",
+      "type": "function",
+      "name": "resolveDefaultCloudBase",
+      "filePath": "apps/homepage/src/lib/runtime-config.ts",
+      "summary": "resolveDefaultCloudBase is a function defined in apps/homepage/src/lib/runtime-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/runtime-config.ts:normalizeUrl",
+      "type": "function",
+      "name": "normalizeUrl",
+      "filePath": "apps/homepage/src/lib/runtime-config.ts",
+      "summary": "normalizeUrl is a function defined in apps/homepage/src/lib/runtime-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/runtime-config.ts:normalizeHostname",
+      "type": "function",
+      "name": "normalizeHostname",
+      "filePath": "apps/homepage/src/lib/runtime-config.ts",
+      "summary": "normalizeHostname is a function defined in apps/homepage/src/lib/runtime-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/runtime-config.ts:normalizePath",
+      "type": "function",
+      "name": "normalizePath",
+      "filePath": "apps/homepage/src/lib/runtime-config.ts",
+      "summary": "normalizePath is a function defined in apps/homepage/src/lib/runtime-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/runtime-config.ts:getCloudAgentApiPath",
+      "type": "function",
+      "name": "getCloudAgentApiPath",
+      "filePath": "apps/homepage/src/lib/runtime-config.ts",
+      "summary": "getCloudAgentApiPath is a function defined in apps/homepage/src/lib/runtime-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/runtime-config.ts:shouldAllowPublicSandboxDiscoveryFallback",
+      "type": "function",
+      "name": "shouldAllowPublicSandboxDiscoveryFallback",
+      "filePath": "apps/homepage/src/lib/runtime-config.ts",
+      "summary": "shouldAllowPublicSandboxDiscoveryFallback is a function defined in apps/homepage/src/lib/runtime-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/runtime-config.ts:parseBooleanFlag",
+      "type": "function",
+      "name": "parseBooleanFlag",
+      "filePath": "apps/homepage/src/lib/runtime-config.ts",
+      "summary": "parseBooleanFlag is a function defined in apps/homepage/src/lib/runtime-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/runtime-config.ts:isLoopbackHostname",
+      "type": "function",
+      "name": "isLoopbackHostname",
+      "filePath": "apps/homepage/src/lib/runtime-config.ts",
+      "summary": "isLoopbackHostname is a function defined in apps/homepage/src/lib/runtime-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/runtime-config.ts:isLoopbackUrl",
+      "type": "function",
+      "name": "isLoopbackUrl",
+      "filePath": "apps/homepage/src/lib/runtime-config.ts",
+      "summary": "isLoopbackUrl is a function defined in apps/homepage/src/lib/runtime-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/runtime-config.ts:isLocalAgentAutoProbeDefaultHostname",
+      "type": "function",
+      "name": "isLocalAgentAutoProbeDefaultHostname",
+      "filePath": "apps/homepage/src/lib/runtime-config.ts",
+      "summary": "isLocalAgentAutoProbeDefaultHostname is a function defined in apps/homepage/src/lib/runtime-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/runtime-config.ts:shouldAutoProbeLocalAgentForConfig",
+      "type": "function",
+      "name": "shouldAutoProbeLocalAgentForConfig",
+      "filePath": "apps/homepage/src/lib/runtime-config.ts",
+      "summary": "shouldAutoProbeLocalAgentForConfig is a function defined in apps/homepage/src/lib/runtime-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/runtime-config.ts:shouldAutoProbeLocalAgent",
+      "type": "function",
+      "name": "shouldAutoProbeLocalAgent",
+      "filePath": "apps/homepage/src/lib/runtime-config.ts",
+      "summary": "shouldAutoProbeLocalAgent is a function defined in apps/homepage/src/lib/runtime-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/runtime-config.ts:getCloudTokenStorageKey",
+      "type": "function",
+      "name": "getCloudTokenStorageKey",
+      "filePath": "apps/homepage/src/lib/runtime-config.ts",
+      "summary": "getCloudTokenStorageKey is a function defined in apps/homepage/src/lib/runtime-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/runtime-config.ts:getSandboxDiscoveryUrls",
+      "type": "function",
+      "name": "getSandboxDiscoveryUrls",
+      "filePath": "apps/homepage/src/lib/runtime-config.ts",
+      "summary": "getSandboxDiscoveryUrls is a function defined in apps/homepage/src/lib/runtime-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/runtime-config.ts:rewriteAgentUiUrl",
+      "type": "function",
+      "name": "rewriteAgentUiUrl",
+      "filePath": "apps/homepage/src/lib/runtime-config.ts",
+      "summary": "rewriteAgentUiUrl is a function defined in apps/homepage/src/lib/runtime-config.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/homepage/src/lib/spa-fallback.ts",
+      "type": "file",
+      "name": "spa-fallback.ts",
+      "filePath": "apps/homepage/src/lib/spa-fallback.ts",
+      "summary": "spa-fallback.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 27 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/spa-fallback.ts:getSpaFallbackRedirectTarget",
+      "type": "function",
+      "name": "getSpaFallbackRedirectTarget",
+      "filePath": "apps/homepage/src/lib/spa-fallback.ts",
+      "summary": "getSpaFallbackRedirectTarget is a function defined in apps/homepage/src/lib/spa-fallback.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/homepage/src/lib/useAuth.ts",
+      "type": "file",
+      "name": "useAuth.ts",
+      "filePath": "apps/homepage/src/lib/useAuth.ts",
+      "summary": "useAuth.ts is a typescript source file in the Milady codebase. It contains 4 functions, 2 imports.",
+      "languageNotes": "typescript; code; 85 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/useAuth.ts:getSnapshot",
+      "type": "function",
+      "name": "getSnapshot",
+      "filePath": "apps/homepage/src/lib/useAuth.ts",
+      "summary": "getSnapshot is a function defined in apps/homepage/src/lib/useAuth.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/useAuth.ts:getServerSnapshot",
+      "type": "function",
+      "name": "getServerSnapshot",
+      "filePath": "apps/homepage/src/lib/useAuth.ts",
+      "summary": "getServerSnapshot is a function defined in apps/homepage/src/lib/useAuth.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/useAuth.ts:subscribe",
+      "type": "function",
+      "name": "subscribe",
+      "filePath": "apps/homepage/src/lib/useAuth.ts",
+      "summary": "subscribe is a function defined in apps/homepage/src/lib/useAuth.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/useAuth.ts:useAuth",
+      "type": "function",
+      "name": "useAuth",
+      "filePath": "apps/homepage/src/lib/useAuth.ts",
+      "summary": "useAuth is a function defined in apps/homepage/src/lib/useAuth.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "type": "file",
+      "name": "useCloudOpenFlow.ts",
+      "filePath": "apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "summary": "useCloudOpenFlow.ts is a typescript source file in the Milady codebase. It contains 12 functions, 3 imports.",
+      "languageNotes": "typescript; code; 391 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:generateCloudAgentName",
+      "type": "function",
+      "name": "generateCloudAgentName",
+      "filePath": "apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "summary": "generateCloudAgentName is a function defined in apps/homepage/src/lib/useCloudOpenFlow.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:cloudAgentCandidateFromManaged",
+      "type": "function",
+      "name": "cloudAgentCandidateFromManaged",
+      "filePath": "apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "summary": "cloudAgentCandidateFromManaged is a function defined in apps/homepage/src/lib/useCloudOpenFlow.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:localCloudAgentCandidates",
+      "type": "function",
+      "name": "localCloudAgentCandidates",
+      "filePath": "apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "summary": "localCloudAgentCandidates is a function defined in apps/homepage/src/lib/useCloudOpenFlow.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:loadCloudAgentCandidates",
+      "type": "function",
+      "name": "loadCloudAgentCandidates",
+      "filePath": "apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "summary": "loadCloudAgentCandidates is a function defined in apps/homepage/src/lib/useCloudOpenFlow.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:selectReusableCloudAgent",
+      "type": "function",
+      "name": "selectReusableCloudAgent",
+      "filePath": "apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "summary": "selectReusableCloudAgent is a function defined in apps/homepage/src/lib/useCloudOpenFlow.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:provisioningMessageForElapsed",
+      "type": "function",
+      "name": "provisioningMessageForElapsed",
+      "filePath": "apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "summary": "provisioningMessageForElapsed is a function defined in apps/homepage/src/lib/useCloudOpenFlow.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:startProvisioningMessageRotation",
+      "type": "function",
+      "name": "startProvisioningMessageRotation",
+      "filePath": "apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "summary": "startProvisioningMessageRotation is a function defined in apps/homepage/src/lib/useCloudOpenFlow.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:waitForProvisioningJob",
+      "type": "function",
+      "name": "waitForProvisioningJob",
+      "filePath": "apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "summary": "waitForProvisioningJob is a function defined in apps/homepage/src/lib/useCloudOpenFlow.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:createAndProvisionCloudAgent",
+      "type": "function",
+      "name": "createAndProvisionCloudAgent",
+      "filePath": "apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "summary": "createAndProvisionCloudAgent is a function defined in apps/homepage/src/lib/useCloudOpenFlow.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:resolveCloudAgentForOpen",
+      "type": "function",
+      "name": "resolveCloudAgentForOpen",
+      "filePath": "apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "summary": "resolveCloudAgentForOpen is a function defined in apps/homepage/src/lib/useCloudOpenFlow.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:cloudOpenErrorNotice",
+      "type": "function",
+      "name": "cloudOpenErrorNotice",
+      "filePath": "apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "summary": "cloudOpenErrorNotice is a function defined in apps/homepage/src/lib/useCloudOpenFlow.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:useCloudOpenFlow",
+      "type": "function",
+      "name": "useCloudOpenFlow",
+      "filePath": "apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "summary": "useCloudOpenFlow is a function defined in apps/homepage/src/lib/useCloudOpenFlow.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/homepage/src/lib/useNoticeToast.ts",
+      "type": "file",
+      "name": "useNoticeToast.ts",
+      "filePath": "apps/homepage/src/lib/useNoticeToast.ts",
+      "summary": "useNoticeToast.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 14 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/lib/useNoticeToast.ts:useNoticeToast",
+      "type": "function",
+      "name": "useNoticeToast",
+      "filePath": "apps/homepage/src/lib/useNoticeToast.ts",
+      "summary": "useNoticeToast is a function defined in apps/homepage/src/lib/useNoticeToast.ts."
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/homepage/src/main.tsx",
+      "type": "file",
+      "name": "main.tsx",
+      "filePath": "apps/homepage/src/main.tsx",
+      "summary": "main.tsx is a typescript source file in the Milady codebase. It contains 5 imports.",
+      "languageNotes": "typescript; code; 28 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "type": "file",
+      "name": "Dashboard.tsx",
+      "filePath": "apps/homepage/src/pages/Dashboard.tsx",
+      "summary": "Dashboard.tsx is a typescript source file in the Milady codebase. It contains 18 functions, 14 imports.",
+      "languageNotes": "typescript; code; 437 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/pages/Dashboard.tsx:openExternal",
+      "type": "function",
+      "name": "openExternal",
+      "filePath": "apps/homepage/src/pages/Dashboard.tsx",
+      "summary": "openExternal is a function defined in apps/homepage/src/pages/Dashboard.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/pages/Dashboard.tsx:copyToClipboard",
+      "type": "function",
+      "name": "copyToClipboard",
+      "filePath": "apps/homepage/src/pages/Dashboard.tsx",
+      "summary": "copyToClipboard is a function defined in apps/homepage/src/pages/Dashboard.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/pages/Dashboard.tsx:openAgentControl",
+      "type": "function",
+      "name": "openAgentControl",
+      "filePath": "apps/homepage/src/pages/Dashboard.tsx",
+      "summary": "openAgentControl is a function defined in apps/homepage/src/pages/Dashboard.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/pages/Dashboard.tsx:copyAgentUrl",
+      "type": "function",
+      "name": "copyAgentUrl",
+      "filePath": "apps/homepage/src/pages/Dashboard.tsx",
+      "summary": "copyAgentUrl is a function defined in apps/homepage/src/pages/Dashboard.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/pages/Dashboard.tsx:forgetRemoteAgent",
+      "type": "function",
+      "name": "forgetRemoteAgent",
+      "filePath": "apps/homepage/src/pages/Dashboard.tsx",
+      "summary": "forgetRemoteAgent is a function defined in apps/homepage/src/pages/Dashboard.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/pages/Dashboard.tsx:deleteCloudAgentById",
+      "type": "function",
+      "name": "deleteCloudAgentById",
+      "filePath": "apps/homepage/src/pages/Dashboard.tsx",
+      "summary": "deleteCloudAgentById is a function defined in apps/homepage/src/pages/Dashboard.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/pages/Dashboard.tsx:copyInstallCommand",
+      "type": "function",
+      "name": "copyInstallCommand",
+      "filePath": "apps/homepage/src/pages/Dashboard.tsx",
+      "summary": "copyInstallCommand is a function defined in apps/homepage/src/pages/Dashboard.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/pages/Dashboard.tsx:agentLaunchUrl",
+      "type": "function",
+      "name": "agentLaunchUrl",
+      "filePath": "apps/homepage/src/pages/Dashboard.tsx",
+      "summary": "agentLaunchUrl is a function defined in apps/homepage/src/pages/Dashboard.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/pages/Dashboard.tsx:isReadyLocalAgent",
+      "type": "function",
+      "name": "isReadyLocalAgent",
+      "filePath": "apps/homepage/src/pages/Dashboard.tsx",
+      "summary": "isReadyLocalAgent is a function defined in apps/homepage/src/pages/Dashboard.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/pages/Dashboard.tsx:localStateFor",
+      "type": "function",
+      "name": "localStateFor",
+      "filePath": "apps/homepage/src/pages/Dashboard.tsx",
+      "summary": "localStateFor is a function defined in apps/homepage/src/pages/Dashboard.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/pages/Dashboard.tsx:getLocalAgentState",
+      "type": "function",
+      "name": "getLocalAgentState",
+      "filePath": "apps/homepage/src/pages/Dashboard.tsx",
+      "summary": "getLocalAgentState is a function defined in apps/homepage/src/pages/Dashboard.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/pages/Dashboard.tsx:scrollToInstall",
+      "type": "function",
+      "name": "scrollToInstall",
+      "filePath": "apps/homepage/src/pages/Dashboard.tsx",
+      "summary": "scrollToInstall is a function defined in apps/homepage/src/pages/Dashboard.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/pages/Dashboard.tsx:openLocalOrPrompt",
+      "type": "function",
+      "name": "openLocalOrPrompt",
+      "filePath": "apps/homepage/src/pages/Dashboard.tsx",
+      "summary": "openLocalOrPrompt is a function defined in apps/homepage/src/pages/Dashboard.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/pages/Dashboard.tsx:LoginErrorBanner",
+      "type": "function",
+      "name": "LoginErrorBanner",
+      "filePath": "apps/homepage/src/pages/Dashboard.tsx",
+      "summary": "LoginErrorBanner is a function defined in apps/homepage/src/pages/Dashboard.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/pages/Dashboard.tsx:AgentErrorToast",
+      "type": "function",
+      "name": "AgentErrorToast",
+      "filePath": "apps/homepage/src/pages/Dashboard.tsx",
+      "summary": "AgentErrorToast is a function defined in apps/homepage/src/pages/Dashboard.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/pages/Dashboard.tsx:DashboardModals",
+      "type": "function",
+      "name": "DashboardModals",
+      "filePath": "apps/homepage/src/pages/Dashboard.tsx",
+      "summary": "DashboardModals is a function defined in apps/homepage/src/pages/Dashboard.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:apps/homepage/src/pages/Dashboard.tsx:MiladyControlHub",
+      "type": "function",
+      "name": "MiladyControlHub",
+      "filePath": "apps/homepage/src/pages/Dashboard.tsx",
+      "summary": "MiladyControlHub is a function defined in apps/homepage/src/pages/Dashboard.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/pages/Dashboard.tsx:Dashboard",
+      "type": "function",
+      "name": "Dashboard",
+      "filePath": "apps/homepage/src/pages/Dashboard.tsx",
+      "summary": "Dashboard is a function defined in apps/homepage/src/pages/Dashboard.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:apps/homepage/src/pages/Homepage.tsx",
+      "type": "file",
+      "name": "Homepage.tsx",
+      "filePath": "apps/homepage/src/pages/Homepage.tsx",
+      "summary": "Homepage.tsx is a typescript source file in the Milady codebase. It contains 5 functions, 8 imports.",
+      "languageNotes": "typescript; code; 252 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/pages/Homepage.tsx:getDownload",
+      "type": "function",
+      "name": "getDownload",
+      "filePath": "apps/homepage/src/pages/Homepage.tsx",
+      "summary": "getDownload is a function defined in apps/homepage/src/pages/Homepage.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/pages/Homepage.tsx:downloadUrl",
+      "type": "function",
+      "name": "downloadUrl",
+      "filePath": "apps/homepage/src/pages/Homepage.tsx",
+      "summary": "downloadUrl is a function defined in apps/homepage/src/pages/Homepage.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/pages/Homepage.tsx:useRotatingPhrase",
+      "type": "function",
+      "name": "useRotatingPhrase",
+      "filePath": "apps/homepage/src/pages/Homepage.tsx",
+      "summary": "useRotatingPhrase is a function defined in apps/homepage/src/pages/Homepage.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/pages/Homepage.tsx:PlatformBar",
+      "type": "function",
+      "name": "PlatformBar",
+      "filePath": "apps/homepage/src/pages/Homepage.tsx",
+      "summary": "PlatformBar is a function defined in apps/homepage/src/pages/Homepage.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:apps/homepage/src/pages/Homepage.tsx:Homepage",
+      "type": "function",
+      "name": "Homepage",
+      "filePath": "apps/homepage/src/pages/Homepage.tsx",
+      "summary": "Homepage is a function defined in apps/homepage/src/pages/Homepage.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/homepage/src/router.tsx",
+      "type": "file",
+      "name": "router.tsx",
+      "filePath": "apps/homepage/src/router.tsx",
+      "summary": "router.tsx is a typescript source file in the Milady codebase. It contains 2 functions, 8 imports.",
+      "languageNotes": "typescript; code; 40 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/router.tsx:AppRoutes",
+      "type": "function",
+      "name": "AppRoutes",
+      "filePath": "apps/homepage/src/router.tsx",
+      "summary": "AppRoutes is a function defined in apps/homepage/src/router.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/src/router.tsx:NavLayout",
+      "type": "function",
+      "name": "NavLayout",
+      "filePath": "apps/homepage/src/router.tsx",
+      "summary": "NavLayout is a function defined in apps/homepage/src/router.tsx."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/homepage/test/e2e/connection-modal.spec.ts",
+      "type": "file",
+      "name": "connection-modal.spec.ts",
+      "filePath": "apps/homepage/test/e2e/connection-modal.spec.ts",
+      "summary": "connection-modal.spec.ts is a typescript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "typescript; code; 135 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/test/e2e/connection-modal.spec.ts:openAttachRemoteModal",
+      "type": "function",
+      "name": "openAttachRemoteModal",
+      "filePath": "apps/homepage/test/e2e/connection-modal.spec.ts",
+      "summary": "openAttachRemoteModal is a function defined in apps/homepage/test/e2e/connection-modal.spec.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/test/e2e/connection-modal.spec.ts:readConnections",
+      "type": "function",
+      "name": "readConnections",
+      "filePath": "apps/homepage/test/e2e/connection-modal.spec.ts",
+      "summary": "readConnections is a function defined in apps/homepage/test/e2e/connection-modal.spec.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/homepage/test/e2e/downloads.spec.ts",
+      "type": "file",
+      "name": "downloads.spec.ts",
+      "filePath": "apps/homepage/test/e2e/downloads.spec.ts",
+      "summary": "downloads.spec.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 142 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:apps/homepage/test/e2e/fixtures/cloud-auth.ts",
+      "type": "file",
+      "name": "cloud-auth.ts",
+      "filePath": "apps/homepage/test/e2e/fixtures/cloud-auth.ts",
+      "summary": "cloud-auth.ts is a typescript source file in the Milady codebase. It contains 6 functions.",
+      "languageNotes": "typescript; code; 526 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:isCloudUrl",
+      "type": "function",
+      "name": "isCloudUrl",
+      "filePath": "apps/homepage/test/e2e/fixtures/cloud-auth.ts",
+      "summary": "isCloudUrl is a function defined in apps/homepage/test/e2e/fixtures/cloud-auth.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:jsonResponse",
+      "type": "function",
+      "name": "jsonResponse",
+      "filePath": "apps/homepage/test/e2e/fixtures/cloud-auth.ts",
+      "summary": "jsonResponse is a function defined in apps/homepage/test/e2e/fixtures/cloud-auth.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:seedCloudAuth",
+      "type": "function",
+      "name": "seedCloudAuth",
+      "filePath": "apps/homepage/test/e2e/fixtures/cloud-auth.ts",
+      "summary": "seedCloudAuth is a function defined in apps/homepage/test/e2e/fixtures/cloud-auth.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:loginViaPolling",
+      "type": "function",
+      "name": "loginViaPolling",
+      "filePath": "apps/homepage/test/e2e/fixtures/cloud-auth.ts",
+      "summary": "loginViaPolling is a function defined in apps/homepage/test/e2e/fixtures/cloud-auth.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockCloudApi",
+      "type": "function",
+      "name": "mockCloudApi",
+      "filePath": "apps/homepage/test/e2e/fixtures/cloud-auth.ts",
+      "summary": "mockCloudApi is a function defined in apps/homepage/test/e2e/fixtures/cloud-auth.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockRemoteAgent",
+      "type": "function",
+      "name": "mockRemoteAgent",
+      "filePath": "apps/homepage/test/e2e/fixtures/cloud-auth.ts",
+      "summary": "mockRemoteAgent is a function defined in apps/homepage/test/e2e/fixtures/cloud-auth.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/homepage/test/e2e/instance-card.spec.ts",
+      "type": "file",
+      "name": "instance-card.spec.ts",
+      "filePath": "apps/homepage/test/e2e/instance-card.spec.ts",
+      "summary": "instance-card.spec.ts is a typescript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "typescript; code; 223 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/test/e2e/instance-card.spec.ts:seedRemoteConnection",
+      "type": "function",
+      "name": "seedRemoteConnection",
+      "filePath": "apps/homepage/test/e2e/instance-card.spec.ts",
+      "summary": "seedRemoteConnection is a function defined in apps/homepage/test/e2e/instance-card.spec.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/test/e2e/instance-card.spec.ts:openCardMenu",
+      "type": "function",
+      "name": "openCardMenu",
+      "filePath": "apps/homepage/test/e2e/instance-card.spec.ts",
+      "summary": "openCardMenu is a function defined in apps/homepage/test/e2e/instance-card.spec.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/homepage/test/e2e/landing.spec.ts",
+      "type": "file",
+      "name": "landing.spec.ts",
+      "filePath": "apps/homepage/test/e2e/landing.spec.ts",
+      "summary": "landing.spec.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 24 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/homepage/test/e2e/open-in-cloud.spec.ts",
+      "type": "file",
+      "name": "open-in-cloud.spec.ts",
+      "filePath": "apps/homepage/test/e2e/open-in-cloud.spec.ts",
+      "summary": "open-in-cloud.spec.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 223 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/test/e2e/open-in-cloud.spec.ts:clickOpenInCloud",
+      "type": "function",
+      "name": "clickOpenInCloud",
+      "filePath": "apps/homepage/test/e2e/open-in-cloud.spec.ts",
+      "summary": "clickOpenInCloud is a function defined in apps/homepage/test/e2e/open-in-cloud.spec.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/homepage/test/e2e/provision-modal.spec.ts",
+      "type": "file",
+      "name": "provision-modal.spec.ts",
+      "filePath": "apps/homepage/test/e2e/provision-modal.spec.ts",
+      "summary": "provision-modal.spec.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 158 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/test/e2e/provision-modal.spec.ts:openProvisionModal",
+      "type": "function",
+      "name": "openProvisionModal",
+      "filePath": "apps/homepage/test/e2e/provision-modal.spec.ts",
+      "summary": "openProvisionModal is a function defined in apps/homepage/test/e2e/provision-modal.spec.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/homepage/test/e2e/signin.spec.ts",
+      "type": "file",
+      "name": "signin.spec.ts",
+      "filePath": "apps/homepage/test/e2e/signin.spec.ts",
+      "summary": "signin.spec.ts is a typescript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "typescript; code; 154 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/test/e2e/signin.spec.ts:readStoredToken",
+      "type": "function",
+      "name": "readStoredToken",
+      "filePath": "apps/homepage/test/e2e/signin.spec.ts",
+      "summary": "readStoredToken is a function defined in apps/homepage/test/e2e/signin.spec.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/homepage/test/e2e/signin.spec.ts:clickSignIn",
+      "type": "function",
+      "name": "clickSignIn",
+      "filePath": "apps/homepage/test/e2e/signin.spec.ts",
+      "summary": "clickSignIn is a function defined in apps/homepage/test/e2e/signin.spec.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/components/layout/Sidebar.tsx",
+      "target": "function:apps/homepage/src/components/layout/Sidebar.tsx:Sidebar",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/components/layout/Sidebar.tsx",
+      "target": "function:apps/homepage/src/components/layout/Sidebar.tsx:NavGroup",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/components/layout/Sidebar.tsx",
+      "target": "function:apps/homepage/src/components/layout/Sidebar.tsx:NavItemButton",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/components/layout/Sidebar.tsx",
+      "target": "function:apps/homepage/src/components/layout/Sidebar.tsx:NavItemExternal",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/components/layout/Sidebar.tsx",
+      "target": "function:apps/homepage/src/components/layout/Sidebar.tsx:OpenLocalRow",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/components/ui/FilterChips.tsx",
+      "target": "function:apps/homepage/src/components/ui/FilterChips.tsx:FilterChips",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/components/ui/StatusDot.tsx",
+      "target": "function:apps/homepage/src/components/ui/StatusDot.tsx:StatusDot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/docs/registry.ts",
+      "target": "function:apps/homepage/src/docs/registry.ts:entriesForTier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/docs/registry.ts",
+      "target": "function:apps/homepage/src/docs/registry.ts:findAdjacent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:createSemaphore",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:agentsEqual",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:collectCloudAgents",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:fetchSandboxesForDiscovery",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:selectOwnedSandboxes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:buildCloudAgentIndexByName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:addSandboxAgents",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:wasDiscoveredMiladyRemote",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:addManualRemoteAgents",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:createLocalProbeClient",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:probeAgent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:probeLocalAgent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:applyProbeResult",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:mergeProbeResults",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:AgentProvider",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:useAgents",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/AgentProvider.tsx:addSandboxAgents",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:buildCloudAgentIndexByName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/AgentProvider.tsx:addManualRemoteAgents",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:wasDiscoveredMiladyRemote",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/AgentProvider.tsx:mergeProbeResults",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:applyProbeResult",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/AgentProvider.tsx:AgentProvider",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:collectCloudAgents",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/AgentProvider.tsx:AgentProvider",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:fetchSandboxesForDiscovery",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/AgentProvider.tsx:AgentProvider",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:selectOwnedSandboxes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/AgentProvider.tsx:AgentProvider",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:addSandboxAgents",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/AgentProvider.tsx:AgentProvider",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:createLocalProbeClient",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/AgentProvider.tsx:AgentProvider",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:addManualRemoteAgents",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/AgentProvider.tsx:AgentProvider",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:agentsEqual",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/AgentProvider.tsx:AgentProvider",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:createSemaphore",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/AgentProvider.tsx:AgentProvider",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:probeAgent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/AgentProvider.tsx:AgentProvider",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:probeLocalAgent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/AgentProvider.tsx:AgentProvider",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:mergeProbeResults",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/AgentProvider.tsx:AgentProvider",
+      "target": "function:apps/homepage/src/lib/AgentProvider.tsx:agentsEqual",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/asset-url.ts",
+      "target": "function:apps/homepage/src/lib/asset-url.ts:normalizeBaseHref",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/asset-url.ts",
+      "target": "function:apps/homepage/src/lib/asset-url.ts:resolveHomepageAssetUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/asset-url.ts:resolveHomepageAssetUrl",
+      "target": "function:apps/homepage/src/lib/asset-url.ts:normalizeBaseHref",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/auth.ts",
+      "target": "function:apps/homepage/src/lib/auth.ts:emitAuthChanged",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/auth.ts",
+      "target": "function:apps/homepage/src/lib/auth.ts:getActiveTokenStorageKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/auth.ts",
+      "target": "function:apps/homepage/src/lib/auth.ts:getToken",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/auth.ts",
+      "target": "function:apps/homepage/src/lib/auth.ts:setToken",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/auth.ts",
+      "target": "function:apps/homepage/src/lib/auth.ts:clearToken",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/auth.ts",
+      "target": "function:apps/homepage/src/lib/auth.ts:isAuthenticated",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/auth.ts",
+      "target": "function:apps/homepage/src/lib/auth.ts:cloudLogin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/auth.ts",
+      "target": "function:apps/homepage/src/lib/auth.ts:cloudLoginPoll",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/auth.ts",
+      "target": "function:apps/homepage/src/lib/auth.ts:fetchWithAuth",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/auth.ts",
+      "target": "function:apps/homepage/src/lib/auth.ts:consumeUrlToken",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/auth.ts:getToken",
+      "target": "function:apps/homepage/src/lib/auth.ts:getActiveTokenStorageKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/auth.ts:setToken",
+      "target": "function:apps/homepage/src/lib/auth.ts:getActiveTokenStorageKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/auth.ts:setToken",
+      "target": "function:apps/homepage/src/lib/auth.ts:emitAuthChanged",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/auth.ts:clearToken",
+      "target": "function:apps/homepage/src/lib/auth.ts:getActiveTokenStorageKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/auth.ts:clearToken",
+      "target": "function:apps/homepage/src/lib/auth.ts:emitAuthChanged",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/auth.ts:isAuthenticated",
+      "target": "function:apps/homepage/src/lib/auth.ts:getToken",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/auth.ts:fetchWithAuth",
+      "target": "function:apps/homepage/src/lib/auth.ts:getToken",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/auth.ts:fetchWithAuth",
+      "target": "function:apps/homepage/src/lib/auth.ts:clearToken",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/auth.ts:consumeUrlToken",
+      "target": "function:apps/homepage/src/lib/auth.ts:setToken",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/cloud-api.ts",
+      "target": "function:apps/homepage/src/lib/cloud-api.ts:isJsonObject",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/cloud-api.ts",
+      "target": "function:apps/homepage/src/lib/cloud-api.ts:isAgentRuntimeState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/cloud-api.ts",
+      "target": "function:apps/homepage/src/lib/cloud-api.ts:normalizeAgentState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/cloud-api.ts",
+      "target": "function:apps/homepage/src/lib/cloud-api.ts:isCloudAuthFailure",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/cloud-api.ts",
+      "target": "function:apps/homepage/src/lib/cloud-api.ts:readErrorMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/cloud-api.ts",
+      "target": "function:apps/homepage/src/lib/cloud-api.ts:unwrapListResponse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/cloud-api.ts",
+      "target": "function:apps/homepage/src/lib/cloud-api.ts:unwrapDataResponse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/cloud-api.ts",
+      "target": "function:apps/homepage/src/lib/cloud-api.ts:makeUnauthenticatedHealthResponse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/cloud-api.ts",
+      "target": "function:apps/homepage/src/lib/cloud-api.ts:makeUnauthenticatedAgentStatus",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/cloud-api.ts",
+      "target": "class:apps/homepage/src/lib/cloud-api.ts:CloudAgentsNotAvailableError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/cloud-api.ts",
+      "target": "class:apps/homepage/src/lib/cloud-api.ts:CloudClient",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/cloud-api.ts",
+      "target": "class:apps/homepage/src/lib/cloud-api.ts:CloudApiClient",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/cloud-api.ts:normalizeAgentState",
+      "target": "function:apps/homepage/src/lib/cloud-api.ts:isAgentRuntimeState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/cloud-api.ts:unwrapListResponse",
+      "target": "function:apps/homepage/src/lib/cloud-api.ts:isJsonObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/cloud-api.ts:unwrapDataResponse",
+      "target": "function:apps/homepage/src/lib/cloud-api.ts:isJsonObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/connections.ts",
+      "target": "function:apps/homepage/src/lib/connections.ts:getConnections",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/connections.ts",
+      "target": "function:apps/homepage/src/lib/connections.ts:saveConnections",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/connections.ts",
+      "target": "function:apps/homepage/src/lib/connections.ts:addConnection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/connections.ts",
+      "target": "function:apps/homepage/src/lib/connections.ts:removeConnection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/connections.ts:addConnection",
+      "target": "function:apps/homepage/src/lib/connections.ts:getConnections",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/connections.ts:addConnection",
+      "target": "function:apps/homepage/src/lib/connections.ts:saveConnections",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/connections.ts:removeConnection",
+      "target": "function:apps/homepage/src/lib/connections.ts:saveConnections",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/connections.ts:removeConnection",
+      "target": "function:apps/homepage/src/lib/connections.ts:getConnections",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/format.ts",
+      "target": "function:apps/homepage/src/lib/format.ts:formatUptime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/open-web-ui.ts",
+      "target": "function:apps/homepage/src/lib/open-web-ui.ts:readRetryAfterMs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/open-web-ui.ts",
+      "target": "function:apps/homepage/src/lib/open-web-ui.ts:requestPairingToken",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/open-web-ui.ts",
+      "target": "function:apps/homepage/src/lib/open-web-ui.ts:delay",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/open-web-ui.ts",
+      "target": "function:apps/homepage/src/lib/open-web-ui.ts:redirectPopupToCloudAgent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/open-web-ui.ts",
+      "target": "function:apps/homepage/src/lib/open-web-ui.ts:extractUuidFromUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/open-web-ui.ts",
+      "target": "function:apps/homepage/src/lib/open-web-ui.ts:renderPopupConnectingState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/open-web-ui.ts",
+      "target": "function:apps/homepage/src/lib/open-web-ui.ts:updatePopupMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/open-web-ui.ts",
+      "target": "function:apps/homepage/src/lib/open-web-ui.ts:openWebUIWithPairingToken",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/open-web-ui.ts",
+      "target": "function:apps/homepage/src/lib/open-web-ui.ts:openWebUIDirect",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/open-web-ui.ts",
+      "target": "function:apps/homepage/src/lib/open-web-ui.ts:openWebUI",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/open-web-ui.ts",
+      "target": "function:apps/homepage/src/lib/open-web-ui.ts:showToast",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/open-web-ui.ts:requestPairingToken",
+      "target": "function:apps/homepage/src/lib/open-web-ui.ts:readRetryAfterMs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/open-web-ui.ts:redirectPopupToCloudAgent",
+      "target": "function:apps/homepage/src/lib/open-web-ui.ts:requestPairingToken",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/open-web-ui.ts:redirectPopupToCloudAgent",
+      "target": "function:apps/homepage/src/lib/open-web-ui.ts:delay",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/open-web-ui.ts:openWebUIWithPairingToken",
+      "target": "function:apps/homepage/src/lib/open-web-ui.ts:showToast",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/open-web-ui.ts:openWebUIWithPairingToken",
+      "target": "function:apps/homepage/src/lib/open-web-ui.ts:renderPopupConnectingState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/open-web-ui.ts:openWebUIWithPairingToken",
+      "target": "function:apps/homepage/src/lib/open-web-ui.ts:extractUuidFromUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/open-web-ui.ts:openWebUIWithPairingToken",
+      "target": "function:apps/homepage/src/lib/open-web-ui.ts:redirectPopupToCloudAgent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/open-web-ui.ts:openWebUI",
+      "target": "function:apps/homepage/src/lib/open-web-ui.ts:openWebUIWithPairingToken",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/open-web-ui.ts:openWebUI",
+      "target": "function:apps/homepage/src/lib/open-web-ui.ts:openWebUIDirect",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/runtime-config.ts",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:normalizeCloudHost",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/runtime-config.ts",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:resolveDefaultCloudBase",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/runtime-config.ts",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:normalizeUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/runtime-config.ts",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:normalizeHostname",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/runtime-config.ts",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:normalizePath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/runtime-config.ts",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:getCloudAgentApiPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/runtime-config.ts",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:shouldAllowPublicSandboxDiscoveryFallback",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/runtime-config.ts",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:parseBooleanFlag",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/runtime-config.ts",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:isLoopbackHostname",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/runtime-config.ts",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:isLoopbackUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/runtime-config.ts",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:isLocalAgentAutoProbeDefaultHostname",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/runtime-config.ts",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:shouldAutoProbeLocalAgentForConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/runtime-config.ts",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:shouldAutoProbeLocalAgent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/runtime-config.ts",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:getCloudTokenStorageKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/runtime-config.ts",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:getSandboxDiscoveryUrls",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/runtime-config.ts",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:rewriteAgentUiUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/runtime-config.ts:resolveDefaultCloudBase",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:normalizeCloudHost",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/runtime-config.ts:isLoopbackHostname",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:normalizeCloudHost",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/runtime-config.ts:isLoopbackUrl",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:isLoopbackHostname",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/runtime-config.ts:isLocalAgentAutoProbeDefaultHostname",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:isLoopbackHostname",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/runtime-config.ts:shouldAutoProbeLocalAgentForConfig",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:isLocalAgentAutoProbeDefaultHostname",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/runtime-config.ts:shouldAutoProbeLocalAgentForConfig",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:isLoopbackUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/runtime-config.ts:shouldAutoProbeLocalAgentForConfig",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:parseBooleanFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/runtime-config.ts:shouldAutoProbeLocalAgent",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:shouldAutoProbeLocalAgentForConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/runtime-config.ts:getCloudTokenStorageKey",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:normalizeCloudHost",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/runtime-config.ts:getSandboxDiscoveryUrls",
+      "target": "function:apps/homepage/src/lib/runtime-config.ts:normalizeUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/spa-fallback.ts",
+      "target": "function:apps/homepage/src/lib/spa-fallback.ts:getSpaFallbackRedirectTarget",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/useAuth.ts",
+      "target": "function:apps/homepage/src/lib/useAuth.ts:getSnapshot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/useAuth.ts",
+      "target": "function:apps/homepage/src/lib/useAuth.ts:getServerSnapshot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/useAuth.ts",
+      "target": "function:apps/homepage/src/lib/useAuth.ts:subscribe",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/useAuth.ts",
+      "target": "function:apps/homepage/src/lib/useAuth.ts:useAuth",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "target": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:generateCloudAgentName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "target": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:cloudAgentCandidateFromManaged",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "target": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:localCloudAgentCandidates",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "target": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:loadCloudAgentCandidates",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "target": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:selectReusableCloudAgent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "target": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:provisioningMessageForElapsed",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "target": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:startProvisioningMessageRotation",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "target": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:waitForProvisioningJob",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "target": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:createAndProvisionCloudAgent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "target": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:resolveCloudAgentForOpen",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "target": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:cloudOpenErrorNotice",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "target": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:useCloudOpenFlow",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:localCloudAgentCandidates",
+      "target": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:cloudAgentCandidateFromManaged",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:loadCloudAgentCandidates",
+      "target": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:localCloudAgentCandidates",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:startProvisioningMessageRotation",
+      "target": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:provisioningMessageForElapsed",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:waitForProvisioningJob",
+      "target": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:startProvisioningMessageRotation",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:createAndProvisionCloudAgent",
+      "target": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:generateCloudAgentName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:createAndProvisionCloudAgent",
+      "target": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:waitForProvisioningJob",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:resolveCloudAgentForOpen",
+      "target": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:loadCloudAgentCandidates",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:resolveCloudAgentForOpen",
+      "target": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:selectReusableCloudAgent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:resolveCloudAgentForOpen",
+      "target": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:createAndProvisionCloudAgent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:useCloudOpenFlow",
+      "target": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:resolveCloudAgentForOpen",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:useCloudOpenFlow",
+      "target": "function:apps/homepage/src/lib/useCloudOpenFlow.ts:cloudOpenErrorNotice",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/lib/useNoticeToast.ts",
+      "target": "function:apps/homepage/src/lib/useNoticeToast.ts:useNoticeToast",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:openExternal",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:copyToClipboard",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:openAgentControl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:copyAgentUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:forgetRemoteAgent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:deleteCloudAgentById",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:copyInstallCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:agentLaunchUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:isReadyLocalAgent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:localStateFor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:getLocalAgentState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:scrollToInstall",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:openLocalOrPrompt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:LoginErrorBanner",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:AgentErrorToast",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:DashboardModals",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:MiladyControlHub",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:Dashboard",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/pages/Dashboard.tsx:copyAgentUrl",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:copyToClipboard",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/pages/Dashboard.tsx:copyInstallCommand",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:copyToClipboard",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/pages/Dashboard.tsx:getLocalAgentState",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:isReadyLocalAgent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/pages/Dashboard.tsx:getLocalAgentState",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:agentLaunchUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/pages/Dashboard.tsx:getLocalAgentState",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:localStateFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/pages/Dashboard.tsx:openLocalOrPrompt",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:scrollToInstall",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/pages/Dashboard.tsx:MiladyControlHub",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:getLocalAgentState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/pages/Dashboard.tsx:MiladyControlHub",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:openAgentControl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/pages/Dashboard.tsx:MiladyControlHub",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:copyAgentUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/pages/Dashboard.tsx:MiladyControlHub",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:forgetRemoteAgent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/pages/Dashboard.tsx:MiladyControlHub",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:deleteCloudAgentById",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/pages/Dashboard.tsx:MiladyControlHub",
+      "target": "function:apps/homepage/src/pages/Dashboard.tsx:copyInstallCommand",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/pages/Homepage.tsx",
+      "target": "function:apps/homepage/src/pages/Homepage.tsx:getDownload",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/pages/Homepage.tsx",
+      "target": "function:apps/homepage/src/pages/Homepage.tsx:downloadUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/pages/Homepage.tsx",
+      "target": "function:apps/homepage/src/pages/Homepage.tsx:useRotatingPhrase",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/pages/Homepage.tsx",
+      "target": "function:apps/homepage/src/pages/Homepage.tsx:PlatformBar",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/pages/Homepage.tsx",
+      "target": "function:apps/homepage/src/pages/Homepage.tsx:Homepage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/pages/Homepage.tsx:downloadUrl",
+      "target": "function:apps/homepage/src/pages/Homepage.tsx:getDownload",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/pages/Homepage.tsx:Homepage",
+      "target": "function:apps/homepage/src/pages/Homepage.tsx:useRotatingPhrase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/pages/Homepage.tsx:Homepage",
+      "target": "function:apps/homepage/src/pages/Homepage.tsx:downloadUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/pages/Homepage.tsx:Homepage",
+      "target": "function:apps/homepage/src/pages/Homepage.tsx:downloadUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/src/pages/Homepage.tsx:Homepage",
+      "target": "function:apps/homepage/src/pages/Homepage.tsx:downloadUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/router.tsx",
+      "target": "function:apps/homepage/src/router.tsx:AppRoutes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/src/router.tsx",
+      "target": "function:apps/homepage/src/router.tsx:NavLayout",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/test/e2e/connection-modal.spec.ts",
+      "target": "function:apps/homepage/test/e2e/connection-modal.spec.ts:openAttachRemoteModal",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/test/e2e/connection-modal.spec.ts",
+      "target": "function:apps/homepage/test/e2e/connection-modal.spec.ts:readConnections",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/test/e2e/fixtures/cloud-auth.ts",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:isCloudUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/test/e2e/fixtures/cloud-auth.ts",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:jsonResponse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/test/e2e/fixtures/cloud-auth.ts",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:seedCloudAuth",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/test/e2e/fixtures/cloud-auth.ts",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:loginViaPolling",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/test/e2e/fixtures/cloud-auth.ts",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockCloudApi",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/test/e2e/fixtures/cloud-auth.ts",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockRemoteAgent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:loginViaPolling",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:seedCloudAuth",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockCloudApi",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:isCloudUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockCloudApi",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:jsonResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockCloudApi",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:jsonResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockCloudApi",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:jsonResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockCloudApi",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:jsonResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockCloudApi",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:jsonResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockCloudApi",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:jsonResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockCloudApi",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:jsonResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockCloudApi",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:jsonResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockCloudApi",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:jsonResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockCloudApi",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:jsonResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockCloudApi",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:jsonResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockCloudApi",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:jsonResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockCloudApi",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:jsonResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockCloudApi",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:jsonResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockCloudApi",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:jsonResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockCloudApi",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:jsonResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockCloudApi",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:jsonResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockRemoteAgent",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:jsonResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockRemoteAgent",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:jsonResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockRemoteAgent",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:jsonResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:mockRemoteAgent",
+      "target": "function:apps/homepage/test/e2e/fixtures/cloud-auth.ts:jsonResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/test/e2e/instance-card.spec.ts",
+      "target": "function:apps/homepage/test/e2e/instance-card.spec.ts:seedRemoteConnection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/test/e2e/instance-card.spec.ts",
+      "target": "function:apps/homepage/test/e2e/instance-card.spec.ts:openCardMenu",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/test/e2e/open-in-cloud.spec.ts",
+      "target": "function:apps/homepage/test/e2e/open-in-cloud.spec.ts:clickOpenInCloud",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/test/e2e/provision-modal.spec.ts",
+      "target": "function:apps/homepage/test/e2e/provision-modal.spec.ts:openProvisionModal",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/test/e2e/signin.spec.ts",
+      "target": "function:apps/homepage/test/e2e/signin.spec.ts:readStoredToken",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/homepage/test/e2e/signin.spec.ts",
+      "target": "function:apps/homepage/test/e2e/signin.spec.ts:clickSignIn",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/components/layout/Sidebar.tsx",
+      "target": "file:apps/homepage/src/components/layout/SessionTile.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/components/layout/Sidebar.tsx",
+      "target": "file:apps/homepage/src/generated/release-data.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/components/layout/Sidebar.tsx",
+      "target": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/components/ui/StatusDot.tsx",
+      "target": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "target": "file:apps/homepage/src/lib/auth.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "target": "file:apps/homepage/src/lib/cloud-api.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "target": "file:apps/homepage/src/lib/connections.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "target": "file:apps/homepage/src/lib/runtime-config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/lib/auth.ts",
+      "target": "file:apps/homepage/src/lib/runtime-config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/lib/cloud-api.ts",
+      "target": "file:apps/homepage/src/lib/auth.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/lib/cloud-api.ts",
+      "target": "file:apps/homepage/src/lib/billing-types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/lib/cloud-api.ts",
+      "target": "file:apps/homepage/src/lib/runtime-config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/lib/connections.ts",
+      "target": "file:apps/homepage/src/lib/cloud-api.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/lib/open-web-ui.ts",
+      "target": "file:apps/homepage/src/lib/auth.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/lib/open-web-ui.ts",
+      "target": "file:apps/homepage/src/lib/runtime-config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/lib/useAuth.ts",
+      "target": "file:apps/homepage/src/lib/auth.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/lib/useAuth.ts",
+      "target": "file:apps/homepage/src/lib/runtime-config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "target": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "target": "file:apps/homepage/src/lib/cloud-api.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "target": "file:apps/homepage/src/lib/open-web-ui.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/lib/useNoticeToast.ts",
+      "target": "file:apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/main.tsx",
+      "target": "file:apps/homepage/src/ErrorBoundary.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/main.tsx",
+      "target": "file:apps/homepage/src/lib/auth.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/main.tsx",
+      "target": "file:apps/homepage/src/lib/spa-fallback.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/main.tsx",
+      "target": "file:apps/homepage/src/router.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/main.tsx",
+      "target": "file:apps/homepage/src/styles.css",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "file:apps/homepage/src/components/dashboard/BrandHero.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "file:apps/homepage/src/components/dashboard/ConnectionModal.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "file:apps/homepage/src/components/dashboard/InstanceGrid.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "file:apps/homepage/src/components/dashboard/ProvisionAgentModal.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "file:apps/homepage/src/components/dashboard/QuickOpsStrip.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "file:apps/homepage/src/components/dashboard/useCloudLogin.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "file:apps/homepage/src/components/layout/DashboardShell.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "file:apps/homepage/src/components/NoticeToast.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "file:apps/homepage/src/lib/AgentProvider.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "file:apps/homepage/src/lib/open-web-ui.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "file:apps/homepage/src/lib/runtime-config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "file:apps/homepage/src/lib/useAuth.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "file:apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "target": "file:apps/homepage/src/lib/useNoticeToast.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/pages/Homepage.tsx",
+      "target": "file:apps/homepage/src/components/dashboard/useCloudLogin.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/pages/Homepage.tsx",
+      "target": "file:apps/homepage/src/components/NoticeToast.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/pages/Homepage.tsx",
+      "target": "config:apps/homepage/src/data/agent-phrases.json",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/pages/Homepage.tsx",
+      "target": "file:apps/homepage/src/generated/release-data.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/pages/Homepage.tsx",
+      "target": "file:apps/homepage/src/lib/cloud-api.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/pages/Homepage.tsx",
+      "target": "file:apps/homepage/src/lib/useAuth.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/pages/Homepage.tsx",
+      "target": "file:apps/homepage/src/lib/useCloudOpenFlow.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/pages/Homepage.tsx",
+      "target": "file:apps/homepage/src/lib/useNoticeToast.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/router.tsx",
+      "target": "file:apps/homepage/src/components/docs/DocsLanding.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/router.tsx",
+      "target": "file:apps/homepage/src/components/docs/DocsLayout.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/router.tsx",
+      "target": "file:apps/homepage/src/components/docs/DocsPage.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/router.tsx",
+      "target": "file:apps/homepage/src/components/docs/TierLanding.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/router.tsx",
+      "target": "file:apps/homepage/src/components/guides/GuidesLanding.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/router.tsx",
+      "target": "file:apps/homepage/src/components/Nav.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/router.tsx",
+      "target": "file:apps/homepage/src/pages/Dashboard.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/src/router.tsx",
+      "target": "file:apps/homepage/src/pages/Homepage.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/test/e2e/connection-modal.spec.ts",
+      "target": "file:apps/homepage/test/e2e/fixtures/cloud-auth.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/test/e2e/downloads.spec.ts",
+      "target": "file:apps/homepage/src/generated/release-data.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/test/e2e/downloads.spec.ts",
+      "target": "file:apps/homepage/test/e2e/fixtures/cloud-auth.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/test/e2e/instance-card.spec.ts",
+      "target": "file:apps/homepage/test/e2e/fixtures/cloud-auth.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/test/e2e/landing.spec.ts",
+      "target": "file:apps/homepage/test/e2e/fixtures/cloud-auth.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/test/e2e/open-in-cloud.spec.ts",
+      "target": "file:apps/homepage/test/e2e/fixtures/cloud-auth.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/test/e2e/provision-modal.spec.ts",
+      "target": "file:apps/homepage/test/e2e/fixtures/cloud-auth.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/homepage/test/e2e/signin.spec.ts",
+      "target": "file:apps/homepage/test/e2e/fixtures/cloud-auth.ts",
+      "type": "imports"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "issues": [],
+  "warnings": [],
+  "warningCount": 0,
+  "stats": {
+    "nodes": 30304,
+    "edges": 52420,
+    "nodeTypes": {
+      "file": 5679,
+      "function": 22785,
+      "class": 783,
+      "service": 31,
+      "pipeline": 38,
+      "document": 575,
+      "config": 406,
+      "resource": 7
+    },
+    "edgeTypes": {
+      "contains": 23575,
+      "calls": 18638,
+      "imports": 9661,
+      "tested_by": 546
+    }
+  }
+}

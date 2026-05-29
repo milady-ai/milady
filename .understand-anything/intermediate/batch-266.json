@@ -1,0 +1,43 @@
+{
+  "batchIndex": 266,
+  "nodes": [
+    {
+      "tags": [
+        "documentation",
+        "api"
+      ],
+      "complexity": "moderate",
+      "id": "document:skills/.defaults/eliza-cloud-manage-domain/references/api-shape.md",
+      "type": "document",
+      "name": "api-shape.md",
+      "filePath": "skills/.defaults/eliza-cloud-manage-domain/references/api-shape.md",
+      "summary": "api-shape.md documents skills/.defaults/eliza-cloud-manage-domain/references with 110 lines of reference material.",
+      "languageNotes": "markdown; docs; 110 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/eliza-cloud-manage-domain/references/dns-records.md",
+      "type": "document",
+      "name": "dns-records.md",
+      "filePath": "skills/.defaults/eliza-cloud-manage-domain/references/dns-records.md",
+      "summary": "dns-records.md documents skills/.defaults/eliza-cloud-manage-domain/references with 34 lines of reference material.",
+      "languageNotes": "markdown; docs; 34 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/eliza-cloud-manage-domain/references/failure-modes.md",
+      "type": "document",
+      "name": "failure-modes.md",
+      "filePath": "skills/.defaults/eliza-cloud-manage-domain/references/failure-modes.md",
+      "summary": "failure-modes.md documents skills/.defaults/eliza-cloud-manage-domain/references with 21 lines of reference material.",
+      "languageNotes": "markdown; docs; 21 lines"
+    }
+  ],
+  "edges": []
+}

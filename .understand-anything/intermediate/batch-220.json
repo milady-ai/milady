@@ -1,0 +1,201 @@
+{
+  "batchIndex": 220,
+  "nodes": [
+    {
+      "tags": [
+        "test",
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.codecov.yml",
+      "type": "config",
+      "name": ".codecov.yml",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/.codecov.yml",
+      "summary": ".codecov.yml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 16 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "complex",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/CHANGELOG.md",
+      "type": "document",
+      "name": "CHANGELOG.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/CHANGELOG.md",
+      "summary": "CHANGELOG.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts with 1424 lines of reference material.",
+      "languageNotes": "markdown; docs; 1424 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/CODE_OF_CONDUCT.md",
+      "type": "document",
+      "name": "CODE_OF_CONDUCT.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/CODE_OF_CONDUCT.md",
+      "summary": "CODE_OF_CONDUCT.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts with 73 lines of reference material.",
+      "languageNotes": "markdown; docs; 73 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/CONTRIBUTING.md",
+      "type": "document",
+      "name": "CONTRIBUTING.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/CONTRIBUTING.md",
+      "summary": "CONTRIBUTING.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts with 36 lines of reference material.",
+      "languageNotes": "markdown; docs; 36 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/FUNDING.json",
+      "type": "config",
+      "name": "FUNDING.json",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/FUNDING.json",
+      "summary": "FUNDING.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 10 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/GUIDELINES.md",
+      "type": "document",
+      "name": "GUIDELINES.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/GUIDELINES.md",
+      "summary": "GUIDELINES.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts with 170 lines of reference material.",
+      "languageNotes": "markdown; docs; 170 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/README.md",
+      "summary": "README.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts with 122 lines of reference material.",
+      "languageNotes": "markdown; docs; 122 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/RELEASING.md",
+      "type": "document",
+      "name": "RELEASING.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/RELEASING.md",
+      "summary": "RELEASING.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts with 45 lines of reference material.",
+      "languageNotes": "markdown; docs; 45 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/SECURITY.md",
+      "type": "document",
+      "name": "SECURITY.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/SECURITY.md",
+      "summary": "SECURITY.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts with 43 lines of reference material.",
+      "languageNotes": "markdown; docs; 43 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/foundry.toml",
+      "type": "config",
+      "name": "foundry.toml",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/foundry.toml",
+      "summary": "foundry.toml configures toml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "toml; config; 20 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv-requirements.txt",
+      "type": "document",
+      "name": "fv-requirements.txt",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv-requirements.txt",
+      "summary": "fv-requirements.txt documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts with 4 lines of reference material.",
+      "languageNotes": "txt; docs; 4 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/netlify.toml",
+      "type": "config",
+      "name": "netlify.toml",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/netlify.toml",
+      "summary": "netlify.toml configures toml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "toml; config; 3 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/remappings.txt",
+      "type": "document",
+      "name": "remappings.txt",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/remappings.txt",
+      "summary": "remappings.txt documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts with 1 lines of reference material.",
+      "languageNotes": "txt; docs; 1 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/renovate.json",
+      "type": "config",
+      "name": "renovate.json",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/renovate.json",
+      "summary": "renovate.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 4 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/slither.config.json",
+      "type": "config",
+      "name": "slither.config.json",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/slither.config.json",
+      "summary": "slither.config.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 4 lines"
+    }
+  ],
+  "edges": []
+}

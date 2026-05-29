@@ -1,0 +1,102 @@
+{
+  "batchIndex": 193,
+  "nodes": [
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:eliza/packages/app-core/packaging/flatpak/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/packages/app-core/packaging/flatpak/README.md",
+      "summary": "README.md documents eliza/packages/app-core/packaging/flatpak with 160 lines of reference material.",
+      "languageNotes": "markdown; docs; 160 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/packaging/flatpak/ai.elizaos.App.metainfo.xml",
+      "type": "config",
+      "name": "ai.elizaos.App.metainfo.xml",
+      "filePath": "eliza/packages/app-core/packaging/flatpak/ai.elizaos.App.metainfo.xml",
+      "summary": "ai.elizaos.App.metainfo.xml configures xml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "xml; config; 88 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/packaging/flatpak/ai.elizaos.App.store.yml",
+      "type": "config",
+      "name": "ai.elizaos.App.store.yml",
+      "filePath": "eliza/packages/app-core/packaging/flatpak/ai.elizaos.App.store.yml",
+      "summary": "ai.elizaos.App.store.yml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 142 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/packaging/flatpak/ai.elizaos.App.yml",
+      "type": "config",
+      "name": "ai.elizaos.App.yml",
+      "filePath": "eliza/packages/app-core/packaging/flatpak/ai.elizaos.App.yml",
+      "summary": "ai.elizaos.App.yml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 155 lines"
+    },
+    {
+      "tags": [
+        "script"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/packaging/flatpak/elizaos-app-wrapper.sh",
+      "type": "file",
+      "name": "elizaos-app-wrapper.sh",
+      "filePath": "eliza/packages/app-core/packaging/flatpak/elizaos-app-wrapper.sh",
+      "summary": "elizaos-app-wrapper.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 5 lines"
+    },
+    {
+      "tags": [
+        "script"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/packaging/flatpak/elizaos-app-wrapper.store.sh",
+      "type": "file",
+      "name": "elizaos-app-wrapper.store.sh",
+      "filePath": "eliza/packages/app-core/packaging/flatpak/elizaos-app-wrapper.store.sh",
+      "summary": "elizaos-app-wrapper.store.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 16 lines"
+    },
+    {
+      "tags": [
+        "script"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/packaging/flatpak/generate-sources.sh",
+      "type": "file",
+      "name": "generate-sources.sh",
+      "filePath": "eliza/packages/app-core/packaging/flatpak/generate-sources.sh",
+      "summary": "generate-sources.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 74 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "complex",
+      "id": "config:eliza/packages/app-core/packaging/flatpak/node-sources.json",
+      "type": "config",
+      "name": "node-sources.json",
+      "filePath": "eliza/packages/app-core/packaging/flatpak/node-sources.json",
+      "summary": "node-sources.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 7930 lines"
+    }
+  ],
+  "edges": []
+}

@@ -1,0 +1,4845 @@
+{
+  "batchIndex": 51,
+  "nodes": [
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/cli/command-format.ts",
+      "type": "file",
+      "name": "command-format.ts",
+      "filePath": "eliza/packages/app-core/src/cli/command-format.ts",
+      "summary": "command-format.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 33 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/command-format.ts:formatCliCommand",
+      "type": "function",
+      "name": "formatCliCommand",
+      "filePath": "eliza/packages/app-core/src/cli/command-format.ts",
+      "summary": "formatCliCommand is a function defined in eliza/packages/app-core/src/cli/command-format.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "type": "file",
+      "name": "checks.ts",
+      "filePath": "eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "summary": "checks.ts is a typescript source file in the Milady codebase. It contains 13 functions, 3 imports.",
+      "languageNotes": "typescript; code; 595 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkRuntime",
+      "type": "function",
+      "name": "checkRuntime",
+      "filePath": "eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "summary": "checkRuntime is a function defined in eliza/packages/app-core/src/cli/doctor/checks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkNodeModules",
+      "type": "function",
+      "name": "checkNodeModules",
+      "filePath": "eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "summary": "checkNodeModules is a function defined in eliza/packages/app-core/src/cli/doctor/checks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkBuildArtifacts",
+      "type": "function",
+      "name": "checkBuildArtifacts",
+      "filePath": "eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "summary": "checkBuildArtifacts is a function defined in eliza/packages/app-core/src/cli/doctor/checks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkConfigFile",
+      "type": "function",
+      "name": "checkConfigFile",
+      "filePath": "eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "summary": "checkConfigFile is a function defined in eliza/packages/app-core/src/cli/doctor/checks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkModelKey",
+      "type": "function",
+      "name": "checkModelKey",
+      "filePath": "eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "summary": "checkModelKey is a function defined in eliza/packages/app-core/src/cli/doctor/checks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkStateDir",
+      "type": "function",
+      "name": "checkStateDir",
+      "filePath": "eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "summary": "checkStateDir is a function defined in eliza/packages/app-core/src/cli/doctor/checks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkDatabase",
+      "type": "function",
+      "name": "checkDatabase",
+      "filePath": "eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "summary": "checkDatabase is a function defined in eliza/packages/app-core/src/cli/doctor/checks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkDiskSpace",
+      "type": "function",
+      "name": "checkDiskSpace",
+      "filePath": "eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "summary": "checkDiskSpace is a function defined in eliza/packages/app-core/src/cli/doctor/checks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkHostConfig",
+      "type": "function",
+      "name": "checkHostConfig",
+      "filePath": "eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "summary": "checkHostConfig is a function defined in eliza/packages/app-core/src/cli/doctor/checks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:getPortOwner",
+      "type": "function",
+      "name": "getPortOwner",
+      "filePath": "eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "summary": "getPortOwner is a function defined in eliza/packages/app-core/src/cli/doctor/checks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkPort",
+      "type": "function",
+      "name": "checkPort",
+      "filePath": "eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "summary": "checkPort is a function defined in eliza/packages/app-core/src/cli/doctor/checks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkElizaWorkspace",
+      "type": "function",
+      "name": "checkElizaWorkspace",
+      "filePath": "eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "summary": "checkElizaWorkspace is a function defined in eliza/packages/app-core/src/cli/doctor/checks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:runAllChecks",
+      "type": "function",
+      "name": "runAllChecks",
+      "filePath": "eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "summary": "runAllChecks is a function defined in eliza/packages/app-core/src/cli/doctor/checks.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/cli/git-commit.ts",
+      "type": "file",
+      "name": "git-commit.ts",
+      "filePath": "eliza/packages/app-core/src/cli/git-commit.ts",
+      "summary": "git-commit.ts is a typescript source file in the Milady codebase. It contains 6 functions.",
+      "languageNotes": "typescript; code; 111 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/git-commit.ts:formatCommit",
+      "type": "function",
+      "name": "formatCommit",
+      "filePath": "eliza/packages/app-core/src/cli/git-commit.ts",
+      "summary": "formatCommit is a function defined in eliza/packages/app-core/src/cli/git-commit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/git-commit.ts:resolveGitHead",
+      "type": "function",
+      "name": "resolveGitHead",
+      "filePath": "eliza/packages/app-core/src/cli/git-commit.ts",
+      "summary": "resolveGitHead is a function defined in eliza/packages/app-core/src/cli/git-commit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/git-commit.ts:readCommitFromPackageJson",
+      "type": "function",
+      "name": "readCommitFromPackageJson",
+      "filePath": "eliza/packages/app-core/src/cli/git-commit.ts",
+      "summary": "readCommitFromPackageJson is a function defined in eliza/packages/app-core/src/cli/git-commit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/git-commit.ts:readCommitFromBuildInfo",
+      "type": "function",
+      "name": "readCommitFromBuildInfo",
+      "filePath": "eliza/packages/app-core/src/cli/git-commit.ts",
+      "summary": "readCommitFromBuildInfo is a function defined in eliza/packages/app-core/src/cli/git-commit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/git-commit.ts:readCommitFromGitHead",
+      "type": "function",
+      "name": "readCommitFromGitHead",
+      "filePath": "eliza/packages/app-core/src/cli/git-commit.ts",
+      "summary": "readCommitFromGitHead is a function defined in eliza/packages/app-core/src/cli/git-commit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/git-commit.ts:resolveCommitHash",
+      "type": "function",
+      "name": "resolveCommitHash",
+      "filePath": "eliza/packages/app-core/src/cli/git-commit.ts",
+      "summary": "resolveCommitHash is a function defined in eliza/packages/app-core/src/cli/git-commit.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/src/cli/plugins-cli.ts",
+      "type": "file",
+      "name": "plugins-cli.ts",
+      "filePath": "eliza/packages/app-core/src/cli/plugins-cli.ts",
+      "summary": "plugins-cli.ts is a typescript source file in the Milady codebase. It contains 7 functions, 3 imports.",
+      "languageNotes": "typescript; code; 1189 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:validatePluginPath",
+      "type": "function",
+      "name": "validatePluginPath",
+      "filePath": "eliza/packages/app-core/src/cli/plugins-cli.ts",
+      "summary": "validatePluginPath is a function defined in eliza/packages/app-core/src/cli/plugins-cli.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:normalizePluginName",
+      "type": "function",
+      "name": "normalizePluginName",
+      "filePath": "eliza/packages/app-core/src/cli/plugins-cli.ts",
+      "summary": "normalizePluginName is a function defined in eliza/packages/app-core/src/cli/plugins-cli.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:parsePluginSpec",
+      "type": "function",
+      "name": "parsePluginSpec",
+      "filePath": "eliza/packages/app-core/src/cli/plugins-cli.ts",
+      "summary": "parsePluginSpec is a function defined in eliza/packages/app-core/src/cli/plugins-cli.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:displayPluginConfig",
+      "type": "function",
+      "name": "displayPluginConfig",
+      "filePath": "eliza/packages/app-core/src/cli/plugins-cli.ts",
+      "summary": "displayPluginConfig is a function defined in eliza/packages/app-core/src/cli/plugins-cli.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:getPluginManager",
+      "type": "function",
+      "name": "getPluginManager",
+      "filePath": "eliza/packages/app-core/src/cli/plugins-cli.ts",
+      "summary": "getPluginManager is a function defined in eliza/packages/app-core/src/cli/plugins-cli.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:registerPluginsCli",
+      "type": "function",
+      "name": "registerPluginsCli",
+      "filePath": "eliza/packages/app-core/src/cli/plugins-cli.ts",
+      "summary": "registerPluginsCli is a function defined in eliza/packages/app-core/src/cli/plugins-cli.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:findPluginExport",
+      "type": "function",
+      "name": "findPluginExport",
+      "filePath": "eliza/packages/app-core/src/cli/plugins-cli.ts",
+      "summary": "findPluginExport is a function defined in eliza/packages/app-core/src/cli/plugins-cli.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/cli/profile-utils.ts",
+      "type": "file",
+      "name": "profile-utils.ts",
+      "filePath": "eliza/packages/app-core/src/cli/profile-utils.ts",
+      "summary": "profile-utils.ts is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 23 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/profile-utils.ts:isValidProfileName",
+      "type": "function",
+      "name": "isValidProfileName",
+      "filePath": "eliza/packages/app-core/src/cli/profile-utils.ts",
+      "summary": "isValidProfileName is a function defined in eliza/packages/app-core/src/cli/profile-utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/profile-utils.ts:normalizeProfileName",
+      "type": "function",
+      "name": "normalizeProfileName",
+      "filePath": "eliza/packages/app-core/src/cli/profile-utils.ts",
+      "summary": "normalizeProfileName is a function defined in eliza/packages/app-core/src/cli/profile-utils.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/cli/profile.ts",
+      "type": "file",
+      "name": "profile.ts",
+      "filePath": "eliza/packages/app-core/src/cli/profile.ts",
+      "summary": "profile.ts is a typescript source file in the Milady codebase. It contains 4 functions, 1 imports.",
+      "languageNotes": "typescript; code; 128 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/profile.ts:takeValue",
+      "type": "function",
+      "name": "takeValue",
+      "filePath": "eliza/packages/app-core/src/cli/profile.ts",
+      "summary": "takeValue is a function defined in eliza/packages/app-core/src/cli/profile.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/profile.ts:parseCliProfileArgs",
+      "type": "function",
+      "name": "parseCliProfileArgs",
+      "filePath": "eliza/packages/app-core/src/cli/profile.ts",
+      "summary": "parseCliProfileArgs is a function defined in eliza/packages/app-core/src/cli/profile.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/profile.ts:resolveProfileStateDir",
+      "type": "function",
+      "name": "resolveProfileStateDir",
+      "filePath": "eliza/packages/app-core/src/cli/profile.ts",
+      "summary": "resolveProfileStateDir is a function defined in eliza/packages/app-core/src/cli/profile.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/profile.ts:applyCliProfileEnv",
+      "type": "function",
+      "name": "applyCliProfileEnv",
+      "filePath": "eliza/packages/app-core/src/cli/profile.ts",
+      "summary": "applyCliProfileEnv is a function defined in eliza/packages/app-core/src/cli/profile.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/cli/program/build-program.ts",
+      "type": "file",
+      "name": "build-program.ts",
+      "filePath": "eliza/packages/app-core/src/cli/program/build-program.ts",
+      "summary": "build-program.ts is a typescript source file in the Milady codebase. It contains 1 function, 4 imports.",
+      "languageNotes": "typescript; code; 15 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/build-program.ts:buildProgram",
+      "type": "function",
+      "name": "buildProgram",
+      "filePath": "eliza/packages/app-core/src/cli/program/build-program.ts",
+      "summary": "buildProgram is a function defined in eliza/packages/app-core/src/cli/program/build-program.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/cli/program/command-registry.ts",
+      "type": "file",
+      "name": "command-registry.ts",
+      "filePath": "eliza/packages/app-core/src/cli/program/command-registry.ts",
+      "summary": "command-registry.ts is a typescript source file in the Milady codebase. It contains 1 function, 12 imports.",
+      "languageNotes": "typescript; code; 31 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/command-registry.ts:registerProgramCommands",
+      "type": "function",
+      "name": "registerProgramCommands",
+      "filePath": "eliza/packages/app-core/src/cli/program/command-registry.ts",
+      "summary": "registerProgramCommands is a function defined in eliza/packages/app-core/src/cli/program/command-registry.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/cli/program/help.ts",
+      "type": "file",
+      "name": "help.ts",
+      "filePath": "eliza/packages/app-core/src/cli/program/help.ts",
+      "summary": "help.ts is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 76 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/help.ts:configureProgramHelp",
+      "type": "function",
+      "name": "configureProgramHelp",
+      "filePath": "eliza/packages/app-core/src/cli/program/help.ts",
+      "summary": "configureProgramHelp is a function defined in eliza/packages/app-core/src/cli/program/help.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/cli/program/preaction.ts",
+      "type": "file",
+      "name": "preaction.ts",
+      "filePath": "eliza/packages/app-core/src/cli/program/preaction.ts",
+      "summary": "preaction.ts is a typescript source file in the Milady codebase. It contains 2 functions, 5 imports.",
+      "languageNotes": "typescript; code; 50 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/preaction.ts:setProcessTitleForCommand",
+      "type": "function",
+      "name": "setProcessTitleForCommand",
+      "filePath": "eliza/packages/app-core/src/cli/program/preaction.ts",
+      "summary": "setProcessTitleForCommand is a function defined in eliza/packages/app-core/src/cli/program/preaction.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/preaction.ts:registerPreActionHooks",
+      "type": "function",
+      "name": "registerPreActionHooks",
+      "filePath": "eliza/packages/app-core/src/cli/program/preaction.ts",
+      "summary": "registerPreActionHooks is a function defined in eliza/packages/app-core/src/cli/program/preaction.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/src/cli/program/register.auth.ts",
+      "type": "file",
+      "name": "register.auth.ts",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.auth.ts",
+      "summary": "register.auth.ts is a typescript source file in the Milady codebase. It contains 5 functions, 2 imports.",
+      "languageNotes": "typescript; code; 285 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.auth.ts:resolveElizaStateDir",
+      "type": "function",
+      "name": "resolveElizaStateDir",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.auth.ts",
+      "summary": "resolveElizaStateDir is a function defined in eliza/packages/app-core/src/cli/program/register.auth.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.auth.ts:openAuthStoreFromCli",
+      "type": "function",
+      "name": "openAuthStoreFromCli",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.auth.ts",
+      "summary": "openAuthStoreFromCli is a function defined in eliza/packages/app-core/src/cli/program/register.auth.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.auth.ts:waitForProofMatch",
+      "type": "function",
+      "name": "waitForProofMatch",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.auth.ts",
+      "summary": "waitForProofMatch is a function defined in eliza/packages/app-core/src/cli/program/register.auth.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.auth.ts:runElizaAuthReset",
+      "type": "function",
+      "name": "runElizaAuthReset",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.auth.ts",
+      "summary": "runElizaAuthReset is a function defined in eliza/packages/app-core/src/cli/program/register.auth.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.auth.ts:registerAuthCommand",
+      "type": "function",
+      "name": "registerAuthCommand",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.auth.ts",
+      "summary": "registerAuthCommand is a function defined in eliza/packages/app-core/src/cli/program/register.auth.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/cli/program/register.benchmark.ts",
+      "type": "file",
+      "name": "register.benchmark.ts",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.benchmark.ts",
+      "summary": "register.benchmark.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 19 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.benchmark.ts:registerBenchmarkCommand",
+      "type": "function",
+      "name": "registerBenchmarkCommand",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.benchmark.ts",
+      "summary": "registerBenchmarkCommand is a function defined in eliza/packages/app-core/src/cli/program/register.benchmark.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/src/cli/program/register.capability-router.test.ts",
+      "type": "file",
+      "name": "register.capability-router.test.ts",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.test.ts",
+      "summary": "register.capability-router.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 278 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.test.ts:jsonResponse",
+      "type": "function",
+      "name": "jsonResponse",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.test.ts",
+      "summary": "jsonResponse is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.test.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "type": "file",
+      "name": "register.capability-router.ts",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "register.capability-router.ts is a typescript source file in the Milady codebase. It contains 28 functions, 1 imports.",
+      "languageNotes": "typescript; code; 942 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:registerCapabilityRouterCommand",
+      "type": "function",
+      "name": "registerCapabilityRouterCommand",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "registerCapabilityRouterCommand is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "type": "function",
+      "name": "runCapabilityRouterConformance",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "runCapabilityRouterConformance is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:buildCapabilityRouterConnectPayload",
+      "type": "function",
+      "name": "buildCapabilityRouterConnectPayload",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "buildCapabilityRouterConnectPayload is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:normalizeApiBase",
+      "type": "function",
+      "name": "normalizeApiBase",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "normalizeApiBase is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:normalizeProvider",
+      "type": "function",
+      "name": "normalizeProvider",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "normalizeProvider is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:collectValues",
+      "type": "function",
+      "name": "collectValues",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "collectValues is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:normalizeConformanceSurfaces",
+      "type": "function",
+      "name": "normalizeConformanceSurfaces",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "normalizeConformanceSurfaces is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:normalizeStringList",
+      "type": "function",
+      "name": "normalizeStringList",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "normalizeStringList is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:optionalStringList",
+      "type": "function",
+      "name": "optionalStringList",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "optionalStringList is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:optionalString",
+      "type": "function",
+      "name": "optionalString",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "optionalString is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:optionalPositiveInteger",
+      "type": "function",
+      "name": "optionalPositiveInteger",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "optionalPositiveInteger is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:parseOptionalPositiveInteger",
+      "type": "function",
+      "name": "parseOptionalPositiveInteger",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "parseOptionalPositiveInteger is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:requireNonEmpty",
+      "type": "function",
+      "name": "requireNonEmpty",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "requireNonEmpty is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:requestCapabilityJson",
+      "type": "function",
+      "name": "requestCapabilityJson",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "requestCapabilityJson is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:invokeCapability",
+      "type": "function",
+      "name": "invokeCapability",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "invokeCapability is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readConformanceModules",
+      "type": "function",
+      "name": "readConformanceModules",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "readConformanceModules is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readNamedList",
+      "type": "function",
+      "name": "readNamedList",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "readNamedList is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readRouteList",
+      "type": "function",
+      "name": "readRouteList",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "readRouteList is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readViewList",
+      "type": "function",
+      "name": "readViewList",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "readViewList is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readModelList",
+      "type": "function",
+      "name": "readModelList",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "readModelList is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readLifecycleHooks",
+      "type": "function",
+      "name": "readLifecycleHooks",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "readLifecycleHooks is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readEventList",
+      "type": "function",
+      "name": "readEventList",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "readEventList is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readServiceList",
+      "type": "function",
+      "name": "readServiceList",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "readServiceList is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readAppBridgeHooks",
+      "type": "function",
+      "name": "readAppBridgeHooks",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "readAppBridgeHooks is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readRouteStatus",
+      "type": "function",
+      "name": "readRouteStatus",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "readRouteStatus is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readAssetResult",
+      "type": "function",
+      "name": "readAssetResult",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "readAssetResult is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isCapabilityAvailability",
+      "type": "function",
+      "name": "isCapabilityAvailability",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "isCapabilityAvailability is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isRecord",
+      "type": "function",
+      "name": "isRecord",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "summary": "isRecord is a function defined in eliza/packages/app-core/src/cli/program/register.capability-router.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/cli/program/register.config.ts",
+      "type": "file",
+      "name": "register.config.ts",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.config.ts",
+      "summary": "register.config.ts is a typescript source file in the Milady codebase. It contains 4 functions, 2 imports.",
+      "languageNotes": "typescript; code; 189 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.config.ts:registerConfigCli",
+      "type": "function",
+      "name": "registerConfigCli",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.config.ts",
+      "summary": "registerConfigCli is a function defined in eliza/packages/app-core/src/cli/program/register.config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.config.ts:flattenConfig",
+      "type": "function",
+      "name": "flattenConfig",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.config.ts",
+      "summary": "flattenConfig is a function defined in eliza/packages/app-core/src/cli/program/register.config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.config.ts:inferGroup",
+      "type": "function",
+      "name": "inferGroup",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.config.ts",
+      "summary": "inferGroup is a function defined in eliza/packages/app-core/src/cli/program/register.config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.config.ts:displayConfig",
+      "type": "function",
+      "name": "displayConfig",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.config.ts",
+      "summary": "displayConfig is a function defined in eliza/packages/app-core/src/cli/program/register.config.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/cli/program/register.configure.ts",
+      "type": "file",
+      "name": "register.configure.ts",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.configure.ts",
+      "summary": "register.configure.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 34 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.configure.ts:registerConfigureCommand",
+      "type": "function",
+      "name": "registerConfigureCommand",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.configure.ts",
+      "summary": "registerConfigureCommand is a function defined in eliza/packages/app-core/src/cli/program/register.configure.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/cli/program/register.dashboard.ts",
+      "type": "file",
+      "name": "register.dashboard.ts",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.dashboard.ts",
+      "summary": "register.dashboard.ts is a typescript source file in the Milady codebase. It contains 3 functions, 1 imports.",
+      "languageNotes": "typescript; code; 164 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.dashboard.ts:isPortListening",
+      "type": "function",
+      "name": "isPortListening",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.dashboard.ts",
+      "summary": "isPortListening is a function defined in eliza/packages/app-core/src/cli/program/register.dashboard.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.dashboard.ts:openInBrowser",
+      "type": "function",
+      "name": "openInBrowser",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.dashboard.ts",
+      "summary": "openInBrowser is a function defined in eliza/packages/app-core/src/cli/program/register.dashboard.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.dashboard.ts:registerDashboardCommand",
+      "type": "function",
+      "name": "registerDashboardCommand",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.dashboard.ts",
+      "summary": "registerDashboardCommand is a function defined in eliza/packages/app-core/src/cli/program/register.dashboard.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/cli/program/register.db.ts",
+      "type": "file",
+      "name": "register.db.ts",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.db.ts",
+      "summary": "register.db.ts is a typescript source file in the Milady codebase. It contains 2 functions, 3 imports.",
+      "languageNotes": "typescript; code; 62 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.db.ts:resolveDbDir",
+      "type": "function",
+      "name": "resolveDbDir",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.db.ts",
+      "summary": "resolveDbDir is a function defined in eliza/packages/app-core/src/cli/program/register.db.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.db.ts:registerDbCommand",
+      "type": "function",
+      "name": "registerDbCommand",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.db.ts",
+      "summary": "registerDbCommand is a function defined in eliza/packages/app-core/src/cli/program/register.db.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/cli/program/register.doctor.ts",
+      "type": "file",
+      "name": "register.doctor.ts",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.doctor.ts",
+      "summary": "register.doctor.ts is a typescript source file in the Milady codebase. It contains 5 functions, 3 imports.",
+      "languageNotes": "typescript; code; 211 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.doctor.ts:statusIcon",
+      "type": "function",
+      "name": "statusIcon",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.doctor.ts",
+      "summary": "statusIcon is a function defined in eliza/packages/app-core/src/cli/program/register.doctor.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.doctor.ts:printResult",
+      "type": "function",
+      "name": "printResult",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.doctor.ts",
+      "summary": "printResult is a function defined in eliza/packages/app-core/src/cli/program/register.doctor.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.doctor.ts:printGrouped",
+      "type": "function",
+      "name": "printGrouped",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.doctor.ts",
+      "summary": "printGrouped is a function defined in eliza/packages/app-core/src/cli/program/register.doctor.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.doctor.ts:attemptFix",
+      "type": "function",
+      "name": "attemptFix",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.doctor.ts",
+      "summary": "attemptFix is a function defined in eliza/packages/app-core/src/cli/program/register.doctor.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.doctor.ts:registerDoctorCommand",
+      "type": "function",
+      "name": "registerDoctorCommand",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.doctor.ts",
+      "summary": "registerDoctorCommand is a function defined in eliza/packages/app-core/src/cli/program/register.doctor.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/cli/program/register.models.ts",
+      "type": "file",
+      "name": "register.models.ts",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.models.ts",
+      "summary": "register.models.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 34 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.models.ts:registerModelsCli",
+      "type": "function",
+      "name": "registerModelsCli",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.models.ts",
+      "summary": "registerModelsCli is a function defined in eliza/packages/app-core/src/cli/program/register.models.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "type": "file",
+      "name": "register.setup.ts",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "summary": "register.setup.ts is a typescript source file in the Milady codebase. It contains 10 functions, 3 imports.",
+      "languageNotes": "typescript; code; 424 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:ask",
+      "type": "function",
+      "name": "ask",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "summary": "ask is a function defined in eliza/packages/app-core/src/cli/program/register.setup.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:askSecret",
+      "type": "function",
+      "name": "askSecret",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "summary": "askSecret is a function defined in eliza/packages/app-core/src/cli/program/register.setup.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:readStdinValue",
+      "type": "function",
+      "name": "readStdinValue",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "summary": "readStdinValue is a function defined in eliza/packages/app-core/src/cli/program/register.setup.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:loadConfig",
+      "type": "function",
+      "name": "loadConfig",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "summary": "loadConfig is a function defined in eliza/packages/app-core/src/cli/program/register.setup.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:saveConfig",
+      "type": "function",
+      "name": "saveConfig",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "summary": "saveConfig is a function defined in eliza/packages/app-core/src/cli/program/register.setup.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:resolveLaunchCommand",
+      "type": "function",
+      "name": "resolveLaunchCommand",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "summary": "resolveLaunchCommand is a function defined in eliza/packages/app-core/src/cli/program/register.setup.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:getEnvSection",
+      "type": "function",
+      "name": "getEnvSection",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "summary": "getEnvSection is a function defined in eliza/packages/app-core/src/cli/program/register.setup.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:hasModelKey",
+      "type": "function",
+      "name": "hasModelKey",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "summary": "hasModelKey is a function defined in eliza/packages/app-core/src/cli/program/register.setup.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:runProviderWizard",
+      "type": "function",
+      "name": "runProviderWizard",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "summary": "runProviderWizard is a function defined in eliza/packages/app-core/src/cli/program/register.setup.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:registerSetupCommand",
+      "type": "function",
+      "name": "registerSetupCommand",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "summary": "registerSetupCommand is a function defined in eliza/packages/app-core/src/cli/program/register.setup.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/cli/program/register.start.ts",
+      "type": "file",
+      "name": "register.start.ts",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.start.ts",
+      "summary": "register.start.ts is a typescript source file in the Milady codebase. It contains 5 functions, 2 imports.",
+      "languageNotes": "typescript; code; 127 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.start.ts:generateConnectionKey",
+      "type": "function",
+      "name": "generateConnectionKey",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.start.ts",
+      "summary": "generateConnectionKey is a function defined in eliza/packages/app-core/src/cli/program/register.start.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.start.ts:isNetworkBind",
+      "type": "function",
+      "name": "isNetworkBind",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.start.ts",
+      "summary": "isNetworkBind is a function defined in eliza/packages/app-core/src/cli/program/register.start.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.start.ts:shouldDisableAutoConnectionKey",
+      "type": "function",
+      "name": "shouldDisableAutoConnectionKey",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.start.ts",
+      "summary": "shouldDisableAutoConnectionKey is a function defined in eliza/packages/app-core/src/cli/program/register.start.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.start.ts:startAction",
+      "type": "function",
+      "name": "startAction",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.start.ts",
+      "summary": "startAction is a function defined in eliza/packages/app-core/src/cli/program/register.start.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.start.ts:registerStartCommand",
+      "type": "function",
+      "name": "registerStartCommand",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.start.ts",
+      "summary": "registerStartCommand is a function defined in eliza/packages/app-core/src/cli/program/register.start.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/cli/program/register.subclis.ts",
+      "type": "file",
+      "name": "register.subclis.ts",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.subclis.ts",
+      "summary": "register.subclis.ts is a typescript source file in the Milady codebase. It contains 5 functions, 2 imports.",
+      "languageNotes": "typescript; code; 109 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.subclis.ts:resolveActionArgs",
+      "type": "function",
+      "name": "resolveActionArgs",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.subclis.ts",
+      "summary": "resolveActionArgs is a function defined in eliza/packages/app-core/src/cli/program/register.subclis.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.subclis.ts:removeCommand",
+      "type": "function",
+      "name": "removeCommand",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.subclis.ts",
+      "summary": "removeCommand is a function defined in eliza/packages/app-core/src/cli/program/register.subclis.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.subclis.ts:registerSubCliByName",
+      "type": "function",
+      "name": "registerSubCliByName",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.subclis.ts",
+      "summary": "registerSubCliByName is a function defined in eliza/packages/app-core/src/cli/program/register.subclis.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.subclis.ts:registerLazyCommand",
+      "type": "function",
+      "name": "registerLazyCommand",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.subclis.ts",
+      "summary": "registerLazyCommand is a function defined in eliza/packages/app-core/src/cli/program/register.subclis.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.subclis.ts:registerSubCliCommands",
+      "type": "function",
+      "name": "registerSubCliCommands",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.subclis.ts",
+      "summary": "registerSubCliCommands is a function defined in eliza/packages/app-core/src/cli/program/register.subclis.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/src/cli/program/register.update.ts",
+      "type": "file",
+      "name": "register.update.ts",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.update.ts",
+      "summary": "register.update.ts is a typescript source file in the Milady codebase. It contains 7 functions, 3 imports.",
+      "languageNotes": "typescript; code; 354 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.update.ts:channelLabel",
+      "type": "function",
+      "name": "channelLabel",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.update.ts",
+      "summary": "channelLabel is a function defined in eliza/packages/app-core/src/cli/program/register.update.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.update.ts:parseChannelOrExit",
+      "type": "function",
+      "name": "parseChannelOrExit",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.update.ts",
+      "summary": "parseChannelOrExit is a function defined in eliza/packages/app-core/src/cli/program/register.update.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.update.ts:voiceModelsAction",
+      "type": "function",
+      "name": "voiceModelsAction",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.update.ts",
+      "summary": "voiceModelsAction is a function defined in eliza/packages/app-core/src/cli/program/register.update.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.update.ts:updateAction",
+      "type": "function",
+      "name": "updateAction",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.update.ts",
+      "summary": "updateAction is a function defined in eliza/packages/app-core/src/cli/program/register.update.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.update.ts:statusAction",
+      "type": "function",
+      "name": "statusAction",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.update.ts",
+      "summary": "statusAction is a function defined in eliza/packages/app-core/src/cli/program/register.update.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.update.ts:channelAction",
+      "type": "function",
+      "name": "channelAction",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.update.ts",
+      "summary": "channelAction is a function defined in eliza/packages/app-core/src/cli/program/register.update.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/program/register.update.ts:registerUpdateCommand",
+      "type": "function",
+      "name": "registerUpdateCommand",
+      "filePath": "eliza/packages/app-core/src/cli/program/register.update.ts",
+      "summary": "registerUpdateCommand is a function defined in eliza/packages/app-core/src/cli/program/register.update.ts."
+    },
+    {
+      "tags": [
+        "entry-point",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/cli/run-main.ts",
+      "type": "file",
+      "name": "run-main.ts",
+      "filePath": "eliza/packages/app-core/src/cli/run-main.ts",
+      "summary": "run-main.ts is a typescript source file in the Milady codebase. It contains 3 functions, 4 imports.",
+      "languageNotes": "typescript; code; 102 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/run-main.ts:registerCliRestartHandler",
+      "type": "function",
+      "name": "registerCliRestartHandler",
+      "filePath": "eliza/packages/app-core/src/cli/run-main.ts",
+      "summary": "registerCliRestartHandler is a function defined in eliza/packages/app-core/src/cli/run-main.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/run-main.ts:loadDotEnv",
+      "type": "function",
+      "name": "loadDotEnv",
+      "filePath": "eliza/packages/app-core/src/cli/run-main.ts",
+      "summary": "loadDotEnv is a function defined in eliza/packages/app-core/src/cli/run-main.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/cli/run-main.ts:runCli",
+      "type": "function",
+      "name": "runCli",
+      "filePath": "eliza/packages/app-core/src/cli/run-main.ts",
+      "summary": "runCli is a function defined in eliza/packages/app-core/src/cli/run-main.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/cli/version.ts",
+      "type": "file",
+      "name": "version.ts",
+      "filePath": "eliza/packages/app-core/src/cli/version.ts",
+      "summary": "version.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 3 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/connectors/capacitor-jsc.ts",
+      "type": "file",
+      "name": "capacitor-jsc.ts",
+      "filePath": "eliza/packages/app-core/src/connectors/capacitor-jsc.ts",
+      "summary": "capacitor-jsc.ts is a typescript source file in the Milady codebase. It contains 2 functions, 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 126 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/connectors/capacitor-jsc.ts:getCapacitorHost",
+      "type": "function",
+      "name": "getCapacitorHost",
+      "filePath": "eliza/packages/app-core/src/connectors/capacitor-jsc.ts",
+      "summary": "getCapacitorHost is a function defined in eliza/packages/app-core/src/connectors/capacitor-jsc.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/connectors/capacitor-jsc.ts:isJscPluginAvailable",
+      "type": "function",
+      "name": "isJscPluginAvailable",
+      "filePath": "eliza/packages/app-core/src/connectors/capacitor-jsc.ts",
+      "summary": "isJscPluginAvailable is a function defined in eliza/packages/app-core/src/connectors/capacitor-jsc.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/src/connectors/capacitor-jsc.ts:CapacitorJscBridge",
+      "type": "class",
+      "name": "CapacitorJscBridge",
+      "filePath": "eliza/packages/app-core/src/connectors/capacitor-jsc.ts",
+      "summary": "CapacitorJscBridge is a class or type declared in eliza/packages/app-core/src/connectors/capacitor-jsc.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/connectors/capacitor-quickjs.ts",
+      "type": "file",
+      "name": "capacitor-quickjs.ts",
+      "filePath": "eliza/packages/app-core/src/connectors/capacitor-quickjs.ts",
+      "summary": "capacitor-quickjs.ts is a typescript source file in the Milady codebase. It contains 2 functions, 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 143 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/connectors/capacitor-quickjs.ts:getCapacitorHost",
+      "type": "function",
+      "name": "getCapacitorHost",
+      "filePath": "eliza/packages/app-core/src/connectors/capacitor-quickjs.ts",
+      "summary": "getCapacitorHost is a function defined in eliza/packages/app-core/src/connectors/capacitor-quickjs.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/connectors/capacitor-quickjs.ts:isQuickJsPluginAvailable",
+      "type": "function",
+      "name": "isQuickJsPluginAvailable",
+      "filePath": "eliza/packages/app-core/src/connectors/capacitor-quickjs.ts",
+      "summary": "isQuickJsPluginAvailable is a function defined in eliza/packages/app-core/src/connectors/capacitor-quickjs.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/src/connectors/capacitor-quickjs.ts:CapacitorQuickJsBridge",
+      "type": "class",
+      "name": "CapacitorQuickJsBridge",
+      "filePath": "eliza/packages/app-core/src/connectors/capacitor-quickjs.ts",
+      "summary": "CapacitorQuickJsBridge is a class or type declared in eliza/packages/app-core/src/connectors/capacitor-quickjs.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/diagnostics/integration-observability.ts",
+      "type": "file",
+      "name": "integration-observability.ts",
+      "filePath": "eliza/packages/app-core/src/diagnostics/integration-observability.ts",
+      "summary": "integration-observability.ts is a typescript source file in the Milady codebase. It contains 4 functions, 1 imports.",
+      "languageNotes": "typescript; code; 132 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/diagnostics/integration-observability.ts:inferErrorKind",
+      "type": "function",
+      "name": "inferErrorKind",
+      "filePath": "eliza/packages/app-core/src/diagnostics/integration-observability.ts",
+      "summary": "inferErrorKind is a function defined in eliza/packages/app-core/src/diagnostics/integration-observability.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/diagnostics/integration-observability.ts:sanitizeToken",
+      "type": "function",
+      "name": "sanitizeToken",
+      "filePath": "eliza/packages/app-core/src/diagnostics/integration-observability.ts",
+      "summary": "sanitizeToken is a function defined in eliza/packages/app-core/src/diagnostics/integration-observability.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/diagnostics/integration-observability.ts:emitEvent",
+      "type": "function",
+      "name": "emitEvent",
+      "filePath": "eliza/packages/app-core/src/diagnostics/integration-observability.ts",
+      "summary": "emitEvent is a function defined in eliza/packages/app-core/src/diagnostics/integration-observability.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/diagnostics/integration-observability.ts:createIntegrationTelemetrySpan",
+      "type": "function",
+      "name": "createIntegrationTelemetrySpan",
+      "filePath": "eliza/packages/app-core/src/diagnostics/integration-observability.ts",
+      "summary": "createIntegrationTelemetrySpan is a function defined in eliza/packages/app-core/src/diagnostics/integration-observability.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/entry.ts",
+      "type": "file",
+      "name": "entry.ts",
+      "filePath": "eliza/packages/app-core/src/entry.ts",
+      "summary": "entry.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 94 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/platform/capacitor-bootstrap.ts",
+      "type": "file",
+      "name": "capacitor-bootstrap.ts",
+      "filePath": "eliza/packages/app-core/src/platform/capacitor-bootstrap.ts",
+      "summary": "capacitor-bootstrap.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 71 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/platform/capacitor-bootstrap.ts:installAppBootstrapClientPatches",
+      "type": "function",
+      "name": "installAppBootstrapClientPatches",
+      "filePath": "eliza/packages/app-core/src/platform/capacitor-bootstrap.ts",
+      "summary": "installAppBootstrapClientPatches is a function defined in eliza/packages/app-core/src/platform/capacitor-bootstrap.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/platform/capacitor-bootstrap.ts:initializeAppBootstrapBridges",
+      "type": "function",
+      "name": "initializeAppBootstrapBridges",
+      "filePath": "eliza/packages/app-core/src/platform/capacitor-bootstrap.ts",
+      "summary": "initializeAppBootstrapBridges is a function defined in eliza/packages/app-core/src/platform/capacitor-bootstrap.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/register-runtime-hooks.ts",
+      "type": "file",
+      "name": "register-runtime-hooks.ts",
+      "filePath": "eliza/packages/app-core/src/register-runtime-hooks.ts",
+      "summary": "register-runtime-hooks.ts is a typescript source file in the Milady codebase. It contains 1 function, 6 imports.",
+      "languageNotes": "typescript; code; 30 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/register-runtime-hooks.ts:ensureLocalInferenceHandler",
+      "type": "function",
+      "name": "ensureLocalInferenceHandler",
+      "filePath": "eliza/packages/app-core/src/register-runtime-hooks.ts",
+      "summary": "ensureLocalInferenceHandler is a function defined in eliza/packages/app-core/src/register-runtime-hooks.ts."
+    },
+    {
+      "tags": [
+        "entry-point",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/registry/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/app-core/src/registry/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase. It contains 3 functions, 1 imports.",
+      "languageNotes": "typescript; code; 106 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/index.ts:resolveEntriesDir",
+      "type": "function",
+      "name": "resolveEntriesDir",
+      "filePath": "eliza/packages/app-core/src/registry/index.ts",
+      "summary": "resolveEntriesDir is a function defined in eliza/packages/app-core/src/registry/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/index.ts:loadRegistry",
+      "type": "function",
+      "name": "loadRegistry",
+      "filePath": "eliza/packages/app-core/src/registry/index.ts",
+      "summary": "loadRegistry is a function defined in eliza/packages/app-core/src/registry/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/index.ts:clearRegistryCacheForTests",
+      "type": "function",
+      "name": "clearRegistryCacheForTests",
+      "filePath": "eliza/packages/app-core/src/registry/index.ts",
+      "summary": "clearRegistryCacheForTests is a function defined in eliza/packages/app-core/src/registry/index.ts."
+    },
+    {
+      "tags": [
+        "api",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/runtime/api-dev-settings-banner.ts",
+      "type": "file",
+      "name": "api-dev-settings-banner.ts",
+      "filePath": "eliza/packages/app-core/src/runtime/api-dev-settings-banner.ts",
+      "summary": "api-dev-settings-banner.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 122 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/runtime/api-dev-settings-banner.ts:summarizeList",
+      "type": "function",
+      "name": "summarizeList",
+      "filePath": "eliza/packages/app-core/src/runtime/api-dev-settings-banner.ts",
+      "summary": "summarizeList is a function defined in eliza/packages/app-core/src/runtime/api-dev-settings-banner.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/src/runtime/api-dev-settings-banner.ts:formatApiDevSettingsBannerText",
+      "type": "function",
+      "name": "formatApiDevSettingsBannerText",
+      "filePath": "eliza/packages/app-core/src/runtime/api-dev-settings-banner.ts",
+      "summary": "formatApiDevSettingsBannerText is a function defined in eliza/packages/app-core/src/runtime/api-dev-settings-banner.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/command-format.ts",
+      "target": "function:eliza/packages/app-core/src/cli/command-format.ts:formatCliCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkNodeModules",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkBuildArtifacts",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkConfigFile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkModelKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkStateDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkDatabase",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkDiskSpace",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkHostConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:getPortOwner",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkPort",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkElizaWorkspace",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:runAllChecks",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkPort",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:getPortOwner",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:runAllChecks",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkRuntime",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:runAllChecks",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkNodeModules",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:runAllChecks",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkBuildArtifacts",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:runAllChecks",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkElizaWorkspace",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:runAllChecks",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkConfigFile",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:runAllChecks",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkModelKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:runAllChecks",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkHostConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:runAllChecks",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkStateDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:runAllChecks",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkDatabase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:runAllChecks",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkDiskSpace",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:runAllChecks",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkPort",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:runAllChecks",
+      "target": "function:eliza/packages/app-core/src/cli/doctor/checks.ts:checkPort",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/git-commit.ts",
+      "target": "function:eliza/packages/app-core/src/cli/git-commit.ts:formatCommit",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/git-commit.ts",
+      "target": "function:eliza/packages/app-core/src/cli/git-commit.ts:resolveGitHead",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/git-commit.ts",
+      "target": "function:eliza/packages/app-core/src/cli/git-commit.ts:readCommitFromPackageJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/git-commit.ts",
+      "target": "function:eliza/packages/app-core/src/cli/git-commit.ts:readCommitFromBuildInfo",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/git-commit.ts",
+      "target": "function:eliza/packages/app-core/src/cli/git-commit.ts:readCommitFromGitHead",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/git-commit.ts",
+      "target": "function:eliza/packages/app-core/src/cli/git-commit.ts:resolveCommitHash",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/git-commit.ts:readCommitFromPackageJson",
+      "target": "function:eliza/packages/app-core/src/cli/git-commit.ts:formatCommit",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/git-commit.ts:readCommitFromBuildInfo",
+      "target": "function:eliza/packages/app-core/src/cli/git-commit.ts:formatCommit",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/git-commit.ts:readCommitFromGitHead",
+      "target": "function:eliza/packages/app-core/src/cli/git-commit.ts:resolveGitHead",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/git-commit.ts:readCommitFromGitHead",
+      "target": "function:eliza/packages/app-core/src/cli/git-commit.ts:formatCommit",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/git-commit.ts:readCommitFromGitHead",
+      "target": "function:eliza/packages/app-core/src/cli/git-commit.ts:formatCommit",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/git-commit.ts:resolveCommitHash",
+      "target": "function:eliza/packages/app-core/src/cli/git-commit.ts:formatCommit",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/git-commit.ts:resolveCommitHash",
+      "target": "function:eliza/packages/app-core/src/cli/git-commit.ts:readCommitFromBuildInfo",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/git-commit.ts:resolveCommitHash",
+      "target": "function:eliza/packages/app-core/src/cli/git-commit.ts:readCommitFromPackageJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/git-commit.ts:resolveCommitHash",
+      "target": "function:eliza/packages/app-core/src/cli/git-commit.ts:readCommitFromGitHead",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/plugins-cli.ts",
+      "target": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:validatePluginPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/plugins-cli.ts",
+      "target": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:normalizePluginName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/plugins-cli.ts",
+      "target": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:parsePluginSpec",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/plugins-cli.ts",
+      "target": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:displayPluginConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/plugins-cli.ts",
+      "target": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:getPluginManager",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/plugins-cli.ts",
+      "target": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:registerPluginsCli",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/plugins-cli.ts",
+      "target": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:findPluginExport",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:parsePluginSpec",
+      "target": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:normalizePluginName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:registerPluginsCli",
+      "target": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:getPluginManager",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:registerPluginsCli",
+      "target": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:getPluginManager",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:registerPluginsCli",
+      "target": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:getPluginManager",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:registerPluginsCli",
+      "target": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:normalizePluginName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:registerPluginsCli",
+      "target": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:parsePluginSpec",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:registerPluginsCli",
+      "target": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:getPluginManager",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:registerPluginsCli",
+      "target": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:getPluginManager",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:registerPluginsCli",
+      "target": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:getPluginManager",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:registerPluginsCli",
+      "target": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:validatePluginPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:registerPluginsCli",
+      "target": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:findPluginExport",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:registerPluginsCli",
+      "target": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:validatePluginPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:registerPluginsCli",
+      "target": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:validatePluginPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:registerPluginsCli",
+      "target": "function:eliza/packages/app-core/src/cli/plugins-cli.ts:displayPluginConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/profile-utils.ts",
+      "target": "function:eliza/packages/app-core/src/cli/profile-utils.ts:isValidProfileName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/profile-utils.ts",
+      "target": "function:eliza/packages/app-core/src/cli/profile-utils.ts:normalizeProfileName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/profile-utils.ts:normalizeProfileName",
+      "target": "function:eliza/packages/app-core/src/cli/profile-utils.ts:isValidProfileName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/profile.ts",
+      "target": "function:eliza/packages/app-core/src/cli/profile.ts:takeValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/profile.ts",
+      "target": "function:eliza/packages/app-core/src/cli/profile.ts:parseCliProfileArgs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/profile.ts",
+      "target": "function:eliza/packages/app-core/src/cli/profile.ts:resolveProfileStateDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/profile.ts",
+      "target": "function:eliza/packages/app-core/src/cli/profile.ts:applyCliProfileEnv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/profile.ts:parseCliProfileArgs",
+      "target": "function:eliza/packages/app-core/src/cli/profile.ts:takeValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/profile.ts:applyCliProfileEnv",
+      "target": "function:eliza/packages/app-core/src/cli/profile.ts:resolveProfileStateDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/build-program.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/build-program.ts:buildProgram",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/command-registry.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/command-registry.ts:registerProgramCommands",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/help.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/help.ts:configureProgramHelp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/preaction.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/preaction.ts:setProcessTitleForCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/preaction.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/preaction.ts:registerPreActionHooks",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/preaction.ts:registerPreActionHooks",
+      "target": "function:eliza/packages/app-core/src/cli/program/preaction.ts:setProcessTitleForCommand",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.auth.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.auth.ts:resolveElizaStateDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.auth.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.auth.ts:openAuthStoreFromCli",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.auth.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.auth.ts:waitForProofMatch",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.auth.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.auth.ts:runElizaAuthReset",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.auth.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.auth.ts:registerAuthCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.auth.ts:openAuthStoreFromCli",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.auth.ts:resolveElizaStateDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.auth.ts:runElizaAuthReset",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.auth.ts:resolveElizaStateDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.auth.ts:runElizaAuthReset",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.auth.ts:waitForProofMatch",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.auth.ts:runElizaAuthReset",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.auth.ts:openAuthStoreFromCli",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.auth.ts:registerAuthCommand",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.auth.ts:runElizaAuthReset",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.benchmark.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.benchmark.ts:registerBenchmarkCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.test.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.test.ts:jsonResponse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:registerCapabilityRouterCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:buildCapabilityRouterConnectPayload",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:normalizeApiBase",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:normalizeProvider",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:collectValues",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:normalizeConformanceSurfaces",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:normalizeStringList",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:optionalStringList",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:optionalString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:optionalPositiveInteger",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:parseOptionalPositiveInteger",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:requireNonEmpty",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:requestCapabilityJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:invokeCapability",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readConformanceModules",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readNamedList",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readRouteList",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readViewList",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readModelList",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readLifecycleHooks",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readEventList",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readServiceList",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readAppBridgeHooks",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readRouteStatus",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readAssetResult",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isCapabilityAvailability",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:registerCapabilityRouterCommand",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:buildCapabilityRouterConnectPayload",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:registerCapabilityRouterCommand",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:normalizeApiBase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:registerCapabilityRouterCommand",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:normalizeApiBase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:requireNonEmpty",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:parseOptionalPositiveInteger",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:normalizeConformanceSurfaces",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:requestCapabilityJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isCapabilityAvailability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:invokeCapability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readConformanceModules",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:invokeCapability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:invokeCapability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:invokeCapability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readRouteStatus",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:invokeCapability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readAssetResult",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:invokeCapability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:invokeCapability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:invokeCapability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:invokeCapability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:invokeCapability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:invokeCapability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:invokeCapability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:invokeCapability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:invokeCapability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:invokeCapability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:invokeCapability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:invokeCapability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:invokeCapability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:invokeCapability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:runCapabilityRouterConformance",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:buildCapabilityRouterConnectPayload",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:normalizeStringList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:buildCapabilityRouterConnectPayload",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:parseOptionalPositiveInteger",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:buildCapabilityRouterConnectPayload",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:requireNonEmpty",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:buildCapabilityRouterConnectPayload",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:requireNonEmpty",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:buildCapabilityRouterConnectPayload",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:requireNonEmpty",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:buildCapabilityRouterConnectPayload",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:optionalStringList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:buildCapabilityRouterConnectPayload",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:optionalString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:buildCapabilityRouterConnectPayload",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:optionalString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:buildCapabilityRouterConnectPayload",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:optionalPositiveInteger",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:buildCapabilityRouterConnectPayload",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:optionalPositiveInteger",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:buildCapabilityRouterConnectPayload",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:normalizeProvider",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:buildCapabilityRouterConnectPayload",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:requireNonEmpty",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:buildCapabilityRouterConnectPayload",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:optionalString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:buildCapabilityRouterConnectPayload",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:optionalString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:normalizeConformanceSurfaces",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:normalizeStringList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:optionalStringList",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:normalizeStringList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:optionalPositiveInteger",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:parseOptionalPositiveInteger",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:invokeCapability",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:requestCapabilityJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:invokeCapability",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readConformanceModules",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readConformanceModules",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readConformanceModules",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readNamedList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readConformanceModules",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readNamedList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readConformanceModules",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readRouteList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readConformanceModules",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readViewList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readConformanceModules",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readModelList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readConformanceModules",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readLifecycleHooks",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readConformanceModules",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readEventList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readConformanceModules",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readServiceList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readConformanceModules",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readAppBridgeHooks",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readConformanceModules",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readNamedList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readConformanceModules",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readNamedList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readConformanceModules",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readNamedList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readNamedList",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readRouteList",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readViewList",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readModelList",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readLifecycleHooks",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readEventList",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readServiceList",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readAppBridgeHooks",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readRouteStatus",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:readAssetResult",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isCapabilityAvailability",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isCapabilityAvailability",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.capability-router.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.config.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.config.ts:registerConfigCli",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.config.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.config.ts:flattenConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.config.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.config.ts:inferGroup",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.config.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.config.ts:displayConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.config.ts:registerConfigCli",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.config.ts:displayConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.config.ts:displayConfig",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.config.ts:flattenConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.config.ts:displayConfig",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.config.ts:inferGroup",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.configure.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.configure.ts:registerConfigureCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.dashboard.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.dashboard.ts:isPortListening",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.dashboard.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.dashboard.ts:openInBrowser",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.dashboard.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.dashboard.ts:registerDashboardCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.dashboard.ts:registerDashboardCommand",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.dashboard.ts:openInBrowser",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.dashboard.ts:registerDashboardCommand",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.dashboard.ts:isPortListening",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.dashboard.ts:registerDashboardCommand",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.dashboard.ts:openInBrowser",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.dashboard.ts:registerDashboardCommand",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.dashboard.ts:isPortListening",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.dashboard.ts:registerDashboardCommand",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.dashboard.ts:openInBrowser",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.db.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.db.ts:resolveDbDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.db.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.db.ts:registerDbCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.db.ts:registerDbCommand",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.db.ts:resolveDbDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.doctor.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.doctor.ts:statusIcon",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.doctor.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.doctor.ts:printResult",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.doctor.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.doctor.ts:printGrouped",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.doctor.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.doctor.ts:attemptFix",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.doctor.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.doctor.ts:registerDoctorCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.doctor.ts:printResult",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.doctor.ts:statusIcon",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.doctor.ts:printGrouped",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.doctor.ts:printResult",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.doctor.ts:registerDoctorCommand",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.doctor.ts:printGrouped",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.doctor.ts:registerDoctorCommand",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.doctor.ts:attemptFix",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.models.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.models.ts:registerModelsCli",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:ask",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:askSecret",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:readStdinValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:loadConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:saveConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:resolveLaunchCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:getEnvSection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:hasModelKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:runProviderWizard",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:registerSetupCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:runProviderWizard",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:loadConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:runProviderWizard",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:getEnvSection",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:runProviderWizard",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:hasModelKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:runProviderWizard",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:saveConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:registerSetupCommand",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:readStdinValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:registerSetupCommand",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:loadConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:registerSetupCommand",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:getEnvSection",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:registerSetupCommand",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:saveConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:registerSetupCommand",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:runProviderWizard",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:registerSetupCommand",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.setup.ts:resolveLaunchCommand",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.start.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.start.ts:generateConnectionKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.start.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.start.ts:isNetworkBind",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.start.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.start.ts:shouldDisableAutoConnectionKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.start.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.start.ts:startAction",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.start.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.start.ts:registerStartCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.start.ts:startAction",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.start.ts:isNetworkBind",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.start.ts:startAction",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.start.ts:shouldDisableAutoConnectionKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.start.ts:startAction",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.start.ts:generateConnectionKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.start.ts:registerStartCommand",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.start.ts:generateConnectionKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.start.ts:registerStartCommand",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.start.ts:startAction",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.start.ts:registerStartCommand",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.start.ts:generateConnectionKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.start.ts:registerStartCommand",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.start.ts:startAction",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.subclis.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.subclis.ts:resolveActionArgs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.subclis.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.subclis.ts:removeCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.subclis.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.subclis.ts:registerSubCliByName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.subclis.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.subclis.ts:registerLazyCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.subclis.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.subclis.ts:registerSubCliCommands",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.subclis.ts:registerSubCliByName",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.subclis.ts:removeCommand",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.subclis.ts:registerLazyCommand",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.subclis.ts:removeCommand",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.subclis.ts:registerLazyCommand",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.subclis.ts:resolveActionArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.subclis.ts:registerSubCliCommands",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.subclis.ts:registerLazyCommand",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.subclis.ts:registerSubCliCommands",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.subclis.ts:registerLazyCommand",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.update.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.update.ts:channelLabel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.update.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.update.ts:parseChannelOrExit",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.update.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.update.ts:voiceModelsAction",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.update.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.update.ts:updateAction",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.update.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.update.ts:statusAction",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.update.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.update.ts:channelAction",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.update.ts",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.update.ts:registerUpdateCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.update.ts:updateAction",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.update.ts:voiceModelsAction",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.update.ts:updateAction",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.update.ts:parseChannelOrExit",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.update.ts:updateAction",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.update.ts:channelLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.update.ts:updateAction",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.update.ts:channelLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.update.ts:statusAction",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.update.ts:channelLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.update.ts:statusAction",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.update.ts:channelLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.update.ts:channelAction",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.update.ts:channelLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.update.ts:channelAction",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.update.ts:channelLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.update.ts:channelAction",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.update.ts:parseChannelOrExit",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.update.ts:channelAction",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.update.ts:channelLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.update.ts:channelAction",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.update.ts:channelLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/program/register.update.ts:channelAction",
+      "target": "function:eliza/packages/app-core/src/cli/program/register.update.ts:channelLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/run-main.ts",
+      "target": "function:eliza/packages/app-core/src/cli/run-main.ts:registerCliRestartHandler",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/run-main.ts",
+      "target": "function:eliza/packages/app-core/src/cli/run-main.ts:loadDotEnv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/cli/run-main.ts",
+      "target": "function:eliza/packages/app-core/src/cli/run-main.ts:runCli",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/run-main.ts:runCli",
+      "target": "function:eliza/packages/app-core/src/cli/run-main.ts:registerCliRestartHandler",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/cli/run-main.ts:runCli",
+      "target": "function:eliza/packages/app-core/src/cli/run-main.ts:loadDotEnv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/connectors/capacitor-jsc.ts",
+      "target": "function:eliza/packages/app-core/src/connectors/capacitor-jsc.ts:getCapacitorHost",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/connectors/capacitor-jsc.ts",
+      "target": "function:eliza/packages/app-core/src/connectors/capacitor-jsc.ts:isJscPluginAvailable",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/connectors/capacitor-jsc.ts",
+      "target": "class:eliza/packages/app-core/src/connectors/capacitor-jsc.ts:CapacitorJscBridge",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/connectors/capacitor-jsc.ts:isJscPluginAvailable",
+      "target": "function:eliza/packages/app-core/src/connectors/capacitor-jsc.ts:getCapacitorHost",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/connectors/capacitor-quickjs.ts",
+      "target": "function:eliza/packages/app-core/src/connectors/capacitor-quickjs.ts:getCapacitorHost",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/connectors/capacitor-quickjs.ts",
+      "target": "function:eliza/packages/app-core/src/connectors/capacitor-quickjs.ts:isQuickJsPluginAvailable",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/connectors/capacitor-quickjs.ts",
+      "target": "class:eliza/packages/app-core/src/connectors/capacitor-quickjs.ts:CapacitorQuickJsBridge",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/connectors/capacitor-quickjs.ts:isQuickJsPluginAvailable",
+      "target": "function:eliza/packages/app-core/src/connectors/capacitor-quickjs.ts:getCapacitorHost",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/diagnostics/integration-observability.ts",
+      "target": "function:eliza/packages/app-core/src/diagnostics/integration-observability.ts:inferErrorKind",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/diagnostics/integration-observability.ts",
+      "target": "function:eliza/packages/app-core/src/diagnostics/integration-observability.ts:sanitizeToken",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/diagnostics/integration-observability.ts",
+      "target": "function:eliza/packages/app-core/src/diagnostics/integration-observability.ts:emitEvent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/diagnostics/integration-observability.ts",
+      "target": "function:eliza/packages/app-core/src/diagnostics/integration-observability.ts:createIntegrationTelemetrySpan",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/diagnostics/integration-observability.ts:inferErrorKind",
+      "target": "function:eliza/packages/app-core/src/diagnostics/integration-observability.ts:sanitizeToken",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/diagnostics/integration-observability.ts:inferErrorKind",
+      "target": "function:eliza/packages/app-core/src/diagnostics/integration-observability.ts:sanitizeToken",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/platform/capacitor-bootstrap.ts",
+      "target": "function:eliza/packages/app-core/src/platform/capacitor-bootstrap.ts:installAppBootstrapClientPatches",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/platform/capacitor-bootstrap.ts",
+      "target": "function:eliza/packages/app-core/src/platform/capacitor-bootstrap.ts:initializeAppBootstrapBridges",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/register-runtime-hooks.ts",
+      "target": "function:eliza/packages/app-core/src/register-runtime-hooks.ts:ensureLocalInferenceHandler",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/index.ts",
+      "target": "function:eliza/packages/app-core/src/registry/index.ts:resolveEntriesDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/index.ts",
+      "target": "function:eliza/packages/app-core/src/registry/index.ts:loadRegistry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/index.ts",
+      "target": "function:eliza/packages/app-core/src/registry/index.ts:clearRegistryCacheForTests",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/registry/index.ts:loadRegistry",
+      "target": "function:eliza/packages/app-core/src/registry/index.ts:resolveEntriesDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/runtime/api-dev-settings-banner.ts",
+      "target": "function:eliza/packages/app-core/src/runtime/api-dev-settings-banner.ts:summarizeList",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/runtime/api-dev-settings-banner.ts",
+      "target": "function:eliza/packages/app-core/src/runtime/api-dev-settings-banner.ts:formatApiDevSettingsBannerText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/runtime/api-dev-settings-banner.ts:formatApiDevSettingsBannerText",
+      "target": "function:eliza/packages/app-core/src/runtime/api-dev-settings-banner.ts:summarizeList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/runtime/api-dev-settings-banner.ts:formatApiDevSettingsBannerText",
+      "target": "function:eliza/packages/app-core/src/runtime/api-dev-settings-banner.ts:summarizeList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/command-format.ts",
+      "target": "file:eliza/packages/app-core/src/cli/cli-name.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/command-format.ts",
+      "target": "file:eliza/packages/app-core/src/cli/profile-utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "target": "file:eliza/packages/agent/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/plugins-cli.ts",
+      "target": "file:eliza/packages/agent/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/plugins-cli.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/plugins-cli.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/profile.ts",
+      "target": "file:eliza/packages/app-core/src/cli/profile-utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/build-program.ts",
+      "target": "file:eliza/packages/app-core/src/cli/program/command-registry.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/build-program.ts",
+      "target": "file:eliza/packages/app-core/src/cli/program/help.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/build-program.ts",
+      "target": "file:eliza/packages/app-core/src/cli/program/preaction.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/build-program.ts",
+      "target": "file:eliza/packages/app-core/src/cli/version.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/command-registry.ts",
+      "target": "file:eliza/packages/app-core/src/cli/program/register.auth.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/command-registry.ts",
+      "target": "file:eliza/packages/app-core/src/cli/program/register.benchmark.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/command-registry.ts",
+      "target": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/command-registry.ts",
+      "target": "file:eliza/packages/app-core/src/cli/program/register.config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/command-registry.ts",
+      "target": "file:eliza/packages/app-core/src/cli/program/register.configure.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/command-registry.ts",
+      "target": "file:eliza/packages/app-core/src/cli/program/register.dashboard.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/command-registry.ts",
+      "target": "file:eliza/packages/app-core/src/cli/program/register.db.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/command-registry.ts",
+      "target": "file:eliza/packages/app-core/src/cli/program/register.doctor.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/command-registry.ts",
+      "target": "file:eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/command-registry.ts",
+      "target": "file:eliza/packages/app-core/src/cli/program/register.start.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/command-registry.ts",
+      "target": "file:eliza/packages/app-core/src/cli/program/register.subclis.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/command-registry.ts",
+      "target": "file:eliza/packages/app-core/src/cli/program/register.update.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/help.ts",
+      "target": "file:eliza/packages/app-core/src/cli/banner.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/help.ts",
+      "target": "file:eliza/packages/app-core/src/cli/cli-name.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/help.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/preaction.ts",
+      "target": "file:eliza/packages/app-core/src/cli/argv.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/preaction.ts",
+      "target": "file:eliza/packages/app-core/src/cli/banner.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/preaction.ts",
+      "target": "file:eliza/packages/app-core/src/cli/cli-name.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/preaction.ts",
+      "target": "file:eliza/packages/app-core/src/utils/globals.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/preaction.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.auth.ts",
+      "target": "file:eliza/packages/app-core/src/cli/cli-utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.auth.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.test.ts",
+      "target": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.test.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.capability-router.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.config.ts",
+      "target": "file:eliza/packages/agent/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.config.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.configure.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.dashboard.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.db.ts",
+      "target": "file:eliza/packages/app-core/src/cli/cli-utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.db.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.db.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.doctor.ts",
+      "target": "file:eliza/packages/app-core/src/cli/cli-utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.doctor.ts",
+      "target": "file:eliza/packages/app-core/src/cli/doctor/checks.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.doctor.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.models.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "target": "file:eliza/packages/agent/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "target": "file:eliza/packages/app-core/src/cli/cli-utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.setup.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.start.ts",
+      "target": "file:eliza/packages/app-core/src/cli/cli-utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.start.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.subclis.ts",
+      "target": "file:eliza/packages/app-core/src/cli/argv.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.subclis.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.update.ts",
+      "target": "file:eliza/packages/agent/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.update.ts",
+      "target": "file:eliza/packages/app-core/src/cli/version.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/program/register.update.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/run-main.ts",
+      "target": "file:eliza/packages/app-core/src/cli/argv.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/run-main.ts",
+      "target": "file:eliza/packages/app-core/src/cli/program/register.subclis.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/run-main.ts",
+      "target": "file:eliza/packages/app-core/src/runtime/error-handlers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/run-main.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/cli/version.ts",
+      "target": "file:eliza/packages/agent/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/connectors/capacitor-jsc.ts",
+      "target": "file:eliza/packages/agent/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/connectors/capacitor-quickjs.ts",
+      "target": "file:eliza/packages/agent/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/diagnostics/integration-observability.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/entry.ts",
+      "target": "file:eliza/packages/app-core/src/cli/profile.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/entry.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/platform/capacitor-bootstrap.ts",
+      "target": "file:eliza/packages/ui/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/platform/capacitor-bootstrap.ts",
+      "target": "file:eliza/packages/ui/src/platform/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/register-runtime-hooks.ts",
+      "target": "file:eliza/packages/app-core/src/runtime/app-core-runtime-hooks.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/register-runtime-hooks.ts",
+      "target": "file:eliza/packages/app-core/src/security/hydrate-wallet-keys-from-platform-store.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/register-runtime-hooks.ts",
+      "target": "file:eliza/packages/app-core/src/services/account-pool.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/register-runtime-hooks.ts",
+      "target": "file:eliza/packages/app-core/src/services/vault-bootstrap.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/register-runtime-hooks.ts",
+      "target": "file:eliza/packages/app-core/src/services/vault-mirror.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/register-runtime-hooks.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/registry/index.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/runtime/api-dev-settings-banner.ts",
+      "target": "file:eliza/packages/app-core/src/runtime/dev-settings-figlet-heading.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/runtime/api-dev-settings-banner.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    }
+  ]
+}

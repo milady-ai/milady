@@ -1,0 +1,674 @@
+{
+  "version": "1.0.0",
+  "kind": "domain",
+  "project": {
+    "name": "miladyai",
+    "languages": [
+      "adoc",
+      "awk",
+      "batch",
+      "c",
+      "ci",
+      "cmake",
+      "comp",
+      "conf",
+      "config",
+      "cpp",
+      "css",
+      "cu",
+      "darwin-arm64-metal-fused",
+      "desktop",
+      "dockerfile",
+      "entitlements",
+      "example",
+      "glb",
+      "gradle",
+      "hbs",
+      "html",
+      "icns",
+      "inc",
+      "iss",
+      "jar",
+      "java",
+      "javascript",
+      "json",
+      "jsonc",
+      "makefile",
+      "markdown",
+      "mdc",
+      "metal",
+      "mm",
+      "mts",
+      "nix",
+      "o",
+      "patch",
+      "pbxproj",
+      "powershell",
+      "pro",
+      "properties",
+      "python",
+      "recipe",
+      "ruby",
+      "service",
+      "sha256",
+      "shell",
+      "so",
+      "sol",
+      "spec",
+      "storyboard",
+      "swift",
+      "template",
+      "terraform",
+      "timer",
+      "toml",
+      "txt",
+      "typed",
+      "typescript",
+      "unknown",
+      "upstream",
+      "vrm",
+      "wav",
+      "webm",
+      "webmanifest",
+      "webp",
+      "xcprivacy",
+      "xcworkspacedata",
+      "xml",
+      "yaml"
+    ],
+    "frameworks": [
+      "React",
+      "Vite",
+      "Vitest",
+      "Tailwind CSS",
+      "Express",
+      "Three.js",
+      "Electrobun",
+      "Capacitor",
+      "Docker",
+      "Docker Compose",
+      "GitHub Actions"
+    ],
+    "description": "Milady is a personal AI assistant that is local-first by default and can also connect to Eliza Cloud or a remote self-hosted backend when you want hosted runtime access. Built on [elizaOS](https://github.com/elizaOS). Note: this project has over 100 source files; this graph scopes the embedded eliza checkout to Milady-relevant runtime, UI, agent, core, security, vault, local inference, and app/plugin management surfaces.",
+    "analyzedAt": "2026-05-28T00:03:39.792Z",
+    "gitCommitHash": "b979c4612da152422404aec7f50f9b8e73e87b9a"
+  },
+  "nodes": [
+    {
+      "id": "domain:desktop-runtime-bootstrap",
+      "type": "domain",
+      "name": "Desktop Runtime Bootstrap",
+      "summary": "Packaged desktop startup, sidecar runtime launch, first API readiness, and platform process management.",
+      "tags": [
+        "domain"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "domain:first-run-setup",
+      "type": "domain",
+      "name": "First-Run Setup",
+      "summary": "Initial user setup, owner/agent identity collection, state persistence, and readiness gating.",
+      "tags": [
+        "domain"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "domain:voice-and-local-inference",
+      "type": "domain",
+      "name": "Voice And Local Inference",
+      "summary": "Voice-driven interaction, ASR/TTS preparation, local model routing, and startup warmup policy.",
+      "tags": [
+        "domain"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "domain:agent-and-plugin-platform",
+      "type": "domain",
+      "name": "Agent And Plugin Platform",
+      "summary": "Core eliza runtime contracts plus app, plugin, and skill management surfaces.",
+      "tags": [
+        "domain"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "domain:build-qa-and-release",
+      "type": "domain",
+      "name": "Build QA And Release",
+      "summary": "Install, build, packaged verification, QA docs, CI, and deployment workflows.",
+      "tags": [
+        "domain"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "flow:fresh-desktop-launch",
+      "type": "flow",
+      "name": "Fresh Desktop Launch",
+      "summary": "The packaged app starts, prepares state directories, launches the embedded runtime sidecar, and waits for API readiness.",
+      "tags": [
+        "flow"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "flow:first-run-onboarding",
+      "type": "flow",
+      "name": "First-Run Onboarding",
+      "summary": "A new user reaches first-run setup, provides identity/runtime choices, and persists first-run completion.",
+      "tags": [
+        "flow"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "flow:voice-driven-setup",
+      "type": "flow",
+      "name": "Voice-Driven Setup",
+      "summary": "The first-run and main UI accept text or voice while ASR/TTS readiness is coordinated with runtime startup.",
+      "tags": [
+        "flow"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "flow:plugin-app-action-surface",
+      "type": "flow",
+      "name": "Plugin And App Action Surface",
+      "summary": "The agent exposes app/plugin/skill operations through runtime plugins and shared contracts.",
+      "tags": [
+        "flow"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "flow:verification-and-release",
+      "type": "flow",
+      "name": "Verification And Release",
+      "summary": "Build scripts, packaged startup tests, and QA docs prove desktop startup and first-run behavior.",
+      "tags": [
+        "flow"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "step:fresh-desktop-launch:renderer-entry",
+      "type": "step",
+      "name": "Renderer Entry",
+      "summary": "apps/app/src/main.tsx loads the branded React app and selects the Milady shell.",
+      "tags": [
+        "step"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "source:apps/app/src/main.tsx",
+      "type": "source",
+      "name": "main.tsx",
+      "filePath": "apps/app/src/main.tsx",
+      "summary": "main.tsx is a typescript source file in the Milady codebase. It contains 50 functions, 8 imports.",
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "step:fresh-desktop-launch:sidecar-runtime",
+      "type": "step",
+      "name": "Sidecar Runtime",
+      "summary": "Electrobun native agent management starts the packaged runtime process.",
+      "tags": [
+        "step"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "source:eliza/packages/app-core/platforms/electrobun/src/native/agent.ts",
+      "type": "source",
+      "name": "agent.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/native/agent.ts",
+      "summary": "agent.ts is a typescript source file in the Milady codebase. It contains 56 functions, 1 class, 10 imports.",
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "step:first-run-onboarding:shell",
+      "type": "step",
+      "name": "First-Run Shell",
+      "summary": "The first-run shell renders setup states and user-facing prompts.",
+      "tags": [
+        "step"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "source:eliza/packages/ui/src/components/shell/FirstRunShell.tsx",
+      "type": "source",
+      "name": "FirstRunShell.tsx",
+      "filePath": "eliza/packages/ui/src/components/shell/FirstRunShell.tsx",
+      "summary": "FirstRunShell.tsx is a typescript source file in the Milady codebase. It contains 10 functions, 2 imports.",
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "step:first-run-onboarding:controller",
+      "type": "step",
+      "name": "Controller State",
+      "summary": "The first-run controller owns setup state transitions, validation, voice capture, and completion calls.",
+      "tags": [
+        "step"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "source:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "type": "source",
+      "name": "use-first-run-controller.ts",
+      "filePath": "eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "summary": "use-first-run-controller.ts is a typescript source file in the Milady codebase. It contains 12 functions, 13 imports.",
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "step:voice-driven-setup:inference-policy",
+      "type": "step",
+      "name": "Inference Startup Policy",
+      "summary": "Local inference startup policy prevents expensive local embedding warmup from blocking packaged first-run readiness.",
+      "tags": [
+        "step"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "source:eliza/plugins/plugin-local-inference/src/runtime/embedding-warmup-policy.ts",
+      "type": "source",
+      "name": "embedding-warmup-policy.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/runtime/embedding-warmup-policy.ts",
+      "summary": "embedding-warmup-policy.ts is a typescript source file in the Milady codebase. It contains 3 functions.",
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "step:voice-driven-setup:voice-types",
+      "type": "step",
+      "name": "Voice Service Contracts",
+      "summary": "Voice service types define ASR/TTS contracts used by local inference and UI integration.",
+      "tags": [
+        "step"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "source:eliza/plugins/plugin-local-inference/src/services/voice/types.ts",
+      "type": "source",
+      "name": "types.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase.",
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "step:plugin-app-action-surface:app-manager",
+      "type": "step",
+      "name": "App Manager Plugin",
+      "summary": "App manager plugin exposes app lifecycle and app-surface operations.",
+      "tags": [
+        "step"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "source:eliza/plugins/plugin-app-manager/src/index.ts",
+      "type": "source",
+      "name": "index.ts",
+      "filePath": "eliza/plugins/plugin-app-manager/src/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "step:plugin-app-action-surface:agent-skills",
+      "type": "step",
+      "name": "Agent Skills Plugin",
+      "summary": "Agent skills plugin bridges enabled skills into the runtime planner surface.",
+      "tags": [
+        "step"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "source:eliza/plugins/plugin-agent-skills/src/index.ts",
+      "type": "source",
+      "name": "index.ts",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase. It contains 10 imports.",
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "step:verification-and-release:packaged-test",
+      "type": "step",
+      "name": "Packaged Startup Test",
+      "summary": "Packaged startup tests exercise first-run bootstrap contracts and API reachability.",
+      "tags": [
+        "step"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "source:apps/app/test/electrobun-packaged/windows-bootstrap.ts",
+      "type": "source",
+      "name": "windows-bootstrap.ts",
+      "filePath": "apps/app/test/electrobun-packaged/windows-bootstrap.ts",
+      "summary": "windows-bootstrap.ts is a typescript source file in the Milady codebase. It contains 4 functions.",
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "step:verification-and-release:first-run-docs",
+      "type": "step",
+      "name": "First-Run QA Docs",
+      "summary": "First-run QA docs capture verification expectations for onboarding and state behavior.",
+      "tags": [
+        "step"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "source:docs/QA-first-run.md",
+      "type": "source",
+      "name": "QA-first-run.md",
+      "filePath": "docs/QA-first-run.md",
+      "summary": "QA-first-run.md documents docs with 40 lines of reference material.",
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "domain:desktop-runtime-bootstrap",
+      "target": "flow:fresh-desktop-launch",
+      "type": "contains_flow",
+      "direction": "outbound",
+      "weight": 1
+    },
+    {
+      "source": "domain:first-run-setup",
+      "target": "flow:first-run-onboarding",
+      "type": "contains_flow",
+      "direction": "outbound",
+      "weight": 1
+    },
+    {
+      "source": "domain:voice-and-local-inference",
+      "target": "flow:voice-driven-setup",
+      "type": "contains_flow",
+      "direction": "outbound",
+      "weight": 1
+    },
+    {
+      "source": "domain:agent-and-plugin-platform",
+      "target": "flow:plugin-app-action-surface",
+      "type": "contains_flow",
+      "direction": "outbound",
+      "weight": 1
+    },
+    {
+      "source": "domain:build-qa-and-release",
+      "target": "flow:verification-and-release",
+      "type": "contains_flow",
+      "direction": "outbound",
+      "weight": 1
+    },
+    {
+      "source": "flow:fresh-desktop-launch",
+      "target": "step:fresh-desktop-launch:renderer-entry",
+      "type": "flow_step",
+      "direction": "outbound",
+      "weight": 1
+    },
+    {
+      "source": "step:fresh-desktop-launch:renderer-entry",
+      "target": "source:apps/app/src/main.tsx",
+      "type": "related",
+      "direction": "outbound",
+      "weight": 0.6
+    },
+    {
+      "source": "flow:fresh-desktop-launch",
+      "target": "step:fresh-desktop-launch:sidecar-runtime",
+      "type": "flow_step",
+      "direction": "outbound",
+      "weight": 1
+    },
+    {
+      "source": "step:fresh-desktop-launch:sidecar-runtime",
+      "target": "source:eliza/packages/app-core/platforms/electrobun/src/native/agent.ts",
+      "type": "related",
+      "direction": "outbound",
+      "weight": 0.6
+    },
+    {
+      "source": "flow:first-run-onboarding",
+      "target": "step:first-run-onboarding:shell",
+      "type": "flow_step",
+      "direction": "outbound",
+      "weight": 1
+    },
+    {
+      "source": "step:first-run-onboarding:shell",
+      "target": "source:eliza/packages/ui/src/components/shell/FirstRunShell.tsx",
+      "type": "related",
+      "direction": "outbound",
+      "weight": 0.6
+    },
+    {
+      "source": "flow:first-run-onboarding",
+      "target": "step:first-run-onboarding:controller",
+      "type": "flow_step",
+      "direction": "outbound",
+      "weight": 1
+    },
+    {
+      "source": "step:first-run-onboarding:controller",
+      "target": "source:eliza/packages/ui/src/first-run/use-first-run-controller.ts",
+      "type": "related",
+      "direction": "outbound",
+      "weight": 0.6
+    },
+    {
+      "source": "flow:voice-driven-setup",
+      "target": "step:voice-driven-setup:inference-policy",
+      "type": "flow_step",
+      "direction": "outbound",
+      "weight": 1
+    },
+    {
+      "source": "step:voice-driven-setup:inference-policy",
+      "target": "source:eliza/plugins/plugin-local-inference/src/runtime/embedding-warmup-policy.ts",
+      "type": "related",
+      "direction": "outbound",
+      "weight": 0.6
+    },
+    {
+      "source": "flow:voice-driven-setup",
+      "target": "step:voice-driven-setup:voice-types",
+      "type": "flow_step",
+      "direction": "outbound",
+      "weight": 1
+    },
+    {
+      "source": "step:voice-driven-setup:voice-types",
+      "target": "source:eliza/plugins/plugin-local-inference/src/services/voice/types.ts",
+      "type": "related",
+      "direction": "outbound",
+      "weight": 0.6
+    },
+    {
+      "source": "flow:plugin-app-action-surface",
+      "target": "step:plugin-app-action-surface:app-manager",
+      "type": "flow_step",
+      "direction": "outbound",
+      "weight": 1
+    },
+    {
+      "source": "step:plugin-app-action-surface:app-manager",
+      "target": "source:eliza/plugins/plugin-app-manager/src/index.ts",
+      "type": "related",
+      "direction": "outbound",
+      "weight": 0.6
+    },
+    {
+      "source": "flow:plugin-app-action-surface",
+      "target": "step:plugin-app-action-surface:agent-skills",
+      "type": "flow_step",
+      "direction": "outbound",
+      "weight": 1
+    },
+    {
+      "source": "step:plugin-app-action-surface:agent-skills",
+      "target": "source:eliza/plugins/plugin-agent-skills/src/index.ts",
+      "type": "related",
+      "direction": "outbound",
+      "weight": 0.6
+    },
+    {
+      "source": "flow:verification-and-release",
+      "target": "step:verification-and-release:packaged-test",
+      "type": "flow_step",
+      "direction": "outbound",
+      "weight": 1
+    },
+    {
+      "source": "step:verification-and-release:packaged-test",
+      "target": "source:apps/app/test/electrobun-packaged/windows-bootstrap.ts",
+      "type": "related",
+      "direction": "outbound",
+      "weight": 0.6
+    },
+    {
+      "source": "flow:verification-and-release",
+      "target": "step:verification-and-release:first-run-docs",
+      "type": "flow_step",
+      "direction": "outbound",
+      "weight": 1
+    },
+    {
+      "source": "step:verification-and-release:first-run-docs",
+      "target": "source:docs/QA-first-run.md",
+      "type": "related",
+      "direction": "outbound",
+      "weight": 0.6
+    }
+  ],
+  "layers": [
+    {
+      "id": "layer:desktop-runtime-bootstrap",
+      "name": "Desktop Runtime Bootstrap",
+      "description": "Packaged desktop startup, sidecar runtime launch, first API readiness, and platform process management.",
+      "nodeIds": [
+        "domain:desktop-runtime-bootstrap",
+        "flow:fresh-desktop-launch"
+      ]
+    },
+    {
+      "id": "layer:first-run-setup",
+      "name": "First-Run Setup",
+      "description": "Initial user setup, owner/agent identity collection, state persistence, and readiness gating.",
+      "nodeIds": [
+        "domain:first-run-setup",
+        "flow:first-run-onboarding"
+      ]
+    },
+    {
+      "id": "layer:voice-and-local-inference",
+      "name": "Voice And Local Inference",
+      "description": "Voice-driven interaction, ASR/TTS preparation, local model routing, and startup warmup policy.",
+      "nodeIds": [
+        "domain:voice-and-local-inference",
+        "flow:voice-driven-setup"
+      ]
+    },
+    {
+      "id": "layer:agent-and-plugin-platform",
+      "name": "Agent And Plugin Platform",
+      "description": "Core eliza runtime contracts plus app, plugin, and skill management surfaces.",
+      "nodeIds": [
+        "domain:agent-and-plugin-platform",
+        "flow:plugin-app-action-surface"
+      ]
+    },
+    {
+      "id": "layer:build-qa-and-release",
+      "name": "Build QA And Release",
+      "description": "Install, build, packaged verification, QA docs, CI, and deployment workflows.",
+      "nodeIds": [
+        "domain:build-qa-and-release",
+        "flow:verification-and-release"
+      ]
+    }
+  ],
+  "tour": [
+    {
+      "order": 1,
+      "title": "Fresh Desktop Launch",
+      "description": "The packaged app starts, prepares state directories, launches the embedded runtime sidecar, and waits for API readiness.",
+      "nodeIds": [
+        "flow:fresh-desktop-launch"
+      ]
+    },
+    {
+      "order": 2,
+      "title": "First-Run Onboarding",
+      "description": "A new user reaches first-run setup, provides identity/runtime choices, and persists first-run completion.",
+      "nodeIds": [
+        "flow:first-run-onboarding"
+      ]
+    },
+    {
+      "order": 3,
+      "title": "Voice-Driven Setup",
+      "description": "The first-run and main UI accept text or voice while ASR/TTS readiness is coordinated with runtime startup.",
+      "nodeIds": [
+        "flow:voice-driven-setup"
+      ]
+    },
+    {
+      "order": 4,
+      "title": "Plugin And App Action Surface",
+      "description": "The agent exposes app/plugin/skill operations through runtime plugins and shared contracts.",
+      "nodeIds": [
+        "flow:plugin-app-action-surface"
+      ]
+    },
+    {
+      "order": 5,
+      "title": "Verification And Release",
+      "description": "Build scripts, packaged startup tests, and QA docs prove desktop startup and first-run behavior.",
+      "nodeIds": [
+        "flow:verification-and-release"
+      ]
+    }
+  ]
+}

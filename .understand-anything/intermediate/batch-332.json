@@ -1,0 +1,508 @@
+{
+  "batchIndex": 332,
+  "nodes": [
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/form.tsx",
+      "type": "file",
+      "name": "form.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/form.tsx",
+      "summary": "form.tsx is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/image-gen/enhanced-loading.tsx",
+      "type": "file",
+      "name": "enhanced-loading.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/image-gen/enhanced-loading.tsx",
+      "summary": "enhanced-loading.tsx is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 75 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/image-gen/enhanced-loading.tsx:EnhancedLoading",
+      "type": "function",
+      "name": "EnhancedLoading",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/image-gen/enhanced-loading.tsx",
+      "summary": "EnhancedLoading is a function defined in eliza/packages/ui/src/cloud-ui/components/image-gen/enhanced-loading.tsx."
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/image-gen/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/image-gen/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 8 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-shell.tsx",
+      "type": "file",
+      "name": "dashboard-shell.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/dashboard-shell.tsx",
+      "summary": "dashboard-shell.tsx is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 29 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-shell.tsx:DashboardShellLayout",
+      "type": "function",
+      "name": "DashboardShellLayout",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/dashboard-shell.tsx",
+      "summary": "DashboardShellLayout is a function defined in eliza/packages/ui/src/cloud-ui/components/layout/dashboard-shell.tsx."
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/layout/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 46 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/layout/page-transition.tsx",
+      "type": "file",
+      "name": "page-transition.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/page-transition.tsx",
+      "summary": "page-transition.tsx is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 56 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/layout/page-transition.tsx:PageTransition",
+      "type": "function",
+      "name": "PageTransition",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/page-transition.tsx",
+      "summary": "PageTransition is a function defined in eliza/packages/ui/src/cloud-ui/components/layout/page-transition.tsx."
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/monetization/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/monetization/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 4 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/navigation-progress.tsx",
+      "type": "file",
+      "name": "navigation-progress.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/navigation-progress.tsx",
+      "summary": "navigation-progress.tsx is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 46 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/navigation-progress.tsx:NavigationProgress",
+      "type": "function",
+      "name": "NavigationProgress",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/navigation-progress.tsx",
+      "summary": "NavigationProgress is a function defined in eliza/packages/ui/src/cloud-ui/components/navigation-progress.tsx."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/pagination.tsx",
+      "type": "file",
+      "name": "pagination.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/pagination.tsx",
+      "summary": "pagination.tsx is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/separator.tsx",
+      "type": "file",
+      "name": "separator.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/separator.tsx",
+      "summary": "separator.tsx is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/share/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/share/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/sheet.tsx",
+      "type": "file",
+      "name": "sheet.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/sheet.tsx",
+      "summary": "sheet.tsx is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/switch.tsx",
+      "type": "file",
+      "name": "switch.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/switch.tsx",
+      "summary": "switch.tsx is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/tabs.tsx",
+      "type": "file",
+      "name": "tabs.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/tabs.tsx",
+      "summary": "tabs.tsx is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/textarea.tsx",
+      "type": "file",
+      "name": "textarea.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/textarea.tsx",
+      "summary": "textarea.tsx is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/theme/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/theme/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 7 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/timeline.tsx",
+      "type": "file",
+      "name": "timeline.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/timeline.tsx",
+      "summary": "timeline.tsx is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 96 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/timeline.tsx:Timeline",
+      "type": "function",
+      "name": "Timeline",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/timeline.tsx",
+      "summary": "Timeline is a function defined in eliza/packages/ui/src/cloud-ui/components/timeline.tsx."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/toggle.tsx",
+      "type": "file",
+      "name": "toggle.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/toggle.tsx",
+      "summary": "toggle.tsx is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "voice",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/voice/audio-utils.ts",
+      "type": "file",
+      "name": "audio-utils.ts",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/voice/audio-utils.ts",
+      "summary": "audio-utils.ts is a typescript source file in the Milady codebase. It contains 3 functions.",
+      "languageNotes": "typescript; code; 30 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/voice/audio-utils.ts:supportsMediaRecorder",
+      "type": "function",
+      "name": "supportsMediaRecorder",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/voice/audio-utils.ts",
+      "summary": "supportsMediaRecorder is a function defined in eliza/packages/ui/src/cloud-ui/components/voice/audio-utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/voice/audio-utils.ts:supportsGetUserMedia",
+      "type": "function",
+      "name": "supportsGetUserMedia",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/voice/audio-utils.ts",
+      "summary": "supportsGetUserMedia is a function defined in eliza/packages/ui/src/cloud-ui/components/voice/audio-utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/voice/audio-utils.ts:getSupportedMimeType",
+      "type": "function",
+      "name": "getSupportedMimeType",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/voice/audio-utils.ts",
+      "summary": "getSupportedMimeType is a function defined in eliza/packages/ui/src/cloud-ui/components/voice/audio-utils.ts."
+    },
+    {
+      "tags": [
+        "entry-point",
+        "voice"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/voice/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/voice/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 10 lines"
+    },
+    {
+      "tags": [
+        "voice"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/voice/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/voice/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 32 lines"
+    },
+    {
+      "tags": [
+        "voice",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/voice/use-audio-player.ts",
+      "type": "file",
+      "name": "use-audio-player.ts",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/voice/use-audio-player.ts",
+      "summary": "use-audio-player.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 151 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/voice/use-audio-player.ts:useAudioPlayer",
+      "type": "function",
+      "name": "useAudioPlayer",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/voice/use-audio-player.ts",
+      "summary": "useAudioPlayer is a function defined in eliza/packages/ui/src/cloud-ui/components/voice/use-audio-player.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/voice/use-audio-recorder.ts",
+      "type": "file",
+      "name": "use-audio-recorder.ts",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/voice/use-audio-recorder.ts",
+      "summary": "use-audio-recorder.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 211 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/voice/use-audio-recorder.ts:useAudioRecorder",
+      "type": "function",
+      "name": "useAudioRecorder",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/voice/use-audio-recorder.ts",
+      "summary": "useAudioRecorder is a function defined in eliza/packages/ui/src/cloud-ui/components/voice/use-audio-recorder.ts."
+    },
+    {
+      "tags": [
+        "frontend"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/index.css",
+      "type": "file",
+      "name": "index.css",
+      "filePath": "eliza/packages/ui/src/cloud-ui/index.css",
+      "summary": "index.css is a css source file in the Milady codebase.",
+      "languageNotes": "css; markup; 3 lines"
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/ui/src/cloud-ui/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 98 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/image-gen/enhanced-loading.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/image-gen/enhanced-loading.tsx:EnhancedLoading",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-shell.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-shell.tsx:DashboardShellLayout",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/page-transition.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/layout/page-transition.tsx:PageTransition",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/navigation-progress.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/navigation-progress.tsx:NavigationProgress",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/timeline.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/timeline.tsx:Timeline",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/voice/audio-utils.ts",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/voice/audio-utils.ts:supportsMediaRecorder",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/voice/audio-utils.ts",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/voice/audio-utils.ts:supportsGetUserMedia",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/voice/audio-utils.ts",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/voice/audio-utils.ts:getSupportedMimeType",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/voice/use-audio-player.ts",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/voice/use-audio-player.ts:useAudioPlayer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/voice/use-audio-recorder.ts",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/voice/use-audio-recorder.ts:useAudioRecorder",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/voice/use-audio-recorder.ts",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/voice/audio-utils.ts",
+      "type": "imports"
+    }
+  ]
+}

@@ -1,0 +1,159 @@
+# .understandignore — patterns for files/dirs to exclude from analysis
+# Syntax: same as .gitignore (globs, # comments, ! negation, trailing / for dirs)
+# Lines below are suggestions — uncomment to activate.
+# Use ! prefix to force-include something excluded by defaults.
+#
+# Built-in defaults are always excluded unless negated:
+#   node_modules/, .git/, dist/, build/, obj/, *.lock, *.min.js, images, fonts, media, archives, logs
+#
+
+# --- From .gitignore (uncomment to exclude) ---
+
+# /eliza/
+# .eliza-repo-setup.lock
+# **/.env
+# **/.env.*
+# **/.env.local
+# **/.env.*.local
+# **/.env.development
+# **/.env.production
+# **/.env.preview
+# **/.env.dev
+# !**/.env.example
+# **/.vercel
+# storybook-static
+# tmp/
+# .tmp/
+# apps/app/electron/build/
+# apps/app/electrobun/build/
+# .bun
+# *.bun-build
+# **/*.bun-build
+# *.tsbuildinfo
+# eliza/packages/elizaos/templates/
+# eliza/packages/elizaos/templates-manifest.json
+# apps/app/electron/tsc-out/
+# **/android/build/
+# eliza/packages/*/src/**/*.d.ts
+# !eliza/packages/app-core/src/ambient-modules.d.ts
+# !eliza/packages/shared/src/elizaos-core-roles.d.ts
+# eliza/packages/*/src/**/*.d.ts.map
+# eliza/packages/core/src/**/*.d.ts
+# eliza/packages/core/src/**/*.d.ts.map
+# src/plugins/**/*.d.ts
+# src/plugins/**/*.d.ts.map
+# eliza/packages/app-core/src/ui/**/*.js
+# docker-compose.extra.yml
+# .dockerignore
+# vendor/
+# !os/android/vendor/
+# os/android/vendor/milady/apps/Milady/Milady.apk
+# os/android/vendor/milady/apps/Milady/*.apk.idsig
+# os/android/vendor/eliza/apps/Eliza/Eliza.apk
+# os/android/vendor/eliza/apps/Eliza/*.apk.idsig
+# .preserve/
+# .local/
+# .vscode/
+# .claude/settings.local.json
+# .claude/scheduled_tasks.lock
+# .claude/skills/
+# .git-workspace/
+# IDENTITY.md
+# USER.md
+# .eliza/
+# .eliza.broken.*/
+# .milady-repo-setup.lock
+# .milady/desktop-dev-console.log
+# .milady/*.png
+# .milady/gmail-fixtures/
+# .milady/avd-signed/
+# reports/avd-smoke/
+# reports/aosp-cuttlefish/
+# reports/e2e-*/
+# test/mocks/fixtures/*.raw.json
+# .turbo/
+# skills/.cache/
+# apps/app/electron/.eliza
+# apps/app/electron/skills/
+# milady-workspace/
+# assets/
+# temp_capture_*.jpg
+# knip_output*.txt
+# src/benchmark/mock-plugin.ts
+# biome-report.json
+# report/
+# /action-benchmark-report/
+# /action-benchmark-report-*/
+# /action-benchmark-report*.md
+# knowledge/
+# !src/knowledge/
+# src/knowledge/*
+# !src/knowledge/history.ts
+# !src/knowledge/history.md
+# scripts/knowledge-loop.mjs
+# **/__pycache__/
+# apps/app/test-results/
+# /auth/
+# :memory:/
+# eliza/packages/benchmarks/app-eval/results/
+# !docs/plugins/
+# apps/app/electrobun/src/libMacWindowEffects.dylib
+# apps/app/electrobun/src/preload.js
+# apps/app/electrobun/artifacts/
+# **/electrobun/artifacts/*.tar.zst
+# apps/app/electron/app-build/
+# apps/app/electron/milady-dist/
+# dist-electron/
+# test-output/
+# artifacts/
+# elizaos-plugins/
+# e2e-screenshots/
+# data/
+# .avatar-clone-tmp
+# eliza/plugins/plugin-agent-skills/
+# eliza/plugins/plugin-anthropic/
+# eliza/plugins/plugin-cli/
+# eliza/plugins/plugin-commands/
+# eliza/plugins/plugin-cron/
+# eliza/plugins/plugin-discord/
+# eliza/plugins/plugin-edge-tts/
+# eliza/plugins/plugin-elizacloud/
+# eliza/plugins/plugin-evm/
+# eliza/plugins/plugin-google-genai/
+# eliza/plugins/plugin-groq/
+# eliza/plugins/plugin-imessage/
+# eliza/plugins/plugin-local-ai/
+# eliza/plugins/plugin-local-embedding/
+# eliza/plugins/plugin-music-library/
+# eliza/plugins/plugin-music-player/
+# eliza/plugins/plugin-ollama/
+# eliza/plugins/plugin-openai/
+# eliza/plugins/plugin-openrouter/
+# eliza/plugins/plugin-pdf/
+# eliza/plugins/plugin-shell/
+# eliza/plugins/plugin-shopify/
+# eliza/plugins/plugin-solana/
+# eliza/plugins/plugin-sql/
+# eliza/plugins/plugin-telegram/
+# eliza/plugins/plugin-whatsapp/
+# .parallax/
+# .worktrees/
+# .claude/worktrees/
+# eliza/apps/app-companion/public/animations/**/*.fbx
+# eliza/apps/app-companion/public/animations/**/*.fbx.gz
+# eliza/apps/app-companion/public/animations/**/*.glb
+
+# --- Detected directories (uncomment to exclude) ---
+
+# docs/
+# scripts/
+# test/
+# tests/
+# fixtures/
+# examples/
+
+# --- Test file patterns (uncomment to exclude) ---
+
+# *.test.*
+# *.spec.*
+# *.snap

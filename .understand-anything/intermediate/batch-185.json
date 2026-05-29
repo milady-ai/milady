@@ -1,0 +1,97 @@
+{
+  "batchIndex": 185,
+  "nodes": [
+    {
+      "tags": [
+        "script",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/scripts/dependency-audit.sh",
+      "type": "file",
+      "name": "dependency-audit.sh",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/scripts/dependency-audit.sh",
+      "summary": "dependency-audit.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 8 lines"
+    },
+    {
+      "tags": [
+        "script",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/scripts/electrobun-agent-doctor.sh",
+      "type": "file",
+      "name": "electrobun-agent-doctor.sh",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/scripts/electrobun-agent-doctor.sh",
+      "summary": "electrobun-agent-doctor.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 18 lines"
+    },
+    {
+      "tags": [
+        "script",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/scripts/electrobun-build-test.sh",
+      "type": "file",
+      "name": "electrobun-build-test.sh",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/scripts/electrobun-build-test.sh",
+      "summary": "electrobun-build-test.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 11 lines"
+    },
+    {
+      "tags": [
+        "script",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/scripts/electrobun-port-audit.sh",
+      "type": "file",
+      "name": "electrobun-port-audit.sh",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/scripts/electrobun-port-audit.sh",
+      "summary": "electrobun-port-audit.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 5 lines"
+    },
+    {
+      "tags": [
+        "script",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/scripts/electrobun-release-audit.sh",
+      "type": "file",
+      "name": "electrobun-release-audit.sh",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/scripts/electrobun-release-audit.sh",
+      "summary": "electrobun-release-audit.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 15 lines"
+    },
+    {
+      "tags": [
+        "script",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/scripts/security-audit.sh",
+      "type": "file",
+      "name": "security-audit.sh",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/scripts/security-audit.sh",
+      "summary": "security-audit.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 18 lines"
+    },
+    {
+      "tags": [
+        "script",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/scripts/validate-agentic-electrobun.sh",
+      "type": "file",
+      "name": "validate-agentic-electrobun.sh",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/scripts/validate-agentic-electrobun.sh",
+      "summary": "validate-agentic-electrobun.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 19 lines"
+    }
+  ],
+  "edges": []
+}

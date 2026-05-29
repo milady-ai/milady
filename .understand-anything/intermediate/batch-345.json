@@ -1,0 +1,2854 @@
+{
+  "batchIndex": 345,
+  "nodes": [
+    {
+      "tags": [
+        "test",
+        "voice",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/voice_profile_emotion_status.test.mjs",
+      "type": "file",
+      "name": "voice_profile_emotion_status.test.mjs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/voice_profile_emotion_status.test.mjs",
+      "summary": "voice_profile_emotion_status.test.mjs is a javascript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "javascript; code; 170 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/voice_profile_emotion_status.test.mjs:writePlaceholderPreset",
+      "type": "function",
+      "name": "writePlaceholderPreset",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/voice_profile_emotion_status.test.mjs",
+      "summary": "writePlaceholderPreset is a function defined in eliza/plugins/plugin-local-inference/native/verify/voice_profile_emotion_status.test.mjs."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench",
+      "type": "file",
+      "name": "vulkan_bench",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_bench",
+      "summary": "vulkan_bench is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 100 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "type": "file",
+      "name": "vulkan_bench.cpp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "summary": "vulkan_bench.cpp is a cpp source file in the Milady codebase. It contains 11 functions, 9 classes.",
+      "languageNotes": "cpp; code; 510 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:lower_ascii",
+      "type": "function",
+      "name": "lower_ascii",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "summary": "lower_ascii is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:software_vulkan_allowed",
+      "type": "function",
+      "name": "software_vulkan_allowed",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "summary": "software_vulkan_allowed is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:looks_like_software_vulkan_device",
+      "type": "function",
+      "name": "looks_like_software_vulkan_device",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "summary": "looks_like_software_vulkan_device is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:load_spirv",
+      "type": "function",
+      "name": "load_spirv",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "summary": "load_spirv is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:init_vk",
+      "type": "function",
+      "name": "init_vk",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "summary": "init_vk is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:find_mem",
+      "type": "function",
+      "name": "find_mem",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "summary": "find_mem is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:alloc_buf",
+      "type": "function",
+      "name": "alloc_buf",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "summary": "alloc_buf is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:free_buf",
+      "type": "function",
+      "name": "free_buf",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "summary": "free_buf is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:bench_dispatch",
+      "type": "function",
+      "name": "bench_dispatch",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "summary": "bench_dispatch is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:spv_path",
+      "type": "function",
+      "name": "spv_path",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "summary": "spv_path is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "summary": "main is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp."
+    },
+    {
+      "tags": [
+        "class",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:Vk",
+      "type": "class",
+      "name": "Vk",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "summary": "Vk is a class or type declared in eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp."
+    },
+    {
+      "tags": [
+        "class",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:Buf",
+      "type": "class",
+      "name": "Buf",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "summary": "Buf is a class or type declared in eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp."
+    },
+    {
+      "tags": [
+        "class",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:DispatchCfg",
+      "type": "class",
+      "name": "DispatchCfg",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "summary": "DispatchCfg is a class or type declared in eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp."
+    },
+    {
+      "tags": [
+        "class",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:TurboPush",
+      "type": "class",
+      "name": "TurboPush",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "summary": "TurboPush is a class or type declared in eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp."
+    },
+    {
+      "tags": [
+        "class",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:QjlPush",
+      "type": "class",
+      "name": "QjlPush",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "summary": "QjlPush is a class or type declared in eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp."
+    },
+    {
+      "tags": [
+        "class",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:PolarPush",
+      "type": "class",
+      "name": "PolarPush",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "summary": "PolarPush is a class or type declared in eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp."
+    },
+    {
+      "tags": [
+        "class",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:FusedTbqPush",
+      "type": "class",
+      "name": "FusedTbqPush",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "summary": "FusedTbqPush is a class or type declared in eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp."
+    },
+    {
+      "tags": [
+        "class",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:FusedPolarPush",
+      "type": "class",
+      "name": "FusedPolarPush",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "summary": "FusedPolarPush is a class or type declared in eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp."
+    },
+    {
+      "tags": [
+        "class",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:Row",
+      "type": "class",
+      "name": "Row",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "summary": "Row is a class or type declared in eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke",
+      "type": "file",
+      "name": "vulkan_dispatch_smoke",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke",
+      "summary": "vulkan_dispatch_smoke is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 87 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "type": "file",
+      "name": "vulkan_dispatch_smoke.cpp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "summary": "vulkan_dispatch_smoke.cpp is a cpp source file in the Milady codebase. It contains 20 functions, 1 class.",
+      "languageNotes": "cpp; code; 567 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:lower_ascii",
+      "type": "function",
+      "name": "lower_ascii",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "summary": "lower_ascii is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:software_vulkan_allowed",
+      "type": "function",
+      "name": "software_vulkan_allowed",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "summary": "software_vulkan_allowed is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:looks_like_software_vulkan_device",
+      "type": "function",
+      "name": "looks_like_software_vulkan_device",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "summary": "looks_like_software_vulkan_device is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:bf16_to_f32",
+      "type": "function",
+      "name": "bf16_to_f32",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "summary": "bf16_to_f32 is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:fill_k_rows",
+      "type": "function",
+      "name": "fill_k_rows",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "summary": "fill_k_rows is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:fill_q_heads",
+      "type": "function",
+      "name": "fill_q_heads",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "summary": "fill_q_heads is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:fill_qjl_sketch",
+      "type": "function",
+      "name": "fill_qjl_sketch",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "summary": "fill_qjl_sketch is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:qjl_ref_score",
+      "type": "function",
+      "name": "qjl_ref_score",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "summary": "qjl_ref_score is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:check_scores",
+      "type": "function",
+      "name": "check_scores",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "summary": "check_scores is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:compute_graph",
+      "type": "function",
+      "name": "compute_graph",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "summary": "compute_graph is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:run_qjl_smoke",
+      "type": "function",
+      "name": "run_qjl_smoke",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "summary": "run_qjl_smoke is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:quantize_turbo3_adapter",
+      "type": "function",
+      "name": "quantize_turbo3_adapter",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "summary": "quantize_turbo3_adapter is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:dot_turbo3_adapter",
+      "type": "function",
+      "name": "dot_turbo3_adapter",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "summary": "dot_turbo3_adapter is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:quantize_turbo4_adapter",
+      "type": "function",
+      "name": "quantize_turbo4_adapter",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "summary": "quantize_turbo4_adapter is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:dot_turbo4_adapter",
+      "type": "function",
+      "name": "dot_turbo4_adapter",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "summary": "dot_turbo4_adapter is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:quantize_turbo3_tcq_adapter",
+      "type": "function",
+      "name": "quantize_turbo3_tcq_adapter",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "summary": "quantize_turbo3_tcq_adapter is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:dot_turbo3_tcq_adapter",
+      "type": "function",
+      "name": "dot_turbo3_tcq_adapter",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "summary": "dot_turbo3_tcq_adapter is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:run_polar_smoke",
+      "type": "function",
+      "name": "run_polar_smoke",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "summary": "run_polar_smoke is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:run_fused_attn_smoke",
+      "type": "function",
+      "name": "run_fused_attn_smoke",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "summary": "run_fused_attn_smoke is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "summary": "main is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp."
+    },
+    {
+      "tags": [
+        "class",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:block_qjl1_256_smoke",
+      "type": "class",
+      "name": "block_qjl1_256_smoke",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "summary": "block_qjl1_256_smoke is a class or type declared in eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "type": "file",
+      "name": "vulkan_verify.cpp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "vulkan_verify.cpp is a cpp source file in the Milady codebase. It contains 20 functions, 10 classes.",
+      "languageNotes": "cpp; code; 1093 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:lower_ascii",
+      "type": "function",
+      "name": "lower_ascii",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "lower_ascii is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:software_vulkan_allowed",
+      "type": "function",
+      "name": "software_vulkan_allowed",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "software_vulkan_allowed is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:looks_like_software_vulkan_device",
+      "type": "function",
+      "name": "looks_like_software_vulkan_device",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "looks_like_software_vulkan_device is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:slurp",
+      "type": "function",
+      "name": "slurp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "slurp is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:find_key",
+      "type": "function",
+      "name": "find_key",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "find_key is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:parse_int_after",
+      "type": "function",
+      "name": "parse_int_after",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "parse_int_after is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:parse_float_array_at",
+      "type": "function",
+      "name": "parse_float_array_at",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "parse_float_array_at is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:parse_byte_array_at",
+      "type": "function",
+      "name": "parse_byte_array_at",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "parse_byte_array_at is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:parse_string_at",
+      "type": "function",
+      "name": "parse_string_at",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "parse_string_at is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_int",
+      "type": "function",
+      "name": "get_int",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "get_int is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_floats",
+      "type": "function",
+      "name": "get_floats",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "get_floats is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_bytes",
+      "type": "function",
+      "name": "get_bytes",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "get_bytes is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fixture",
+      "type": "function",
+      "name": "load_fixture",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "load_fixture is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_spirv",
+      "type": "function",
+      "name": "load_spirv",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "load_spirv is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:hadamard128_inplace",
+      "type": "function",
+      "name": "hadamard128_inplace",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "hadamard128_inplace is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:find_balanced",
+      "type": "function",
+      "name": "find_balanced",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "find_balanced is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:split_object_array",
+      "type": "function",
+      "name": "split_object_array",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "split_object_array is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fused_cases",
+      "type": "function",
+      "name": "load_fused_cases",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "load_fused_cases is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:run_fused_attn",
+      "type": "function",
+      "name": "run_fused_attn",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "run_fused_attn is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "main is a function defined in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "class",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:Fixture",
+      "type": "class",
+      "name": "Fixture",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "Fixture is a class or type declared in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "class",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:TurboPush",
+      "type": "class",
+      "name": "TurboPush",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "TurboPush is a class or type declared in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "class",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:QjlPush",
+      "type": "class",
+      "name": "QjlPush",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "QjlPush is a class or type declared in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "class",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:PolarPush",
+      "type": "class",
+      "name": "PolarPush",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "PolarPush is a class or type declared in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "class",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:QjlMulMvPush",
+      "type": "class",
+      "name": "QjlMulMvPush",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "QjlMulMvPush is a class or type declared in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "class",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:QjlDequantPush",
+      "type": "class",
+      "name": "QjlDequantPush",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "QjlDequantPush is a class or type declared in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "class",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:PolarDequantPush",
+      "type": "class",
+      "name": "PolarDequantPush",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "PolarDequantPush is a class or type declared in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "class",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:KernelBindings",
+      "type": "class",
+      "name": "KernelBindings",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "KernelBindings is a class or type declared in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "class",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:FusedAttnPush",
+      "type": "class",
+      "name": "FusedAttnPush",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "FusedAttnPush is a class or type declared in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "class",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:FusedAttnCase",
+      "type": "class",
+      "name": "FusedAttnCase",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "summary": "FusedAttnCase is a class or type declared in eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp."
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/voice-bench/bin/voice-bench",
+      "type": "file",
+      "name": "voice-bench",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/bin/voice-bench",
+      "summary": "voice-bench is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 134 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "voice",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/plugins/plugin-local-inference/native/voice-bench/configs/gpu-benchmarks.json",
+      "type": "config",
+      "name": "gpu-benchmarks.json",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/configs/gpu-benchmarks.json",
+      "summary": "gpu-benchmarks.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 126 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "voice",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/plugins/plugin-local-inference/native/voice-bench/configs/gpu/matrix.json",
+      "type": "config",
+      "name": "matrix.json",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/configs/gpu/matrix.json",
+      "summary": "matrix.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 128 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "voice",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/plugins/plugin-local-inference/native/voice-bench/configs/gpu/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/configs/gpu/README.md",
+      "summary": "README.md documents eliza/plugins/plugin-local-inference/native/voice-bench/configs/gpu with 10 lines of reference material.",
+      "languageNotes": "markdown; docs; 10 lines"
+    },
+    {
+      "tags": [
+        "entry-point",
+        "voice",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 45 lines"
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts",
+      "type": "file",
+      "name": "tts-bench.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts",
+      "summary": "tts-bench.ts is a typescript source file in the Milady codebase. It contains 7 functions.",
+      "languageNotes": "typescript; code; 462 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:percentile",
+      "type": "function",
+      "name": "percentile",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts",
+      "summary": "percentile is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:nowMs",
+      "type": "function",
+      "name": "nowMs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts",
+      "summary": "nowMs is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:peakRssMb",
+      "type": "function",
+      "name": "peakRssMb",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts",
+      "summary": "peakRssMb is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:runTtsBenchOnce",
+      "type": "function",
+      "name": "runTtsBenchOnce",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts",
+      "summary": "runTtsBenchOnce is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:aggregate",
+      "type": "function",
+      "name": "aggregate",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts",
+      "summary": "aggregate is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:buildRun",
+      "type": "function",
+      "name": "buildRun",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts",
+      "summary": "buildRun is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:renderMarkdown",
+      "type": "function",
+      "name": "renderMarkdown",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts",
+      "summary": "renderMarkdown is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/vulkan/fused_attn_qjl_polar.comp",
+      "type": "file",
+      "name": "fused_attn_qjl_polar.comp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/vulkan/fused_attn_qjl_polar.comp",
+      "summary": "fused_attn_qjl_polar.comp is a comp source file in the Milady codebase.",
+      "languageNotes": "comp; code; 253 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/vulkan/fused_attn_qjl_tbq.comp",
+      "type": "file",
+      "name": "fused_attn_qjl_tbq.comp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/vulkan/fused_attn_qjl_tbq.comp",
+      "summary": "fused_attn_qjl_tbq.comp is a comp source file in the Milady codebase.",
+      "languageNotes": "comp; code; 281 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/vulkan/polar_get_rows.comp",
+      "type": "file",
+      "name": "polar_get_rows.comp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/vulkan/polar_get_rows.comp",
+      "summary": "polar_get_rows.comp is a comp source file in the Milady codebase.",
+      "languageNotes": "comp; code; 148 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/vulkan/polar_preht.comp",
+      "type": "file",
+      "name": "polar_preht.comp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/vulkan/polar_preht.comp",
+      "summary": "polar_preht.comp is a comp source file in the Milady codebase.",
+      "languageNotes": "comp; code; 160 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/vulkan/polar.comp",
+      "type": "file",
+      "name": "polar.comp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/vulkan/polar.comp",
+      "summary": "polar.comp is a comp source file in the Milady codebase.",
+      "languageNotes": "comp; code; 216 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-local-inference/native/vulkan/qjl_get_rows.comp",
+      "type": "file",
+      "name": "qjl_get_rows.comp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/vulkan/qjl_get_rows.comp",
+      "summary": "qjl_get_rows.comp is a comp source file in the Milady codebase.",
+      "languageNotes": "comp; code; 68 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/vulkan/qjl_mul_mv.comp",
+      "type": "file",
+      "name": "qjl_mul_mv.comp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/vulkan/qjl_mul_mv.comp",
+      "summary": "qjl_mul_mv.comp is a comp source file in the Milady codebase.",
+      "languageNotes": "comp; code; 99 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/vulkan/qjl_multi.comp",
+      "type": "file",
+      "name": "qjl_multi.comp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/vulkan/qjl_multi.comp",
+      "summary": "qjl_multi.comp is a comp source file in the Milady codebase.",
+      "languageNotes": "comp; code; 105 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/vulkan/qjl.comp",
+      "type": "file",
+      "name": "qjl.comp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/vulkan/qjl.comp",
+      "summary": "qjl.comp is a comp source file in the Milady codebase.",
+      "languageNotes": "comp; code; 143 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/vulkan/turbo3_multi.comp",
+      "type": "file",
+      "name": "turbo3_multi.comp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/vulkan/turbo3_multi.comp",
+      "summary": "turbo3_multi.comp is a comp source file in the Milady codebase.",
+      "languageNotes": "comp; code; 131 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/vulkan/turbo3_tcq_multi.comp",
+      "type": "file",
+      "name": "turbo3_tcq_multi.comp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/vulkan/turbo3_tcq_multi.comp",
+      "summary": "turbo3_tcq_multi.comp is a comp source file in the Milady codebase.",
+      "languageNotes": "comp; code; 104 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/vulkan/turbo3_tcq.comp",
+      "type": "file",
+      "name": "turbo3_tcq.comp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/vulkan/turbo3_tcq.comp",
+      "summary": "turbo3_tcq.comp is a comp source file in the Milady codebase.",
+      "languageNotes": "comp; code; 142 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/vulkan/turbo3.comp",
+      "type": "file",
+      "name": "turbo3.comp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/vulkan/turbo3.comp",
+      "summary": "turbo3.comp is a comp source file in the Milady codebase.",
+      "languageNotes": "comp; code; 153 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/voice_profile_emotion_status.test.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/voice_profile_emotion_status.test.mjs:writePlaceholderPreset",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:lower_ascii",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:software_vulkan_allowed",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:looks_like_software_vulkan_device",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:load_spirv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:init_vk",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:find_mem",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:alloc_buf",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:free_buf",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:bench_dispatch",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:spv_path",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "target": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:Vk",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "target": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:Buf",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "target": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:DispatchCfg",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "target": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:TurboPush",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "target": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:QjlPush",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "target": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:PolarPush",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "target": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:FusedTbqPush",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "target": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:FusedPolarPush",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp",
+      "target": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:Row",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:looks_like_software_vulkan_device",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:lower_ascii",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:init_vk",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:software_vulkan_allowed",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:init_vk",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:looks_like_software_vulkan_device",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:alloc_buf",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:find_mem",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:init_vk",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:alloc_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:alloc_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:alloc_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:alloc_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:load_spirv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:spv_path",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:bench_dispatch",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:spv_path",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:load_spirv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:spv_path",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:bench_dispatch",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:spv_path",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:free_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:free_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:free_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:free_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:alloc_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:alloc_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:alloc_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:load_spirv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:spv_path",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:bench_dispatch",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:spv_path",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:load_spirv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:spv_path",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:bench_dispatch",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:spv_path",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:free_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:free_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:free_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:alloc_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:alloc_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:alloc_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:load_spirv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:spv_path",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:bench_dispatch",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:spv_path",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:free_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:free_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:free_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:alloc_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:alloc_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:alloc_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:alloc_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:load_spirv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:spv_path",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:bench_dispatch",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:spv_path",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:free_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:free_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:free_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_bench.cpp:free_buf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:lower_ascii",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:software_vulkan_allowed",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:looks_like_software_vulkan_device",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:bf16_to_f32",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:fill_k_rows",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:fill_q_heads",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:fill_qjl_sketch",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:qjl_ref_score",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:check_scores",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:compute_graph",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:run_qjl_smoke",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:quantize_turbo3_adapter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:dot_turbo3_adapter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:quantize_turbo4_adapter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:dot_turbo4_adapter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:quantize_turbo3_tcq_adapter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:dot_turbo3_tcq_adapter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:run_polar_smoke",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:run_fused_attn_smoke",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp",
+      "target": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:block_qjl1_256_smoke",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:looks_like_software_vulkan_device",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:lower_ascii",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:qjl_ref_score",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:bf16_to_f32",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:run_qjl_smoke",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:fill_k_rows",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:run_qjl_smoke",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:fill_qjl_sketch",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:run_qjl_smoke",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:qjl_ref_score",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:run_qjl_smoke",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:compute_graph",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:run_qjl_smoke",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:check_scores",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:run_polar_smoke",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:fill_k_rows",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:run_polar_smoke",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:fill_q_heads",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:run_polar_smoke",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:compute_graph",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:run_polar_smoke",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:check_scores",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:run_fused_attn_smoke",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:fill_k_rows",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:software_vulkan_allowed",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:looks_like_software_vulkan_device",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:run_polar_smoke",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_dispatch_smoke.cpp:run_polar_smoke",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:lower_ascii",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:software_vulkan_allowed",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:looks_like_software_vulkan_device",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:slurp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:find_key",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:parse_int_after",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:parse_float_array_at",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:parse_byte_array_at",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:parse_string_at",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_int",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_floats",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_bytes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fixture",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_spirv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:hadamard128_inplace",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:find_balanced",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:split_object_array",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fused_cases",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:run_fused_attn",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:Fixture",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:TurboPush",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:QjlPush",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:PolarPush",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:QjlMulMvPush",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:QjlDequantPush",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:PolarDequantPush",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:KernelBindings",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:FusedAttnPush",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+      "target": "class:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:FusedAttnCase",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:looks_like_software_vulkan_device",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:lower_ascii",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_int",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:find_key",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_int",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:parse_int_after",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_floats",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:find_key",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_floats",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:parse_float_array_at",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_bytes",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:find_key",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_bytes",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:parse_byte_array_at",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fixture",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:slurp",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fixture",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:find_key",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fixture",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:parse_string_at",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fixture",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_int",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fixture",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_int",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fixture",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_int",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fixture",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_int",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fixture",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_int",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fixture",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_int",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fixture",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_int",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fixture",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_int",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fixture",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_int",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fixture",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_int",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fixture",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_floats",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fixture",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_floats",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fixture",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_bytes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fixture",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_floats",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:split_object_array",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:find_balanced",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fused_cases",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:find_key",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fused_cases",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:find_balanced",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fused_cases",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:split_object_array",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fused_cases",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_int",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fused_cases",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_int",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fused_cases",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_int",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fused_cases",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_int",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fused_cases",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_int",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fused_cases",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_floats",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fused_cases",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_bytes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fused_cases",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_bytes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fused_cases",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_floats",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:run_fused_attn",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:slurp",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:run_fused_attn",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:find_key",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:run_fused_attn",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:parse_string_at",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:run_fused_attn",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:find_key",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:run_fused_attn",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_int",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:run_fused_attn",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_int",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:run_fused_attn",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:get_int",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:run_fused_attn",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fused_cases",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:run_fused_attn",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_spirv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:run_fused_attn",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:software_vulkan_allowed",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:run_fused_attn",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:looks_like_software_vulkan_device",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:slurp",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:find_key",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:parse_string_at",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:run_fused_attn",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_fixture",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:hadamard128_inplace",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:software_vulkan_allowed",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:looks_like_software_vulkan_device",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp:load_spirv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:percentile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:nowMs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:peakRssMb",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:runTtsBenchOnce",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:aggregate",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:buildRun",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:renderMarkdown",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:runTtsBenchOnce",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:nowMs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:runTtsBenchOnce",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:nowMs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:runTtsBenchOnce",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:nowMs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:runTtsBenchOnce",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:peakRssMb",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:runTtsBenchOnce",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:nowMs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:runTtsBenchOnce",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:peakRssMb",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:aggregate",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:percentile",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:aggregate",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:percentile",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:aggregate",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:percentile",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:aggregate",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:percentile",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:aggregate",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:percentile",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:buildRun",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/tts-bench.ts:aggregate",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/voice_profile_emotion_status.test.mjs",
+      "target": "file:eliza/plugins/plugin-local-inference/native/verify/voice_profile_emotion_status.mjs",
+      "type": "imports"
+    }
+  ]
+}

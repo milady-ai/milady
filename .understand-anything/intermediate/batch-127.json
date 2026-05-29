@@ -1,0 +1,2906 @@
+{
+  "batchIndex": 127,
+  "nodes": [
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "type": "file",
+      "name": "turbo_kernels.c",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "turbo_kernels.c is a c source file in the Milady codebase. It contains 28 functions, 1 imports.",
+      "languageNotes": "c; code; 597 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_fp32_to_fp16",
+      "type": "function",
+      "name": "eliza_fp32_to_fp16",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "eliza_fp32_to_fp16 is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_fp16_to_fp32",
+      "type": "function",
+      "name": "eliza_fp16_to_fp32",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "eliza_fp16_to_fp32 is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:fwht_128",
+      "type": "function",
+      "name": "fwht_128",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "fwht_128 is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_turbo_rotate_forward",
+      "type": "function",
+      "name": "eliza_turbo_rotate_forward",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "eliza_turbo_rotate_forward is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq_hadamard32",
+      "type": "function",
+      "name": "tbq_hadamard32",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "tbq_hadamard32 is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq_precondition_block32",
+      "type": "function",
+      "name": "tbq_precondition_block32",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "tbq_precondition_block32 is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:nearest_3bit",
+      "type": "function",
+      "name": "nearest_3bit",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "nearest_3bit is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:nearest_4bit",
+      "type": "function",
+      "name": "nearest_4bit",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "nearest_4bit is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_turbo3_group",
+      "type": "function",
+      "name": "eliza_quantize_turbo3_group",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "eliza_quantize_turbo3_group is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_dequantize_turbo3_group",
+      "type": "function",
+      "name": "eliza_dequantize_turbo3_group",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "eliza_dequantize_turbo3_group is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_turbo4_block",
+      "type": "function",
+      "name": "eliza_quantize_turbo4_block",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "eliza_quantize_turbo4_block is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_dequantize_turbo4_block",
+      "type": "function",
+      "name": "eliza_dequantize_turbo4_block",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "eliza_dequantize_turbo4_block is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_turbo3_tcq_block",
+      "type": "function",
+      "name": "eliza_quantize_turbo3_tcq_block",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "eliza_quantize_turbo3_tcq_block is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_dequantize_turbo3_tcq_block",
+      "type": "function",
+      "name": "eliza_dequantize_turbo3_tcq_block",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "eliza_dequantize_turbo3_tcq_block is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq_nearest_codebook",
+      "type": "function",
+      "name": "tbq_nearest_codebook",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "tbq_nearest_codebook is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq3_get_code",
+      "type": "function",
+      "name": "tbq3_get_code",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "tbq3_get_code is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq3_set_code",
+      "type": "function",
+      "name": "tbq3_set_code",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "tbq3_set_code is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq4_get_code",
+      "type": "function",
+      "name": "tbq4_get_code",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "tbq4_get_code is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq4_set_code",
+      "type": "function",
+      "name": "tbq4_set_code",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "tbq4_set_code is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq_precondition_fork",
+      "type": "function",
+      "name": "tbq_precondition_fork",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "tbq_precondition_fork is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq_uncondition_fork",
+      "type": "function",
+      "name": "tbq_uncondition_fork",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "tbq_uncondition_fork is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_tbq3_block",
+      "type": "function",
+      "name": "eliza_quantize_tbq3_block",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "eliza_quantize_tbq3_block is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_tbq4_block",
+      "type": "function",
+      "name": "eliza_quantize_tbq4_block",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "eliza_quantize_tbq4_block is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_tbq3_decode_block_uncond",
+      "type": "function",
+      "name": "eliza_tbq3_decode_block_uncond",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "eliza_tbq3_decode_block_uncond is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_tbq4_decode_block_uncond",
+      "type": "function",
+      "name": "eliza_tbq4_decode_block_uncond",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "eliza_tbq4_decode_block_uncond is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_dot_q_turbo3",
+      "type": "function",
+      "name": "eliza_dot_q_turbo3",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "eliza_dot_q_turbo3 is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_dot_q_turbo4",
+      "type": "function",
+      "name": "eliza_dot_q_turbo4",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "eliza_dot_q_turbo4 is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_dot_q_turbo3_tcq",
+      "type": "function",
+      "name": "eliza_dot_q_turbo3_tcq",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "summary": "eliza_dot_q_turbo3_tcq is a function defined in eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.h",
+      "type": "file",
+      "name": "turbo_kernels.h",
+      "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.h",
+      "summary": "turbo_kernels.h is a c source file in the Milady codebase.",
+      "languageNotes": "c; code; 137 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "type": "file",
+      "name": "cpu_bench.c",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "summary": "cpu_bench.c is a c source file in the Milady codebase. It contains 19 functions, 2 imports.",
+      "languageNotes": "c; code; 349 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:now_us",
+      "type": "function",
+      "name": "now_us",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "summary": "now_us is a function defined in eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:cmp_double",
+      "type": "function",
+      "name": "cmp_double",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "summary": "cmp_double is a function defined in eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:median_d",
+      "type": "function",
+      "name": "median_d",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "summary": "median_d is a function defined in eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:xorshift32",
+      "type": "function",
+      "name": "xorshift32",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "summary": "xorshift32 is a function defined in eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:randn_one",
+      "type": "function",
+      "name": "randn_one",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "summary": "randn_one is a function defined in eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:fill_randn",
+      "type": "function",
+      "name": "fill_randn",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "summary": "fill_randn is a function defined in eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:fill_rand_bytes",
+      "type": "function",
+      "name": "fill_rand_bytes",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "summary": "fill_rand_bytes is a function defined in eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_turbo3",
+      "type": "function",
+      "name": "run_turbo3",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "summary": "run_turbo3 is a function defined in eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_turbo4",
+      "type": "function",
+      "name": "run_turbo4",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "summary": "run_turbo4 is a function defined in eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_turbo3_tcq",
+      "type": "function",
+      "name": "run_turbo3_tcq",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "summary": "run_turbo3_tcq is a function defined in eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_qjl",
+      "type": "function",
+      "name": "run_qjl",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "summary": "run_qjl is a function defined in eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_polar",
+      "type": "function",
+      "name": "run_polar",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "summary": "run_polar is a function defined in eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:bench_kernel",
+      "type": "function",
+      "name": "bench_kernel",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "summary": "bench_kernel is a function defined in eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:thunk_turbo3",
+      "type": "function",
+      "name": "thunk_turbo3",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "summary": "thunk_turbo3 is a function defined in eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:thunk_turbo4",
+      "type": "function",
+      "name": "thunk_turbo4",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "summary": "thunk_turbo4 is a function defined in eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:thunk_turbo3_tcq",
+      "type": "function",
+      "name": "thunk_turbo3_tcq",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "summary": "thunk_turbo3_tcq is a function defined in eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:thunk_qjl",
+      "type": "function",
+      "name": "thunk_qjl",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "summary": "thunk_qjl is a function defined in eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:thunk_polar",
+      "type": "function",
+      "name": "thunk_polar",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "summary": "thunk_polar is a function defined in eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "summary": "main is a function defined in eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "type": "file",
+      "name": "gen_fixture.c",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "summary": "gen_fixture.c is a c source file in the Milady codebase. It contains 17 functions, 1 imports.",
+      "languageNotes": "c; code; 856 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "function",
+      "name": "rand_normal",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "summary": "rand_normal is a function defined in eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "function",
+      "name": "write_floats_json",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "summary": "write_floats_json is a function defined in eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_bytes_json",
+      "type": "function",
+      "name": "write_bytes_json",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "summary": "write_bytes_json is a function defined in eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_turbo3",
+      "type": "function",
+      "name": "gen_turbo3",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "summary": "gen_turbo3 is a function defined in eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_turbo4",
+      "type": "function",
+      "name": "gen_turbo4",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "summary": "gen_turbo4 is a function defined in eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_turbo3_tcq",
+      "type": "function",
+      "name": "gen_turbo3_tcq",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "summary": "gen_turbo3_tcq is a function defined in eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_qjl",
+      "type": "function",
+      "name": "gen_qjl",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "summary": "gen_qjl is a function defined in eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar",
+      "type": "function",
+      "name": "gen_polar",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "summary": "gen_polar is a function defined in eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar_qjl",
+      "type": "function",
+      "name": "gen_polar_qjl",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "summary": "gen_polar_qjl is a function defined in eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_q_and_k",
+      "type": "function",
+      "name": "gen_fused_q_and_k",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "summary": "gen_fused_q_and_k is a function defined in eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_tbq",
+      "type": "function",
+      "name": "gen_fused_attn_qjl_tbq",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "summary": "gen_fused_attn_qjl_tbq is a function defined in eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_polar",
+      "type": "function",
+      "name": "gen_fused_attn_qjl_polar",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "summary": "gen_fused_attn_qjl_polar is a function defined in eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_tbq_causal",
+      "type": "function",
+      "name": "gen_fused_attn_qjl_tbq_causal",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "summary": "gen_fused_attn_qjl_tbq_causal is a function defined in eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_polar_causal",
+      "type": "function",
+      "name": "gen_fused_attn_qjl_polar_causal",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "summary": "gen_fused_attn_qjl_polar_causal is a function defined in eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar_preht",
+      "type": "function",
+      "name": "gen_polar_preht",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "summary": "gen_polar_preht is a function defined in eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:self_test",
+      "type": "function",
+      "name": "self_test",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "summary": "self_test is a function defined in eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "summary": "main is a function defined in eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "type": "file",
+      "name": "qjl_polar_ref.c",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "summary": "qjl_polar_ref.c is a c source file in the Milady codebase. It contains 22 functions, 1 imports.",
+      "languageNotes": "c; code; 488 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_fp32_to_bf16",
+      "type": "function",
+      "name": "eliza_fp32_to_bf16",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "summary": "eliza_fp32_to_bf16 is a function defined in eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_bf16_to_fp32",
+      "type": "function",
+      "name": "eliza_bf16_to_fp32",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "summary": "eliza_bf16_to_fp32 is a function defined in eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:fp32_to_fp16_bits",
+      "type": "function",
+      "name": "fp32_to_fp16_bits",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "summary": "fp32_to_fp16_bits is a function defined in eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:fp16_bits_to_fp32",
+      "type": "function",
+      "name": "fp16_bits_to_fp32",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "summary": "fp16_bits_to_fp32 is a function defined in eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:splitmix64",
+      "type": "function",
+      "name": "splitmix64",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "summary": "splitmix64 is a function defined in eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:box_muller",
+      "type": "function",
+      "name": "box_muller",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "summary": "box_muller is a function defined in eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_qjl_make_projection",
+      "type": "function",
+      "name": "eliza_qjl_make_projection",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "summary": "eliza_qjl_make_projection is a function defined in eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_qjl_quantize_row",
+      "type": "function",
+      "name": "eliza_qjl_quantize_row",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "summary": "eliza_qjl_quantize_row is a function defined in eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_qjl_sketch_query",
+      "type": "function",
+      "name": "eliza_qjl_sketch_query",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "summary": "eliza_qjl_sketch_query is a function defined in eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_qjl_score_qk",
+      "type": "function",
+      "name": "eliza_qjl_score_qk",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "summary": "eliza_qjl_score_qk is a function defined in eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_qjl_mul_mv",
+      "type": "function",
+      "name": "eliza_qjl_mul_mv",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "summary": "eliza_qjl_mul_mv is a function defined in eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_qjl_dequantize_row",
+      "type": "function",
+      "name": "eliza_qjl_dequantize_row",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "summary": "eliza_qjl_dequantize_row is a function defined in eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_hadamard_inplace",
+      "type": "function",
+      "name": "eliza_polar_hadamard_inplace",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "summary": "eliza_polar_hadamard_inplace is a function defined in eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_qjl_signs",
+      "type": "function",
+      "name": "eliza_polar_qjl_signs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "summary": "eliza_polar_qjl_signs is a function defined in eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:polar_q4_nearest",
+      "type": "function",
+      "name": "polar_q4_nearest",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "summary": "polar_q4_nearest is a function defined in eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_quantize_row",
+      "type": "function",
+      "name": "eliza_polar_quantize_row",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "summary": "eliza_polar_quantize_row is a function defined in eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_dequantize_row",
+      "type": "function",
+      "name": "eliza_polar_dequantize_row",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "summary": "eliza_polar_dequantize_row is a function defined in eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_mul_mv",
+      "type": "function",
+      "name": "eliza_polar_mul_mv",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "summary": "eliza_polar_mul_mv is a function defined in eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:fused_softmax_weights",
+      "type": "function",
+      "name": "fused_softmax_weights",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "summary": "fused_softmax_weights is a function defined in eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:fused_qjl_scores_one_head",
+      "type": "function",
+      "name": "fused_qjl_scores_one_head",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "summary": "fused_qjl_scores_one_head is a function defined in eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_fused_attn_qjl_tbq3",
+      "type": "function",
+      "name": "eliza_fused_attn_qjl_tbq3",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "summary": "eliza_fused_attn_qjl_tbq3 is a function defined in eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_fused_attn_qjl_polar",
+      "type": "function",
+      "name": "eliza_fused_attn_qjl_polar",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "summary": "eliza_fused_attn_qjl_polar is a function defined in eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.h",
+      "type": "file",
+      "name": "qjl_polar_ref.h",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.h",
+      "summary": "qjl_polar_ref.h is a c source file in the Milady codebase.",
+      "languageNotes": "c; code; 184 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_fp32_to_fp16",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_fp16_to_fp32",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:fwht_128",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_turbo_rotate_forward",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq_hadamard32",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq_precondition_block32",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:nearest_3bit",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:nearest_4bit",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_turbo3_group",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_dequantize_turbo3_group",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_turbo4_block",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_dequantize_turbo4_block",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_turbo3_tcq_block",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_dequantize_turbo3_tcq_block",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq_nearest_codebook",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq3_get_code",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq3_set_code",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq4_get_code",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq4_set_code",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq_precondition_fork",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq_uncondition_fork",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_tbq3_block",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_tbq4_block",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_tbq3_decode_block_uncond",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_tbq4_decode_block_uncond",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_dot_q_turbo3",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_dot_q_turbo4",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_dot_q_turbo3_tcq",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_turbo_rotate_forward",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:fwht_128",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq_precondition_block32",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq_hadamard32",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_turbo3_group",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_turbo_rotate_forward",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_turbo3_group",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:nearest_3bit",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_turbo3_group",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_fp32_to_fp16",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_dequantize_turbo3_group",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_fp16_to_fp32",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_turbo4_block",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq_precondition_block32",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_turbo4_block",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_fp32_to_fp16",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_turbo4_block",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:nearest_4bit",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_dequantize_turbo4_block",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_fp16_to_fp32",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_turbo3_tcq_block",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_turbo_rotate_forward",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_turbo3_tcq_block",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_fp32_to_fp16",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_dequantize_turbo3_tcq_block",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_fp16_to_fp32",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq_precondition_fork",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq_hadamard32",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq_uncondition_fork",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq_hadamard32",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_tbq3_block",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq_precondition_fork",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_tbq3_block",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_fp32_to_fp16",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_tbq3_block",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq3_set_code",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_tbq3_block",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq_nearest_codebook",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_tbq4_block",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq_precondition_fork",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_tbq4_block",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_fp32_to_fp16",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_tbq4_block",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq4_set_code",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_quantize_tbq4_block",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq_nearest_codebook",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_tbq3_decode_block_uncond",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_fp16_to_fp32",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_tbq3_decode_block_uncond",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq3_get_code",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_tbq3_decode_block_uncond",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq_uncondition_fork",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_tbq4_decode_block_uncond",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_fp16_to_fp32",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_tbq4_decode_block_uncond",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq4_get_code",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_tbq4_decode_block_uncond",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:tbq_uncondition_fork",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_dot_q_turbo3",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_dequantize_turbo3_group",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_dot_q_turbo4",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_dequantize_turbo4_block",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_dot_q_turbo3_tcq",
+      "target": "function:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c:eliza_dequantize_turbo3_tcq_block",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:now_us",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:cmp_double",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:median_d",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:xorshift32",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:randn_one",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:fill_randn",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:fill_rand_bytes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_turbo3",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_turbo4",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_turbo3_tcq",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_qjl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_polar",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:bench_kernel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:thunk_turbo3",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:thunk_turbo4",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:thunk_turbo3_tcq",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:thunk_qjl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:thunk_polar",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:randn_one",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:xorshift32",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:randn_one",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:xorshift32",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:fill_randn",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:randn_one",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:fill_rand_bytes",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:xorshift32",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_turbo3",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:now_us",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_turbo3",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:now_us",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_turbo4",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:now_us",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_turbo4",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:now_us",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_turbo3_tcq",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:now_us",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_turbo3_tcq",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:now_us",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_qjl",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:now_us",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_qjl",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:now_us",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_polar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:now_us",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_polar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:now_us",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:bench_kernel",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:median_d",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:thunk_turbo3",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_turbo3",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:thunk_turbo4",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_turbo4",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:thunk_turbo3_tcq",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_turbo3_tcq",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:thunk_qjl",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_qjl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:thunk_polar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:run_polar",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:fill_randn",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:fill_rand_bytes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:fill_rand_bytes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:fill_rand_bytes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:fill_randn",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:fill_rand_bytes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:fill_randn",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:fill_rand_bytes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c:bench_kernel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_bytes_json",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_turbo3",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_turbo4",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_turbo3_tcq",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_qjl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar_qjl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_q_and_k",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_tbq",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_polar",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_tbq_causal",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_polar_causal",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar_preht",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:self_test",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_turbo3",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_turbo3",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_turbo3",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_turbo3",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_bytes_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_turbo3",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_turbo4",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_turbo4",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_turbo4",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_turbo4",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_bytes_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_turbo4",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_turbo3_tcq",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_turbo3_tcq",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_turbo3_tcq",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_turbo3_tcq",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_bytes_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_turbo3_tcq",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_qjl",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_qjl",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_qjl",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_qjl",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_bytes_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_qjl",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_bytes_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar_qjl",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar_qjl",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar_qjl",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar_qjl",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_bytes_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar_qjl",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_q_and_k",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_q_and_k",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_tbq",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_q_and_k",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_tbq",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_tbq",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_tbq",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_bytes_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_tbq",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_bytes_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_tbq",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_polar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_q_and_k",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_polar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_polar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_polar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_bytes_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_polar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_bytes_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_polar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_tbq_causal",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_q_and_k",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_tbq_causal",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_tbq_causal",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_tbq_causal",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_bytes_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_tbq_causal",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_bytes_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_tbq_causal",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_polar_causal",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_q_and_k",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_polar_causal",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_polar_causal",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_polar_causal",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_bytes_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_polar_causal",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_bytes_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_polar_causal",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar_preht",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar_preht",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar_preht",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar_preht",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar_preht",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_bytes_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar_preht",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_bytes_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar_preht",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar_preht",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:write_floats_json",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:self_test",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:self_test",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:self_test",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:self_test",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:self_test",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:rand_normal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:self_test",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_turbo3",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_turbo4",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_turbo3_tcq",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_qjl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar_qjl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_polar_preht",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_tbq",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_polar",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_tbq_causal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c:gen_fused_attn_qjl_polar_causal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_fp32_to_bf16",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_bf16_to_fp32",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:fp32_to_fp16_bits",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:fp16_bits_to_fp32",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:splitmix64",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:box_muller",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_qjl_make_projection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_qjl_quantize_row",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_qjl_sketch_query",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_qjl_score_qk",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_qjl_mul_mv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_qjl_dequantize_row",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_hadamard_inplace",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_qjl_signs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:polar_q4_nearest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_quantize_row",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_dequantize_row",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_mul_mv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:fused_softmax_weights",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:fused_qjl_scores_one_head",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_fused_attn_qjl_tbq3",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_fused_attn_qjl_polar",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:box_muller",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:splitmix64",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:box_muller",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:splitmix64",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_qjl_make_projection",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:box_muller",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_qjl_quantize_row",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_fp32_to_bf16",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_qjl_score_qk",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_bf16_to_fp32",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_qjl_mul_mv",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_bf16_to_fp32",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_qjl_dequantize_row",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_bf16_to_fp32",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_quantize_row",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_qjl_signs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_quantize_row",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:fp32_to_fp16_bits",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_quantize_row",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_hadamard_inplace",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_quantize_row",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:polar_q4_nearest",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_quantize_row",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:polar_q4_nearest",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_dequantize_row",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_qjl_signs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_dequantize_row",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:fp16_bits_to_fp32",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_dequantize_row",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_hadamard_inplace",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_mul_mv",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_dequantize_row",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:fused_qjl_scores_one_head",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_bf16_to_fp32",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_fused_attn_qjl_tbq3",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:fused_qjl_scores_one_head",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_fused_attn_qjl_tbq3",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:fused_softmax_weights",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_fused_attn_qjl_polar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:fused_qjl_scores_one_head",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_fused_attn_qjl_polar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:fused_softmax_weights",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_fused_attn_qjl_polar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c:eliza_polar_dequantize_row",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+      "target": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.h",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "target": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.h",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/cpu_bench.c",
+      "target": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.h",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/gen_fixture.c",
+      "target": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.h",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.c",
+      "target": "file:eliza/plugins/plugin-local-inference/native/verify/qjl_polar_ref.h",
+      "type": "imports"
+    }
+  ]
+}

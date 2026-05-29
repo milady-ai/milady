@@ -1,0 +1,2259 @@
+{
+  "batchIndex": 327,
+  "nodes": [
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/elizacloud/base-url.test.ts",
+      "type": "file",
+      "name": "base-url.test.ts",
+      "filePath": "eliza/packages/shared/src/elizacloud/base-url.test.ts",
+      "summary": "base-url.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 19 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/elizacloud/base-url.ts",
+      "type": "file",
+      "name": "base-url.ts",
+      "filePath": "eliza/packages/shared/src/elizacloud/base-url.ts",
+      "summary": "base-url.ts is a typescript source file in the Milady codebase. It contains 4 functions.",
+      "languageNotes": "typescript; code; 67 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/elizacloud/base-url.ts:isLoopbackHost",
+      "type": "function",
+      "name": "isLoopbackHost",
+      "filePath": "eliza/packages/shared/src/elizacloud/base-url.ts",
+      "summary": "isLoopbackHost is a function defined in eliza/packages/shared/src/elizacloud/base-url.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/elizacloud/base-url.ts:trimApiPath",
+      "type": "function",
+      "name": "trimApiPath",
+      "filePath": "eliza/packages/shared/src/elizacloud/base-url.ts",
+      "summary": "trimApiPath is a function defined in eliza/packages/shared/src/elizacloud/base-url.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/elizacloud/base-url.ts:normalizeCloudSiteUrl",
+      "type": "function",
+      "name": "normalizeCloudSiteUrl",
+      "filePath": "eliza/packages/shared/src/elizacloud/base-url.ts",
+      "summary": "normalizeCloudSiteUrl is a function defined in eliza/packages/shared/src/elizacloud/base-url.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/elizacloud/base-url.ts:resolveCloudApiBaseUrl",
+      "type": "function",
+      "name": "resolveCloudApiBaseUrl",
+      "filePath": "eliza/packages/shared/src/elizacloud/base-url.ts",
+      "summary": "resolveCloudApiBaseUrl is a function defined in eliza/packages/shared/src/elizacloud/base-url.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/elizacloud/cloud-provisioning.ts",
+      "type": "file",
+      "name": "cloud-provisioning.ts",
+      "filePath": "eliza/packages/shared/src/elizacloud/cloud-provisioning.ts",
+      "summary": "cloud-provisioning.ts is a typescript source file in the Milady codebase. It contains 4 functions.",
+      "languageNotes": "typescript; code; 33 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/elizacloud/cloud-provisioning.ts:hasValue",
+      "type": "function",
+      "name": "hasValue",
+      "filePath": "eliza/packages/shared/src/elizacloud/cloud-provisioning.ts",
+      "summary": "hasValue is a function defined in eliza/packages/shared/src/elizacloud/cloud-provisioning.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/elizacloud/cloud-provisioning.ts:hasCompatApiToken",
+      "type": "function",
+      "name": "hasCompatApiToken",
+      "filePath": "eliza/packages/shared/src/elizacloud/cloud-provisioning.ts",
+      "summary": "hasCompatApiToken is a function defined in eliza/packages/shared/src/elizacloud/cloud-provisioning.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/elizacloud/cloud-provisioning.ts:hasCloudApiKeyProvisioning",
+      "type": "function",
+      "name": "hasCloudApiKeyProvisioning",
+      "filePath": "eliza/packages/shared/src/elizacloud/cloud-provisioning.ts",
+      "summary": "hasCloudApiKeyProvisioning is a function defined in eliza/packages/shared/src/elizacloud/cloud-provisioning.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/elizacloud/cloud-provisioning.ts:isCloudProvisionedContainer",
+      "type": "function",
+      "name": "isCloudProvisionedContainer",
+      "filePath": "eliza/packages/shared/src/elizacloud/cloud-provisioning.ts",
+      "summary": "isCloudProvisionedContainer is a function defined in eliza/packages/shared/src/elizacloud/cloud-provisioning.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/elizacloud/cloud-secrets.ts",
+      "type": "file",
+      "name": "cloud-secrets.ts",
+      "filePath": "eliza/packages/shared/src/elizacloud/cloud-secrets.ts",
+      "summary": "cloud-secrets.ts is a typescript source file in the Milady codebase. It contains 4 functions.",
+      "languageNotes": "typescript; code; 58 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/elizacloud/cloud-secrets.ts:getCloudSecret",
+      "type": "function",
+      "name": "getCloudSecret",
+      "filePath": "eliza/packages/shared/src/elizacloud/cloud-secrets.ts",
+      "summary": "getCloudSecret is a function defined in eliza/packages/shared/src/elizacloud/cloud-secrets.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/elizacloud/cloud-secrets.ts:scrubCloudSecretsFromEnv",
+      "type": "function",
+      "name": "scrubCloudSecretsFromEnv",
+      "filePath": "eliza/packages/shared/src/elizacloud/cloud-secrets.ts",
+      "summary": "scrubCloudSecretsFromEnv is a function defined in eliza/packages/shared/src/elizacloud/cloud-secrets.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/elizacloud/cloud-secrets.ts:clearCloudSecrets",
+      "type": "function",
+      "name": "clearCloudSecrets",
+      "filePath": "eliza/packages/shared/src/elizacloud/cloud-secrets.ts",
+      "summary": "clearCloudSecrets is a function defined in eliza/packages/shared/src/elizacloud/cloud-secrets.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/elizacloud/cloud-secrets.ts:_resetCloudSecretsForTesting",
+      "type": "function",
+      "name": "_resetCloudSecretsForTesting",
+      "filePath": "eliza/packages/shared/src/elizacloud/cloud-secrets.ts",
+      "summary": "_resetCloudSecretsForTesting is a function defined in eliza/packages/shared/src/elizacloud/cloud-secrets.ts."
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/elizacloud/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/shared/src/elizacloud/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 4 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/env-utils.ts",
+      "type": "file",
+      "name": "env-utils.ts",
+      "filePath": "eliza/packages/shared/src/env-utils.ts",
+      "summary": "env-utils.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 11 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/env-utils.ts:isTruthyEnvValue",
+      "type": "function",
+      "name": "isTruthyEnvValue",
+      "filePath": "eliza/packages/shared/src/env-utils.ts",
+      "summary": "isTruthyEnvValue is a function defined in eliza/packages/shared/src/env-utils.ts."
+    },
+    {
+      "tags": [
+        "entry-point",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/events/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/shared/src/events/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase. It contains 4 functions.",
+      "languageNotes": "typescript; code; 134 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/events/index.ts:dispatchAppEvent",
+      "type": "function",
+      "name": "dispatchAppEvent",
+      "filePath": "eliza/packages/shared/src/events/index.ts",
+      "summary": "dispatchAppEvent is a function defined in eliza/packages/shared/src/events/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/events/index.ts:dispatchWindowEvent",
+      "type": "function",
+      "name": "dispatchWindowEvent",
+      "filePath": "eliza/packages/shared/src/events/index.ts",
+      "summary": "dispatchWindowEvent is a function defined in eliza/packages/shared/src/events/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/events/index.ts:dispatchAppEmoteEvent",
+      "type": "function",
+      "name": "dispatchAppEmoteEvent",
+      "filePath": "eliza/packages/shared/src/events/index.ts",
+      "summary": "dispatchAppEmoteEvent is a function defined in eliza/packages/shared/src/events/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/events/index.ts:dispatchElizaCloudStatusUpdated",
+      "type": "function",
+      "name": "dispatchElizaCloudStatusUpdated",
+      "filePath": "eliza/packages/shared/src/events/index.ts",
+      "summary": "dispatchElizaCloudStatusUpdated is a function defined in eliza/packages/shared/src/events/index.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/format-error.ts",
+      "type": "file",
+      "name": "format-error.ts",
+      "filePath": "eliza/packages/shared/src/format-error.ts",
+      "summary": "format-error.ts is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 19 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/format-error.ts:formatError",
+      "type": "function",
+      "name": "formatError",
+      "filePath": "eliza/packages/shared/src/format-error.ts",
+      "summary": "formatError is a function defined in eliza/packages/shared/src/format-error.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/format-error.ts:formatErrorWithStack",
+      "type": "function",
+      "name": "formatErrorWithStack",
+      "filePath": "eliza/packages/shared/src/format-error.ts",
+      "summary": "formatErrorWithStack is a function defined in eliza/packages/shared/src/format-error.ts."
+    },
+    {
+      "tags": [
+        "entry-point",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/hardware-catalog/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/shared/src/hardware-catalog/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase. It contains 3 functions, 1 imports.",
+      "languageNotes": "typescript; code; 229 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/hardware-catalog/index.ts:COLOR_SET_FULL",
+      "type": "function",
+      "name": "COLOR_SET_FULL",
+      "filePath": "eliza/packages/shared/src/hardware-catalog/index.ts",
+      "summary": "COLOR_SET_FULL is a function defined in eliza/packages/shared/src/hardware-catalog/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/hardware-catalog/index.ts:findBySku",
+      "type": "function",
+      "name": "findBySku",
+      "filePath": "eliza/packages/shared/src/hardware-catalog/index.ts",
+      "summary": "findBySku is a function defined in eliza/packages/shared/src/hardware-catalog/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/hardware-catalog/index.ts:findBySlug",
+      "type": "function",
+      "name": "findBySlug",
+      "filePath": "eliza/packages/shared/src/hardware-catalog/index.ts",
+      "summary": "findBySlug is a function defined in eliza/packages/shared/src/hardware-catalog/index.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/i18n/keyword-matching.ts",
+      "type": "file",
+      "name": "keyword-matching.ts",
+      "filePath": "eliza/packages/shared/src/i18n/keyword-matching.ts",
+      "summary": "keyword-matching.ts is a typescript source file in the Milady codebase. It contains 11 functions, 3 imports.",
+      "languageNotes": "typescript; code; 159 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:isValidationKeywordDoc",
+      "type": "function",
+      "name": "isValidationKeywordDoc",
+      "filePath": "eliza/packages/shared/src/i18n/keyword-matching.ts",
+      "summary": "isValidationKeywordDoc is a function defined in eliza/packages/shared/src/i18n/keyword-matching.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:lookupValidationKeywordDoc",
+      "type": "function",
+      "name": "lookupValidationKeywordDoc",
+      "filePath": "eliza/packages/shared/src/i18n/keyword-matching.ts",
+      "summary": "lookupValidationKeywordDoc is a function defined in eliza/packages/shared/src/i18n/keyword-matching.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:escapePattern",
+      "type": "function",
+      "name": "escapePattern",
+      "filePath": "eliza/packages/shared/src/i18n/keyword-matching.ts",
+      "summary": "escapePattern is a function defined in eliza/packages/shared/src/i18n/keyword-matching.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:normalizeKeywordMatchText",
+      "type": "function",
+      "name": "normalizeKeywordMatchText",
+      "filePath": "eliza/packages/shared/src/i18n/keyword-matching.ts",
+      "summary": "normalizeKeywordMatchText is a function defined in eliza/packages/shared/src/i18n/keyword-matching.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:usesAsciiWordBoundaries",
+      "type": "function",
+      "name": "usesAsciiWordBoundaries",
+      "filePath": "eliza/packages/shared/src/i18n/keyword-matching.ts",
+      "summary": "usesAsciiWordBoundaries is a function defined in eliza/packages/shared/src/i18n/keyword-matching.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:splitKeywordDoc",
+      "type": "function",
+      "name": "splitKeywordDoc",
+      "filePath": "eliza/packages/shared/src/i18n/keyword-matching.ts",
+      "summary": "splitKeywordDoc is a function defined in eliza/packages/shared/src/i18n/keyword-matching.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:textIncludesKeywordTerm",
+      "type": "function",
+      "name": "textIncludesKeywordTerm",
+      "filePath": "eliza/packages/shared/src/i18n/keyword-matching.ts",
+      "summary": "textIncludesKeywordTerm is a function defined in eliza/packages/shared/src/i18n/keyword-matching.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:collectKeywordTermMatches",
+      "type": "function",
+      "name": "collectKeywordTermMatches",
+      "filePath": "eliza/packages/shared/src/i18n/keyword-matching.ts",
+      "summary": "collectKeywordTermMatches is a function defined in eliza/packages/shared/src/i18n/keyword-matching.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:findKeywordTermMatch",
+      "type": "function",
+      "name": "findKeywordTermMatch",
+      "filePath": "eliza/packages/shared/src/i18n/keyword-matching.ts",
+      "summary": "findKeywordTermMatch is a function defined in eliza/packages/shared/src/i18n/keyword-matching.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:getValidationKeywordTerms",
+      "type": "function",
+      "name": "getValidationKeywordTerms",
+      "filePath": "eliza/packages/shared/src/i18n/keyword-matching.ts",
+      "summary": "getValidationKeywordTerms is a function defined in eliza/packages/shared/src/i18n/keyword-matching.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:getValidationKeywordLocaleTerms",
+      "type": "function",
+      "name": "getValidationKeywordLocaleTerms",
+      "filePath": "eliza/packages/shared/src/i18n/keyword-matching.ts",
+      "summary": "getValidationKeywordLocaleTerms is a function defined in eliza/packages/shared/src/i18n/keyword-matching.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/i18n/validation-keywords.ts",
+      "type": "file",
+      "name": "validation-keywords.ts",
+      "filePath": "eliza/packages/shared/src/i18n/validation-keywords.ts",
+      "summary": "validation-keywords.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 21 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/src/local-inference-gpu/__tests__/gpu-profile-loader.test.ts",
+      "type": "file",
+      "name": "gpu-profile-loader.test.ts",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/__tests__/gpu-profile-loader.test.ts",
+      "summary": "gpu-profile-loader.test.ts is a typescript source file in the Milady codebase. It contains 4 imports.",
+      "languageNotes": "typescript; code; 304 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/src/local-inference-gpu/__tests__/gpu-profiles.test.ts",
+      "type": "file",
+      "name": "gpu-profiles.test.ts",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/__tests__/gpu-profiles.test.ts",
+      "summary": "gpu-profiles.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 354 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference-gpu/__tests__/gpu-profiles.test.ts:mustGetGpuProfile",
+      "type": "function",
+      "name": "mustGetGpuProfile",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/__tests__/gpu-profiles.test.ts",
+      "summary": "mustGetGpuProfile is a function defined in eliza/packages/shared/src/local-inference-gpu/__tests__/gpu-profiles.test.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/local-inference-gpu/gpu-overrides.ts",
+      "type": "file",
+      "name": "gpu-overrides.ts",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/gpu-overrides.ts",
+      "summary": "gpu-overrides.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 144 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference-gpu/gpu-overrides.ts:getGpuOverrides",
+      "type": "function",
+      "name": "getGpuOverrides",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/gpu-overrides.ts",
+      "summary": "getGpuOverrides is a function defined in eliza/packages/shared/src/local-inference-gpu/gpu-overrides.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference-gpu/gpu-overrides.ts:bundleToOverrides",
+      "type": "function",
+      "name": "bundleToOverrides",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/gpu-overrides.ts",
+      "summary": "bundleToOverrides is a function defined in eliza/packages/shared/src/local-inference-gpu/gpu-overrides.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts",
+      "type": "file",
+      "name": "gpu-profile-loader.ts",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts",
+      "summary": "gpu-profile-loader.ts is a typescript source file in the Milady codebase. It contains 8 functions, 1 imports.",
+      "languageNotes": "typescript; code; 240 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:__setNvidiaSmiMockForTests",
+      "type": "function",
+      "name": "__setNvidiaSmiMockForTests",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts",
+      "summary": "__setNvidiaSmiMockForTests is a function defined in eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:detectGpuFromNvidiaSmi",
+      "type": "function",
+      "name": "detectGpuFromNvidiaSmi",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts",
+      "summary": "detectGpuFromNvidiaSmi is a function defined in eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:firstLineOrNull",
+      "type": "function",
+      "name": "firstLineOrNull",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts",
+      "summary": "firstLineOrNull is a function defined in eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:classifyGpuName",
+      "type": "function",
+      "name": "classifyGpuName",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts",
+      "summary": "classifyGpuName is a function defined in eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:profileYamlPath",
+      "type": "function",
+      "name": "profileYamlPath",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts",
+      "summary": "profileYamlPath is a function defined in eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:__clearProfileCacheForTests",
+      "type": "function",
+      "name": "__clearProfileCacheForTests",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts",
+      "summary": "__clearProfileCacheForTests is a function defined in eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:loadProfile",
+      "type": "function",
+      "name": "loadProfile",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts",
+      "summary": "loadProfile is a function defined in eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:resolveProfileForHost",
+      "type": "function",
+      "name": "resolveProfileForHost",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts",
+      "summary": "resolveProfileForHost is a function defined in eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/local-inference-gpu/gpu-profile-schema.ts",
+      "type": "file",
+      "name": "gpu-profile-schema.ts",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/gpu-profile-schema.ts",
+      "summary": "gpu-profile-schema.ts is a typescript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "typescript; code; 145 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-schema.ts:bundleIdsInProfileMatchCatalog",
+      "type": "function",
+      "name": "bundleIdsInProfileMatchCatalog",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/gpu-profile-schema.ts",
+      "summary": "bundleIdsInProfileMatchCatalog is a function defined in eliza/packages/shared/src/local-inference-gpu/gpu-profile-schema.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-schema.ts:getRecommendationsByTier",
+      "type": "function",
+      "name": "getRecommendationsByTier",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/gpu-profile-schema.ts",
+      "summary": "getRecommendationsByTier is a function defined in eliza/packages/shared/src/local-inference-gpu/gpu-profile-schema.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/local-inference-gpu/gpu-tier-detect.ts",
+      "type": "file",
+      "name": "gpu-tier-detect.ts",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/gpu-tier-detect.ts",
+      "summary": "gpu-tier-detect.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 115 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference-gpu/gpu-tier-detect.ts:detectNvidiaGpu",
+      "type": "function",
+      "name": "detectNvidiaGpu",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/gpu-tier-detect.ts",
+      "summary": "detectNvidiaGpu is a function defined in eliza/packages/shared/src/local-inference-gpu/gpu-tier-detect.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference-gpu/gpu-tier-detect.ts:autoSelectProfile",
+      "type": "function",
+      "name": "autoSelectProfile",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/gpu-tier-detect.ts",
+      "summary": "autoSelectProfile is a function defined in eliza/packages/shared/src/local-inference-gpu/gpu-tier-detect.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts",
+      "type": "file",
+      "name": "gpu-tier-profiles.ts",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts",
+      "summary": "gpu-tier-profiles.ts is a typescript source file in the Milady codebase. It contains 4 functions.",
+      "languageNotes": "typescript; code; 311 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts:getGpuProfile",
+      "type": "function",
+      "name": "getGpuProfile",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts",
+      "summary": "getGpuProfile is a function defined in eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts:parseCudaCompute",
+      "type": "function",
+      "name": "parseCudaCompute",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts",
+      "summary": "parseCudaCompute is a function defined in eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts:selectBestProfile",
+      "type": "function",
+      "name": "selectBestProfile",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts",
+      "summary": "selectBestProfile is a function defined in eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts:buildLlamaCppArgs",
+      "type": "function",
+      "name": "buildLlamaCppArgs",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts",
+      "summary": "buildLlamaCppArgs is a function defined in eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/local-inference/catalog.test.ts",
+      "type": "file",
+      "name": "catalog.test.ts",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.test.ts",
+      "summary": "catalog.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 156 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/src/local-inference/catalog.ts",
+      "type": "file",
+      "name": "catalog.ts",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.ts",
+      "summary": "catalog.ts is a typescript source file in the Milady codebase. It contains 23 functions, 1 imports.",
+      "languageNotes": "typescript; code; 641 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/catalog.ts:mtpSupportedForTier",
+      "type": "function",
+      "name": "mtpSupportedForTier",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.ts",
+      "summary": "mtpSupportedForTier is a function defined in eliza/packages/shared/src/local-inference/catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/catalog.ts:isDefaultEligibleId",
+      "type": "function",
+      "name": "isDefaultEligibleId",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.ts",
+      "summary": "isDefaultEligibleId is a function defined in eliza/packages/shared/src/local-inference/catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/catalog.ts:eliza1TierPublishStatus",
+      "type": "function",
+      "name": "eliza1TierPublishStatus",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.ts",
+      "summary": "eliza1TierPublishStatus is a function defined in eliza/packages/shared/src/local-inference/catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/catalog.ts:readPublishStatusOverride",
+      "type": "function",
+      "name": "readPublishStatusOverride",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.ts",
+      "summary": "readPublishStatusOverride is a function defined in eliza/packages/shared/src/local-inference/catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/catalog.ts:tierSlug",
+      "type": "function",
+      "name": "tierSlug",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.ts",
+      "summary": "tierSlug is a function defined in eliza/packages/shared/src/local-inference/catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/catalog.ts:tierDisplaySlug",
+      "type": "function",
+      "name": "tierDisplaySlug",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.ts",
+      "summary": "tierDisplaySlug is a function defined in eliza/packages/shared/src/local-inference/catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/catalog.ts:tierDisplayName",
+      "type": "function",
+      "name": "tierDisplayName",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.ts",
+      "summary": "tierDisplayName is a function defined in eliza/packages/shared/src/local-inference/catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/catalog.ts:bundleRemotePrefix",
+      "type": "function",
+      "name": "bundleRemotePrefix",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.ts",
+      "summary": "bundleRemotePrefix is a function defined in eliza/packages/shared/src/local-inference/catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/catalog.ts:bundlePath",
+      "type": "function",
+      "name": "bundlePath",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.ts",
+      "summary": "bundlePath is a function defined in eliza/packages/shared/src/local-inference/catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/catalog.ts:bundleRemotePath",
+      "type": "function",
+      "name": "bundleRemotePath",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.ts",
+      "summary": "bundleRemotePath is a function defined in eliza/packages/shared/src/local-inference/catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/catalog.ts:bundleComponent",
+      "type": "function",
+      "name": "bundleComponent",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.ts",
+      "summary": "bundleComponent is a function defined in eliza/packages/shared/src/local-inference/catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/catalog.ts:voiceQuantForTier",
+      "type": "function",
+      "name": "voiceQuantForTier",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.ts",
+      "summary": "voiceQuantForTier is a function defined in eliza/packages/shared/src/local-inference/catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/catalog.ts:voiceQuantLadderForTier",
+      "type": "function",
+      "name": "voiceQuantLadderForTier",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.ts",
+      "summary": "voiceQuantLadderForTier is a function defined in eliza/packages/shared/src/local-inference/catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/catalog.ts:defaultVoiceQuantForTier",
+      "type": "function",
+      "name": "defaultVoiceQuantForTier",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.ts",
+      "summary": "defaultVoiceQuantForTier is a function defined in eliza/packages/shared/src/local-inference/catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/catalog.ts:primaryVoiceFileForTier",
+      "type": "function",
+      "name": "primaryVoiceFileForTier",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.ts",
+      "summary": "primaryVoiceFileForTier is a function defined in eliza/packages/shared/src/local-inference/catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/catalog.ts:sourceModelForTier",
+      "type": "function",
+      "name": "sourceModelForTier",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.ts",
+      "summary": "sourceModelForTier is a function defined in eliza/packages/shared/src/local-inference/catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/catalog.ts:runtimeForTier",
+      "type": "function",
+      "name": "runtimeForTier",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.ts",
+      "summary": "runtimeForTier is a function defined in eliza/packages/shared/src/local-inference/catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/catalog.ts:textQuantizationMatrix",
+      "type": "function",
+      "name": "textQuantizationMatrix",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.ts",
+      "summary": "textQuantizationMatrix is a function defined in eliza/packages/shared/src/local-inference/catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/catalog.ts:blurbForTier",
+      "type": "function",
+      "name": "blurbForTier",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.ts",
+      "summary": "blurbForTier is a function defined in eliza/packages/shared/src/local-inference/catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/catalog.ts:chatTier",
+      "type": "function",
+      "name": "chatTier",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.ts",
+      "summary": "chatTier is a function defined in eliza/packages/shared/src/local-inference/catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/catalog.ts:findCatalogModel",
+      "type": "function",
+      "name": "findCatalogModel",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.ts",
+      "summary": "findCatalogModel is a function defined in eliza/packages/shared/src/local-inference/catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/catalog.ts:buildHuggingFaceResolveUrlForPath",
+      "type": "function",
+      "name": "buildHuggingFaceResolveUrlForPath",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.ts",
+      "summary": "buildHuggingFaceResolveUrlForPath is a function defined in eliza/packages/shared/src/local-inference/catalog.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/catalog.ts:buildHuggingFaceResolveUrl",
+      "type": "function",
+      "name": "buildHuggingFaceResolveUrl",
+      "filePath": "eliza/packages/shared/src/local-inference/catalog.ts",
+      "summary": "buildHuggingFaceResolveUrl is a function defined in eliza/packages/shared/src/local-inference/catalog.ts."
+    },
+    {
+      "tags": [
+        "documentation",
+        "local-inference"
+      ],
+      "complexity": "complex",
+      "id": "document:eliza/packages/shared/src/local-inference/CONTEXT_SCALING.md",
+      "type": "document",
+      "name": "CONTEXT_SCALING.md",
+      "filePath": "eliza/packages/shared/src/local-inference/CONTEXT_SCALING.md",
+      "summary": "CONTEXT_SCALING.md documents eliza/packages/shared/src/local-inference with 319 lines of reference material.",
+      "languageNotes": "markdown; docs; 319 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/src/local-inference/gpu-profiles.ts",
+      "type": "file",
+      "name": "gpu-profiles.ts",
+      "filePath": "eliza/packages/shared/src/local-inference/gpu-profiles.ts",
+      "summary": "gpu-profiles.ts is a typescript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "typescript; code; 297 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/gpu-profiles.ts:matchGpuProfile",
+      "type": "function",
+      "name": "matchGpuProfile",
+      "filePath": "eliza/packages/shared/src/local-inference/gpu-profiles.ts",
+      "summary": "matchGpuProfile is a function defined in eliza/packages/shared/src/local-inference/gpu-profiles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/gpu-profiles.ts:reservedHeadroomGb",
+      "type": "function",
+      "name": "reservedHeadroomGb",
+      "filePath": "eliza/packages/shared/src/local-inference/gpu-profiles.ts",
+      "summary": "reservedHeadroomGb is a function defined in eliza/packages/shared/src/local-inference/gpu-profiles.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/local-inference/kokoro-execution-provider.test.ts",
+      "type": "file",
+      "name": "kokoro-execution-provider.test.ts",
+      "filePath": "eliza/packages/shared/src/local-inference/kokoro-execution-provider.test.ts",
+      "summary": "kokoro-execution-provider.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 45 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/local-inference/kokoro-execution-provider.ts",
+      "type": "file",
+      "name": "kokoro-execution-provider.ts",
+      "filePath": "eliza/packages/shared/src/local-inference/kokoro-execution-provider.ts",
+      "summary": "kokoro-execution-provider.ts is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 79 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/kokoro-execution-provider.ts:parseKokoroExecutionProvider",
+      "type": "function",
+      "name": "parseKokoroExecutionProvider",
+      "filePath": "eliza/packages/shared/src/local-inference/kokoro-execution-provider.ts",
+      "summary": "parseKokoroExecutionProvider is a function defined in eliza/packages/shared/src/local-inference/kokoro-execution-provider.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/local-inference/kokoro-execution-provider.ts:buildKokoroOrtSessionOptions",
+      "type": "function",
+      "name": "buildKokoroOrtSessionOptions",
+      "filePath": "eliza/packages/shared/src/local-inference/kokoro-execution-provider.ts",
+      "summary": "buildKokoroOrtSessionOptions is a function defined in eliza/packages/shared/src/local-inference/kokoro-execution-provider.ts."
+    },
+    {
+      "tags": [
+        "entry-point",
+        "local-inference"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/local-inference/kokoro/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/shared/src/local-inference/kokoro/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 98 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/elizacloud/base-url.ts",
+      "target": "function:eliza/packages/shared/src/elizacloud/base-url.ts:isLoopbackHost",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/elizacloud/base-url.ts",
+      "target": "function:eliza/packages/shared/src/elizacloud/base-url.ts:trimApiPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/elizacloud/base-url.ts",
+      "target": "function:eliza/packages/shared/src/elizacloud/base-url.ts:normalizeCloudSiteUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/elizacloud/base-url.ts",
+      "target": "function:eliza/packages/shared/src/elizacloud/base-url.ts:resolveCloudApiBaseUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/elizacloud/base-url.ts:normalizeCloudSiteUrl",
+      "target": "function:eliza/packages/shared/src/elizacloud/base-url.ts:trimApiPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/elizacloud/base-url.ts:normalizeCloudSiteUrl",
+      "target": "function:eliza/packages/shared/src/elizacloud/base-url.ts:isLoopbackHost",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/elizacloud/base-url.ts:resolveCloudApiBaseUrl",
+      "target": "function:eliza/packages/shared/src/elizacloud/base-url.ts:normalizeCloudSiteUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/elizacloud/cloud-provisioning.ts",
+      "target": "function:eliza/packages/shared/src/elizacloud/cloud-provisioning.ts:hasValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/elizacloud/cloud-provisioning.ts",
+      "target": "function:eliza/packages/shared/src/elizacloud/cloud-provisioning.ts:hasCompatApiToken",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/elizacloud/cloud-provisioning.ts",
+      "target": "function:eliza/packages/shared/src/elizacloud/cloud-provisioning.ts:hasCloudApiKeyProvisioning",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/elizacloud/cloud-provisioning.ts",
+      "target": "function:eliza/packages/shared/src/elizacloud/cloud-provisioning.ts:isCloudProvisionedContainer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/elizacloud/cloud-provisioning.ts:hasCompatApiToken",
+      "target": "function:eliza/packages/shared/src/elizacloud/cloud-provisioning.ts:hasValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/elizacloud/cloud-provisioning.ts:hasCloudApiKeyProvisioning",
+      "target": "function:eliza/packages/shared/src/elizacloud/cloud-provisioning.ts:hasValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/elizacloud/cloud-provisioning.ts:isCloudProvisionedContainer",
+      "target": "function:eliza/packages/shared/src/elizacloud/cloud-provisioning.ts:hasValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/elizacloud/cloud-provisioning.ts:isCloudProvisionedContainer",
+      "target": "function:eliza/packages/shared/src/elizacloud/cloud-provisioning.ts:hasCompatApiToken",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/elizacloud/cloud-provisioning.ts:isCloudProvisionedContainer",
+      "target": "function:eliza/packages/shared/src/elizacloud/cloud-provisioning.ts:hasCloudApiKeyProvisioning",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/elizacloud/cloud-secrets.ts",
+      "target": "function:eliza/packages/shared/src/elizacloud/cloud-secrets.ts:getCloudSecret",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/elizacloud/cloud-secrets.ts",
+      "target": "function:eliza/packages/shared/src/elizacloud/cloud-secrets.ts:scrubCloudSecretsFromEnv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/elizacloud/cloud-secrets.ts",
+      "target": "function:eliza/packages/shared/src/elizacloud/cloud-secrets.ts:clearCloudSecrets",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/elizacloud/cloud-secrets.ts",
+      "target": "function:eliza/packages/shared/src/elizacloud/cloud-secrets.ts:_resetCloudSecretsForTesting",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/env-utils.ts",
+      "target": "function:eliza/packages/shared/src/env-utils.ts:isTruthyEnvValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/events/index.ts",
+      "target": "function:eliza/packages/shared/src/events/index.ts:dispatchAppEvent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/events/index.ts",
+      "target": "function:eliza/packages/shared/src/events/index.ts:dispatchWindowEvent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/events/index.ts",
+      "target": "function:eliza/packages/shared/src/events/index.ts:dispatchAppEmoteEvent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/events/index.ts",
+      "target": "function:eliza/packages/shared/src/events/index.ts:dispatchElizaCloudStatusUpdated",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/events/index.ts:dispatchAppEmoteEvent",
+      "target": "function:eliza/packages/shared/src/events/index.ts:dispatchWindowEvent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/events/index.ts:dispatchElizaCloudStatusUpdated",
+      "target": "function:eliza/packages/shared/src/events/index.ts:dispatchWindowEvent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/format-error.ts",
+      "target": "function:eliza/packages/shared/src/format-error.ts:formatError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/format-error.ts",
+      "target": "function:eliza/packages/shared/src/format-error.ts:formatErrorWithStack",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/hardware-catalog/index.ts",
+      "target": "function:eliza/packages/shared/src/hardware-catalog/index.ts:COLOR_SET_FULL",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/hardware-catalog/index.ts",
+      "target": "function:eliza/packages/shared/src/hardware-catalog/index.ts:findBySku",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/hardware-catalog/index.ts",
+      "target": "function:eliza/packages/shared/src/hardware-catalog/index.ts:findBySlug",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/i18n/keyword-matching.ts",
+      "target": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:isValidationKeywordDoc",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/i18n/keyword-matching.ts",
+      "target": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:lookupValidationKeywordDoc",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/i18n/keyword-matching.ts",
+      "target": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:escapePattern",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/i18n/keyword-matching.ts",
+      "target": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:normalizeKeywordMatchText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/i18n/keyword-matching.ts",
+      "target": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:usesAsciiWordBoundaries",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/i18n/keyword-matching.ts",
+      "target": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:splitKeywordDoc",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/i18n/keyword-matching.ts",
+      "target": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:textIncludesKeywordTerm",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/i18n/keyword-matching.ts",
+      "target": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:collectKeywordTermMatches",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/i18n/keyword-matching.ts",
+      "target": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:findKeywordTermMatch",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/i18n/keyword-matching.ts",
+      "target": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:getValidationKeywordTerms",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/i18n/keyword-matching.ts",
+      "target": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:getValidationKeywordLocaleTerms",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:lookupValidationKeywordDoc",
+      "target": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:isValidationKeywordDoc",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:splitKeywordDoc",
+      "target": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:normalizeKeywordMatchText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:textIncludesKeywordTerm",
+      "target": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:normalizeKeywordMatchText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:textIncludesKeywordTerm",
+      "target": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:normalizeKeywordMatchText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:textIncludesKeywordTerm",
+      "target": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:usesAsciiWordBoundaries",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:textIncludesKeywordTerm",
+      "target": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:escapePattern",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:collectKeywordTermMatches",
+      "target": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:textIncludesKeywordTerm",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:findKeywordTermMatch",
+      "target": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:textIncludesKeywordTerm",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:getValidationKeywordTerms",
+      "target": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:lookupValidationKeywordDoc",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:getValidationKeywordTerms",
+      "target": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:splitKeywordDoc",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:getValidationKeywordTerms",
+      "target": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:splitKeywordDoc",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:getValidationKeywordLocaleTerms",
+      "target": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:lookupValidationKeywordDoc",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:getValidationKeywordLocaleTerms",
+      "target": "function:eliza/packages/shared/src/i18n/keyword-matching.ts:splitKeywordDoc",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference-gpu/__tests__/gpu-profiles.test.ts",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/__tests__/gpu-profiles.test.ts:mustGetGpuProfile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference-gpu/gpu-overrides.ts",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-overrides.ts:getGpuOverrides",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference-gpu/gpu-overrides.ts",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-overrides.ts:bundleToOverrides",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference-gpu/gpu-overrides.ts:getGpuOverrides",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-overrides.ts:bundleToOverrides",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:__setNvidiaSmiMockForTests",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:detectGpuFromNvidiaSmi",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:firstLineOrNull",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:classifyGpuName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:profileYamlPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:__clearProfileCacheForTests",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:loadProfile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:resolveProfileForHost",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:detectGpuFromNvidiaSmi",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:firstLineOrNull",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:detectGpuFromNvidiaSmi",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:firstLineOrNull",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:loadProfile",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:profileYamlPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:resolveProfileForHost",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:detectGpuFromNvidiaSmi",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:resolveProfileForHost",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:classifyGpuName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:resolveProfileForHost",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-loader.ts:loadProfile",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference-gpu/gpu-profile-schema.ts",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-schema.ts:bundleIdsInProfileMatchCatalog",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference-gpu/gpu-profile-schema.ts",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-profile-schema.ts:getRecommendationsByTier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference-gpu/gpu-tier-detect.ts",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-tier-detect.ts:detectNvidiaGpu",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference-gpu/gpu-tier-detect.ts",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-tier-detect.ts:autoSelectProfile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference-gpu/gpu-tier-detect.ts:autoSelectProfile",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-tier-detect.ts:detectNvidiaGpu",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts:getGpuProfile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts:parseCudaCompute",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts:selectBestProfile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts:buildLlamaCppArgs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts:selectBestProfile",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts:parseCudaCompute",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts:selectBestProfile",
+      "target": "function:eliza/packages/shared/src/local-inference-gpu/gpu-tier-profiles.ts:parseCudaCompute",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/catalog.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:mtpSupportedForTier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/catalog.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:isDefaultEligibleId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/catalog.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:eliza1TierPublishStatus",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/catalog.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:readPublishStatusOverride",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/catalog.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:tierSlug",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/catalog.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:tierDisplaySlug",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/catalog.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:tierDisplayName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/catalog.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:bundleRemotePrefix",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/catalog.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:bundlePath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/catalog.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:bundleRemotePath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/catalog.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:bundleComponent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/catalog.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:voiceQuantForTier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/catalog.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:voiceQuantLadderForTier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/catalog.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:defaultVoiceQuantForTier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/catalog.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:primaryVoiceFileForTier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/catalog.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:sourceModelForTier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/catalog.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:runtimeForTier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/catalog.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:textQuantizationMatrix",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/catalog.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:blurbForTier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/catalog.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:chatTier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/catalog.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:findCatalogModel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/catalog.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:buildHuggingFaceResolveUrlForPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/catalog.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:buildHuggingFaceResolveUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:eliza1TierPublishStatus",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:readPublishStatusOverride",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:tierDisplayName",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:tierDisplaySlug",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:bundleRemotePrefix",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:tierSlug",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:bundleRemotePath",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:bundleRemotePrefix",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:bundleComponent",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:bundleRemotePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:defaultVoiceQuantForTier",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:voiceQuantForTier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:primaryVoiceFileForTier",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:voiceQuantForTier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:sourceModelForTier",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:bundleComponent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:sourceModelForTier",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:bundleComponent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:sourceModelForTier",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:primaryVoiceFileForTier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:sourceModelForTier",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:bundleComponent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:sourceModelForTier",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:bundleComponent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:sourceModelForTier",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:bundleComponent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:sourceModelForTier",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:bundleComponent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:sourceModelForTier",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:tierSlug",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:runtimeForTier",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:mtpSupportedForTier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:blurbForTier",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:tierDisplayName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:chatTier",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:tierDisplayName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:chatTier",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:bundleRemotePrefix",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:chatTier",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:bundlePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:chatTier",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:bundlePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:chatTier",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:sourceModelForTier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:chatTier",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:runtimeForTier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:chatTier",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:textQuantizationMatrix",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:chatTier",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:bundlePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:chatTier",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:blurbForTier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:chatTier",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:eliza1TierPublishStatus",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/local-inference/catalog.ts:buildHuggingFaceResolveUrl",
+      "target": "function:eliza/packages/shared/src/local-inference/catalog.ts:buildHuggingFaceResolveUrlForPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/gpu-profiles.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/gpu-profiles.ts:matchGpuProfile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/gpu-profiles.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/gpu-profiles.ts:reservedHeadroomGb",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/kokoro-execution-provider.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/kokoro-execution-provider.ts:parseKokoroExecutionProvider",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/local-inference/kokoro-execution-provider.ts",
+      "target": "function:eliza/packages/shared/src/local-inference/kokoro-execution-provider.ts:buildKokoroOrtSessionOptions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/shared/src/elizacloud/base-url.test.ts",
+      "target": "file:eliza/packages/shared/src/elizacloud/base-url.ts",
+      "type": "imports"
+    }
+  ]
+}

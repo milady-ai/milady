@@ -83,7 +83,7 @@ sessions and are being discarded. We see only ANSI-stripped final stdout.
 **Why it matters.** Without reasoning, tool-call structure, and token usage we
 cannot do SFT on agentic problem-solving — only on text completions of stripped
 summaries.
-**Fix.** Read `~/.milady/workspaces/<sessionId>/.claude/session-logs/*.json` on
+**Fix.** Read `~/.local/state/milady/workspaces/<sessionId>/.claude/session-logs/*.json` on
 `task_complete`. Parse Codex `--output-last-message` JSON. For OpenCode, enable
 its streaming JSON output and parse. Merge into the parent trajectory as
 `childSteps[]` with full step records, not just IDs.
