@@ -302,6 +302,21 @@ if (fs.existsSync(path.join(elizaRoot, "package.json"))) {
     "dist/node/index.node.js",
   ]);
   const sharedPath = path.join(elizaRoot, "packages", "shared");
+  // Upstream eliza moved @elizaos/cloud-sdk from eliza/cloud/packages/sdk
+  // (inside the optional cloud submodule) to eliza/packages/cloud-sdk in
+  // the main packages tree. The CI ref pinned via MILADY_ELIZA_REF only
+  // carries the new location; older local checkouts may still have the
+  // old one. Prefer the new path when it exists, fall back to the old
+  // path otherwise, and let selectRuntimePackageRoot probe the installed
+  // npm copy if neither source location is present. MILADY_SKIP_CLOUD_SUBMODULE
+  // is incidental here — even with the submodule initialized, current refs
+  // do not put cloud-sdk under eliza/cloud/.
+  const cloudSdkNewPath = path.join(elizaRoot, "packages", "cloud-sdk");
+  const cloudSdkLegacyPath = path.join(elizaRoot, "cloud", "packages", "sdk");
+  const cloudSdkPath = fs.existsSync(path.join(cloudSdkNewPath, "package.json"))
+    ? cloudSdkNewPath
+    : cloudSdkLegacyPath;
+  const cloudSdkRuntimeEntries = ["dist/index.js", "src/index.ts"];
   const sqlPluginPath = path.join(elizaRoot, "plugins", "plugin-sql");
   const sqlPluginTypescriptPath = path.join(sqlPluginPath, "typescript");
   const sqlPluginRuntimeEntries = [
@@ -332,12 +347,14 @@ if (fs.existsSync(path.join(elizaRoot, "package.json"))) {
     elizaCloudPluginPath,
     elizaCloudPluginRuntimeEntries,
   );
+  const cloudSdkRuntimePath = selectRuntimePackageRoot(
+    "@elizaos/cloud-sdk",
+    cloudSdkPath,
+    cloudSdkRuntimeEntries,
+  );
 
   linkElizaPackage("@elizaos/core", coreRuntimePath);
-  linkElizaPackage(
-    "@elizaos/cloud-sdk",
-    path.join(elizaRoot, "cloud", "packages", "sdk"),
-  );
+  linkElizaPackage("@elizaos/cloud-sdk", cloudSdkRuntimePath);
   linkElizaPackage("@elizaos/shared", sharedPath);
   if (elizaCloudPluginRuntimePath) {
     linkRendererSourcePackage(

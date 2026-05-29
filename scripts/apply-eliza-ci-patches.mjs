@@ -206,6 +206,63 @@ function patchCoreStateTypes(raw) {
   return raw.replace('format: "JSON";', 'format: "JSON" | "TOON";');
 }
 
+function patchElectrobunAgentChildPathFallback(raw) {
+  if (raw.includes("existingPathKey")) {
+    return raw;
+  }
+
+  // Pattern A: newer eliza (f4991bc6+) uses a prependDesktopChildPathDirectory helper
+  const helperPatched = raw.replace(
+    /export function prependDesktopChildPathDirectory\(\r?\n([ \t]*)childEnv: Record<string, string \| undefined>,\r?\n[ \t]*directory: string,\r?\n[ \t]*\): boolean \{\r?\n[ \t]*const existingPath = childEnv\.PATH\?\.trim\(\);\r?\n[ \t]*if \(!existingPath\) \{\r?\n[ \t]*childEnv\.PATH = directory;\r?\n[ \t]*return true;\r?\n[ \t]*\}\r?\n[ \t]*if \(existingPath\.split\(path\.delimiter\)\.includes\(directory\)\) \{\r?\n[ \t]*return false;\r?\n[ \t]*\}\r?\n[ \t]*childEnv\.PATH = `\$\{directory\}\$\{path\.delimiter\}\$\{existingPath\}`;\r?\n[ \t]*return true;\r?\n[ \t]*\}/,
+    (_, indent) =>
+      `export function prependDesktopChildPathDirectory(
+${indent}childEnv: Record<string, string | undefined>,
+${indent}directory: string,
+): boolean {
+${indent}const existingPathKey = childEnv.PATH !== undefined ? "PATH" : "Path";
+${indent}const existingPath = childEnv[existingPathKey]?.trim();
+${indent}if (!existingPath) {
+${indent}  childEnv[existingPathKey] = directory;
+${indent}  return true;
+${indent}}
+${indent}if (existingPath.split(path.delimiter).includes(directory)) {
+${indent}  return false;
+${indent}}
+${indent}childEnv[existingPathKey] = \`\${directory}\${path.delimiter}\${existingPath}\`;
+${indent}return true;
+}`,
+  );
+
+  if (helperPatched !== raw) {
+    return helperPatched;
+  }
+
+  // Pattern B: older eliza has the PATH prepend inline in the spawn block
+  const inlinePatched = raw.replace(
+    /([ \t]*)const bunDir = path\.dirname\(bunExecutable\);\r?\n\1const existingPath = childEnv\.PATH(?: \?\? "")?;\r?\n\1if \(!existingPath\.split\(path\.delimiter\)\.includes\(bunDir\)\) \{\r?\n\1[ \t]*childEnv\.PATH = bunDir \+ path\.delimiter \+ existingPath;\r?\n\1[ \t]*diagnosticLog\(`\[Agent\] Prepended bun dir to child PATH: \$\{bunDir\}`\);\r?\n\1\}\r?\n/,
+    (_, indent) => `${indent}const bunDir = path.dirname(bunExecutable);
+${indent}const existingPathKey =
+${indent}  childEnv.PATH !== undefined ? "PATH" : "Path";
+${indent}const existingPath =
+${indent}  childEnv[existingPathKey] ?? process.env.PATH ?? process.env.Path ?? "";
+${indent}if (!existingPath.split(path.delimiter).includes(bunDir)) {
+${indent}  childEnv[existingPathKey] = existingPath
+${indent}    ? bunDir + path.delimiter + existingPath
+${indent}    : bunDir;
+${indent}  diagnosticLog(\`[Agent] Prepended bun dir to child PATH: \${bunDir}\`);
+${indent}}
+`,
+  );
+
+  if (inlinePatched !== raw) {
+    return inlinePatched;
+  }
+
+  throw new Error(
+    "Could not patch Electrobun agent PATH fallback: neither helper function nor inline block matched",
+  );
+}
+
 function patchComputerUseVisionContextProvider(raw) {
   const providerPath = path.join(
     elizaDir,
@@ -270,10 +327,17 @@ export async function runIosBridgeCli(
 }
 
 function patchRuntimeCopyTarSafeHoists(raw) {
-  let next = raw.replace(
-    'const ALWAYS_HOISTED_PACKAGES = new Set(["@elizaos/core"]);',
-    'const ALWAYS_HOISTED_PACKAGES = new Set(["@elizaos/core", "commander"]);',
-  );
+  let next = raw
+    // eliza refs that only have @elizaos/core
+    .replace(
+      'const ALWAYS_HOISTED_PACKAGES = new Set(["@elizaos/core"]);',
+      'const ALWAYS_HOISTED_PACKAGES = new Set(["@elizaos/core", "commander", "pg", "pg-pool"]);',
+    )
+    // eliza refs (e.g. f4991bc6+) that already include commander
+    .replace(
+      'const ALWAYS_HOISTED_PACKAGES = new Set(["@elizaos/core", "commander"]);',
+      'const ALWAYS_HOISTED_PACKAGES = new Set(["@elizaos/core", "commander", "pg", "pg-pool"]);',
+    );
   if (!next.includes("function shouldHoistRuntimePackage")) {
     next = next.replace(
       "\ntype CopyTargetOptions = {",
@@ -358,6 +422,10 @@ function patchAppCoreReleaseCheck(raw) {
     .replace(
       "release-check: release workflow is missing notary wrapper wiring:",
       "release-check: release workflow is missing required release wiring:",
+    )
+    .replace(
+      '"ELIZA_TEST_WINDOWS_PROOF_INSTALL_DIR: $" +\n    "{{ runner.temp }}\\\\el-proof",',
+      '"ELIZA_TEST_WINDOWS_PROOF_INSTALL_DIR: $" + "{{ runner.temp }}\\\\el-smoke-proof",',
     )
     .replace(
       '"ELIZA_TEST_WINDOWS_PROOF_INSTALL_DIR: $" + "{{ runner.temp }}\\\\el-proof",',
@@ -554,6 +622,144 @@ const requiredElectrobunConfigSnippets`,
 `,
   );
 
+  return patched;
+}
+
+function patchWhisperBuildWindowsConfig(raw) {
+  // Normalize CRLF -> LF so multi-line anchors match on Windows runners,
+  // where `git clone` of the eliza submodule applies autocrlf=true (the
+  // default on the Windows GitHub Actions runner image). Single-line
+  // replaces survive CRLF, but the multi-line ?: ternaries below would
+  // silently miss. We write the file back with LF; Node treats both the
+  // same when executing .mjs.
+  const normalized = raw.replace(/\r\n/g, "\n");
+  if (normalized.includes('"--config"')) return raw;
+
+  // MSBuild (the default Windows generator) is multi-config, so the cmake
+  // configure-time CMAKE_BUILD_TYPE=Release flag is ignored; without --config
+  // at build time MSBuild silently picks Debug. Outputs then land in Debug
+  // subdirs that the post-build search probes never look at. Force Release at
+  // build time on Windows, and broaden the candidate lookup so both Release
+  // and Debug subdirs resolve (covers stale local caches too).
+  let patched = normalized.replace(
+    `  const buildArgs = [
+    "--build",
+    buildPath,
+    "--target",`,
+    `  const buildArgs = [
+    "--build",
+    buildPath,
+    ...(process.platform === "win32" ? ["--config", "Release"] : []),
+    "--target",`,
+  );
+
+  patched = patched.replace(
+    `      : process.platform === "win32"
+        ? [
+            path.join(subBuild, "src", "whisper.dll"),
+            path.join(subBuild, "whisper.dll"),
+          ]`,
+    `      : process.platform === "win32"
+        ? [
+            // CMake on Windows routes shared library outputs (whisper.dll,
+            // ggml.dll etc.) to RUNTIME_OUTPUT_DIRECTORY = <buildPath>/bin/
+            // and into a <config>/ subdir under MSBuild. Search those first,
+            // then fall back to the layout the Linux/macOS branches expect.
+            // Observed in CI: "whisper.vcxproj -> ...build-whisper/bin/Debug/whisper.dll".
+            path.join(buildPath, "bin", "Release", "whisper.dll"),
+            path.join(buildPath, "bin", "Debug", "whisper.dll"),
+            path.join(buildPath, "bin", "whisper.dll"),
+            path.join(subBuild, "src", "Release", "whisper.dll"),
+            path.join(subBuild, "src", "Debug", "whisper.dll"),
+            path.join(subBuild, "src", "whisper.dll"),
+            path.join(subBuild, "Release", "whisper.dll"),
+            path.join(subBuild, "Debug", "whisper.dll"),
+            path.join(subBuild, "whisper.dll"),
+          ]`,
+  );
+
+  patched = patched.replace(
+    `      : process.platform === "win32"
+        ? [path.join(buildPath, "whisper_eliza_adapter.dll")]`,
+    `      : process.platform === "win32"
+        ? [
+            path.join(buildPath, "Release", "whisper_eliza_adapter.dll"),
+            path.join(buildPath, "Debug", "whisper_eliza_adapter.dll"),
+            path.join(buildPath, "whisper_eliza_adapter.dll"),
+          ]`,
+  );
+
+  // CLI lookup is non-fatal (a warning) but ship the matching Windows config
+  // subdirs so the diagnostic logs the actual binary instead of giving up.
+  patched = patched.replace(
+    `  const cliCandidates = [
+    path.join(buildPath, "bin", "whisper-cli"),
+    path.join(subBuild, "bin", "whisper-cli"),
+    path.join(subBuild, "whisper-cli"),
+  ];`,
+    `  const cliCandidates =
+    process.platform === "win32"
+      ? [
+          path.join(buildPath, "bin", "Release", "whisper-cli.exe"),
+          path.join(buildPath, "bin", "Debug", "whisper-cli.exe"),
+          path.join(buildPath, "bin", "whisper-cli.exe"),
+          path.join(subBuild, "bin", "Release", "whisper-cli.exe"),
+          path.join(subBuild, "bin", "Debug", "whisper-cli.exe"),
+          path.join(subBuild, "bin", "whisper-cli.exe"),
+          path.join(subBuild, "Release", "whisper-cli.exe"),
+          path.join(subBuild, "Debug", "whisper-cli.exe"),
+          path.join(subBuild, "whisper-cli.exe"),
+        ]
+      : [
+          path.join(buildPath, "bin", "whisper-cli"),
+          path.join(subBuild, "bin", "whisper-cli"),
+          path.join(subBuild, "whisper-cli"),
+        ];`,
+  );
+
+  return patched;
+}
+
+function patchValidateCdnAssetsRootDir(raw) {
+  if (raw.includes("ELIZA_CDN_ROOT_DIR")) return raw;
+  // Patch the CLI entry point to accept a root dir override
+  let patched = raw.replace(
+    "  await main();\n}",
+    "  const overrideRoot = process.env.ELIZA_CDN_ROOT_DIR;\n  await main({ cwd: overrideRoot ? path.resolve(overrideRoot) : repoRoot });\n}",
+  );
+  // Patch validateGroup calls to accept asset root overrides via env
+  patched = patched.replace(
+    `  const [missingApp, missingHomepage] = await Promise.all([
+    validateGroup(manifest.app, {
+      repository,
+      releaseTag: effectiveRef,
+      assetRoot: "packages/app/public",
+      retryPolicy,
+    }),
+    validateGroup(manifest.homepage, {
+      repository,
+      releaseTag: effectiveRef,
+      assetRoot: "packages/homepage/public",
+      retryPolicy,
+    }),
+  ]);`,
+    `  const appAssetRoot = env.ELIZA_CDN_APP_ASSET_ROOT || "packages/app/public";
+  const homepageAssetRoot = env.ELIZA_CDN_HOMEPAGE_ASSET_ROOT || "packages/homepage/public";
+  const [missingApp, missingHomepage] = await Promise.all([
+    validateGroup(manifest.app, {
+      repository,
+      releaseTag: effectiveRef,
+      assetRoot: appAssetRoot,
+      retryPolicy,
+    }),
+    validateGroup(manifest.homepage, {
+      repository,
+      releaseTag: effectiveRef,
+      assetRoot: homepageAssetRoot,
+      retryPolicy,
+    }),
+  ]);`,
+  );
   return patched;
 }
 
@@ -1143,6 +1349,30 @@ function applyReleaseSourcePatches() {
   );
 
   replaceFileText(
+    path.join(
+      elizaDir,
+      "packages",
+      "app-core",
+      "scripts",
+      "validate-cdn-assets.mjs",
+    ),
+    patchValidateCdnAssetsRootDir,
+    "validate-cdn-assets ELIZA_CDN_ROOT_DIR override",
+  );
+
+  replaceFileText(
+    path.join(
+      elizaDir,
+      "plugins",
+      "plugin-local-inference",
+      "native",
+      "build-whisper.mjs",
+    ),
+    patchWhisperBuildWindowsConfig,
+    "whisper Windows MSBuild Release config + lookup",
+  );
+
+  replaceFileText(
     path.join(elizaDir, "packages", "app-core", "src", "runtime", "eliza.ts"),
     patchStartApiServerCatchBlock,
     "app-core API startup error visibility",
@@ -1152,6 +1382,21 @@ function applyReleaseSourcePatches() {
     path.join(elizaDir, "packages", "agent", "src", "runtime", "eliza.ts"),
     patchStartApiServerCatchBlock,
     "agent API startup error visibility",
+  );
+
+  replaceFileText(
+    path.join(
+      elizaDir,
+      "packages",
+      "app-core",
+      "platforms",
+      "electrobun",
+      "src",
+      "native",
+      "agent.ts",
+    ),
+    patchElectrobunAgentChildPathFallback,
+    "Electrobun agent child PATH fallback",
   );
 
   replaceFileText(

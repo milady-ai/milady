@@ -670,6 +670,8 @@ jobs:
         # subsequent bunx electrobun build cannot resolve the import until tsc
         # has run. Build the dist here so the symlinked workspace package has
         # the expected entry point before the desktop build kicks off.
+        # Guard: the package may not exist in newer eliza checkouts.
+        if: hashFiles('eliza/packages/electrobun-carrots/package.json') != ''
         shell: bash
         working-directory: eliza/packages/electrobun-carrots
         run: bun run build
@@ -750,6 +752,18 @@ jobs:
       - name: Link local @elizaos workspace packages
         shell: bash
         run: node eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs
+
+      # bun's bundler walks up looking for `react` / `react-dom` / `@types/react`
+      # when transforming JSX-flagged tsconfig contexts (electrobun's
+      # tsconfig.json uses jsx:"react-jsx"). When invoked from
+      # eliza/packages/app-core/platforms/electrobun the nested node_modules
+      # only contains workspace symlinks, not react, so bun falls through to
+      # the @types/react .d.ts and crashes on `export as namespace React`.
+      # ci.yml + agent-review.yml run this script for exactly this reason; the
+      # release workflow needs the same alignment before any bun-bundle step.
+      - name: Align nested eliza package resolution
+        shell: bash
+        run: node scripts/align-eliza-ci-node-modules.mjs
 
       - name: Download Whisper model artifact
         if: ${{ needs.validate-release.result == 'success' }}
@@ -984,21 +998,17 @@ jobs:
           out_dir="$RUNNER_TEMP/electrobun-entry-probe"
           rm -rf "$out_dir"
           node "$GITHUB_WORKSPACE/scripts/copy-runtime-node-modules.ts" --link-only
-          bun build src/index.ts --target=bun --outdir "$out_dir" \
-            --external "*.node" \
-            --external @node-llama-cpp/mac-arm64-metal \
-            --external @node-llama-cpp/mac-x64 \
-            --external @node-llama-cpp/linux-x64-cuda \
-            --external @node-llama-cpp/linux-x64-cuda-ext \
-            --external @node-llama-cpp/linux-x64-vulkan \
-            --external @node-llama-cpp/linux-x64 \
-            --external @node-llama-cpp/linux-arm64 \
-            --external @node-llama-cpp/linux-armv7l \
-            --external @node-llama-cpp/win-x64-cuda \
-            --external @node-llama-cpp/win-x64-cuda-ext \
-            --external @node-llama-cpp/win-x64-vulkan \
-            --external @node-llama-cpp/win-x64 \
-            --external @node-llama-cpp/win-arm64
+          # Match upstream eliza release-electrobun.yml verbatim:
+          # `--packages=external` tells bun to externalize EVERY npm package,
+          # which is what this probe wants — we only need to verify the entry
+          # transpiles, not actually bundle the dependency tree. Without it,
+          # bun follows tsconfig path mappings + jsx:"react-jsx" into
+          # ambient-modules.d.ts (which contains an `import type from "react"`),
+          # finds @types/react instead of react in the bun store, and crashes
+          # parsing `export as namespace React`. The previous explicit
+          # --external "*.node" + per-arch @node-llama-cpp filters were a
+          # subset of this and missed react/react-dom entirely.
+          bun build src/index.ts --target=bun --packages=external --outdir "$out_dir"
 
       - name: Build patched Electrobun CLI
         shell: bash
