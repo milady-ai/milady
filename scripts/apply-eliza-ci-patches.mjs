@@ -625,6 +625,86 @@ const requiredElectrobunConfigSnippets`,
   return patched;
 }
 
+function patchWhisperBuildWindowsConfig(raw) {
+  if (raw.includes('"--config"')) return raw;
+
+  // MSBuild (the default Windows generator) is multi-config, so the cmake
+  // configure-time CMAKE_BUILD_TYPE=Release flag is ignored; without --config
+  // at build time MSBuild silently picks Debug. Outputs then land in Debug
+  // subdirs that the post-build search probes never look at. Force Release at
+  // build time on Windows, and broaden the candidate lookup so both Release
+  // and Debug subdirs resolve (covers stale local caches too).
+  let patched = raw.replace(
+    `  const buildArgs = [
+    "--build",
+    buildPath,
+    "--target",`,
+    `  const buildArgs = [
+    "--build",
+    buildPath,
+    ...(process.platform === "win32" ? ["--config", "Release"] : []),
+    "--target",`,
+  );
+
+  patched = patched.replace(
+    `      : process.platform === "win32"
+        ? [
+            path.join(subBuild, "src", "whisper.dll"),
+            path.join(subBuild, "whisper.dll"),
+          ]`,
+    `      : process.platform === "win32"
+        ? [
+            path.join(subBuild, "src", "Release", "whisper.dll"),
+            path.join(subBuild, "src", "Debug", "whisper.dll"),
+            path.join(subBuild, "src", "whisper.dll"),
+            path.join(subBuild, "Release", "whisper.dll"),
+            path.join(subBuild, "Debug", "whisper.dll"),
+            path.join(subBuild, "whisper.dll"),
+          ]`,
+  );
+
+  patched = patched.replace(
+    `      : process.platform === "win32"
+        ? [path.join(buildPath, "whisper_eliza_adapter.dll")]`,
+    `      : process.platform === "win32"
+        ? [
+            path.join(buildPath, "Release", "whisper_eliza_adapter.dll"),
+            path.join(buildPath, "Debug", "whisper_eliza_adapter.dll"),
+            path.join(buildPath, "whisper_eliza_adapter.dll"),
+          ]`,
+  );
+
+  // CLI lookup is non-fatal (a warning) but ship the matching Windows config
+  // subdirs so the diagnostic logs the actual binary instead of giving up.
+  patched = patched.replace(
+    `  const cliCandidates = [
+    path.join(buildPath, "bin", "whisper-cli"),
+    path.join(subBuild, "bin", "whisper-cli"),
+    path.join(subBuild, "whisper-cli"),
+  ];`,
+    `  const cliCandidates =
+    process.platform === "win32"
+      ? [
+          path.join(buildPath, "bin", "Release", "whisper-cli.exe"),
+          path.join(buildPath, "bin", "Debug", "whisper-cli.exe"),
+          path.join(buildPath, "bin", "whisper-cli.exe"),
+          path.join(subBuild, "bin", "Release", "whisper-cli.exe"),
+          path.join(subBuild, "bin", "Debug", "whisper-cli.exe"),
+          path.join(subBuild, "bin", "whisper-cli.exe"),
+          path.join(subBuild, "Release", "whisper-cli.exe"),
+          path.join(subBuild, "Debug", "whisper-cli.exe"),
+          path.join(subBuild, "whisper-cli.exe"),
+        ]
+      : [
+          path.join(buildPath, "bin", "whisper-cli"),
+          path.join(subBuild, "bin", "whisper-cli"),
+          path.join(subBuild, "whisper-cli"),
+        ];`,
+  );
+
+  return patched;
+}
+
 function patchValidateCdnAssetsRootDir(raw) {
   if (raw.includes("ELIZA_CDN_ROOT_DIR")) return raw;
   // Patch the CLI entry point to accept a root dir override
@@ -1263,6 +1343,18 @@ function applyReleaseSourcePatches() {
     ),
     patchValidateCdnAssetsRootDir,
     "validate-cdn-assets ELIZA_CDN_ROOT_DIR override",
+  );
+
+  replaceFileText(
+    path.join(
+      elizaDir,
+      "plugins",
+      "plugin-local-inference",
+      "native",
+      "build-whisper.mjs",
+    ),
+    patchWhisperBuildWindowsConfig,
+    "whisper Windows MSBuild Release config + lookup",
   );
 
   replaceFileText(
