@@ -34,10 +34,7 @@ type DeleteState = "idle" | "confirm" | "deleting";
  * users don't click through into a dead page.
  */
 const OPEN_DISABLED_COPY: Partial<
-  Record<
-    import("../../lib/AgentProvider").ManagedAgent["status"],
-    { label: string; title: string }
-  >
+  Record<ManagedAgent["status"], { label: string; title: string }>
 > = {
   provisioning: {
     label: "starting\u2026",

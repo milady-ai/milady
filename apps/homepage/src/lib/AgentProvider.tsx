@@ -92,11 +92,8 @@ export interface ManagedAgent {
   avatarIndex?: number;
 }
 
-export type SourceFilter = "all" | "local" | "cloud" | "remote";
-
 interface AgentContextValue {
   agents: ManagedAgent[];
-  filteredAgents: ManagedAgent[];
   /** True only during initial load (first fetch). */
   loading: boolean;
   /** True when any refetch is in progress (interval, manual refresh, post-mutation). */
@@ -105,8 +102,6 @@ interface AgentContextValue {
   error: string | null;
   clearError: () => void;
   cloudClient: CloudClient | null;
-  sourceFilter: SourceFilter;
-  setSourceFilter: (f: SourceFilter) => void;
   refresh: () => Promise<void>;
   addRemoteUrl: (name: string, url: string, token?: string) => void;
   removeRemote: (id: string) => void;
@@ -536,7 +531,6 @@ export function AgentProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sourceFilter, setSourceFilter] = useState<SourceFilter>("all");
   const cloudClientRef = useRef<CloudClient | null>(null);
   const cloudTokenRef = useRef<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -557,14 +551,6 @@ export function AgentProvider({ children }: { children: ReactNode }) {
         return (order[a.source] ?? 3) - (order[b.source] ?? 3);
       }),
     [agents],
-  );
-
-  const filteredAgents = useMemo(
-    () =>
-      sourceFilter === "all"
-        ? sortedAgents
-        : sortedAgents.filter((a) => a.source === sourceFilter),
-    [sortedAgents, sourceFilter],
   );
 
   const clearError = useCallback(() => setError(null), []);
@@ -705,14 +691,11 @@ export function AgentProvider({ children }: { children: ReactNode }) {
   const contextValue = useMemo<AgentContextValue>(
     () => ({
       agents: sortedAgents,
-      filteredAgents,
       loading,
       isRefreshing,
       error,
       clearError,
       cloudClient: cloudClientRef.current,
-      sourceFilter,
-      setSourceFilter,
       refresh: fetchAll,
       addRemoteUrl,
       removeRemote,
@@ -720,12 +703,10 @@ export function AgentProvider({ children }: { children: ReactNode }) {
     }),
     [
       sortedAgents,
-      filteredAgents,
       loading,
       isRefreshing,
       error,
       clearError,
-      sourceFilter,
       fetchAll,
       addRemoteUrl,
       removeRemote,
