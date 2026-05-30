@@ -2900,6 +2900,12 @@ export default defineConfig({
       // Contains native-only pty-state-capture / pty-console imports; skip pre-bundling.
       "@elizaos/plugin-agent-orchestrator",
       "pty-console",
+      // @elizaos/agent is server-side and the published alpha lags develop
+      // (missing newer subpaths like runtime/plugin-collector). esbuild
+      // dep-prebundling resolves it from the stale published package and
+      // crashes ("Missing ./runtime/plugin-collector specifier"); excluding it
+      // lets resolve.alias map @elizaos/agent[/*] to local source instead.
+      "@elizaos/agent",
       // Built-in secrets live in @elizaos/core features; Vite must not externalize them as a separate package.
       // Node-only HTTP client — crashes in browser, stub via nativeModuleStubPlugin
       "undici",
