@@ -19,7 +19,7 @@ API_PORT=$((31337 + OFFSET))
 UI_PORT=$((2138 + OFFSET))
 HOME_PORT=$((2142 + OFFSET))
 GATEWAY_PORT=$((18789 + OFFSET))
-STATE_DIR="~/.local/state/milady-wt-${SLOT}"
+STATE_DIR="${HOME}/.local/state/milady-wt-${SLOT}"
 
 cat > .env.worktree <<EOF
 # Worktree isolation — slot ${SLOT}

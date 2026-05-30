@@ -30,14 +30,4 @@ export interface PackageJsonRecord extends JsonObject {
   workspaces?: PackageWorkspaceSpec;
 }
 
-export interface PackageLinkDescriptor {
-  linkPath: string;
-  targetPath: string;
-}
-
-export interface VendoredPackageRecord {
-  dir: string;
-  version: string;
-}
-
 export type PublishedPackageSpec = [packageName: string, version: string];
