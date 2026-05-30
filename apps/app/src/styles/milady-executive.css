@@ -21,7 +21,8 @@
 
 :root {
   /* type — body is a system stack (zero bundle cost); display + mono bundled */
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-display: "Saira Condensed", "Arial Narrow", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
@@ -32,7 +33,7 @@
 
   /* champagne / cream gold */
   --deep-gold: #a8946b;
-  --classic-gold: #c9b38c;   /* resting accent */
+  --classic-gold: #c9b38c; /* resting accent */
   --highlight-gold: #e8dcc0; /* hover — lighter, never darker/black */
   --champagne-gold: #ece7df;
   --burnished-gold: #b9a173;
@@ -44,7 +45,7 @@
   --chrome-highlight: #ece7df;
   --gunmetal: #17171a;
 
-  --gold-glow: rgba(201, 179, 140, 0.10);
+  --gold-glow: rgba(201, 179, 140, 0.1);
   --soft-white-glow: rgba(236, 231, 223, 0.05);
   --inner-shadow: rgba(0, 0, 0, 0.55);
 
@@ -52,7 +53,7 @@
   --accent-rgb: 201, 179, 140;
   --accent-hover: var(--highlight-gold);
   --accent-muted: var(--deep-gold);
-  --accent-subtle: rgba(201, 179, 140, 0.10);
+  --accent-subtle: rgba(201, 179, 140, 0.1);
   --accent-foreground: #0a0a0b;
   --primary: var(--classic-gold);
   --primary-foreground: #0a0a0b;
@@ -62,7 +63,7 @@
   --warn-muted: rgba(185, 161, 115, 0.7);
   --warn-subtle: rgba(185, 161, 115, 0.14);
   --focus: rgba(201, 179, 140, 0.16);
-  --focus-ring: 0 0 0 2px rgba(201, 179, 140, 0.30);
+  --focus-ring: 0 0 0 2px rgba(201, 179, 140, 0.3);
   --link-color: var(--classic-gold);
   --link-hover-color: var(--highlight-gold);
 }
@@ -105,7 +106,11 @@
 /* Velvet card sheen — a single diffuse top glow, matte. */
 .card,
 [class*="bg-card"] {
-  background-image: radial-gradient(120% 80% at 50% 0%, rgba(201, 179, 140, 0.045), transparent 60%);
+  background-image: radial-gradient(
+    120% 80% at 50% 0%,
+    rgba(201, 179, 140, 0.045),
+    transparent 60%
+  );
 }
 
 /* First-run / onboarding palette -> executive velvet (dark, not the old light). */
@@ -119,14 +124,14 @@
   background: transparent;
   --text: #ece7df;
   --muted: #8d877c;
-  --border: rgba(236, 231, 223, 0.10);
+  --border: rgba(236, 231, 223, 0.1);
   --card: rgba(23, 23, 26, 0.72);
   --ok: #7fbf9b;
   --accent: var(--classic-gold);
   --accent-foreground: #0a0a0b;
   --first-run-text-strong: rgba(246, 242, 234, 0.98);
   --first-run-text-primary: rgba(236, 231, 223, 0.96);
-  --first-run-text-subtle: rgba(236, 231, 223, 0.80);
+  --first-run-text-subtle: rgba(236, 231, 223, 0.8);
   --first-run-text-muted: rgba(173, 166, 154, 0.86);
   --first-run-card-bg: rgba(23, 23, 26, 0.72);
   --first-run-card-border-strong: rgba(201, 179, 140, 0.32);
@@ -150,10 +155,18 @@
   background-color: #0a0a0b !important;
   color: #ece7df !important;
 }
-[data-testid="startup-shell-loading"] [class*="text-[#0B35F1]"] { color: #ece7df !important; }
-[data-testid="startup-shell-loading"] [class*="bg-white"]       { background-color: #17171a !important; }
-[data-testid="startup-shell-loading"] [class*="bg-[#0B35F1]"]   { background-color: rgba(201, 179, 140, 0.45) !important; }
-[data-testid="startup-shell-loading"] [class*="ring-[#0B35F1]"] { box-shadow: 0 0 0 1px rgba(201, 179, 140, 0.20) !important; }
+[data-testid="startup-shell-loading"] [class*="text-[#0B35F1]"] {
+  color: #ece7df !important;
+}
+[data-testid="startup-shell-loading"] [class*="bg-white"] {
+  background-color: #17171a !important;
+}
+[data-testid="startup-shell-loading"] [class*="bg-[#0B35F1]"] {
+  background-color: rgba(201, 179, 140, 0.45) !important;
+}
+[data-testid="startup-shell-loading"] [class*="ring-[#0B35F1]"] {
+  box-shadow: 0 0 0 1px rgba(201, 179, 140, 0.2) !important;
+}
 
 /* Functional, brand-neutral blocks carried over verbatim from brand-gold.css so
  * the memory-type taxonomy badges keep their colors. */
@@ -169,13 +182,38 @@
   --memory-type-unknown-bg: rgba(156, 163, 175, 0.15);
   --memory-type-unknown-fg: rgb(156, 163, 175);
 }
-.memory-type-badge-messages { background-color: var(--memory-type-messages-bg); color: var(--memory-type-messages-fg); }
-.memory-type-badge-memories { background-color: var(--memory-type-memories-bg); color: var(--memory-type-memories-fg); }
-.memory-type-badge-facts { background-color: var(--memory-type-facts-bg); color: var(--memory-type-facts-fg); }
-.memory-type-badge-documents { background-color: var(--memory-type-documents-bg); color: var(--memory-type-documents-fg); }
-.memory-type-badge-unknown { background-color: var(--memory-type-unknown-bg); color: var(--memory-type-unknown-fg); }
-.memory-type-dot-messages { background-color: var(--memory-type-messages-fg); }
-.memory-type-dot-memories { background-color: var(--memory-type-memories-fg); }
-.memory-type-dot-facts { background-color: var(--memory-type-facts-fg); }
-.memory-type-dot-documents { background-color: var(--memory-type-documents-fg); }
-.memory-type-dot-unknown { background-color: var(--memory-type-unknown-fg); }
+.memory-type-badge-messages {
+  background-color: var(--memory-type-messages-bg);
+  color: var(--memory-type-messages-fg);
+}
+.memory-type-badge-memories {
+  background-color: var(--memory-type-memories-bg);
+  color: var(--memory-type-memories-fg);
+}
+.memory-type-badge-facts {
+  background-color: var(--memory-type-facts-bg);
+  color: var(--memory-type-facts-fg);
+}
+.memory-type-badge-documents {
+  background-color: var(--memory-type-documents-bg);
+  color: var(--memory-type-documents-fg);
+}
+.memory-type-badge-unknown {
+  background-color: var(--memory-type-unknown-bg);
+  color: var(--memory-type-unknown-fg);
+}
+.memory-type-dot-messages {
+  background-color: var(--memory-type-messages-fg);
+}
+.memory-type-dot-memories {
+  background-color: var(--memory-type-memories-fg);
+}
+.memory-type-dot-facts {
+  background-color: var(--memory-type-facts-fg);
+}
+.memory-type-dot-documents {
+  background-color: var(--memory-type-documents-fg);
+}
+.memory-type-dot-unknown {
+  background-color: var(--memory-type-unknown-fg);
+}
