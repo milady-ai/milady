@@ -38,14 +38,16 @@ describe("package mode aliases", () => {
     ]);
   });
 
-  it("imports packaged app-core style exports instead of private ui dist paths", () => {
+  it("imports the packaged app-core base styles + Milady's own theme, not private ui dist paths", () => {
     const mainText = fs.readFileSync(
       path.join(appRoot, "src/main.tsx"),
       "utf8",
     );
 
     expect(mainText).toContain("@elizaos/app-core/styles/styles.css");
-    expect(mainText).toContain("@elizaos/app-core/styles/brand-gold.css");
+    // Milady ships its own executive theme, replacing the upstream gold theme.
+    expect(mainText).toContain("./styles/milady-executive.css");
+    expect(mainText).not.toContain("brand-gold.css");
     expect(mainText).not.toContain("@elizaos/ui/dist/styles/");
   });
 
