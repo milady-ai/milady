@@ -1,0 +1,26 @@
+{
+  "name": "agentic-electrobun-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "electrobun run",
+    "dev": "electrobun dev",
+    "dev:watch": "electrobun dev --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "build:dev": "electrobun build",
+    "build:canary": "electrobun build --env=canary",
+    "build:stable": "electrobun build --env=stable",
+    "doctor": "scripts/electrobun-agent-doctor.sh",
+    "audit:security": "scripts/security-audit.sh",
+    "audit:release": "scripts/electrobun-release-audit.sh"
+  },
+  "dependencies": {
+    "electrobun": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.0",
+    "typescript": "^5.9.0"
+  }
+}

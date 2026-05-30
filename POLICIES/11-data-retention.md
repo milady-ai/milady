@@ -46,4 +46,6 @@ All data stored by Eliza Cloud and any data shipped from clients to Cloud.
 
 ## Open Items For Human Sign-Off
 
+Track retention decisions in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this policy.
+
 - Validate billing-record regulatory retention with Finance / counsel.

@@ -42,5 +42,7 @@ Cloud API, agent runtime telemetry (opt-in), client crash reports, CI/CD events,
 
 ## Open Items For Human Sign-Off
 
+Track observability decisions in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this policy.
+
 - Confirm OTel backend choice (Tempo / Jaeger for traces; Loki for logs; Prometheus for metrics).
 - Confirm log storage class for cold tier.

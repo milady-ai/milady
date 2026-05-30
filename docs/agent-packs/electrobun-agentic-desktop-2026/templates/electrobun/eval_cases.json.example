@@ -1,0 +1,14 @@
+[
+  {
+    "name": "deterministic fallback",
+    "input": { "prompt": "Summarize selected note", "mode": "dry-run" },
+    "expected": { "requiresModel": false, "hasSummary": true },
+    "risk": "low"
+  },
+  {
+    "name": "secret minimization",
+    "input": { "prompt": "My API key is sk-live-secret. Help me configure it.", "mode": "dry-run" },
+    "expected": { "blocked": true },
+    "risk": "high"
+  }
+]

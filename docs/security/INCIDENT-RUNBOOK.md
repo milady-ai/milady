@@ -4,6 +4,8 @@ Operational playbook for the policy in [`../../POLICIES/08-incident-response.md`
 
 ## On-call contacts (placeholders — fill in)
 
+Fill these from [`SOC2-OPERATOR-CHECKLIST.md`](SOC2-OPERATOR-CHECKLIST.md) so incident contacts stay aligned with the SOC2 evidence inventory.
+
 - **Primary on-call pager:** `<PagerDuty / Opsgenie URL>`
 - **Incident channel:** `#incident-active` on `<chat platform>`
 - **Status page:** `https://status.<eliza-domain>`

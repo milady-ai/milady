@@ -72,7 +72,7 @@ try {
   }
 
   const result = spawnSync(
-    "bun",
+    "node",
     [
       "eliza/packages/app-core/scripts/run-node-tsx.mjs",
       "eliza/packages/app-core/scripts/release-check.ts",

@@ -2,6 +2,8 @@
 
 SOC2 A1.1 / A1.2.
 
+Track the operator-owned capacity values in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this plan.
+
 ## Current load (baseline)
 
 Snapshot — fill in after next capacity review:

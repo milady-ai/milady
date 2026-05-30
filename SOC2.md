@@ -52,20 +52,7 @@ eliza/docs/security/                          mirror of docs/security for the el
 
 ## Open human-in-loop items (must be filled before audit)
 
-These are the placeholders that appear across the documentation and require an operator decision:
-
-- Designate **Security Lead** / CISO function.
-- Designate **DPO** (or formally assign to Security Lead).
-- Confirm **IdP** (Google Workspace vs Okta).
-- Confirm **hosting provider** + primary + backup region.
-- Confirm **payment processor** and **observability vendor** identities.
-- Choose **GRC tool** (Vanta / Drata / Secureframe / none).
-- Publish **PGP key** for `security@elizalabs.ai` and update SECURITY.md fingerprint.
-- Establish **on-call paging** tool (PagerDuty / Opsgenie).
-- Publish public **status page**, **subprocessor URL**, **/.well-known/security.txt**.
-- Engage **penetration test** vendor; pick **bug-bounty** platform decision.
-- Confirm **Steward** production deployment topology.
-- Approve **board / leadership security review** cadence (CC1.2).
+Use [`docs/security/SOC2-OPERATOR-CHECKLIST.md`](docs/security/SOC2-OPERATOR-CHECKLIST.md) as the canonical fill-in sheet for names, vendors, URLs, contact routes, and deployment values. The checklist includes the source files that must be patched after each operator decision is made.
 
 ## Phased plan (high level)
 

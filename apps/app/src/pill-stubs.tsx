@@ -16,13 +16,6 @@
 
 import { type ReactElement, useEffect, useRef, useState } from "react";
 
-export interface Conversation {
-  id: string;
-  title?: string;
-  updatedAt?: number | string;
-  [key: string]: unknown;
-}
-
 export interface ConversationMessage {
   id: string;
   role: string;

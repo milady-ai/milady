@@ -36,5 +36,7 @@ All personnel with access to Eliza systems, company-issued devices, BYOD devices
 
 ## Open Items For Human Sign-Off
 
+Track endpoint and network decisions in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this policy.
+
 - Confirm MDM tooling (or document decision to operate without).
 - VPN provider.

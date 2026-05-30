@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { rewriteConfiguredElizaRegistrySpecifiers } from "./disable-local-eliza-workspace.mjs";
+import {
+  removeLocalElizaOverrideSpecifiers,
+  rewriteConfiguredElizaRegistrySpecifiers,
+} from "./disable-local-eliza-workspace.mjs";
 
 describe("disable local eliza workspace", () => {
   it("rewrites exact elizaOS registry pins when an explicit package tag is selected", () => {
@@ -61,5 +64,24 @@ describe("disable local eliza workspace", () => {
 
     expect(changed).toBe(false);
     expect(pkg.dependencies["@elizaos/prompts"]).toBe("2.0.0-alpha.139");
+  });
+
+  it("repairs stale local overrides back to package-mode registry overrides", () => {
+    const pkg = {
+      overrides: {
+        "@elizaos/shared": "file:./eliza/packages/shared",
+        "@elizaos/ui": "file:./eliza/packages/ui",
+        "@elizaos/app-core": "file:./eliza/packages/app-core",
+      },
+    };
+
+    const changed = removeLocalElizaOverrideSpecifiers(pkg, {
+      log: () => undefined,
+    });
+
+    expect(changed).toBe(true);
+    expect(pkg.overrides["@elizaos/shared"]).toBe("alpha");
+    expect(pkg.overrides["@elizaos/ui"]).toBe("alpha");
+    expect(pkg.overrides["@elizaos/app-core"]).toBeUndefined();
   });
 });

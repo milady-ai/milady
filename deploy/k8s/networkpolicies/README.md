@@ -42,3 +42,4 @@ kubectl run -n eliza-agents netshoot --image=nicolaka/netshoot --rm -it -- \
 External-secrets-operator runs in `external-secrets` namespace and reaches the
 Steward proxy via a separate egress rule (TODO: add
 `allow-eso-to-steward.yaml` once Steward endpoint is finalized).
+Track the final Steward endpoint and egress rule in [`../../../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../../../docs/security/SOC2-OPERATOR-CHECKLIST.md).

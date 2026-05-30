@@ -452,6 +452,122 @@ function ensureLocalWorkspaceDists() {
       );
     }
   }
+
+  // Catch-all: build every remaining workspace plugin/package that declares a
+  // build script. Eliza's BASELINE_BUNDLED_RUNTIME_PACKAGES has grown to ~40
+  // packages and copy-runtime-node-modules.ts now enforces that each one has
+  // its declared runtime entries on disk (assertRequiredBundledPackagesLanded).
+  // The explicit `builds` list above only covers ~25 of those. Iterating the
+  // workspace tree and building anything not yet built keeps us in sync as
+  // upstream adds new baseline plugins, without requiring this file to be
+  // edited every time. Failures are logged-and-continued; the eliza assertion
+  // surfaces any genuinely missing runtime entry downstream.
+  ensureWorkspacePluginDistsByPackageJsonMain(elizaPluginsDir);
+  ensureWorkspacePluginDistsByPackageJsonMain(elizaPackagesDir);
+}
+
+function ensureWorkspacePluginDistsByPackageJsonMain(baseDir: string) {
+  if (!fs.existsSync(baseDir)) return;
+
+  for (const entry of fs.readdirSync(baseDir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const packageDir = path.join(baseDir, entry.name);
+    const packageJsonPath = path.join(packageDir, "package.json");
+    if (!fs.existsSync(packageJsonPath)) continue;
+
+    let pkg: {
+      name?: string;
+      main?: unknown;
+      module?: unknown;
+      exports?: unknown;
+      scripts?: Record<string, unknown>;
+    };
+    try {
+      pkg = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+    } catch {
+      continue;
+    }
+
+    if (!pkg?.scripts || typeof pkg.scripts.build !== "string") continue;
+
+    // Collect every declared runtime JS entry from main, module, and exports.
+    // Mirrors eliza's assertRequiredBundledPackagesLanded so we build whenever
+    // any entry the assertion will look for is missing on disk — not just the
+    // top-level `main`. Plugins like plugin-companion declare both `dist/index.js`
+    // and a separate `./plugin` subpath at `dist/plugin.js`; checking only main
+    // missed those and the assertion fired on the unbuilt sibling entry.
+    const declaredEntries = collectDeclaredRuntimeEntries(pkg);
+    if (declaredEntries.length === 0) continue;
+
+    const missingEntries = declaredEntries.filter(
+      (relPath) => !fs.existsSync(path.join(packageDir, relPath)),
+    );
+    if (missingEntries.length === 0) continue;
+
+    const label = `${path.relative(repoRoot, packageDir)} (${pkg.name ?? entry.name})`;
+    console.log(
+      `[copy-runtime-node-modules wrapper] building ${label}: ${missingEntries.length} declared entr${missingEntries.length === 1 ? "y" : "ies"} missing (e.g. ${missingEntries[0]})`,
+    );
+    const result = spawnSync(bunExecutable, ["run", "build"], {
+      cwd: packageDir,
+      env: process.env,
+      stdio: "inherit",
+    });
+    if (result.status !== 0) {
+      console.warn(
+        `[copy-runtime-node-modules wrapper] WARN: ${label} build exited with status ${result.status}; eliza assertRequiredBundledPackagesLanded will report any missing entries`,
+      );
+    }
+  }
+}
+
+function collectDeclaredRuntimeEntries(pkg: {
+  main?: unknown;
+  module?: unknown;
+  exports?: unknown;
+}): string[] {
+  const entries = new Set<string>();
+
+  for (const candidate of [pkg.main, pkg.module]) {
+    if (typeof candidate === "string" && isRuntimeJsEntryPath(candidate)) {
+      entries.add(stripLeadingDotSlash(candidate));
+    }
+  }
+
+  walkExportsField(pkg.exports, entries);
+
+  return [...entries].sort();
+}
+
+function walkExportsField(value: unknown, entries: Set<string>): void {
+  if (typeof value === "string") {
+    if (isRuntimeJsEntryPath(value)) {
+      entries.add(stripLeadingDotSlash(value));
+    }
+    return;
+  }
+  if (Array.isArray(value)) {
+    for (const item of value) walkExportsField(item, entries);
+    return;
+  }
+  if (value && typeof value === "object") {
+    for (const [key, item] of Object.entries(
+      value as Record<string, unknown>,
+    )) {
+      if (key === "types" || key === "typings") continue;
+      walkExportsField(item, entries);
+    }
+  }
+}
+
+function isRuntimeJsEntryPath(value: string): boolean {
+  if (!value || value === "." || value === "./") return false;
+  if (value.includes("*")) return false;
+  return /\.(?:[cm]?js)$/i.test(value);
+}
+
+function stripLeadingDotSlash(value: string): string {
+  return value.startsWith("./") ? value.slice(2) : value;
 }
 
 function linkLocalScopedPackage(

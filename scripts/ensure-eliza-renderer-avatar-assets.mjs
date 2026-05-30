@@ -13,6 +13,14 @@ const rendererRoots = [
   .filter((candidate) => fs.existsSync(candidate));
 const sourceRoots = [
   ...rendererRoots,
+  // Upstream eliza renamed `plugins/app-companion` -> `plugins/plugin-companion`
+  // between f7a4e0bc50 (2026-05-04 known-good release ref) and f4991bc6
+  // (2026-05-27 develop pin). Both paths are listed so the publisher works
+  // against either ref. ~20 other plugins were renamed in the same batch;
+  // only the companion paths are exercised by this script, which is why a
+  // narrow path-additive fix is sufficient here.
+  path.join(repoRoot, "eliza/plugins/plugin-companion/public"),
+  path.join(repoRoot, "eliza/plugins/plugin-companion/public_src"),
   path.join(repoRoot, "eliza/plugins/app-companion/public"),
   path.join(repoRoot, "eliza/plugins/app-companion/public_src"),
   path.join(repoRoot, "apps/homepage/public"),

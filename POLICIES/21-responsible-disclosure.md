@@ -57,5 +57,7 @@ All Eliza-controlled assets: Eliza Cloud, published clients (desktop / mobile / 
 
 ## Open Items For Human Sign-Off
 
+Track public security contact decisions in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this policy.
+
 - Publish PGP key.
 - Decide bug-bounty platform vs self-managed.

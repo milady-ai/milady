@@ -21,10 +21,9 @@ permissions:
   contents: read
 
 env:
-  # Pin upstream eliza checkout to a known-good SHA. Upstream develop landed a
-  # cloud-migration squash that broke milady CI; pinning here keeps reproducibility.
-  # Bump after upstream stabilizes (or override with MILADY_ELIZA_REF env var).
-  MILADY_ELIZA_REF: "f7a4e0bc50f966174ea42c41db787359ca6d8e67"
+  # Pin the canonical elizaOS/eliza checkout to the latest verified develop SHA.
+  # Override with MILADY_ELIZA_REF only for a specific upstream release test.
+  MILADY_ELIZA_REF: "f4991bc6059514f10a0fc1a8ec3f199478c415ae"
   BUN_VERSION: "1.3.13"
   NODE_NO_WARNINGS: "1"
 
@@ -38,7 +37,7 @@ jobs:
         shell: bash -euo pipefail {0}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 0
           submodules: false
@@ -55,7 +54,7 @@ jobs:
           fi
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: "24"
 
@@ -72,6 +71,16 @@ jobs:
 
       - name: Run regression matrix contract
         run: bun run test:regression-matrix:release-contract
+        env:
+          # On pull_request, actions/checkout does not create refs/remotes/origin/develop,
+          # so the changed-files diff against origin/develop throws "Unable to resolve
+          # changed files". validate-regression-matrix.mjs prefers GITHUB_BASE_SHA (a
+          # non-default var); supply the PR base SHA (present in the merge ref's ancestry
+          # under fetch-depth:0) so the diff resolves. Empty on push, where the script
+          # early-returns with no changed files.
+          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
 
       - name: Run release contract suite
         run: bun run test:release:contract
+        env:
+          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}

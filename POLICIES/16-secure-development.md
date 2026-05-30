@@ -49,5 +49,7 @@ Every PR to a protected branch must pass:
 
 ## Open Items For Human Sign-Off
 
+Track SDLC gate decisions in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this policy.
+
 - Confirm CodeQL or Semgrep (or both).
 - Define the protected-branch list.

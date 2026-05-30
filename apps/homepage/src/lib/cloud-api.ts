@@ -1,50 +1,9 @@
 import { clearToken } from "./auth";
-import type {
-  BillingSettingsResponse,
-  CreditsSummaryResponse,
-} from "./billing-types";
 import {
   CLOUD_AGENT_API_BASE_PATH,
   CLOUD_BASE,
   getCloudAgentApiPath,
 } from "./runtime-config";
-
-export type {
-  StewardApprovalActionResponse,
-  StewardPendingApproval,
-  StewardPolicyResult,
-  StewardStatusResponse,
-  StewardTxRecord,
-  StewardTxStatus,
-} from "@elizaos/app-core/api/client-types-steward";
-// ── Wallet types ───────────────────────────────────────────────────────
-export type {
-  EvmChainBalance,
-  EvmTokenBalance,
-  SolanaTokenBalance,
-  WalletBalancesResponse,
-} from "@elizaos/shared/contracts/wallet";
-
-import type {
-  StewardApprovalActionResponse,
-  StewardPendingApproval,
-  StewardStatusResponse,
-  StewardTxRecord,
-} from "@elizaos/app-core/api/client-types-steward";
-import type { WalletBalancesResponse } from "@elizaos/shared/contracts/wallet";
-
-// Wallet addresses response (same shape as WalletAddresses but with Response suffix for API clarity)
-export type { WalletAddresses as WalletAddressesResponse } from "@elizaos/shared/contracts/wallet";
-
-import type { WalletAddresses as WalletAddressesResponse } from "@elizaos/shared/contracts/wallet";
-
-// Steward policy types (not in shared — these are UI-specific config shapes)
-export type StewardPolicyType =
-  | "spending-limit"
-  | "approved-addresses"
-  | "auto-approve-threshold"
-  | "time-window"
-  | "rate-limit";
 
 export type JsonPrimitive = boolean | number | string | null;
 export type JsonValue = JsonPrimitive | JsonObject | JsonValue[];
@@ -107,39 +66,6 @@ export interface CloudAgentBilling {
   currency?: string;
 }
 
-export type StewardApprovedAddressesMode = "whitelist" | "blacklist";
-
-export interface StewardAllowedHourWindow {
-  start: number;
-  end: number;
-}
-
-export interface StewardPolicyConfig {
-  maxPerTx?: string;
-  maxPerDay?: string;
-  maxPerWeek?: string;
-  addresses?: string[];
-  mode?: StewardApprovedAddressesMode;
-  threshold?: string;
-  allowedHours?: StewardAllowedHourWindow[];
-  allowedDays?: number[];
-  maxTxPerHour?: number;
-  maxTxPerDay?: number;
-}
-
-export type StewardPolicyConfigKey = keyof StewardPolicyConfig;
-export type StewardPolicyConfigValue = Exclude<
-  StewardPolicyConfig[StewardPolicyConfigKey],
-  undefined
->;
-
-export interface StewardPolicyRule {
-  id: string;
-  type: StewardPolicyType;
-  enabled: boolean;
-  config: StewardPolicyConfig;
-}
-
 export interface CloudAgentDetail {
   id: string;
   name: string;
@@ -158,34 +84,11 @@ export interface CloudAgentDetail {
   region?: string;
 }
 
-export interface CloudBackup {
-  id: string;
-  createdAt: string;
-  size?: number;
-}
-
-export interface CreditBalance {
-  balance: number;
-  currency?: string;
-}
-
 export interface JobStatus {
   id: string;
   status: "pending" | "in_progress" | "completed" | "failed";
   result?: JsonValue;
   error?: string;
-}
-
-export interface BridgeResponse<T = JsonObject> {
-  result?: T;
-  error?: JsonValue;
-  [key: string]: JsonValue | T | undefined;
-}
-
-export interface BridgeStatus {
-  state: AgentRuntimeState;
-  uptime?: number;
-  memories?: number;
 }
 
 /**
@@ -229,10 +132,7 @@ async function readErrorMessage(res: Response): Promise<string> {
   }
 }
 
-function unwrapListResponse<T>(
-  data: unknown,
-  primaryKey?: "agents" | "backups" | "containers",
-): T[] {
+function unwrapListResponse<T>(data: unknown, primaryKey?: "agents"): T[] {
   if (Array.isArray(data)) return data as T[];
   if (!isJsonObject(data)) return [];
   const obj = data;
@@ -270,12 +170,6 @@ interface CreateCloudAgentApiResponse {
   success?: boolean;
   data?: { id: string };
   id?: string;
-}
-
-export interface CloudSessionSummary {
-  credits?: number;
-  requests?: number;
-  tokens?: number;
 }
 
 export class CloudAgentsNotAvailableError extends Error {
@@ -369,13 +263,6 @@ export class CloudClient {
     }));
   }
 
-  async getAgent(agentId: string): Promise<CloudAgentDetail> {
-    const data = await this.request<unknown>(getCloudAgentApiPath(agentId), {
-      method: "GET",
-    });
-    return unwrapDataResponse<CloudAgentDetail>(data);
-  }
-
   async createAgent(
     config: CreateCloudAgentInput,
   ): Promise<CreateCloudAgentResponse> {
@@ -418,84 +305,6 @@ export class CloudClient {
     return { jobId: res.jobId ?? res.data?.jobId };
   }
 
-  async suspendAgent(agentId: string): Promise<void> {
-    await this.request(getCloudAgentApiPath(agentId, "suspend"), {
-      method: "POST",
-    });
-  }
-
-  async resumeAgent(agentId: string): Promise<{ jobId?: string }> {
-    const res = await this.request<{
-      jobId?: string;
-      data?: { jobId?: string };
-    }>(getCloudAgentApiPath(agentId, "resume"), {
-      method: "POST",
-    });
-    return { jobId: res.jobId ?? res.data?.jobId };
-  }
-
-  // Snapshots & backups
-  async takeSnapshot(agentId: string): Promise<void> {
-    await this.request(getCloudAgentApiPath(agentId, "snapshot"), {
-      method: "POST",
-    });
-  }
-
-  async listBackups(agentId: string): Promise<CloudBackup[]> {
-    const data = await this.request<unknown>(
-      getCloudAgentApiPath(agentId, "backups"),
-      { method: "GET" },
-    );
-    return unwrapListResponse<CloudBackup>(data, "backups");
-  }
-
-  async restoreBackup(agentId: string, backupId?: string): Promise<void> {
-    await this.request(getCloudAgentApiPath(agentId, "restore"), {
-      method: "POST",
-      body: JSON.stringify(backupId ? { backupId } : {}),
-    });
-  }
-
-  // Bridge (JSON-RPC to sandbox)
-  async bridge<T = JsonObject>(
-    agentId: string,
-    method: string,
-    params?: object,
-  ): Promise<BridgeResponse<T>> {
-    return this.request(getCloudAgentApiPath(agentId, "bridge"), {
-      method: "POST",
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: crypto.randomUUID(),
-        method,
-        params: params ?? {},
-      }),
-    });
-  }
-
-  async getAgentBridgeStatus(agentId: string): Promise<BridgeStatus> {
-    const res = await this.bridge<BridgeStatus>(agentId, "status.get");
-    const payload = res.result ?? res;
-    const state = normalizeAgentState(
-      typeof payload.state === "string" ? payload.state : undefined,
-    );
-    return {
-      state,
-      uptime: typeof payload.uptime === "number" ? payload.uptime : undefined,
-      memories:
-        typeof payload.memories === "number" ? payload.memories : undefined,
-    };
-  }
-
-  // Credits & billing
-  async getCreditsBalance(): Promise<CreditBalance> {
-    return this.request("/api/credits/balance", { method: "GET" });
-  }
-
-  async getCreditsSummary(): Promise<CreditsSummaryResponse> {
-    return this.request("/api/v1/credits/summary", { method: "GET" });
-  }
-
   // Jobs (async operation polling)
   async getJobStatus(jobId: string): Promise<JobStatus> {
     const data = await this.request<unknown>(`/api/v1/jobs/${jobId}`, {
@@ -516,88 +325,6 @@ export class CloudClient {
     }
     throw new Error("Job timed out");
   }
-
-  // Containers (for container-level monitoring)
-  async listContainers(): Promise<JsonObject[]> {
-    const data = await this.request<unknown>("/api/v1/containers", {
-      method: "GET",
-    });
-    return unwrapListResponse<JsonObject>(data, "containers");
-  }
-
-  async getContainerHealth(containerId: string): Promise<JsonObject> {
-    return this.request(`/api/v1/containers/${containerId}/health`, {
-      method: "GET",
-    });
-  }
-
-  async getContainerMetrics(
-    containerId: string,
-  ): Promise<Partial<MetricsData>> {
-    return this.request(`/api/v1/containers/${containerId}/metrics`, {
-      method: "GET",
-    });
-  }
-
-  async getContainerLogs(containerId: string): Promise<string> {
-    const res = await fetch(
-      `${CLOUD_BASE}/api/v1/containers/${containerId}/logs`,
-      {
-        headers: { "X-Api-Key": this.apiKey },
-      },
-    );
-    if (!res.ok) throw new Error(`Logs ${res.status}`);
-    return res.text();
-  }
-
-  // Billing settings
-  async getBillingSettings(): Promise<BillingSettingsResponse> {
-    return this.request("/api/v1/billing/settings", { method: "GET" });
-  }
-
-  // Billing checkout — creates a Stripe checkout session, returns { url, sessionId }
-  async createBillingCheckout(amountUsd: number): Promise<{
-    checkoutUrl?: string;
-    url?: string;
-    clientSecret?: string;
-    publishableKey?: string;
-    sessionId?: string;
-  }> {
-    // Use the cloud base URL for redirects since the cloud validates redirect origins
-    const redirectBase = CLOUD_BASE;
-    return this.request("/api/v1/credits/checkout", {
-      method: "POST",
-      body: JSON.stringify({
-        credits: amountUsd,
-        success_url: `${redirectBase}/dashboard/billing/success`,
-        cancel_url: `${redirectBase}/dashboard/settings?tab=billing&canceled=1`,
-      }),
-    });
-  }
-
-  // Pairing token (for opening Web UI with auth handoff)
-  async getPairingToken(agentId: string): Promise<{
-    token: string;
-    redirectUrl: string;
-    expiresIn: number;
-  }> {
-    const res = await this.request<
-      | { token: string; redirectUrl: string; expiresIn: number }
-      | { data: { token: string; redirectUrl: string; expiresIn: number } }
-    >(getCloudAgentApiPath(agentId, "pairing-token"), { method: "POST" });
-    // Backend may wrap in { data: ... } or return flat
-    if ("data" in res && res.data?.redirectUrl) return res.data;
-    return res as { token: string; redirectUrl: string; expiresIn: number };
-  }
-
-  // Session info
-  async getCurrentSession(): Promise<{
-    credits?: number;
-    requests?: number;
-    tokens?: number;
-  }> {
-    return this.request("/api/sessions/current", { method: "GET" });
-  }
 }
 
 export type ConnectionType = "local" | "remote" | "cloud";
@@ -617,20 +344,6 @@ export interface AgentStatus {
   memories?: number;
   agentName: string;
   model: string;
-}
-
-export interface MetricsData {
-  cpu: number;
-  memoryMb: number;
-  diskMb: number;
-  timestamp: string;
-}
-
-export interface LogEntry {
-  level: "info" | "warn" | "error";
-  message: string;
-  timestamp: string;
-  agentName: string;
 }
 
 export interface HealthResponse {
@@ -701,12 +414,6 @@ export class CloudApiClient {
       ...opts,
       headers: this.buildHeaders(opts),
     });
-  }
-
-  private async request<T>(path: string, opts: RequestInit = {}): Promise<T> {
-    const res = await this.rawFetch(path, opts);
-    if (!res.ok) throw new Error(`API ${res.status}: ${path}`);
-    return res.json();
   }
 
   async health(options?: RequestSignalOptions): Promise<HealthResponse> {
@@ -782,143 +489,5 @@ export class CloudApiClient {
     }
 
     throw new Error(`API ${primary.status}: /api/status`);
-  }
-
-  async startAgent(): Promise<{ ok: boolean; status: { state: string } }> {
-    return this.request("/api/agent/start", { method: "POST" });
-  }
-
-  async stopAgent(): Promise<{ ok: boolean; status: { state: string } }> {
-    return this.request("/api/agent/stop", { method: "POST" });
-  }
-
-  async pauseAgent(): Promise<{ ok: boolean; status: { state: string } }> {
-    return this.request("/api/agent/pause", { method: "POST" });
-  }
-
-  async resumeAgent(): Promise<{ ok: boolean; status: { state: string } }> {
-    return this.request("/api/agent/resume", { method: "POST" });
-  }
-
-  async playAgent(): Promise<{ ok: boolean; status: { state: string } }> {
-    await this.startAgent();
-    return this.resumeAgent();
-  }
-
-  async exportAgent(password: string, includeLogs?: boolean): Promise<Blob> {
-    const headers = this.buildHeaders();
-    headers.set("Content-Type", "application/json");
-
-    const res = await fetch(`${this.baseUrl}/api/agent/export`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ password, includeLogs }),
-    });
-    if (!res.ok) throw new Error(`Export failed: ${res.status}`);
-    return res.blob();
-  }
-
-  async estimateExportSize(): Promise<{ sizeBytes: number }> {
-    return this.request("/api/agent/export/estimate", { method: "GET" });
-  }
-
-  async importAgent(file: File, password: string): Promise<{ ok: boolean }> {
-    const passwordBytes = new TextEncoder().encode(password);
-    const fileBytes = new Uint8Array(await file.arrayBuffer());
-    const lengthBuf = new ArrayBuffer(4);
-    new DataView(lengthBuf).setUint32(0, passwordBytes.length);
-    const envelope = new Blob([lengthBuf, passwordBytes, fileBytes]);
-    const res = await fetch(`${this.baseUrl}/api/agent/import`, {
-      method: "POST",
-      headers: this.buildHeaders(),
-      body: envelope,
-    });
-    if (!res.ok) throw new Error(`Import failed: ${res.status}`);
-    return res.json();
-  }
-
-  async getMetrics(): Promise<MetricsData[]> {
-    return this.request("/api/metrics", { method: "GET" });
-  }
-
-  async getLogs(opts?: {
-    limit?: number;
-    level?: string;
-  }): Promise<LogEntry[]> {
-    const params = new URLSearchParams();
-    if (opts?.limit) params.set("limit", String(opts.limit));
-    if (opts?.level) params.set("level", opts.level);
-    const qs = params.toString();
-    return this.request(`/api/logs${qs ? `?${qs}` : ""}`, { method: "GET" });
-  }
-
-  // Wallet
-
-  async getWalletAddresses(): Promise<WalletAddressesResponse> {
-    return this.request("/api/wallet/addresses", { method: "GET" });
-  }
-
-  async getWalletBalances(): Promise<WalletBalancesResponse> {
-    return this.request("/api/wallet/balances", { method: "GET" });
-  }
-
-  async getStewardStatus(): Promise<StewardStatusResponse> {
-    return this.request("/api/wallet/steward-status", { method: "GET" });
-  }
-
-  async getStewardTxRecords(options?: {
-    status?: string;
-    limit?: number;
-    offset?: number;
-  }): Promise<{
-    records: StewardTxRecord[];
-    total: number;
-    offset: number;
-    limit: number;
-  }> {
-    const params = new URLSearchParams();
-    if (options?.status) params.set("status", options.status);
-    if (options?.limit) params.set("limit", String(options.limit));
-    if (options?.offset) params.set("offset", String(options.offset));
-    const qs = params.toString();
-    return this.request(`/api/wallet/steward-tx-records${qs ? `?${qs}` : ""}`, {
-      method: "GET",
-    });
-  }
-
-  async getStewardPendingApprovals(): Promise<StewardPendingApproval[]> {
-    return this.request("/api/wallet/steward-pending-approvals", {
-      method: "GET",
-    });
-  }
-
-  async approveStewardTx(txId: string): Promise<StewardApprovalActionResponse> {
-    return this.request("/api/wallet/steward-approve-tx", {
-      method: "POST",
-      body: JSON.stringify({ txId }),
-    });
-  }
-
-  async denyStewardTx(
-    txId: string,
-    reason?: string,
-  ): Promise<StewardApprovalActionResponse> {
-    return this.request("/api/wallet/steward-deny-tx", {
-      method: "POST",
-      body: JSON.stringify({ txId, ...(reason ? { reason } : {}) }),
-    });
-  }
-
-  async getStewardPolicies(): Promise<StewardPolicyRule[]> {
-    return this.request("/api/wallet/steward-policies", { method: "GET" });
-  }
-
-  async setStewardPolicies(
-    policies: StewardPolicyRule[],
-  ): Promise<{ ok: boolean }> {
-    return this.request("/api/wallet/steward-policies", {
-      method: "PUT",
-      body: JSON.stringify({ policies }),
-    });
   }
 }

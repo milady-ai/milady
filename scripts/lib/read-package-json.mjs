@@ -6,9 +6,7 @@ import path from "node:path";
 /**
  * @typedef {import("./package-types.d.ts").JsonObject} JsonObject
  * @typedef {import("./package-types.d.ts").PackageJsonRecord} PackageJsonRecord
- * @typedef {import("./package-types.d.ts").PackageLinkDescriptor} PackageLinkDescriptor
  * @typedef {import("./package-types.d.ts").PackageStringMap} PackageStringMap
- * @typedef {import("./package-types.d.ts").VendoredPackageRecord} VendoredPackageRecord
  * @typedef {import("./package-types.d.ts").PackageWorkspaceSpec} PackageWorkspaceSpec
  */
 
@@ -107,23 +105,4 @@ export function readPackageJson(dir) {
   } catch {
     return null;
   }
-}
-
-/**
- * Build a Map of vendored @elizaos/* package names to their local directory and version.
- * Combines results from `getElizaPackageLinks` and `getPluginPackageLinks`.
- *
- * @param {ReadonlyArray<PackageLinkDescriptor>} links - package link descriptors from setup-upstreams
- * @returns {Map<string, VendoredPackageRecord>}
- */
-export function buildVendoredPackageMap(links) {
-  /** @type {Map<string, VendoredPackageRecord>} */
-  const vendored = new Map();
-  for (const link of links) {
-    const pkg = readPackageJson(link.targetPath);
-    if (pkg?.name && typeof pkg.version === "string") {
-      vendored.set(pkg.name, { dir: link.targetPath, version: pkg.version });
-    }
-  }
-  return vendored;
 }

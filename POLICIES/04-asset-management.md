@@ -36,5 +36,7 @@ Company-issued laptops, mobile devices, servers/VMs in cloud accounts, container
 
 ## Open Items For Human Sign-Off
 
+Track asset and registry decisions in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this policy.
+
 - Confirm endpoint protection tool.
 - Confirm container registry (GHCR vs other).

@@ -287,6 +287,56 @@ function assertCorePackageEntry(nodeModulesRoot) {
   );
 }
 
+function ensureElizaCoreRuntimeDeps(elizaSourceRoot) {
+  // The source-link hydration above provides @elizaos/core's source but NOT its
+  // dependency closure. @elizaos/core source imports runtime deps (e.g.
+  // drizzle-orm in evaluators/_factCandidates.ts) that the packaged-Electrobun
+  // Playwright bootstrap pulls in via startApiServer. When they cannot resolve
+  // from eliza/packages/core the spec import throws "Cannot find package …" and
+  // Playwright reports "No tests found" -> exit 1 (the Windows release leg).
+  // Install any missing ones at the version eliza/packages/core declares so they
+  // resolve from eliza/node_modules; this is a no-op when the dep is already present.
+  const coreManifestPath = path.join(
+    elizaSourceRoot,
+    "packages",
+    "core",
+    "package.json",
+  );
+  if (!fs.existsSync(coreManifestPath)) return;
+  const coreManifest = JSON.parse(fs.readFileSync(coreManifestPath, "utf8"));
+  const coreRequire = createRequire(coreManifestPath);
+  const requiredRuntimeDeps = ["drizzle-orm"];
+  const missing = [];
+  for (const dep of requiredRuntimeDeps) {
+    try {
+      coreRequire.resolve(dep);
+    } catch {
+      const version =
+        coreManifest.dependencies?.[dep] ??
+        coreManifest.devDependencies?.[dep] ??
+        coreManifest.peerDependencies?.[dep];
+      if (!version) {
+        console.warn(
+          `[hydrate-windows-playwright-deps] ${dep} has no version declared in @elizaos/core; installing latest`,
+        );
+      }
+      missing.push(version ? `${dep}@${version}` : dep);
+    }
+  }
+  if (missing.length === 0) {
+    console.log(
+      "[hydrate-windows-playwright-deps] @elizaos/core runtime deps already resolvable",
+    );
+    return;
+  }
+  console.log(
+    `[hydrate-windows-playwright-deps] installing missing @elizaos/core runtime deps: ${missing.join(", ")}`,
+  );
+  run(["add", "--no-save", "--ignore-scripts", ...missing], {
+    cwd: elizaSourceRoot,
+  });
+}
+
 run(
   ["add", "--no-save", "--dev", "--ignore-scripts", "@playwright/test@1.59.1"],
   {
@@ -302,6 +352,21 @@ if (fs.existsSync(path.join(elizaRoot, "package.json"))) {
     "dist/node/index.node.js",
   ]);
   const sharedPath = path.join(elizaRoot, "packages", "shared");
+  // Upstream eliza moved @elizaos/cloud-sdk from eliza/cloud/packages/sdk
+  // (inside the optional cloud submodule) to eliza/packages/cloud-sdk in
+  // the main packages tree. The CI ref pinned via MILADY_ELIZA_REF only
+  // carries the new location; older local checkouts may still have the
+  // old one. Prefer the new path when it exists, fall back to the old
+  // path otherwise, and let selectRuntimePackageRoot probe the installed
+  // npm copy if neither source location is present. MILADY_SKIP_CLOUD_SUBMODULE
+  // is incidental here — even with the submodule initialized, current refs
+  // do not put cloud-sdk under eliza/cloud/.
+  const cloudSdkNewPath = path.join(elizaRoot, "packages", "cloud-sdk");
+  const cloudSdkLegacyPath = path.join(elizaRoot, "cloud", "packages", "sdk");
+  const cloudSdkPath = fs.existsSync(path.join(cloudSdkNewPath, "package.json"))
+    ? cloudSdkNewPath
+    : cloudSdkLegacyPath;
+  const cloudSdkRuntimeEntries = ["dist/index.js", "src/index.ts"];
   const sqlPluginPath = path.join(elizaRoot, "plugins", "plugin-sql");
   const sqlPluginTypescriptPath = path.join(sqlPluginPath, "typescript");
   const sqlPluginRuntimeEntries = [
@@ -332,12 +397,14 @@ if (fs.existsSync(path.join(elizaRoot, "package.json"))) {
     elizaCloudPluginPath,
     elizaCloudPluginRuntimeEntries,
   );
+  const cloudSdkRuntimePath = selectRuntimePackageRoot(
+    "@elizaos/cloud-sdk",
+    cloudSdkPath,
+    cloudSdkRuntimeEntries,
+  );
 
   linkElizaPackage("@elizaos/core", coreRuntimePath);
-  linkElizaPackage(
-    "@elizaos/cloud-sdk",
-    path.join(elizaRoot, "cloud", "packages", "sdk"),
-  );
+  linkElizaPackage("@elizaos/cloud-sdk", cloudSdkRuntimePath);
   linkElizaPackage("@elizaos/shared", sharedPath);
   if (elizaCloudPluginRuntimePath) {
     linkRendererSourcePackage(
@@ -371,4 +438,5 @@ if (fs.existsSync(path.join(elizaRoot, "package.json"))) {
   }
   assertCorePackageEntry(path.join(sqlPluginPath, "node_modules"));
   assertCorePackageEntry(path.join(sqlPluginTypescriptPath, "node_modules"));
+  ensureElizaCoreRuntimeDeps(elizaRoot);
 }
