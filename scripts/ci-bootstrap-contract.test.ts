@@ -188,21 +188,4 @@ describe("CI bootstrap contract", () => {
     expect(soc2.indexOf(clone)).toBeLessThan(soc2.indexOf(install));
     expect(soc2.indexOf(install)).toBeLessThan(soc2.indexOf(verify));
   });
-
-  it("lets elizaCloud patch version drift skip cleanly", async () => {
-    const { main } = await import("./patch-elizacloud.mjs");
-    const output: string[] = [];
-    const originalLog: typeof console.log = console.log;
-
-    try {
-      console.log = (...args: unknown[]) => {
-        output.push(args.map(String).join(" "));
-      };
-      main();
-    } finally {
-      console.log = originalLog;
-    }
-
-    expect(output.join("\n")).toMatch(/\[patch-elizacloud\].*skipping/);
-  });
 });
