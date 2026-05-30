@@ -66,7 +66,9 @@ jobs:
 
       - name: Install dependencies
         shell: bash
-        run: bun install --ignore-scripts
+        # Retry once: github: deps (e.g. node-llama-cpp) can hit transient
+        # GitHub resolution/rate-limit failures on non-frozen installs.
+        run: bun install --ignore-scripts || (sleep 5 && bun install --ignore-scripts)
 
       - name: Run repository postinstall
         run: bun run postinstall
