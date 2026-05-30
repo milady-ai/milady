@@ -1,179 +1,207 @@
-# Milady Whitelabel Client — Executive Design System (Foundation Pass)
+# Milady Whitelabel Client — Own Frontend Layer + Executive Design System
 
 **Date:** 2026-05-30
-**Status:** Approved design — ready for implementation plan
-**Scope:** Foundation + chrome. Per-screen editorial re-layout is a later pass.
+**Status:** Approved direction — ready for Phase 1 implementation plan
+**Driving constraint:** **Clear, distinct architectural separation** between Milady's
+frontend and the base elizaOS UI. Milady must own its identity layer, not be a
+recolored elizaOS under the paint.
 
 ## Problem
 
-`apps/app` is already the Milady client (its own `app.config.ts`, namespace, env
-aliases, character catalog, `appName: "Milady"`), but it still *looks* like
-elizaOS: it consumes the shared `@elizaos/app-core` + `@elizaos/ui` and inherits
-their chrome. The most visible offender is the startup splash, which hardcodes
-elizaOS blue-on-white and the literal string `"elizaOS"`. The user wants Milady
-to read as **its own white-labeled version** with an **executive** identity —
-flat velvet black, soft smooth textures, warm champagne/cream gold accents,
-condensed-display + monospace typography — in the spirit of the `.cache`
-gift-card reference, codified in a `design.md` (google-labs `DESIGN.md` format).
+`apps/app` is Milady's own, committable client, but today it is a thin shell
+(4 source files) that renders elizaOS's `<App>` from `@elizaos/app-core`. So it
+*looks* and *is structured* like elizaOS — same chrome, same startup screen
+(hardcoded elizaOS blue + the literal string `"elizaOS"`), same navigation. The
+user wants Milady to read as **its own version** with an **executive** identity
+(flat velvet black, soft smooth textures, warm champagne/cream gold accents,
+condensed-display + monospace type, `.cache`-spirit editorial layout), codified
+in a `design.md` (google-labs `DESIGN.md` format).
 
-## Decisions (locked with the user)
+## Architecture findings (researched, with evidence)
 
-1. **Whitelabel depth:** brand + theme layer. Keep consuming the shared runtime
-   UI; ship Milady's own complete design system + branding that reskins every
-   surface; close the spots where upstream hardcodes elizaOS. No fork.
-2. **Theme strategy:** replace. The executive look becomes *the* Milady identity;
-   retire the current `brand-gold.css` import. No theme switcher.
-3. **First increment:** foundation + chrome (design.md + theme tokens + branded
-   splash/chrome that renders Milady). Per-screen polish follows.
-4. **Fonts:** bundle self-hosted, open-licensed (offline-capable, fits
-   local-first/desktop).
+- **`App` is a 1743-line monolith** — `eliza/packages/ui/src/App.tsx`. It is a
+  switch on `tab` and exports only `App` itself (`App.tsx:1116`).
+- **Shell chrome is NOT injectable.** The boot-config slot system
+  (`companionShell`, `characterEditor`, `codingAgentTasksPanel`, `stewardLogo`,
+  `lifeOpsPageView`, … in `config/boot-config-store.ts`) injects only *leaf
+  feature widgets*. The Header (`components/shell/Header.tsx`), conversations
+  sidebar, desktop tab bar, layout frame, view-router, and **startup screen** are
+  hardwired inside `App`. A theme can recolor them but can never make them
+  Milady's — **so theme-only ≠ separation.**
+- **The pieces are modular files**, not inlined: `components/pages/ChatView.tsx`,
+  `SettingsView.tsx`, `HomeView.tsx`, `StreamView.tsx`, `shell/Header.tsx`,
+  `conversations/ConversationsSidebar.tsx` each stand alone. They are simply not
+  on the package's public barrel (`index.ts` does `export * from "./App"`, which
+  surfaces only `App`).
+- **Startup render seam:** `App.tsx:1593` — inside
+  `if (startupCoordinator.phase !== "ready" || !firstRunComplete)` it returns
+  `<CloudVideoBackground><div data-testid="pre-agent-cloud-shell"><StartupScreen/></div>…`.
+  This is the exact insertion point for a host-supplied startup shell.
+- **Theming (CSS vars) is the one already-clean seam** — `styles.css` defines a
+  Tailwind `@theme inline` map over CSS custom properties; `brand-gold.css`
+  overrides `:root`. `AppContext.tsx:230-234` applies a `BrandingConfig.theme`
+  `ThemeDefinition` inline **only when `branding.theme` is set** (`if (!brandTheme)
+  return;`), and `applyThemeToDocument` (`themes/apply-theme.ts`) sets inline
+  `:root` props that beat stylesheets. Milady will not set `branding.theme`, so a
+  static sheet stays authoritative — exactly as `brand-gold.css` is today.
 
-## Key architecture finding — the CSS-variable cascade (the spine)
+## Chosen architecture
 
-`@elizaos/ui` is fully token-driven: `styles.css` defines a Tailwind
-`@theme inline` map over CSS custom properties (`--bg`, `--accent`, `--card`,
-`--text`, `--border`, `--radius`, `--shadow-*`, fonts…); changing the vars
-reskins every component. There are two ways those vars get set:
-
-- **Static stylesheet** — `brand-gold.css` imported in `main.tsx` sets `:root`
-  tokens (it is already a flat-black + gold sheet; the gold is a *bright* yellow
-  `#f0b90b` and the font is Poppins).
-- **Inline at boot** — `AppContext.tsx:230-234` runs
-  `applyThemeToDocument(branding.theme, uiTheme)` **only when
-  `branding.theme` is set** (`if (!brandTheme) return;`). `applyThemeToDocument`
-  (`themes/apply-theme.ts`) sets **inline** `root.style.setProperty(...)`, which
-  beats any stylesheet `:root{}` rule for every token in `THEME_CSS_VAR_MAP`.
-
-**Consequence:** because Milady will **not** set `branding.theme`, nothing
-applies inline token overrides at boot — so a static stylesheet remains
-authoritative, exactly as `brand-gold.css` is today. We therefore deliver the
-Milady theme as **one CSS sheet**, not a parallel `ThemeDefinition` object. This
-is the least-complicated coherent design and keeps a single source of truth.
-
-> Trade-off considered: expressing colors as a `ThemeDefinition` via
-> `branding.theme`. Rejected for the foundation pass — it would force colors into
-> the inline path and split the brand across a TS object + a CSS sheet for the
-> non-token bits (velvet gradients, letter-spacing, `@font-face`), with no
-> benefit while we are *replacing* (not offering a user-pickable variant).
-
-## Architecture
+**Milady owns its own shell/identity layer and composes elizaOS feature *views* as
+content. It does NOT fork the 1743-line monolith.**
 
 ```
-apps/app/                      ← the Milady client (committable)
-  design.md                    ← NEW. Source of truth (DESIGN.md format)
-  src/main.tsx                 ← swap brand-gold.css import → milady-executive.css
-  src/styles/
-    milady-executive.css       ← NEW. The whole theme: :root tokens + @font-face
-                                  + velvet textures + letter-spacing + splash recolor
-    fonts/                      ← NEW. self-hosted woff2 (condensed display + mono)
+apps/app/                          ← Milady client (committable)
+  design.md                        ← NEW. Design system source of truth (DESIGN.md format)
+  src/
+    main.tsx                       ← mounts MiladyApp instead of <App>; swaps theme import
+    ui/                            ← NEW. Milady-owned frontend layer
+      MiladyApp.tsx                ← own shell: startup gate + chrome + router (Phase 2)
+      shell/
+        MiladyStartupShell.tsx     ← own startup/splash (Phase 1)
+        MiladyHeader.tsx           ← own top bar / nav (Phase 2)
+        MiladySidebar.tsx          ← (Phase 2/3)
+      router/                      ← dispatches tabs → composed elizaOS views (Phase 2)
+    styles/
+      milady-executive.css         ← NEW. Executive theme: :root tokens + @font-face + textures
+      fonts/                       ← NEW. self-hosted woff2 (condensed display + mono)
   public/brand/favicons/
-    favicon.svg                ← REPLACE elizaOS face → minimal Milady mark
+    favicon.svg                    ← REPLACE elizaOS face → Milady mark
 
-eliza/packages/ui/             ← upstream (non-committable here)
-  …/shell/StartupShell.tsx     ← targeted upstream PR: read useBranding().appName
-                                  + theme tokens instead of hardcoded hex + "elizaOS"
+eliza/packages/ (upstream — non-committable here; small, low-risk PRs)
+  ui/src/App.tsx                   ← render bootConfig.startupShell ?? <StartupScreen/> at :1593
+  ui/src/index.ts                  ← export the feature views + state hooks (useApp,
+                                     useBootConfig, useBranding) so apps/app can compose them
 ```
 
-The whitelabel rides three existing, already-wired levers — no new app
-architecture:
+- **Owns** (identity surfaces): startup/splash, header/nav, sidebar, layout frame,
+  view-router — built on the executive design system.
+- **Composes** (functionality): elizaOS feature views (`ChatView`, `SettingsView`,
+  `HomeView`, …) + the elizaOS state layer (`AppProvider`/`useApp`/`useBootConfig`)
+  — imported, not rebuilt. Chat/settings/etc. stay shared and keep working.
+- **The seam** is "own the shell + export the views," not "copy the monolith." The
+  only upstream work is a `startupShell` slot + barrel exports of already-standalone
+  files — small and low-risk.
 
-1. `BrandingConfig.appName` — already `"Milady"`; `{{appName}}` chrome already
-   says Milady via `useBranding()` / `appNameInterpolationVars`.
-2. The token-driven UI — one `:root` sheet reskins all body components.
-3. `<AppProvider branding={APP_BRANDING}>` is already passed in `main.tsx`.
+> Rejected alternatives: **theme-only** (no real separation — shares all chrome);
+> **fork the monolith** (copy 1743 LOC into `apps/app` — brittle, must track
+> upstream); **slot-only** (impossible — chrome is hardwired, not slot-fed). The
+> own-shell-compose-views path is the minimal change that achieves genuine
+> separation while keeping the elizaOS feature ecosystem.
 
 ## The design system (`apps/app/design.md`)
 
 google-labs `DESIGN.md` format: YAML token front-matter (keyed to the real
-`ThemeColorSet` / CSS-var names) + prose sections in canonical order: **Overview ·
-Colors · Typography · Layout · Elevation & Depth · Shapes · Components · Do's &
-Don'ts**. `milady-executive.css` is the literal implementation of these tokens;
-they are kept in sync by review (no codegen step in this pass — YAGNI).
+`ThemeColorSet` / CSS-var names) + prose in canonical order: **Overview · Colors ·
+Typography · Layout · Elevation & Depth · Shapes · Components · Do's & Don'ts**.
+`milady-executive.css` is the literal implementation; kept in sync by review (no
+codegen this pass — YAGNI).
 
-### Colors (executive velvet, indicative — finalized in design.md)
+### Colors (executive velvet — indicative; finalized in design.md)
 
 | Role | Value | Notes |
 |---|---|---|
 | `--bg` | `#0a0a0b` | velvet near-black, never pure `#000` |
 | `--bg-elevated` / `--card` | `#121214` → `#17171a` | smooth step up |
-| `--surface` glow | radial `rgba(201,179,140,0.06)` | the "velvet" sheen on cards |
+| surface glow | radial `rgba(201,179,140,0.06)` | the "velvet" sheen |
 | `--text` | `#ece7df` | warm cream-white |
 | `--muted` | `#8d877c` | warm grey |
 | `--border` | `rgba(236,231,223,0.08)` | low-contrast hairline |
-| `--accent` | `#c9b38c` | **champagne/cream gold**, not bright `#f0b90b` |
+| `--accent` | `#c9b38c` | champagne/cream gold (not bright `#f0b90b`) |
 | `--accent-hover` | `#e8dcc0` | lighter champagne (resting→lighter, never →black) |
 | `--accent-foreground` | `#0a0a0b` | text on accent |
 
-Accent is **sparing** — editorial, not gilded. (Note: this brand is intentionally
-warm-gold; the cloud-frontend "no blue / orange-accent" rule in CLAUDE.md governs
-`packages/cloud-frontend`, a different surface, and does not bind this desktop
-client. Flag for confirmation if cloud-frontend must share the palette.)
+Accent is sparing — editorial, not gilded. (The cloud-frontend "no blue /
+orange-accent" rule in CLAUDE.md governs `packages/cloud-frontend`, a separate
+surface; this desktop client is intentionally warm-champagne. Treated as distinct
+brands unless told otherwise.)
 
 ### Typography
-
-- **Display/headers:** self-hosted condensed grotesque (candidate: *Saira
-  Condensed* / *Archivo Narrow* — OFL). Drives `--font-display`.
-- **Labels/meta:** self-hosted monospace (candidate: *IBM Plex Mono* /
-  *JetBrains Mono* — OFL), uppercase + tracked for section labels (`01 / 03`,
-  `LIVE PREVIEW`). Drives `--font-mono`.
-- **Body:** keep a clean grotesque (mono or a neutral sans) per design.md.
-- Final family choices live in design.md; files bundled under `src/styles/fonts/`.
+- **Display:** self-hosted condensed grotesque (candidate *Saira Condensed* /
+  *Archivo Narrow*, OFL) → `--font-display`.
+- **Labels/meta:** self-hosted monospace (candidate *IBM Plex Mono* /
+  *JetBrains Mono*, OFL), uppercase + tracked → `--font-mono`.
+- **Body:** clean neutral grotesque per design.md. Replaces Poppins.
+- Files bundled under `src/styles/fonts/`; exact families finalized in design.md.
 
 ### Elevation & textures ("soft velvet smooth")
+One low soft shadow + a single diffuse light-source glow per card; large radii;
+smooth gradients; matte, no gloss.
 
-Single low, soft shadow + one diffuse light-source glow per card (no hard
-drop-shadows); large radii; smooth gradients; matte — no gloss.
+## Performance — lightning fast (first-class requirement)
 
-## The startup splash (the headline complaint)
+Speed is a hard requirement, not a nice-to-have. The executive direction helps,
+not hurts, here:
 
-`StartupShell.tsx` hardcodes `bg-[#F7F9FF] text-[#0B35F1]` + a white logo ring +
-the literal `"elizaOS"`, and ignores branding. `firstRunTheme` exists in
-`BrandingConfig` but is **consumed nowhere**, so it is not the lever. Plan:
+- **First paint:** Milady's startup shell is dependency-light with its critical
+  CSS inlined. It **drops `CloudVideoBackground`** (an HQ 1080p MP4 decoded on
+  first paint) in favor of a pure-CSS velvet gradient — faster *and* on-brand.
+  Target: startup visible on first frame, no video/network on the critical path.
+- **Fonts (the main theme-perf risk):** self-hosted `woff2`, **subset** to used
+  glyphs, **only the weights actually used** (display + mono), `font-display: swap`,
+  and `<link rel="preload">` for the two faces. A system fallback stack paints text
+  immediately so there's no FOIT. No webfont network requests.
+- **Theme CSS:** one small sheet; velvet = pure CSS gradients (no image/video
+  textures). No runtime theme computation (static `:root`, no `branding.theme`
+  inline pass).
+- **Shell layer stays thin:** Milady's shell composes existing components and
+  preserves elizaOS's `React.lazy` route splitting — it adds no extra providers,
+  no extra re-renders, no heavy dependencies. Feature views stay lazy.
+- **Bundle discipline:** no new heavy deps; measure `apps/app` build output and
+  keep the Milady layer's added weight minimal (fonts subset, CSS small).
 
-1. **Committable recolor (ships in the real build):** a scoped block in
-   `milady-executive.css` targeting `[data-testid="startup-shell-loading"]` (and
-   the hardcoded-blue children — logo ring, status text, skeleton bars) recolors
-   the splash to velvet-black + champagne. These literal-hex Tailwind classes are
-   immune to token swaps but overridable by a scoped sheet. Fragile-by-nature
-   (couples to upstream class strings) — documented as a stopgap.
-2. **Committable mark:** replace the served `favicon.svg` (the splash logo) with a
-   minimal Milady mark (a champagne dot/monogram on velvet), so the elizaOS face
-   is gone from the splash committably.
-3. **The literal text `"elizaOS"`:** the only residue not fixable from
-   `apps/app`. Durable fix = **targeted upstream PR** making `StartupShell` read
-   `useBranding().appName` + theme tokens. Immediate dev visibility = a local
-   `eliza/` edit (non-committable; the clone is gitignored). Mark in the
-   component becomes the typographic wordmark `• Milady` in the condensed font.
+## Phasing
 
-Net: after this pass the splash is on-brand velvet **in the packaged build**; the
-upstream PR removes the last hardcoded string.
+### Phase 1 (this pass) — design system + own startup
+- **Committable now, immediate:** author `design.md`; ship `milady-executive.css`
+  (replaces the `brand-gold.css` import in `main.tsx`) + self-hosted fonts → the
+  whole token-driven body reskins to the executive look. As a committable stopgap
+  for the splash before the slot lands, a scoped recolor of
+  `[data-testid="pre-agent-cloud-shell"]` / `startup-shell-loading` + a Milady
+  `favicon.svg` make the front door velvet in the packaged build.
+- **The clean ownership:** `MiladyStartupShell.tsx` (Milady's own splash — `• Milady`
+  wordmark in the condensed font, executive palette, velvet) supplied via a new
+  `startupShell` boot-config slot. Upstream PR adds the slot at `App.tsx:1593`
+  (`bootConfig.startupShell ?? <StartupScreen/>`); works in local `eliza/` dev
+  immediately, reaches packaged builds after the alpha republish. Local `eliza/`
+  edit applied meanwhile so dev shows it now.
+
+### Phase 2 — own the app shell + chrome
+`MiladyApp.tsx` + `MiladyHeader`/sidebar/layout + a router that dispatches tabs to
+**composed** elizaOS views. Requires the upstream barrel exports of the views +
+state hooks. `main.tsx` mounts `MiladyApp` instead of `<App>`.
+
+### Phase 3+ — own individual screens only where the brand demands it.
 
 ## Verification
-
-- `bun run --cwd apps/app build` (production vite build the desktop shell loads).
-- Desktop dev render check via the dev observability endpoints
-  (`/api/dev/cursor-screenshot`, `/api/dev/console-log`) to confirm the executive
-  look + Milady splash render with no regressions.
-- `bun run verify` (typecheck + lint) for the touched `apps/app` files.
-- The full 5-loop `audit:cloud` visual review applies to `cloud-frontend` and to
-  the later all-screens re-skin pass — not gating this foundation pass.
+- `bun run --cwd apps/app build` (the production vite build the desktop shell loads).
+- Desktop dev render check via dev observability endpoints
+  (`/api/dev/cursor-screenshot`, `/api/dev/console-log`) — executive look + Milady
+  startup render, no regressions.
+- `bun run verify` (typecheck + lint) on touched `apps/app` files.
+- **Performance check:** measure startup first-paint (dev console timing +
+  screenshot timing) before/after; confirm no video/webfont on the critical path;
+  record `apps/app` build size delta and keep the Milady layer's added weight
+  minimal. A regression in first-paint or bundle size blocks "done."
+- Full 5-loop `audit:cloud` review applies to `cloud-frontend` / the later
+  all-screens pass — not gating Phase 1.
 
 ## Out of scope (this pass)
-
-- Per-screen editorial re-layout of every route.
-- A theme switcher / light-mode variant (we are replacing, single dark brand).
-- A bespoke Milady logo *glyph* beyond the minimal favicon mark + wordmark.
-- Touching `cloud-frontend` or the marketing homepage.
+- Phase 2/3 chrome + screen ownership (planned separately).
+- A theme switcher / light-mode variant (single dark executive brand).
+- A bespoke Milady logo *glyph* beyond a minimal favicon + the wordmark.
+- `cloud-frontend` and the marketing homepage.
 
 ## Risks
-
-- **Splash recolor couples to upstream class strings** — mitigated by the upstream
-  PR being the durable fix; the CSS stopgap is clearly marked and small.
-- **Stale alpha** — the upstream `StartupShell` PR won't reach a packaged Milady
-  build until elizaOS republishes `alpha` (gated on upstream green CI). The
-  committable recolor + favicon make the splash on-brand *without* waiting on that.
-- **Font weight** — bundling woff2 adds repo/bundle size; keep to the two weights
-  actually used (display + mono), subset if needed.
-- **`brand-gold.css` other importers** — confirm nothing else depends on it being
-  imported by `main.tsx`; it remains in `@elizaos/ui` for other consumers, we only
-  stop importing it here.
+- **Milady maintains its shell layer** — bounded (identity surfaces only; feature
+  views composed, not copied), but real ongoing work.
+- **Upstream-gated for packaged builds** — the `startupShell` slot + view/state
+  exports must merge upstream and republish to `alpha` to reach packaged Milady
+  builds. Committable theme + splash recolor + favicon give visible separation
+  meanwhile; local `eliza/` dev gets the full path immediately.
+- **Splash recolor stopgap couples to upstream class strings** — small, clearly
+  marked, retired once `MiladyStartupShell` lands via the slot.
+- **Export surface** — composing views needs `useApp`/`useBootConfig`/views on the
+  barrel; they are standalone files so the export is low-risk (confirm exact set
+  in the plan).
+- **Font weight** — bundle only the two weights used; subset if needed.
