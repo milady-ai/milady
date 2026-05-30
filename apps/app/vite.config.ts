@@ -2977,6 +2977,27 @@ export default defineConfig({
       output: {
         manualChunks: resolveManualChunk,
       },
+      // Suppress known-benign build noise so the log stays signal-rich.
+      // Anything not matched here still surfaces via the default handler.
+      onwarn(warning, defaultHandler) {
+        const message = warning.message ?? "";
+        const where = warning.id ?? warning.loc?.file ?? message;
+        // @electric-sql/pglite ships Emscripten/WASM glue that uses eval().
+        if (warning.code === "EVAL" && /pglite/i.test(where)) return;
+        // Modules imported both dynamically and statically: the dynamic imports
+        // are intentional (the @elizaos/ui DynamicViewLoader string-keyed module
+        // registry and plugin-browser lazy-loading), and the modules stay
+        // statically reachable in the main chunk. Informational — not a defect;
+        // converting either side would break the registry/lazy load.
+        if (
+          warning.plugin === "vite:reporter" &&
+          /dynamically imported by[\s\S]*but also statically imported by/.test(
+            message,
+          )
+        )
+          return;
+        defaultHandler(warning);
+      },
     },
     commonjsOptions: {
       include: [/node_modules/],
