@@ -143,6 +143,7 @@ import {
 } from "./app-config";
 import { APP_ENV_ALIASES, APP_ENV_PREFIX } from "./brand-env";
 import { APP_CHARACTER_CATALOG } from "./character-catalog";
+import { MiladyStartupShell } from "./ui/shell/MiladyStartupShell";
 import { bootIosLocalRuntimeIfApplicable } from "./ios-local-runtime-boot";
 import { bootAndroidLocalRuntimeIfApplicable } from "./android-local-runtime-boot";
 import {
@@ -303,7 +304,13 @@ const APP_VRM_ASSETS = APP_STYLE_PRESETS.slice()
   .sort((a, b) => a.avatarIndex - b.avatarIndex)
   .map((p) => ({ title: p.name, slug: `${APP_NAMESPACE}-${p.avatarIndex}` }));
 
-const appBootConfig: AppBootConfig = {
+// `startupShell` is a Milady-added boot-config slot not yet on the published
+// @elizaos/* alpha type. Widen the annotation (no `as` cast) so the literal is
+// type-safe in packages mode; the field is read by App via the upstream slot
+// (local mode now; packaged builds after the slot ships upstream).
+const appBootConfig: AppBootConfig & {
+  startupShell?: typeof MiladyStartupShell;
+} = {
   ...getBootConfig(),
   branding: APP_BRANDING,
   defaultApps: APP_CONFIG.defaultApps,
@@ -315,6 +322,10 @@ const appBootConfig: AppBootConfig = {
   onboardingStyles: APP_STYLE_PRESETS,
   characterEditor: CharacterEditor,
   companionShell: CompanionShell,
+  // Milady's own velvet startup splash, rendered via the `startupShell` slot
+  // (no-ops on stale alpha that lacks the slot; the splash recolor stopgap in
+  // milady-executive.css holds until the upstream slot ships).
+  startupShell: MiladyStartupShell,
   resolveCompanionInferenceNotice,
   companionInferenceAlertButton: InferenceCloudAlertButton,
   companionGlobalOverlay: GlobalEmoteOverlay,
