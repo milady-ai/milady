@@ -1,6 +1,8 @@
 import { App, ErrorBoundary } from "@elizaos/app-core";
 import "@elizaos/app-core/styles/styles.css";
-import "@elizaos/app-core/styles/brand-gold.css";
+// Milady executive theme (velvet black + champagne gold) — replaces the
+// upstream elizaOS gold theme. styles.css above stays as the base token layer.
+import "./styles/milady-executive.css";
 
 import { App as CapacitorApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";

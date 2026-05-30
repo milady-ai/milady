@@ -1,0 +1,181 @@
+/* Milady executive design system — velvet black + champagne gold.
+ * Replaces @elizaos/app-core/styles/brand-gold.css. Source of truth: apps/app/design.md.
+ * The shared elizaOS UI is token-driven; overriding these :root vars reskins the
+ * whole client. No branding.theme inline pass is set, so this sheet stays authoritative. */
+
+/* ── Self-hosted fonts (latin subset, font-display: swap, no network) ── */
+@font-face {
+  font-family: "Saira Condensed";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("./fonts/saira-condensed-latin.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("./fonts/jetbrains-mono-latin.woff2") format("woff2");
+}
+
+:root {
+  /* type — body is a system stack (zero bundle cost); display + mono bundled */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Saira Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* velvet blacks (never pure #000) */
+  --jet-black: #08080a;
+  --rich-black: #0a0a0b;
+  --charcoal: #121214;
+
+  /* champagne / cream gold */
+  --deep-gold: #a8946b;
+  --classic-gold: #c9b38c;   /* resting accent */
+  --highlight-gold: #e8dcc0; /* hover — lighter, never darker/black */
+  --champagne-gold: #ece7df;
+  --burnished-gold: #b9a173;
+
+  /* warm neutrals */
+  --dark-silver: #2a2a2e;
+  --steel: #8d877c;
+  --bright-silver: #b8b2a6;
+  --chrome-highlight: #ece7df;
+  --gunmetal: #17171a;
+
+  --gold-glow: rgba(201, 179, 140, 0.10);
+  --soft-white-glow: rgba(236, 231, 223, 0.05);
+  --inner-shadow: rgba(0, 0, 0, 0.55);
+
+  --accent: var(--classic-gold);
+  --accent-rgb: 201, 179, 140;
+  --accent-hover: var(--highlight-gold);
+  --accent-muted: var(--deep-gold);
+  --accent-subtle: rgba(201, 179, 140, 0.10);
+  --accent-foreground: #0a0a0b;
+  --primary: var(--classic-gold);
+  --primary-foreground: #0a0a0b;
+  --ring: rgba(201, 179, 140, 0.55);
+  --border-hover: var(--classic-gold);
+  --warn: var(--burnished-gold);
+  --warn-muted: rgba(185, 161, 115, 0.7);
+  --warn-subtle: rgba(185, 161, 115, 0.14);
+  --focus: rgba(201, 179, 140, 0.16);
+  --focus-ring: 0 0 0 2px rgba(201, 179, 140, 0.30);
+  --link-color: var(--classic-gold);
+  --link-hover-color: var(--highlight-gold);
+}
+
+/* Main UI semantic tokens (the shared dark theme the body renders in). */
+[data-theme="dark"],
+.dark {
+  font-family: var(--font-sans);
+
+  --bg: #0a0a0b;
+  --bg-accent: #101012;
+  --bg-elevated: #151518;
+  --bg-hover: #1d1d22;
+  --bg-muted: #101012;
+
+  --card: #121214;
+  --card-foreground: #e7e2d9;
+  --surface: #17171a;
+
+  --text: #ece7df;
+  --text-strong: #f6f2ea;
+  --chat-text: #ece7df;
+  --muted: #8d877c;
+  --muted-strong: #ada69a;
+
+  --border: rgba(236, 231, 223, 0.08);
+  --border-strong: rgba(236, 231, 223, 0.14);
+  --border-subtle: rgba(236, 231, 223, 0.05);
+  --input: #1b1b1f;
+
+  --accent-foreground: #0a0a0b;
+  --primary-foreground: #0a0a0b;
+
+  --header-bar-bg: #08080a;
+  --header-bar-fg: #ece7df;
+  --section-bar-bg: #0a0a0b;
+  --section-bar-fg: #ece7df;
+}
+
+/* Velvet card sheen — a single diffuse top glow, matte. */
+.card,
+[class*="bg-card"] {
+  background-image: radial-gradient(120% 80% at 50% 0%, rgba(201, 179, 140, 0.045), transparent 60%);
+}
+
+/* First-run / onboarding palette -> executive velvet (dark, not the old light). */
+.first-run-screen {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: transparent;
+  --text: #ece7df;
+  --muted: #8d877c;
+  --border: rgba(236, 231, 223, 0.10);
+  --card: rgba(23, 23, 26, 0.72);
+  --ok: #7fbf9b;
+  --accent: var(--classic-gold);
+  --accent-foreground: #0a0a0b;
+  --first-run-text-strong: rgba(246, 242, 234, 0.98);
+  --first-run-text-primary: rgba(236, 231, 223, 0.96);
+  --first-run-text-subtle: rgba(236, 231, 223, 0.80);
+  --first-run-text-muted: rgba(173, 166, 154, 0.86);
+  --first-run-card-bg: rgba(23, 23, 26, 0.72);
+  --first-run-card-border-strong: rgba(201, 179, 140, 0.32);
+  --first-run-recommended-bg: rgba(201, 179, 140, 0.12);
+  --first-run-recommended-border: rgba(201, 179, 140, 0.28);
+  --first-run-accent-bg: rgba(201, 179, 140, 0.16);
+  --first-run-accent-border: rgba(201, 179, 140, 0.28);
+  --first-run-accent-foreground: #0a0a0b;
+  --first-run-input-bg: rgba(10, 10, 11, 0.7);
+  --first-run-link: var(--highlight-gold);
+}
+
+/* ── Splash recolor STOPGAP ───────────────────────────────────────────────
+ * Until MiladyStartupShell ships through the `startupShell` slot, the upstream
+ * StartupShell hardcodes elizaOS literal-hex Tailwind classes (bg-[#F7F9FF],
+ * text-[#0B35F1], bg-white). These are immune to token swaps but overridable by
+ * scoping to its testid wrapper. FRAGILE — couples to upstream class strings;
+ * retired once the slot lands. */
+[data-testid="startup-shell-loading"],
+[data-testid="startup-shell-loading"] [class*="bg-[#F7F9FF]"] {
+  background-color: #0a0a0b !important;
+  color: #ece7df !important;
+}
+[data-testid="startup-shell-loading"] [class*="text-[#0B35F1]"] { color: #ece7df !important; }
+[data-testid="startup-shell-loading"] [class*="bg-white"]       { background-color: #17171a !important; }
+[data-testid="startup-shell-loading"] [class*="bg-[#0B35F1]"]   { background-color: rgba(201, 179, 140, 0.45) !important; }
+[data-testid="startup-shell-loading"] [class*="ring-[#0B35F1]"] { box-shadow: 0 0 0 1px rgba(201, 179, 140, 0.20) !important; }
+
+/* Functional, brand-neutral blocks carried over verbatim from brand-gold.css so
+ * the memory-type taxonomy badges keep their colors. */
+:root {
+  --memory-type-messages-bg: rgba(99, 102, 241, 0.15);
+  --memory-type-messages-fg: rgb(99, 102, 241);
+  --memory-type-memories-bg: rgba(168, 85, 247, 0.15);
+  --memory-type-memories-fg: rgb(168, 85, 247);
+  --memory-type-facts-bg: rgba(34, 197, 94, 0.15);
+  --memory-type-facts-fg: rgb(34, 197, 94);
+  --memory-type-documents-bg: rgba(245, 158, 11, 0.15);
+  --memory-type-documents-fg: rgb(245, 158, 11);
+  --memory-type-unknown-bg: rgba(156, 163, 175, 0.15);
+  --memory-type-unknown-fg: rgb(156, 163, 175);
+}
+.memory-type-badge-messages { background-color: var(--memory-type-messages-bg); color: var(--memory-type-messages-fg); }
+.memory-type-badge-memories { background-color: var(--memory-type-memories-bg); color: var(--memory-type-memories-fg); }
+.memory-type-badge-facts { background-color: var(--memory-type-facts-bg); color: var(--memory-type-facts-fg); }
+.memory-type-badge-documents { background-color: var(--memory-type-documents-bg); color: var(--memory-type-documents-fg); }
+.memory-type-badge-unknown { background-color: var(--memory-type-unknown-bg); color: var(--memory-type-unknown-fg); }
+.memory-type-dot-messages { background-color: var(--memory-type-messages-fg); }
+.memory-type-dot-memories { background-color: var(--memory-type-memories-fg); }
+.memory-type-dot-facts { background-color: var(--memory-type-facts-fg); }
+.memory-type-dot-documents { background-color: var(--memory-type-documents-fg); }
+.memory-type-dot-unknown { background-color: var(--memory-type-unknown-fg); }
