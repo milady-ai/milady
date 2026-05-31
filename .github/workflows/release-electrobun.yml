@@ -1580,19 +1580,6 @@ jobs:
           Write-Host "Public installer still valid for release upload: $($installer.Name)"
           Write-Host "Installer size: $([math]::Round($installer.Length / 1MB, 1)) MB"
 
-      - name: Build MSIX package
-        if: matrix.platform.os == 'windows' && steps.build-electrobun-app.outputs.fallback != 'true'
-        env:
-          WINDOWS_SIGN_CERT_BASE64: ${{ secrets.WINDOWS_SIGN_CERT_BASE64 }}
-          WINDOWS_SIGN_CERT_PASSWORD: ${{ secrets.WINDOWS_SIGN_CERT_PASSWORD }}
-          WINDOWS_SIGN_TIMESTAMP_URL: ${{ secrets.WINDOWS_SIGN_TIMESTAMP_URL }}
-        shell: pwsh
-        run: |
-          pwsh -File eliza/packages/app-core/packaging/msix/build-msix.ps1 `
-            -BuildDir (Join-Path $PWD "eliza/packages/app-core/platforms/electrobun/build") `
-            -OutputDir (Join-Path $PWD "eliza/packages/app-core/platforms/electrobun/artifacts") `
-            -Version "${{ needs.prepare.outputs.version }}"
-
       # When building unsigned (skip_codesign=1), the CEF framework ships with
       # a pre-existing signature.  Injecting version.json into Resources breaks
       # that signature (resource hash mismatch).  Ad-hoc re-sign the .app so
@@ -2017,8 +2004,7 @@ jobs:
             -name "ElizaOSApp-Setup-*.exe" -o \
             -name "ElizaOSApp-Setup-*.exe.zip" -o \
             -name "eliza-*.exe.zip" -o \
-            -name "*Setup*.tar.gz" -o \
-            -name "*.msix" \
+            -name "*Setup*.tar.gz" \
           \) -exec cp {} release-files/ \; 2>/dev/null || true
 
           # Decompress Windows .exe.zip back to .exe for end-user downloads
@@ -2032,8 +2018,7 @@ jobs:
             -name "ElizaOSApp-Setup-*.exe" -o \
             -name "*.dmg" -o \
             -name "*.app.tar.gz" -o \
-            -name "*.tar.zst" -o \
-            -name "*.msix" \
+            -name "*.tar.zst" \
           \) -exec mv -f {} release-files/ \; 2>/dev/null || true
           find release-files -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} + 2>/dev/null || true
 
