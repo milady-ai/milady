@@ -1,0 +1,1029 @@
+<!-- concept-D13-L5 | direction: Split Avatar + Work Canvas (Artifacts) | look: Brutalist Mono | targets: 420x760, 960x640 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D13 · Split Avatar + Work Canvas (Artifacts) · Brutalist Mono</title>
+<style>
+:root{
+  --bg:#F4F2EC;
+  --surface:#FFFFFF;
+  --surface-2:#E8E5DC;
+  --border:#111111;
+  --text:#111111;
+  --text-muted:#555555;
+  --accent:#1A57FF;
+  --accent-2:#FF4A00;
+  --danger:#D90429;
+  --radius:0px;
+  --radius-sm:0px;
+  --font:"JetBrains Mono","IBM Plex Mono","SF Mono","Cascadia Mono","Courier New",monospace;
+  --shadow:4px 4px 0 #111111;
+  --shadow-sm:2px 2px 0 #111111;
+  --border-w:2px;
+  --ease:steps(1,end);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  min-height:100vh;
+  background:var(--bg);
+  font-family:var(--font);
+  color:var(--text);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+
+/* Grid overlay */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(17,17,17,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(17,17,17,0.04) 1px,transparent 1px);
+  background-size:32px 32px;
+  pointer-events:none;z-index:0;
+}
+
+.app-window{
+  position:relative;z-index:1;
+  width:min(960px,98vw);
+  height:min(640px,96vh);
+  background:var(--surface);
+  border:var(--border-w) solid var(--border);
+  box-shadow:var(--shadow);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+
+/* Titlebar */
+.titlebar{
+  display:flex;align-items:center;gap:0;
+  border-bottom:var(--border-w) solid var(--border);
+  background:var(--text);
+  color:var(--bg);
+  flex-shrink:0;
+}
+.titlebar-left{
+  display:flex;gap:1px;border-right:var(--border-w) solid var(--border);
+}
+.dot-btn{
+  width:28px;height:28px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;cursor:pointer;
+  border-right:1px solid rgba(255,255,255,0.2);
+  color:var(--bg);
+}
+.dot-btn:hover{background:rgba(255,255,255,0.15)}
+.titlebar-title{
+  flex:1;text-align:center;
+  font-size:11px;font-weight:700;
+  letter-spacing:0.12em;text-transform:uppercase;
+  padding:8px;
+}
+.titlebar-right{
+  width:28px;height:28px;
+  border-left:var(--border-w) solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:11px;
+}
+.titlebar-right:hover{background:rgba(255,255,255,0.15)}
+
+/* Split */
+.split{display:flex;flex:1;overflow:hidden}
+
+/* LEFT: Conversation */
+.conv-col{
+  width:42%;min-width:0;
+  display:flex;flex-direction:column;
+  border-right:var(--border-w) solid var(--border);
+}
+
+.conv-header{
+  display:flex;align-items:center;gap:0;
+  border-bottom:var(--border-w) solid var(--border);
+  flex-shrink:0;
+  height:40px;
+}
+.conv-header-section{
+  display:flex;align-items:center;
+  padding:0 12px;
+  height:100%;
+  border-right:var(--border-w) solid var(--border);
+}
+.conv-title{
+  font-size:10px;font-weight:700;letter-spacing:0.12em;
+  text-transform:uppercase;
+}
+
+/* Waveform avatar — block chars */
+.ascii-wave{
+  display:flex;align-items:flex-end;gap:1px;
+  height:22px;padding:0 6px 0 0;
+}
+.ascii-bar{
+  width:5px;
+  background:var(--text);
+  min-height:3px;
+  transition:height 0s steps(1,end);
+}
+
+/* State machine: IDLE */
+.ascii-wave.idle .ascii-bar{animation:brut-idle 1.5s steps(1,end) infinite}
+.ascii-bar:nth-child(1){animation-delay:0s}
+.ascii-bar:nth-child(2){animation-delay:0.2s}
+.ascii-bar:nth-child(3){animation-delay:0.4s}
+.ascii-bar:nth-child(4){animation-delay:0.6s}
+.ascii-bar:nth-child(5){animation-delay:0.8s}
+.ascii-bar:nth-child(6){animation-delay:1s}
+@keyframes brut-idle{0%{height:3px}33%{height:7px}66%{height:5px}100%{height:3px}}
+
+/* THINKING — spinner glyphs done with border animation */
+.ascii-wave.thinking .ascii-bar{
+  animation:brut-think 0.8s steps(1,end) infinite;
+  background:var(--text-muted);
+}
+@keyframes brut-think{0%{height:3px}25%{height:14px}50%{height:7px}75%{height:18px}100%{height:3px}}
+
+/* SPEAKING */
+.ascii-wave.speaking .ascii-bar{
+  animation:brut-speak 0.18s steps(1,end) infinite alternate;
+  background:var(--accent);
+}
+@keyframes brut-speak{from{height:2px}to{height:22px}}
+
+/* MUTED */
+.ascii-wave.muted .ascii-bar{
+  height:3px!important;animation:none!important;
+  background:var(--danger)!important;
+}
+
+/* State label */
+.state-label{
+  font-size:10px;font-weight:700;letter-spacing:0.08em;
+  text-transform:uppercase;color:var(--text-muted);
+  padding:0 8px;
+}
+.state-label.listening{color:var(--accent)}
+.state-label.muted{color:var(--danger)}
+
+/* Voice badge */
+.voice-badge{
+  display:none;align-items:center;gap:4px;
+  border:var(--border-w) solid var(--text);
+  padding:2px 8px;
+  font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+  margin:0 8px;
+}
+.voice-badge.visible{display:flex}
+.voice-badge.muted{border-color:var(--danger);color:var(--danger)}
+.badge-dot{
+  width:5px;height:5px;
+  background:var(--text);
+  animation:brut-blink 0.5s steps(1,end) infinite;
+}
+.voice-badge.muted .badge-dot{background:var(--danger);animation:none}
+@keyframes brut-blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+/* Chat log */
+.chat-log{
+  flex:1;overflow-y:auto;
+  padding:12px;
+  display:flex;flex-direction:column;gap:12px;
+  scroll-behavior:smooth;
+}
+.chat-log::-webkit-scrollbar{width:4px;background:var(--bg)}
+.chat-log::-webkit-scrollbar-thumb{background:var(--border)}
+
+/* Messages */
+.msg{display:flex;flex-direction:column;gap:4px}
+.msg-meta{
+  font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--text-muted);display:flex;gap:6px;align-items:center;
+}
+.msg-glyph{font-size:10px}
+.msg-time{color:rgba(0,0,0,0.3)}
+
+.msg.user .msg-bubble{
+  background:var(--text);color:var(--bg);
+  padding:8px 12px;
+  border:var(--border-w) solid var(--text);
+  font-size:13px;line-height:1.5;
+  align-self:flex-end;max-width:90%;
+  box-shadow:var(--shadow-sm);
+}
+.msg.user{align-items:flex-end}
+
+.msg.assistant .msg-body{
+  font-size:13px;line-height:1.6;color:var(--text);
+  border-left:var(--border-w) solid var(--text);
+  padding-left:10px;
+}
+.msg.assistant.partial .msg-body{color:var(--text-muted)}
+
+/* Artifact card */
+.artifact-card{
+  border:var(--border-w) solid var(--text);
+  padding:10px 12px;
+  cursor:pointer;
+  position:relative;
+  margin-top:4px;
+  background:var(--surface);
+  box-shadow:var(--shadow-sm);
+  transition:all 0s var(--ease);
+}
+.artifact-card:hover{
+  background:var(--text);color:var(--bg);
+}
+.artifact-card:hover .artifact-card-label,
+.artifact-card:hover .artifact-card-title,
+.artifact-card:hover .artifact-card-meta,
+.artifact-card:hover .artifact-card-action{color:var(--bg)}
+.artifact-card-label{
+  font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:3px;
+}
+.artifact-card-title{font-size:13px;font-weight:700;color:var(--text)}
+.artifact-card-meta{font-size:10px;color:var(--text-muted);margin-top:3px}
+.artifact-card-action{
+  position:absolute;top:10px;right:12px;
+  font-size:10px;font-weight:700;color:var(--accent);letter-spacing:0.06em;
+}
+.artifact-card:hover .artifact-card-action{color:var(--bg)}
+
+/* Attach chip */
+.attach-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  background:var(--surface-2);
+  border:var(--border-w) solid var(--text);
+  padding:2px 8px;
+  font-size:10px;color:var(--text-muted);
+}
+.attach-chip-remove{cursor:pointer}
+.attach-chip-remove:hover{color:var(--danger)}
+
+/* Suggestions */
+.suggestions{
+  padding:7px 12px 9px;
+  display:flex;flex-wrap:wrap;gap:5px;
+  border-top:var(--border-w) solid var(--border);
+  transition:opacity 0s;
+}
+.chip{
+  display:inline-flex;align-items:center;
+  padding:4px 10px;
+  background:var(--surface);
+  border:var(--border-w) solid var(--text);
+  font-size:10px;color:var(--text);
+  cursor:pointer;font-family:var(--font);
+  font-weight:700;letter-spacing:0.04em;
+  white-space:nowrap;
+}
+.chip:hover{background:var(--text);color:var(--bg)}
+
+/* Composer */
+.composer{
+  padding:8px 10px 10px;
+  border-top:var(--border-w) solid var(--border);
+  flex-shrink:0;
+}
+.composer-attach-row{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px}
+.composer-row{
+  display:flex;align-items:center;gap:0;
+  border:var(--border-w) solid var(--text);
+}
+.composer-input{
+  flex:1;border:none;background:transparent;
+  font-size:13px;font-family:var(--font);
+  color:var(--text);outline:none;
+  padding:8px 10px;
+  caret-color:var(--text);
+}
+.composer-input::placeholder{color:var(--text-muted)}
+.composer-btn{
+  width:36px;height:36px;
+  border:none;border-left:var(--border-w) solid var(--text);
+  background:var(--surface);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;
+  font-size:14px;color:var(--text);
+  font-family:var(--font);
+  font-weight:700;
+}
+.composer-btn:hover{background:var(--text);color:var(--bg)}
+.btn-attach{border-left:none;border-right:var(--border-w) solid var(--text)}
+.btn-action.send-mode{background:var(--accent);color:#fff;border-left-color:var(--accent)}
+.btn-action.send-mode:hover{background:#0040cc}
+.btn-action.stop{background:var(--danger);color:#fff;border-left-color:var(--danger)}
+.btn-action.stop:hover{background:#a00020}
+.btn-mute.muted{background:var(--danger)!important;color:#fff!important}
+
+/* Interrupted */
+.msg-interrupted{
+  font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--danger);margin-top:3px;
+}
+
+/* Inline widget */
+.widget-card{
+  border:var(--border-w) solid var(--text);
+  overflow:hidden;margin-top:4px;
+  box-shadow:var(--shadow-sm);
+}
+.widget-header{
+  display:flex;align-items:center;gap:0;
+  border-bottom:var(--border-w) solid var(--text);
+  background:var(--text);color:var(--bg);
+}
+.widget-icon{
+  width:28px;height:28px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;
+  border-right:1px solid rgba(255,255,255,0.2);
+}
+.widget-name{
+  flex:1;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+  padding:0 10px;color:var(--bg);
+}
+.widget-expand{font-size:9px;font-weight:700;cursor:pointer;padding:0 10px;color:var(--bg);opacity:0.7}
+.widget-expand:hover{opacity:1}
+.widget-body{padding:10px 12px;font-family:var(--font)}
+.widget-value{font-size:22px;font-weight:700;color:var(--text)}
+.widget-sub{font-size:10px;color:var(--text-muted);margin-top:2px}
+.widget-row{display:flex;gap:0;margin-top:8px;border:var(--border-w) solid var(--text)}
+.widget-stat{
+  flex:1;padding:6px 8px;
+  border-right:var(--border-w) solid var(--text);
+}
+.widget-stat:last-child{border-right:none}
+.widget-stat-label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted)}
+.widget-stat-val{font-size:14px;font-weight:700;color:var(--text)}
+.widget-actions{display:flex;gap:0;border-top:var(--border-w) solid var(--text)}
+.widget-btn{
+  flex:1;padding:7px;
+  font-size:10px;font-weight:700;cursor:pointer;
+  font-family:var(--font);letter-spacing:0.08em;text-transform:uppercase;
+  border:none;border-right:var(--border-w) solid var(--text);
+  background:var(--surface);color:var(--text);
+}
+.widget-btn:last-child{border-right:none}
+.widget-btn:hover{background:var(--text);color:var(--bg)}
+.widget-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.widget-btn.primary:hover{background:#0040cc}
+
+/* RIGHT: Artifact workspace */
+.artifact-col{
+  flex:1;display:flex;flex-direction:column;min-width:0;
+  background:var(--bg);
+}
+.artifact-empty{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:12px;
+  color:var(--text-muted);padding:32px;text-align:center;
+}
+.artifact-empty-icon{
+  font-size:14px;font-weight:700;letter-spacing:0.1em;
+  border:var(--border-w) solid var(--text-muted);
+  padding:12px 18px;color:var(--text-muted);
+  animation:brut-cursor 1s steps(1,end) infinite;
+}
+@keyframes brut-cursor{0%,49%{border-color:var(--text-muted)}50%,100%{border-color:transparent}}
+.artifact-empty-text{font-size:11px;line-height:1.6;font-weight:600;letter-spacing:0.02em;max-width:200px}
+
+.artifact-panel{display:flex;flex-direction:column;height:100%}
+.artifact-panel-header{
+  display:flex;align-items:center;gap:0;
+  border-bottom:var(--border-w) solid var(--border);
+  background:var(--surface);
+  flex-shrink:0;height:40px;
+}
+.artifact-panel-title{
+  flex:1;font-size:11px;font-weight:700;letter-spacing:0.08em;
+  text-transform:uppercase;padding:0 14px;
+}
+.artifact-version-sel{
+  font-size:10px;color:var(--text);
+  background:var(--surface-2);
+  border:none;border-left:var(--border-w) solid var(--border);
+  border-right:var(--border-w) solid var(--border);
+  padding:0 10px;cursor:pointer;font-family:var(--font);
+  font-weight:700;height:100%;letter-spacing:0.04em;
+}
+.artifact-tabs{
+  display:flex;height:100%;
+}
+.artifact-tab{
+  padding:0 14px;height:100%;
+  font-size:10px;font-weight:700;cursor:pointer;
+  color:var(--text-muted);border:none;border-left:var(--border-w) solid var(--border);
+  background:transparent;font-family:var(--font);letter-spacing:0.08em;text-transform:uppercase;
+}
+.artifact-tab:hover{background:var(--surface-2)}
+.artifact-tab.active{
+  background:var(--text);color:var(--bg);
+}
+
+.artifact-toolbar{
+  display:flex;align-items:center;gap:0;
+  border-bottom:var(--border-w) solid var(--border);
+  background:var(--surface-2);
+  flex-shrink:0;height:36px;
+}
+.toolbar-btn{
+  display:flex;align-items:center;gap:4px;
+  padding:0 12px;height:100%;
+  background:transparent;
+  border:none;border-right:var(--border-w) solid var(--border);
+  font-size:10px;color:var(--text-muted);
+  cursor:pointer;font-family:var(--font);font-weight:700;
+  letter-spacing:0.06em;text-transform:uppercase;
+}
+.toolbar-btn:hover{background:var(--text);color:var(--bg)}
+.toolbar-btn.primary{
+  background:var(--accent);color:#fff;border-right-color:var(--accent);
+  margin-left:auto;
+}
+.toolbar-btn.primary:hover{background:#0040cc}
+.refine-chips{display:flex;gap:0;height:100%;flex:1;overflow:hidden}
+.refine-chip{
+  display:flex;align-items:center;
+  padding:0 10px;height:100%;
+  background:transparent;
+  border:none;border-right:var(--border-w) solid var(--border);
+  font-size:10px;color:var(--accent-2);
+  cursor:pointer;font-family:var(--font);font-weight:700;
+  letter-spacing:0.04em;
+}
+.refine-chip:hover{background:var(--accent-2);color:#fff}
+
+.artifact-content{
+  flex:1;overflow-y:auto;padding:14px;
+  font-size:12px;line-height:1.7;color:var(--text);
+}
+.artifact-content::-webkit-scrollbar{width:4px;background:var(--bg)}
+.artifact-content::-webkit-scrollbar-thumb{background:var(--border)}
+.artifact-content pre{
+  background:var(--surface-2);
+  border:var(--border-w) solid var(--text);
+  padding:12px;overflow-x:auto;
+  font-size:11px;box-shadow:var(--shadow-sm);
+  margin:6px 0;
+}
+.artifact-content code{
+  background:var(--surface-2);
+  padding:0px 4px;border:1px solid var(--border);
+  font-size:11px;
+}
+
+/* Demo btn */
+.demo-btn{
+  position:fixed;bottom:16px;right:16px;
+  padding:8px 16px;
+  background:var(--text);
+  color:var(--bg);border:var(--border-w) solid var(--text);
+  font-size:11px;font-weight:700;font-family:var(--font);
+  cursor:pointer;
+  box-shadow:var(--shadow);
+  z-index:100;letter-spacing:0.08em;text-transform:uppercase;
+}
+.demo-btn:hover{background:var(--bg);color:var(--text)}
+
+@media(max-width:700px){
+  .app-window{width:100vw;height:100vh;flex-direction:column}
+  .split{flex-direction:column}
+  .conv-col{width:100%;height:60%;border-right:none;border-bottom:var(--border-w) solid var(--border)}
+  .artifact-col{height:40%}
+}
+</style>
+</head>
+<body>
+
+<div class="app-window">
+  <div class="titlebar">
+    <div class="titlebar-left">
+      <div class="dot-btn">✕</div>
+      <div class="dot-btn">−</div>
+      <div class="dot-btn">□</div>
+    </div>
+    <div class="titlebar-title">ELIZA // SPLIT CANVAS MODE</div>
+    <div class="titlebar-right">☰</div>
+  </div>
+
+  <div class="split">
+    <!-- LEFT: Conversation -->
+    <div class="conv-col">
+      <div class="conv-header">
+        <div class="conv-header-section" style="gap:6px">
+          <div class="ascii-wave idle" id="asciiWave">
+            <div class="ascii-bar"></div>
+            <div class="ascii-bar"></div>
+            <div class="ascii-bar"></div>
+            <div class="ascii-bar"></div>
+            <div class="ascii-bar"></div>
+            <div class="ascii-bar"></div>
+          </div>
+          <div class="state-label" id="stateLabel">IDLE</div>
+        </div>
+        <div class="conv-header-section" style="flex:1">
+          <div class="conv-title">TRANSCRIPT</div>
+        </div>
+        <div class="voice-badge" id="voiceBadge">
+          <div class="badge-dot"></div>
+          <span id="voiceLabel">LISTENING</span>
+        </div>
+      </div>
+
+      <div class="chat-log" id="chatLog">
+        <div class="msg assistant">
+          <div class="msg-meta"><span class="msg-glyph">[SYS]</span> ELIZA <span class="msg-time">00:00</span></div>
+          <div class="msg-body">SYSTEM READY. Input via keyboard or voice. Substantial outputs auto-route to workspace panel.</div>
+        </div>
+
+        <div class="msg user">
+          <div class="msg-meta"><span class="msg-glyph">[KBD]</span> USER <span class="msg-time">00:01</span></div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
+            <div class="attach-chip">📄 ERD.png</div>
+            <div class="msg-bubble">Generate SQL migrations for this database schema. Include indexes and foreign key constraints.</div>
+          </div>
+        </div>
+
+        <div class="msg assistant">
+          <div class="msg-meta"><span class="msg-glyph">[SYS]</span> ELIZA <span class="msg-time">00:02</span></div>
+          <div class="msg-body">Generated 7 migration files: CREATE TABLE, ALTER TABLE, CREATE INDEX, FK constraints. Named sequentially per Flyway convention.</div>
+          <div class="artifact-card" onclick="openArtifact()">
+            <div class="artifact-card-label">// ARTIFACT &gt; SQL MIGRATIONS</div>
+            <div class="artifact-card-title">migrations/V1__init.sql</div>
+            <div class="artifact-card-action">[OPEN]</div>
+            <div class="artifact-card-meta">7 files · 312 lines · Flyway convention</div>
+          </div>
+        </div>
+
+        <div class="msg user">
+          <div class="msg-meta"><span class="msg-glyph">[MIC]</span> USER VOICE <span class="msg-time">00:03</span></div>
+          <div class="msg-bubble">Add a migration for a full-text search index on the documents table.</div>
+        </div>
+
+        <div class="msg assistant">
+          <div class="msg-meta"><span class="msg-glyph">[SYS]</span> ELIZA <span class="msg-time">00:04</span></div>
+          <div class="msg-body">V2: Added V8__fts_index.sql — GIN index on tsvector column, trigger to keep it updated, and a search function. Postgres 15+ compatible.</div>
+          <div class="artifact-card" onclick="openArtifact()">
+            <div class="artifact-card-label">// ARTIFACT &gt; SQL MIGRATIONS</div>
+            <div class="artifact-card-title">migrations/ — V2 (8 files)</div>
+            <div class="artifact-card-action">[OPEN]</div>
+            <div class="artifact-card-meta">8 files · 374 lines · + FTS index</div>
+          </div>
+          <div class="msg-interrupted">// [INTERRUPTED]</div>
+        </div>
+
+        <div class="msg assistant">
+          <div class="msg-meta"><span class="msg-glyph">[SYS]</span> ELIZA <span class="msg-time">00:05</span></div>
+          <div class="msg-body">DB server status check:</div>
+          <div class="widget-card">
+            <div class="widget-header">
+              <div class="widget-icon">🗄</div>
+              <div class="widget-name">// POSTGRES MONITOR</div>
+              <div class="widget-expand">[EXPAND]</div>
+            </div>
+            <div class="widget-body">
+              <div class="widget-value">14ms</div>
+              <div class="widget-sub">avg query latency // status: NOMINAL</div>
+              <div class="widget-row">
+                <div class="widget-stat">
+                  <div class="widget-stat-label">Tables</div>
+                  <div class="widget-stat-val">23</div>
+                </div>
+                <div class="widget-stat">
+                  <div class="widget-stat-label">Active</div>
+                  <div class="widget-stat-val">7</div>
+                </div>
+                <div class="widget-stat">
+                  <div class="widget-stat-label">Locks</div>
+                  <div class="widget-stat-val">0</div>
+                </div>
+              </div>
+            </div>
+            <div class="widget-actions">
+              <button class="widget-btn">PSQL SHELL</button>
+              <button class="widget-btn primary">RUN MIGRATIONS</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="suggestions" id="suggestions">
+        <div class="chip" onclick="insertChip(this,'Add rollback scripts')">+ rollbacks</div>
+        <div class="chip" onclick="insertChip(this,'Generate seed data')">+ seed data</div>
+        <div class="chip" onclick="insertChip(this,'Add audit log triggers')">+ audit log</div>
+      </div>
+
+      <div class="composer">
+        <div class="composer-attach-row" id="attachRow"></div>
+        <div class="composer-row">
+          <button class="composer-btn btn-attach" onclick="addAttachment()" title="Attach">+</button>
+          <input class="composer-input" id="compInput" placeholder="_ type command or speak…" oninput="onInput()" onkeydown="onKey(event)">
+          <button class="composer-btn btn-action" id="actionBtn" onclick="onAction()" title="Voice">MIC</button>
+          <button class="composer-btn btn-mute" id="muteBtn" onclick="toggleMute()" title="Mute">SPK</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Artifact workspace -->
+    <div class="artifact-col" id="artifactCol">
+      <div class="artifact-empty" id="artifactEmpty">
+        <div class="artifact-empty-icon">[ WORKSPACE ]</div>
+        <div class="artifact-empty-text">NO ARTIFACT OPEN. SUBSTANTIAL OUTPUTS AUTO-OPEN HERE.</div>
+      </div>
+
+      <div class="artifact-panel" id="artifactPanel" style="display:none">
+        <div class="artifact-panel-header">
+          <div class="artifact-panel-title" id="panelTitle">MIGRATIONS/</div>
+          <select class="artifact-version-sel" id="versionSel" onchange="switchVersion(this.value)">
+            <option value="2">V2 — 8 files + FTS</option>
+            <option value="1">V1 — 7 files init</option>
+          </select>
+          <div class="artifact-tabs">
+            <button class="artifact-tab active" onclick="switchTab('code',this)">SQL</button>
+            <button class="artifact-tab" onclick="switchTab('preview',this)">RUN</button>
+          </div>
+        </div>
+        <div class="artifact-toolbar">
+          <div class="refine-chips">
+            <div class="refine-chip" onclick="refineArtifact('Add rollback scripts')">+ rollbacks</div>
+            <div class="refine-chip" onclick="refineArtifact('Generate seed data')">+ seed data</div>
+            <div class="refine-chip" onclick="refineArtifact('Add audit log triggers')">+ audit log</div>
+          </div>
+          <button class="toolbar-btn" onclick="copyArtifact()">COPY</button>
+          <button class="toolbar-btn" onclick="downloadArtifact()">DL</button>
+          <button class="toolbar-btn primary" onclick="publishArtifact()">PUSH</button>
+        </div>
+        <div class="artifact-content" id="artifactContent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="demo-btn" id="demoBtn" onclick="runDemo()">[ PLAY DEMO ]</button>
+
+<script>
+let state = 'idle';
+let muted = false;
+let typing = false;
+let generating = false;
+let demoTimers = [];
+let ampInterval = null;
+let ampPhase = 0;
+
+const asciiWave = document.getElementById('asciiWave');
+const stateLabel = document.getElementById('stateLabel');
+const voiceBadge = document.getElementById('voiceBadge');
+const voiceLabel = document.getElementById('voiceLabel');
+const actionBtn = document.getElementById('actionBtn');
+const muteBtn = document.getElementById('muteBtn');
+const compInput = document.getElementById('compInput');
+const chatLog = document.getElementById('chatLog');
+const suggEl = document.getElementById('suggestions');
+const attachRow = document.getElementById('attachRow');
+const artifactEmpty = document.getElementById('artifactEmpty');
+const artifactPanel = document.getElementById('artifactPanel');
+const artifactContent = document.getElementById('artifactContent');
+const bars = asciiWave.querySelectorAll('.ascii-bar');
+
+function setOrbState(s) {
+  state = s;
+  asciiWave.className = 'ascii-wave ' + s + (muted ? ' muted' : '');
+
+  const LABELS = {idle:'IDLE',listening:'LISTENING',thinking:'THINKING',speaking:'SPEAKING'};
+  stateLabel.textContent = muted ? 'MUTED' : (LABELS[s] || 'IDLE');
+  stateLabel.className = 'state-label ' + (muted ? 'muted' : s === 'listening' ? 'listening' : '');
+
+  if (s === 'listening' && !muted) {
+    voiceBadge.className = 'voice-badge visible';
+    voiceLabel.textContent = 'LISTENING';
+    startAmpSim();
+  } else if (muted) {
+    voiceBadge.className = 'voice-badge visible muted';
+    voiceLabel.textContent = 'MUTED';
+    stopAmpSim();
+  } else {
+    voiceBadge.className = 'voice-badge';
+    stopAmpSim();
+  }
+}
+
+// Discrete step amplitude — bars snap to heights
+const HEIGHTS = [2, 4, 6, 8, 10, 14, 18, 22];
+function startAmpSim() {
+  stopAmpSim();
+  bars.forEach(b => { b.style.animation = 'none'; b.style.background = '#111'; });
+  ampInterval = setInterval(() => {
+    bars.forEach((bar) => {
+      // discrete step — brutalist, no easing
+      const h = HEIGHTS[Math.floor(Math.random() * HEIGHTS.length)];
+      bar.style.height = h + 'px';
+    });
+  }, 100); // 10fps discrete steps
+}
+function stopAmpSim() {
+  if (ampInterval) { clearInterval(ampInterval); ampInterval = null; }
+  bars.forEach(b => { b.style.height = ''; b.style.animation = ''; b.style.background = ''; });
+}
+
+function toggleMute() {
+  muted = !muted;
+  muteBtn.textContent = muted ? 'MUT' : 'SPK';
+  muteBtn.className = 'composer-btn btn-mute' + (muted ? ' muted' : '');
+  setOrbState(state);
+}
+
+function onInput() {
+  const val = compInput.value.trim();
+  if (val.length > 0) {
+    typing = true;
+    suggEl.style.opacity = '0';
+    suggEl.style.pointerEvents = 'none';
+    actionBtn.textContent = generating ? 'STP' : 'SND';
+    actionBtn.className = 'composer-btn btn-action' + (generating ? ' stop' : ' send-mode');
+  } else {
+    typing = false;
+    suggEl.style.opacity = '';
+    suggEl.style.pointerEvents = '';
+    actionBtn.textContent = generating ? 'STP' : 'MIC';
+    actionBtn.className = 'composer-btn btn-action' + (generating ? ' stop' : '');
+  }
+}
+
+function onKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onAction(); }
+}
+
+function onAction() {
+  if (generating) { stopGeneration(); return; }
+  const val = compInput.value.trim();
+  if (val) { sendTyped(val); return; }
+  if (state === 'idle') runDemo();
+}
+
+let pendingAttach = [];
+function addAttachment() {
+  const files = ['ERD-v2.png','schema.sql','sample-data.csv'];
+  pendingAttach.push(files[pendingAttach.length % files.length]);
+  renderAttachChips();
+}
+function renderAttachChips() {
+  attachRow.innerHTML = pendingAttach.map((f,i) =>
+    `<div class="attach-chip">[ ${f} ] <span class="attach-chip-remove" onclick="removeAttach(${i})">[X]</span></div>`
+  ).join('');
+}
+function removeAttach(i) { pendingAttach.splice(i,1); renderAttachChips(); }
+
+function sendTyped(val) {
+  compInput.value = '';
+  typing = false;
+  onInput();
+  const aHtml = pendingAttach.length ?
+    `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px">${pendingAttach.map(f=>`<div class="attach-chip">[ ${f} ]</div>`).join('')}</div>` : '';
+  pendingAttach = [];
+  attachRow.innerHTML = '';
+  addMsg('user', `${aHtml}<div class="msg-bubble">${val}</div>`, '[KBD]');
+  scheduleReply();
+}
+
+function insertChip(el, text) {
+  compInput.value = text;
+  onInput();
+  compInput.focus();
+}
+
+function addMsg(role, html, glyph, partial) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + role + (partial ? ' partial' : '');
+  const g = glyph || (role === 'user' ? '[KBD]' : '[SYS]');
+  const name = role === 'user' ? 'USER' : 'ELIZA';
+  div.innerHTML = `<div class="msg-meta"><span class="msg-glyph">${g}</span> ${name} <span class="msg-time">live</span></div>${html}`;
+  chatLog.appendChild(div);
+  chatLog.scrollTop = chatLog.scrollHeight;
+  return div;
+}
+
+function scheduleReply() {
+  generating = true;
+  onInput();
+  setOrbState('thinking');
+  const t1 = setTimeout(() => {
+    setOrbState('speaking');
+    const replies = [
+      "V3: 9 files. Added V9__rollback_procedures.sql — DOWN migrations for each UP, wrapping all DDL in transactions. Safe to run against prod.",
+      "V3: Added seeds/ directory — 3 SQL seed files with realistic sample data matching FK constraints. 1000 rows per core table.",
+      "V3: Added audit log trigger on all writable tables — creates audit.log_entry rows on INSERT/UPDATE/DELETE with old/new JSON blobs."
+    ][Math.floor(Math.random() * 3)];
+    addMsg('sys', `<div class="msg-body">${replies}</div>
+      <div class="artifact-card" onclick="openArtifact()">
+        <div class="artifact-card-label">// ARTIFACT > SQL MIGRATIONS</div>
+        <div class="artifact-card-title">migrations/ — V3</div>
+        <div class="artifact-card-action">[OPEN]</div>
+        <div class="artifact-card-meta">Updated version</div>
+      </div>`, '[SYS]');
+    const t2 = setTimeout(() => {
+      generating = false;
+      setOrbState('idle');
+      onInput();
+    }, 1800);
+    demoTimers.push(t2);
+  }, 1200);
+  demoTimers.push(t1);
+}
+
+function addMsg(role, html, glyph, partial) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + (role === 'sys' ? 'assistant' : role) + (partial ? ' partial' : '');
+  const g = glyph || (role === 'user' ? '[KBD]' : '[SYS]');
+  const name = role === 'user' ? 'USER' : 'ELIZA';
+  div.innerHTML = `<div class="msg-meta"><span class="msg-glyph">${g}</span> ${name} <span class="msg-time">live</span></div>${html}`;
+  chatLog.appendChild(div);
+  chatLog.scrollTop = chatLog.scrollHeight;
+  return div;
+}
+
+function stopGeneration() {
+  demoTimers.forEach(clearTimeout);
+  demoTimers = [];
+  generating = false;
+  setOrbState('idle');
+  onInput();
+}
+
+const ARTIFACTS = {
+  2:`<pre><code>-- V1__create_tables.sql
+CREATE TABLE users (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email       TEXT NOT NULL UNIQUE,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE documents (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title       TEXT NOT NULL,
+  body        TEXT NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_documents_user_id ON documents(user_id);
+CREATE INDEX idx_documents_created_at ON documents(created_at DESC);
+
+-- V8__fts_index.sql
+ALTER TABLE documents
+  ADD COLUMN IF NOT EXISTS search_vector tsvector
+    GENERATED ALWAYS AS (
+      to_tsvector('english', coalesce(title, '') || ' ' || coalesce(body, ''))
+    ) STORED;
+
+CREATE INDEX idx_documents_fts
+  ON documents USING GIN(search_vector);
+
+-- Full text search function
+CREATE OR REPLACE FUNCTION search_documents(query TEXT)
+RETURNS SETOF documents AS $$
+  SELECT * FROM documents
+  WHERE search_vector @@ plainto_tsquery('english', query)
+  ORDER BY ts_rank(search_vector, plainto_tsquery('english', query)) DESC;
+$$ LANGUAGE SQL STABLE;
+</code></pre>`,
+  1:`<pre><code>-- V1__create_tables.sql
+CREATE TABLE users (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email       TEXT NOT NULL UNIQUE,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE documents (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title       TEXT NOT NULL,
+  body        TEXT NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_documents_user_id ON documents(user_id);
+
+-- V2__add_tags.sql
+CREATE TABLE tags (
+  id   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE document_tags (
+  document_id UUID REFERENCES documents(id) ON DELETE CASCADE,
+  tag_id      UUID REFERENCES tags(id) ON DELETE CASCADE,
+  PRIMARY KEY (document_id, tag_id)
+);
+</code></pre>`
+};
+
+function openArtifact() {
+  artifactEmpty.style.display = 'none';
+  artifactPanel.style.display = 'flex';
+  artifactContent.innerHTML = ARTIFACTS[2];
+}
+
+function switchVersion(v) {
+  artifactContent.innerHTML = ARTIFACTS[parseInt(v)] || ARTIFACTS[2];
+}
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.artifact-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (tab === 'preview') {
+    artifactContent.innerHTML = `<pre><code>$ flyway migrate -url=jdbc:postgresql://localhost/mydb
+
+Flyway Community Edition
+Database: jdbc:postgresql://localhost/mydb
+
++-----------+---------+-------------+------+---------------------+---------+----------+
+| Category  | Version | Description | Type | Installed On        | State   | Undoable |
++-----------+---------+-------------+------+---------------------+---------+----------+
+| Versioned | 1       | create tables | SQL  | 2024-03-01 10:00:01 | Success | No       |
+| Versioned | 2       | add tags      | SQL  | 2024-03-01 10:00:02 | Success | No       |
+| Versioned | 3       | add sessions  | SQL  | 2024-03-01 10:00:03 | Success | No       |
+| Versioned | 8       | fts index     | SQL  | 2024-03-01 10:00:08 | Success | No       |
++-----------+---------+-------------+------+---------------------+---------+----------+
+
+Successfully applied 4 migrations to schema "public"
+Flyway Community Edition: Migration complete.
+$</code></pre>`;
+  } else {
+    artifactContent.innerHTML = ARTIFACTS[2];
+  }
+}
+
+function copyArtifact() {}
+function downloadArtifact() {}
+function publishArtifact() {}
+function refineArtifact(text) { compInput.value = text; onInput(); compInput.focus(); }
+
+function clearDemoTimers() {
+  demoTimers.forEach(clearTimeout);
+  demoTimers = [];
+  stopAmpSim();
+}
+
+function runDemo() {
+  clearDemoTimers();
+  generating = false;
+  onInput();
+  setOrbState('idle');
+
+  const t1 = setTimeout(() => {
+    setOrbState('listening');
+    actionBtn.textContent = 'STP';
+    const pm = addMsg('user',
+      `<div class="msg-bubble" style="opacity:0.45;font-style:italic">Add soft-delete support to users table…</div>`,
+      '[MIC]');
+    pm.classList.add('partial');
+
+    const t2 = setTimeout(() => {
+      setOrbState('thinking');
+      pm.classList.remove('partial');
+      pm.querySelector('.msg-bubble').style.opacity = '';
+      pm.querySelector('.msg-bubble').style.fontStyle = '';
+
+      const t3 = setTimeout(() => {
+        setOrbState('speaking');
+        addMsg('sys', `<div class="msg-body">V3: Added V9__soft_delete.sql — adds deleted_at column to users, CREATE VIEW users_active, UPDATE policies, and a restore function. Hard-delete prevented by trigger.</div>
+          <div class="artifact-card" onclick="openArtifact()">
+            <div class="artifact-card-label">// ARTIFACT > SQL MIGRATIONS</div>
+            <div class="artifact-card-title">migrations/ — V3 (9 files)</div>
+            <div class="artifact-card-action">[OPEN]</div>
+            <div class="artifact-card-meta">9 files · 421 lines · soft-delete</div>
+          </div>`, '[SYS]');
+        openArtifact();
+        const sel = document.getElementById('versionSel');
+        if (!sel.querySelector('[value="3"]')) {
+          const o = document.createElement('option');
+          o.value='3';o.textContent='V3 — 9 files + soft-delete';o.selected=true;
+          sel.insertBefore(o, sel.firstChild);
+        }
+        document.getElementById('panelTitle').textContent = 'MIGRATIONS/ V3';
+
+        const t4 = setTimeout(() => {
+          setOrbState('idle');
+          actionBtn.textContent = 'MIC';
+          onInput();
+        }, 2200);
+        demoTimers.push(t4);
+      }, 1300);
+      demoTimers.push(t3);
+    }, 1900);
+    demoTimers.push(t2);
+  }, 600);
+  demoTimers.push(t1);
+}
+
+setTimeout(runDemo, 1000);
+</script>
+</body>
+</html>

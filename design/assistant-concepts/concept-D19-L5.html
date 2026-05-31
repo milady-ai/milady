@@ -1,0 +1,702 @@
+<!-- concept-D19-L5 | direction: Glass HUD Overlay | look: Brutalist Mono | targets: 420x760, 960x640 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D19 · Glass HUD Overlay · Brutalist Mono</title>
+<style>
+:root {
+  --bg:#F4F2EC;
+  --surface:#FFFFFF;
+  --surface-2:#E8E5DC;
+  --border:#111111;
+  --text:#111111;
+  --text-muted:#555555;
+  --accent:#1A57FF;
+  --accent-2:#FF4A00;
+  --danger:#D90429;
+  --radius:0px;
+  --radius-sm:0px;
+  --font:"JetBrains Mono","IBM Plex Mono","SF Mono","Cascadia Mono","Courier New",monospace;
+  --shadow:4px 4px 0 #111111;
+  --shadow-sm:2px 2px 0 #111111;
+  --border-w:2px;
+  --ease:steps(1,end);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+body {
+  font-family:var(--font);
+  background:#CFCCBF;
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* Device */
+.device {
+  position:relative;
+  width:420px;height:760px;
+  background:var(--bg);
+  border:var(--border-w) solid var(--border);
+  box-shadow:6px 6px 0 var(--border);
+  overflow:hidden;
+  display:flex;flex-direction:column;
+  z-index:2;
+}
+
+/* Grid overlay */
+.device::before {
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(17,17,17,0.06) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(17,17,17,0.06) 1px,transparent 1px);
+  background-size:20px 20px;
+  pointer-events:none;z-index:0;
+}
+
+/* Edge indicator (frame border color change) */
+.edge-glow {
+  position:absolute;inset:0;
+  pointer-events:none;z-index:100;
+  transition:border-color var(--ease);
+  border:var(--border-w) solid transparent;
+}
+.edge-glow.listening{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent),inset 2px 2px 0 var(--accent),-2px -2px 0 var(--accent);}
+.edge-glow.speaking{border-color:var(--accent-2);box-shadow:inset 0 0 0 1px var(--accent-2),inset 2px 2px 0 var(--accent-2),-2px -2px 0 var(--accent-2);}
+.edge-glow.muted{border-color:var(--danger);box-shadow:inset 0 0 0 1px var(--danger);}
+
+@keyframes brute-blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+.edge-glow.listening{animation:brute-blink 0.6s steps(1,end) infinite}
+
+/* HUD layer */
+.hud-layer {
+  position:relative;z-index:5;
+  display:flex;flex-direction:column;
+  height:100%;padding:10px;gap:8px;
+}
+
+/* Status bar */
+.status-bar {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 8px;
+  background:var(--surface);
+  border:var(--border-w) solid var(--border);
+  box-shadow:var(--shadow-sm);
+}
+.status-time{font-size:14px;font-weight:700;color:var(--text);letter-spacing:0.06em}
+.live-badge {
+  display:flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:700;color:var(--accent);
+  text-transform:uppercase;letter-spacing:0.1em;
+  opacity:0;
+}
+.live-badge.visible{opacity:1}
+.live-dot{width:8px;height:8px;background:var(--accent)}
+@keyframes brute-dot{0%,49%{background:var(--accent)}50%,100%{background:transparent;border:1px solid var(--accent)}}
+.live-badge.visible .live-dot{animation:brute-dot 0.5s steps(1,end) infinite}
+.session-timer{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:0.06em}
+.muted-label{
+  font-size:11px;font-weight:700;color:var(--danger);
+  text-transform:uppercase;letter-spacing:0.1em;
+  opacity:0;border:1px solid var(--danger);padding:1px 5px;
+}
+.muted-label.visible{opacity:1}
+
+/* Chat log */
+.chat-log {
+  flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:7px;
+  scrollbar-width:thin;scrollbar-color:var(--border) transparent;
+}
+.chat-log::-webkit-scrollbar{width:4px}
+.chat-log::-webkit-scrollbar-thumb{background:var(--border)}
+
+.turn{display:flex;flex-direction:column;gap:3px}
+.turn-header{
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;
+  color:var(--text-muted);display:flex;align-items:center;gap:4px;
+}
+
+.bubble {
+  padding:8px 10px;
+  font-size:13px;line-height:1.5;color:var(--text);
+  background:var(--surface);
+  border:var(--border-w) solid var(--border);
+  max-width:100%;
+  position:relative;
+}
+.bubble.user {
+  background:var(--accent);color:#fff;
+  border-color:var(--border);
+  box-shadow:var(--shadow-sm);
+  margin-left:20px;
+}
+.bubble.assistant{box-shadow:var(--shadow-sm);margin-right:6px}
+.bubble.partial{opacity:0.55;border-style:dashed}
+.bubble.interrupted::after{content:' [INTERRUPT]';font-size:10px;color:rgba(255,255,255,0.7);font-weight:700}
+.bubble.assistant.interrupted::after{color:var(--danger)}
+
+/* Attachment chip */
+.attachment-chip {
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,0.25);
+  border:1px solid rgba(255,255,255,0.5);
+  padding:2px 7px;font-size:11px;color:rgba(255,255,255,0.9);
+  margin-bottom:5px;
+}
+.attachment-chip.staged {
+  background:var(--surface-2);border:1px solid var(--border);
+  color:var(--text);font-size:11px;padding:2px 7px;
+}
+.thumb{font-size:13px}
+.chip-remove{cursor:pointer;color:var(--danger);font-weight:700}
+
+/* App card */
+.app-card {
+  background:var(--surface);
+  border:var(--border-w) solid var(--border);
+  box-shadow:var(--shadow);
+  margin-right:6px;
+}
+.app-card-header {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:7px 10px;border-bottom:var(--border-w) solid var(--border);
+  background:var(--surface-2);
+}
+.app-card-title {
+  display:flex;align-items:center;gap:6px;
+  font-size:11px;font-weight:700;color:var(--text);
+  text-transform:uppercase;letter-spacing:0.1em;
+}
+.app-icon{width:18px;height:18px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:10px}
+.app-expand{font-size:12px;cursor:pointer;color:var(--text-muted);font-weight:700}
+.app-expand:hover{background:var(--border);color:var(--surface)}
+.app-card-body{padding:8px 10px}
+.weather-main{display:flex;align-items:flex-end;gap:8px}
+.weather-temp{font-size:30px;font-weight:700;color:var(--text);line-height:1;letter-spacing:-0.02em}
+.weather-detail{font-size:11px;color:var(--text-muted);line-height:1.6;text-transform:uppercase;letter-spacing:0.05em}
+.weather-forecast{display:flex;gap:4px;margin-top:7px}
+.forecast-item{
+  flex:1;text-align:center;padding:5px 3px;
+  border:1px solid var(--border);
+  font-size:10px;color:var(--text-muted);text-transform:uppercase;
+}
+.forecast-item span{display:block;font-size:13px;margin:2px 0}
+.forecast-item strong{color:var(--text);font-weight:700}
+.app-card-actions{display:flex;gap:6px;padding:0 10px 8px}
+.card-btn {
+  flex:1;padding:6px 8px;
+  font-family:var(--font);font-size:11px;font-weight:700;
+  text-transform:uppercase;letter-spacing:0.08em;
+  border:var(--border-w) solid var(--border);cursor:pointer;
+  transition:all var(--ease);
+}
+.card-btn.primary{background:var(--accent);color:#fff}
+.card-btn.primary:hover{background:#fff;color:var(--accent);border-color:var(--accent)}
+.card-btn.secondary{background:var(--surface-2);color:var(--text)}
+.card-btn.secondary:hover{background:var(--border);color:var(--surface)}
+
+/* Avatar — block waveform */
+.avatar-container {
+  width:40px;height:36px;cursor:pointer;flex-shrink:0;
+  border:var(--border-w) solid var(--border);
+  background:var(--surface-2);
+  display:flex;align-items:flex-end;justify-content:center;
+  gap:2px;padding:3px 4px;
+  position:relative;
+}
+.avatar-container:hover{background:var(--border);filter:invert(1)}
+.wbar {
+  width:4px;background:var(--border);
+  height:4px;display:block;
+}
+.avatar-container.idle .wbar{animation:idle-block 2s steps(4,end) infinite}
+.avatar-container.idle .wbar:nth-child(2){animation-delay:0.5s}
+.avatar-container.idle .wbar:nth-child(3){animation-delay:1s}
+.avatar-container.idle .wbar:nth-child(4){animation-delay:1.5s}
+@keyframes idle-block{0%{height:2px}25%{height:8px}50%{height:4px}75%{height:6px}100%{height:2px}}
+
+.avatar-container.listening .wbar{background:var(--accent)}
+.avatar-container.thinking .wbar{background:var(--accent-2)}
+.avatar-container.speaking .wbar{background:var(--border)}
+.avatar-container.speaking .wbar{animation:speak-block 0.3s steps(2,end) infinite}
+@keyframes speak-block{0%{height:4px}50%{height:20px}}
+.avatar-container.speaking .wbar:nth-child(2){animation-delay:0.075s}
+.avatar-container.speaking .wbar:nth-child(3){animation-delay:0.15s}
+.avatar-container.speaking .wbar:nth-child(4){animation-delay:0.225s}
+
+/* State label in avatar */
+.state-label {
+  position:absolute;top:-18px;left:0;right:0;
+  font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;
+  color:var(--text);text-align:center;background:var(--bg);
+  border:1px solid var(--border);padding:1px 2px;
+  display:none;
+}
+.avatar-container.listening .state-label,
+.avatar-container.thinking .state-label,
+.avatar-container.speaking .state-label{display:block}
+.avatar-container.listening .state-label{color:var(--accent);border-color:var(--accent)}
+.avatar-container.thinking .state-label{color:var(--accent-2);border-color:var(--accent-2)}
+
+/* Thinking spinner */
+.think-spin {
+  display:none;font-size:16px;color:var(--accent-2);
+  animation:think-spin-anim 0.5s steps(4,end) infinite;
+}
+@keyframes think-spin-anim{0%{content:'|'}25%{content:'/'}50%{content:'—'}75%{content:'\\'}}
+.avatar-container.thinking .wbar{display:none}
+.avatar-container.thinking .think-spin{display:block}
+
+/* Suggestions */
+.suggestions{display:flex;gap:5px;flex-wrap:wrap}
+.suggestions.hidden{display:none}
+.suggestion-chip {
+  display:inline-flex;align-items:center;gap:4px;
+  background:var(--surface);border:var(--border-w) solid var(--border);
+  padding:4px 8px;font-size:11px;font-weight:700;
+  color:var(--text);cursor:pointer;text-transform:uppercase;letter-spacing:0.07em;
+  box-shadow:var(--shadow-sm);
+}
+.suggestion-chip:hover{background:var(--border);color:var(--surface)}
+
+.staged-attachments{display:flex;gap:5px;flex-wrap:wrap}
+
+/* Listening indicator */
+.listening-indicator {
+  display:none;align-items:center;gap:6px;
+  padding:4px 8px;
+  background:var(--surface);border:var(--border-w) solid var(--border);
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text);
+}
+.listening-indicator.visible{display:flex}
+.listening-indicator.muted-indicator{border-color:var(--danger);color:var(--danger)}
+.listening-indicator.thinking-ind{border-color:var(--accent-2);color:var(--accent-2)}
+.listening-indicator.speaking-ind{border-color:var(--border)}
+.mic-wave{display:flex;align-items:center;gap:1px;height:10px}
+.mic-wave span{width:3px;height:4px;background:currentColor;display:block}
+@keyframes mic-blink{0%,49%{height:4px}50%,100%{height:10px}}
+.listening-indicator.visible:not(.muted-indicator) .mic-wave span{animation:mic-blink 0.3s steps(1,end) infinite}
+.listening-indicator.visible:not(.muted-indicator) .mic-wave span:nth-child(2){animation-delay:0.075s}
+.listening-indicator.visible:not(.muted-indicator) .mic-wave span:nth-child(3){animation-delay:0.15s}
+.listening-indicator.visible:not(.muted-indicator) .mic-wave span:nth-child(4){animation-delay:0.225s}
+.listening-indicator.visible:not(.muted-indicator) .mic-wave span:nth-child(5){animation-delay:0.3s}
+
+/* Pill */
+.pill-row {
+  display:flex;align-items:center;gap:6px;
+  background:var(--surface);
+  border:var(--border-w) solid var(--border);
+  box-shadow:var(--shadow-sm);
+  padding:5px;
+}
+.pill-attach {
+  width:32px;height:32px;
+  border:var(--border-w) solid var(--border);
+  background:var(--surface-2);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:18px;font-weight:900;color:var(--text);flex-shrink:0;
+}
+.pill-attach:hover{background:var(--border);color:var(--surface)}
+.pill-input {
+  flex:1;border:none;background:transparent;
+  font-family:var(--font);font-size:13px;color:var(--text);outline:none;
+}
+.pill-input::placeholder{color:var(--text-muted)}
+.pill-action {
+  width:32px;height:32px;
+  border:var(--border-w) solid var(--border);
+  background:var(--surface-2);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:14px;flex-shrink:0;font-family:var(--font);font-weight:700;
+}
+.pill-action.mic{background:var(--surface-2);color:var(--text)}
+.pill-action.mic:hover{background:var(--border);color:var(--surface)}
+.pill-action.send{background:var(--accent);color:#fff;border-color:var(--border)}
+.pill-action.send:hover{background:#fff;color:var(--accent);border-color:var(--accent)}
+.pill-action.stop{background:var(--danger);color:#fff;border-color:var(--border)}
+
+/* Controls */
+.controls-row{display:flex;align-items:center;justify-content:center;gap:8px}
+.ctrl-btn{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;cursor:pointer;font-family:var(--font)}
+.ctrl-icon{
+  width:38px;height:30px;
+  border:var(--border-w) solid var(--border);background:var(--surface-2);
+  display:flex;align-items:center;justify-content:center;font-size:13px;
+  box-shadow:var(--shadow-sm);transition:all var(--ease);
+}
+.ctrl-icon:hover{background:var(--border);color:var(--surface);filter:invert(1)}
+.ctrl-icon.danger{border-color:var(--danger)}
+.ctrl-icon.danger.active{background:var(--danger);color:#fff}
+.ctrl-label{font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;font-weight:700}
+
+/* Detach bubble */
+.detach-bubble {
+  position:absolute;bottom:80px;right:12px;
+  width:60px;height:44px;
+  background:var(--surface);border:var(--border-w) solid var(--accent);
+  box-shadow:4px 4px 0 var(--accent);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;z-index:50;
+  opacity:0;pointer-events:none;
+}
+.detach-bubble.visible{opacity:1;pointer-events:auto}
+.bubble-timer{font-size:10px;font-weight:700;color:var(--accent);letter-spacing:0.06em}
+@keyframes brute-bubble{0%,49%{border-color:var(--accent);box-shadow:4px 4px 0 var(--accent)}50%,100%{border-color:var(--border);box-shadow:4px 4px 0 var(--border)}}
+.detach-bubble.visible{animation:brute-bubble 0.8s steps(1,end) infinite}
+
+/* Play demo */
+.play-demo {
+  position:absolute;top:10px;right:10px;z-index:200;
+  background:var(--accent);border:var(--border-w) solid var(--border);
+  box-shadow:var(--shadow-sm);padding:4px 10px;
+  font-family:var(--font);font-size:10px;font-weight:700;
+  text-transform:uppercase;letter-spacing:0.1em;
+  color:#fff;cursor:pointer;
+}
+.play-demo:hover{background:#fff;color:var(--accent);border-color:var(--accent)}
+.play-demo:disabled{background:var(--surface-2);color:var(--text-muted);cursor:not-allowed}
+
+@media(min-width:760px){
+  .device{width:960px;height:640px;}
+}
+</style>
+</head>
+<body>
+<div class="device" id="device">
+  <div class="edge-glow" id="edgeGlow"></div>
+
+  <div class="hud-layer">
+    <!-- Status -->
+    <div class="status-bar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="status-time" id="clockDisplay">09:41</span>
+        <div class="live-badge" id="liveBadge">
+          <div class="live-dot"></div>
+          <span>[LIVE]</span>
+          <span class="session-timer" id="sessionTimer">0:00</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="muted-label" id="mutedLabel">[MUTED]</span>
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted)">ELIZA/HUD</span>
+      </div>
+    </div>
+
+    <!-- Chat log -->
+    <div class="chat-log" id="chatLog">
+      <div class="turn">
+        <div class="turn-header">🎙 [VOICE] USER</div>
+        <div class="bubble user">What's the weather like in Tokyo right now?</div>
+      </div>
+      <div class="turn">
+        <div class="turn-header">▶ [ELIZA] RESPONSE</div>
+        <div class="bubble assistant interrupted">Tokyo is 18°C and partly cloudy. Mild conditions throughout the day</div>
+      </div>
+      <div class="turn">
+        <div class="turn-header">⌨ [TYPED] USER</div>
+        <div class="bubble user">
+          <div class="attachment-chip">
+            <div class="thumb">📄</div>
+            <span>photo.jpg</span>
+          </div>
+          <div>What is this building?</div>
+        </div>
+      </div>
+      <div class="turn">
+        <div class="turn-header">▶ [ELIZA] RESPONSE</div>
+        <div class="bubble assistant">Shibuya Crossing, Tokyo. Busiest pedestrian crossing globally. ~2,500 crossers per cycle at peak hours. Notable for scramble pattern.</div>
+      </div>
+      <div class="turn">
+        <div class="turn-header">▶ [ELIZA] WIDGET::WEATHER</div>
+        <div class="app-card">
+          <div class="app-card-header">
+            <div class="app-card-title"><div class="app-icon">W</div>TOKYO::WEATHER</div>
+            <span class="app-expand">[↗]</span>
+          </div>
+          <div class="app-card-body">
+            <div class="weather-main">
+              <div class="weather-temp">18°C</div>
+              <div class="weather-detail">PARTLY_CLOUDY<br>HUMIDITY:62% WIND:8KPH</div>
+            </div>
+            <div class="weather-forecast">
+              <div class="forecast-item"><div>MON</div><span>🌤</span><strong>19°</strong></div>
+              <div class="forecast-item"><div>TUE</div><span>🌧</span><strong>14°</strong></div>
+              <div class="forecast-item"><div>WED</div><span>☀️</span><strong>22°</strong></div>
+            </div>
+          </div>
+          <div class="app-card-actions">
+            <button class="card-btn primary">FORECAST</button>
+            <button class="card-btn secondary">HOURLY</button>
+          </div>
+        </div>
+      </div>
+      <div class="turn" id="streamingTurn" style="display:none">
+        <div class="turn-header">▶ [ELIZA] STREAMING...</div>
+        <div class="bubble assistant partial" id="streamingBubble"></div>
+      </div>
+    </div>
+
+    <!-- Listening indicator -->
+    <div class="listening-indicator" id="listeningIndicator">
+      <div class="mic-wave">
+        <span id="w1"></span><span id="w2"></span><span id="w3"></span><span id="w4"></span><span id="w5"></span>
+      </div>
+      🎙 [<span id="listenLabel">LISTENING</span>]
+    </div>
+
+    <!-- Suggestions -->
+    <div class="suggestions" id="suggestions">
+      <div class="suggestion-chip" onclick="fillSuggestion('Ask about this screen')">[SCREEN?]</div>
+      <div class="suggestion-chip" onclick="fillSuggestion('Summarize current view')">[SUMMARIZE]</div>
+    </div>
+
+    <div class="staged-attachments" id="stagedAttachments"></div>
+
+    <!-- Pill -->
+    <div class="pill-row">
+      <button class="pill-attach" onclick="handleAttach()">[+]</button>
+      <div class="avatar-container idle" id="pillOrb" onclick="toggleVoice()">
+        <span class="state-label" id="stateLabel">IDLE</span>
+        <div class="think-spin" id="thinkSpin">|</div>
+        <div class="wbar" id="b1"></div>
+        <div class="wbar" id="b2"></div>
+        <div class="wbar" id="b3"></div>
+        <div class="wbar" id="b4"></div>
+      </div>
+      <input class="pill-input" id="pillInput" placeholder="QUERY_" oninput="onInput()" onkeydown="onKeydown(event)">
+      <button class="pill-action mic" id="pillAction" onclick="handleAction()">[MIC]</button>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls-row">
+      <button class="ctrl-btn" onclick="toggleMute()">
+        <div class="ctrl-icon danger" id="muteIcon">🎙</div>
+        <span class="ctrl-label" id="muteLabel">MUTE</span>
+      </button>
+      <button class="ctrl-btn" onclick="endSession()">
+        <div class="ctrl-icon danger">[END]</div>
+        <span class="ctrl-label">SESSION</span>
+      </button>
+      <button class="ctrl-btn" onclick="toggleDetach()">
+        <div class="ctrl-icon">[⤢]</div>
+        <span class="ctrl-label">DETACH</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Detach bubble -->
+  <div class="detach-bubble" id="detachBubble" onclick="toggleDetach()">
+    <div style="font-size:11px;font-weight:700;color:var(--accent)">[LIVE]</div>
+    <div class="bubble-timer" id="bubbleTimer">0:00</div>
+  </div>
+
+  <button class="play-demo" id="playDemoBtn" onclick="playDemo()">[DEMO]</button>
+</div>
+
+<script>
+const STATE={mode:'idle',muted:false,sessionActive:false,sessionSeconds:0,hasAttachment:false,detached:false};
+let demoTimer=null,ampRaf=null,sessionInterval=null,thinkFrame=0;
+const THINK_FRAMES=['|','/','—','\\'];
+
+const edgeGlow=document.getElementById('edgeGlow');
+const pillOrb=document.getElementById('pillOrb');
+const pillAction=document.getElementById('pillAction');
+const pillInput=document.getElementById('pillInput');
+const listeningIndicator=document.getElementById('listeningIndicator');
+const listenLabel=document.getElementById('listenLabel');
+const liveBadge=document.getElementById('liveBadge');
+const sessionTimer=document.getElementById('sessionTimer');
+const mutedLabel=document.getElementById('mutedLabel');
+const muteIcon=document.getElementById('muteIcon');
+const muteLabel=document.getElementById('muteLabel');
+const suggestions=document.getElementById('suggestions');
+const stagedAttachments=document.getElementById('stagedAttachments');
+const chatLog=document.getElementById('chatLog');
+const detachBubble=document.getElementById('detachBubble');
+const bubbleTimer=document.getElementById('bubbleTimer');
+const streamingTurn=document.getElementById('streamingTurn');
+const streamingBubble=document.getElementById('streamingBubble');
+const playDemoBtn=document.getElementById('playDemoBtn');
+const thinkSpin=document.getElementById('thinkSpin');
+const stateLabel=document.getElementById('stateLabel');
+const bars=[document.getElementById('b1'),document.getElementById('b2'),document.getElementById('b3'),document.getElementById('b4')];
+const waveEls=[document.getElementById('w1'),document.getElementById('w2'),document.getElementById('w3'),document.getElementById('w4'),document.getElementById('w5')];
+
+function updateClock(){
+  const now=new Date();
+  document.getElementById('clockDisplay').textContent=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+}
+updateClock();setInterval(updateClock,1000);
+
+function startSessionTimer(){
+  if(sessionInterval)return;STATE.sessionActive=true;liveBadge.classList.add('visible');
+  sessionInterval=setInterval(()=>{
+    STATE.sessionSeconds++;
+    const m=Math.floor(STATE.sessionSeconds/60),s=STATE.sessionSeconds%60;
+    const t=m+':'+s.toString().padStart(2,'0');
+    sessionTimer.textContent=t;bubbleTimer.textContent=t;
+  },1000);
+}
+function stopSessionTimer(){clearInterval(sessionInterval);sessionInterval=null;STATE.sessionActive=false;STATE.sessionSeconds=0;liveBadge.classList.remove('visible');}
+
+let thinkInterval=null;
+function setMode(mode){
+  STATE.mode=mode;
+  clearInterval(thinkInterval);thinkInterval=null;
+  pillOrb.className='avatar-container '+mode;
+  edgeGlow.className='edge-glow';
+  listeningIndicator.className='listening-indicator';
+  listeningIndicator.style.cssText='';
+  stateLabel.textContent=mode.toUpperCase();
+
+  if(mode==='listening'){
+    if(STATE.muted){
+      listeningIndicator.classList.add('visible','muted-indicator');
+      listenLabel.textContent='MUTED';
+      edgeGlow.classList.add('muted');
+    } else {
+      listeningIndicator.classList.add('visible');
+      listenLabel.textContent='LISTENING';
+      edgeGlow.classList.add('listening');
+      startAmp();
+    }
+    updateActionBtn('stop');
+  } else if(mode==='thinking'){
+    listeningIndicator.classList.add('visible','thinking-ind');
+    listenLabel.textContent='PROCESSING';
+    thinkInterval=setInterval(()=>{
+      thinkFrame=(thinkFrame+1)%THINK_FRAMES.length;
+      thinkSpin.textContent=THINK_FRAMES[thinkFrame];
+    },150);
+    stopAmp();updateActionBtn('stop');
+  } else if(mode==='speaking'){
+    listeningIndicator.classList.add('visible','speaking-ind');
+    listenLabel.textContent='OUTPUT';
+    edgeGlow.classList.add('speaking');
+    startAmp();updateActionBtn('stop');
+  } else {
+    stopAmp();updateActionBtn('mic');
+  }
+}
+
+function updateActionBtn(type){
+  pillAction.className='pill-action '+type;
+  if(type==='mic')pillAction.textContent=STATE.muted?'[MUT]':'[MIC]';
+  else if(type==='send')pillAction.textContent='[SND]';
+  else if(type==='stop')pillAction.textContent='[STP]';
+}
+
+function startAmp(){
+  stopAmp();
+  function tick(){
+    const amp=STATE.mode==='listening'?12:8;
+    bars.forEach(b=>{
+      const h=Math.max(2,Math.round(Math.random()*amp/2)*2);
+      b.style.height=h+'px';
+    });
+    waveEls.forEach(el=>{const h=Math.max(2,Math.round(Math.random()*8/2)*2);el.style.height=h+'px';});
+    ampRaf=setTimeout(tick,100);
+  }
+  tick();
+}
+function stopAmp(){if(ampRaf){clearTimeout(ampRaf);ampRaf=null;}bars.forEach(b=>b.style.height='4px');waveEls.forEach(el=>el.style.height='4px');}
+
+function toggleVoice(){
+  if(STATE.mode==='idle'){startSessionTimer();setMode('listening');}
+  else{setMode('idle');stopSessionTimer();}
+}
+
+function onInput(){
+  const val=pillInput.value.trim();
+  if(val.length>0){suggestions.classList.add('hidden');updateActionBtn('send');}
+  else{suggestions.classList.remove('hidden');if(STATE.mode==='idle')updateActionBtn('mic');}
+}
+function onKeydown(e){if(e.key==='Enter'&&pillInput.value.trim())handleSend();}
+
+function handleAction(){
+  if(STATE.mode!=='idle'){setMode('idle');stopSessionTimer();}
+  else if(pillInput.value.trim())handleSend();
+  else toggleVoice();
+}
+
+function handleSend(){
+  const text=pillInput.value.trim();if(!text)return;
+  addTurn('user','⌨ [TYPED] USER',text,STATE.hasAttachment?'document.pdf':null);
+  pillInput.value='';STATE.hasAttachment=false;stagedAttachments.innerHTML='';
+  onInput();suggestions.classList.remove('hidden');
+  setTimeout(()=>streamReply('DOC_ANALYSIS: Three sections identified. METHODOLOGY: standard approach. RESULTS: 34% improvement over baseline. CONCLUSIONS: proceed to next phase.'),500);
+}
+
+function handleAttach(){
+  if(STATE.hasAttachment)return;STATE.hasAttachment=true;
+  const chip=document.createElement('div');chip.className='attachment-chip staged';
+  chip.innerHTML=`<div class="thumb">📄</div><span>document.pdf</span><span class="chip-remove" onclick="removeAttachment()">[x]</span>`;
+  stagedAttachments.appendChild(chip);
+}
+function removeAttachment(){STATE.hasAttachment=false;stagedAttachments.innerHTML='';}
+function fillSuggestion(text){pillInput.value=text;onInput();pillInput.focus();}
+
+function addTurn(who,header,text,attachment){
+  const div=document.createElement('div');div.className='turn';
+  const cls=who==='user'?'user':'assistant';
+  let inner='';
+  if(attachment&&who==='user'){
+    inner=`<div class="bubble ${cls}"><div class="attachment-chip" style="margin-bottom:5px"><div class="thumb">📄</div><span>${attachment}</span></div><div>${text}</div></div>`;
+  } else {
+    inner=`<div class="bubble ${cls}">${text}</div>`;
+  }
+  div.innerHTML=`<div class="turn-header">${header}</div>${inner}`;
+  chatLog.appendChild(div);chatLog.scrollTop=chatLog.scrollHeight;
+}
+
+function streamReply(text){
+  streamingTurn.style.display='';streamingBubble.classList.add('partial');streamingBubble.textContent='';
+  chatLog.scrollTop=chatLog.scrollHeight;let i=0;
+  const iv=setInterval(()=>{
+    if(i>=text.length){clearInterval(iv);streamingBubble.classList.remove('partial');
+      addTurn('assistant','▶ [ELIZA] RESPONSE',text);
+      streamingTurn.style.display='none';streamingBubble.textContent='';return;}
+    streamingBubble.textContent+=text[i++];chatLog.scrollTop=chatLog.scrollHeight;
+  },16);
+}
+
+function toggleMute(){
+  STATE.muted=!STATE.muted;
+  mutedLabel.classList.toggle('visible',STATE.muted);
+  muteIcon.textContent=STATE.muted?'🔇':'🎙';
+  muteIcon.classList.toggle('active',STATE.muted);
+  muteLabel.textContent=STATE.muted?'UNMUTE':'MUTE';
+  if(STATE.mode==='listening')setMode('listening');
+}
+
+function toggleDetach(){
+  STATE.detached=!STATE.detached;
+  detachBubble.classList.toggle('visible',STATE.detached&&STATE.sessionActive);
+}
+
+function endSession(){setMode('idle');stopSessionTimer();STATE.detached=false;detachBubble.classList.remove('visible');}
+
+function playDemo(){
+  if(demoTimer){clearTimeout(demoTimer);demoTimer=null;}
+  setMode('idle');stopSessionTimer();
+  playDemoBtn.disabled=true;playDemoBtn.textContent='[RUNNING...]';
+  const steps=[
+    ()=>{startSessionTimer();setMode('listening');},
+    ()=>{setMode('thinking');},
+    ()=>{setMode('speaking');},
+    ()=>{addTurn('user','🎙 [VOICE] USER','What will the weather be like this weekend?');
+      streamReply('WEEKEND_FORECAST: SAT=22C_SUNNY MON=19C_PARTLY_CLOUDY. Conditions favorable for outdoor ops.');
+      setMode('idle');},
+    ()=>{setMode('listening');},
+    ()=>{setMode('idle');stopSessionTimer();playDemoBtn.disabled=false;playDemoBtn.textContent='[REPLAY]';}
+  ];
+  const delays=[0,2200,1200,1800,3400,2000];
+  let el=0;steps.forEach((fn,i)=>{el+=delays[i];demoTimer=setTimeout(fn,el);});
+}
+
+setTimeout(playDemo,400);
+</script>
+</body>
+</html>

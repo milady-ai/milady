@@ -1,0 +1,1456 @@
+<!-- concept-D17-L1 | direction: Now-Playing / Media-Player Style | look: Soft Aurora Glass | targets: 420x760, 960x640 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D17 · Now-Playing / Media-Player Style · Soft Aurora Glass</title>
+<style>
+:root {
+  --bg:#EAF0FB;
+  --bg-aurora:radial-gradient(120% 90% at 18% 12%,#F3E9FB 0%,transparent 55%),radial-gradient(120% 90% at 82% 88%,#E6F7F4 0%,transparent 55%),linear-gradient(160deg,#EAF0FB,#EFEAFB);
+  --surface:rgba(255,255,255,0.55);
+  --surface-2:rgba(255,255,255,0.72);
+  --border:rgba(255,255,255,0.65);
+  --text:#1B2233;
+  --text-muted:#5A6582;
+  --accent:#6E8BFF;
+  --accent-2:#9C6CF0;
+  --accent-3:#5FE3C0;
+  --danger:#FF6B8B;
+  --radius:22px;
+  --radius-sm:14px;
+  --font:"SF Pro Display","Segoe UI Variable","Helvetica Neue",system-ui,sans-serif;
+  --shadow:0 12px 40px rgba(80,90,160,0.18);
+  --shadow-sm:0 4px 16px rgba(80,90,160,0.12);
+  --blur:saturate(1.4) blur(24px);
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+body {
+  min-height:100vh;
+  background:var(--bg-aurora);
+  background-color:var(--bg);
+  font-family:var(--font);
+  color:var(--text);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow-x:hidden;
+  animation:auroraDrift 30s ease-in-out infinite alternate;
+}
+
+@keyframes auroraDrift {
+  0%{filter:hue-rotate(0deg)}
+  100%{filter:hue-rotate(12deg)}
+}
+
+.app-window {
+  width:420px;
+  min-height:760px;
+  background:var(--surface);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  border-radius:var(--radius);
+  border:1.5px solid var(--border);
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  position:relative;
+}
+
+/* Header */
+.header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:18px 20px 12px;
+  background:var(--surface-2);
+  backdrop-filter:var(--blur);
+  border-bottom:1px solid var(--border);
+}
+
+.header-title {
+  font-size:15px;
+  font-weight:600;
+  color:var(--text);
+  letter-spacing:-0.01em;
+}
+
+.header-sub {
+  font-size:11px;
+  color:var(--text-muted);
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+  margin-top:2px;
+}
+
+.header-actions {
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.icon-btn {
+  width:36px;height:36px;
+  border-radius:50%;
+  border:none;
+  background:var(--surface-2);
+  backdrop-filter:var(--blur);
+  border:1px solid var(--border);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.24s var(--ease);
+  color:var(--text-muted);
+  font-size:16px;
+}
+.icon-btn:hover{transform:scale(1.08);box-shadow:var(--shadow-sm)}
+
+/* NOW PLAYING PANEL */
+.now-playing {
+  padding:20px 20px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+}
+
+.np-cover-row {
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+
+/* AVATAR - Aurora Orb */
+.avatar-orb {
+  width:72px;height:72px;
+  border-radius:50%;
+  flex-shrink:0;
+  position:relative;
+  cursor:pointer;
+}
+
+.avatar-orb-inner {
+  width:100%;height:100%;
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #A8BFFF 0%, #9C6CF0 45%, #5FE3C0 100%);
+  box-shadow:0 0 0 3px rgba(110,139,255,0.25), 0 8px 32px rgba(110,139,255,0.35);
+  position:relative;
+  overflow:hidden;
+  transition:transform 0.4s var(--ease);
+}
+
+.avatar-orb-inner::before {
+  content:'';
+  position:absolute;
+  top:8px;left:12px;
+  width:20px;height:14px;
+  background:rgba(255,255,255,0.45);
+  border-radius:50%;
+  filter:blur(4px);
+}
+
+.avatar-orb-inner::after {
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  background:conic-gradient(from 0deg, transparent 0%, rgba(156,108,240,0.3) 30%, transparent 60%);
+  animation:orbSwirl 4s linear infinite;
+  opacity:0;
+  transition:opacity 0.4s;
+}
+
+.avatar-halo {
+  position:absolute;
+  inset:-6px;
+  border-radius:50%;
+  border:2px solid rgba(110,139,255,0.25);
+  animation:haloPulse 3s ease-in-out infinite;
+}
+
+@keyframes orbSwirl{to{transform:rotate(360deg)}}
+@keyframes haloPulse{0%,100%{transform:scale(1);opacity:0.4}50%{transform:scale(1.08);opacity:0.7}}
+
+/* IDLE state */
+.avatar-orb.idle .avatar-orb-inner{animation:breathe 4s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1.0)}50%{transform:scale(1.04)}}
+
+/* LISTENING state — orb + halo react to the JS-faked mic level (--mic: 0..1) */
+.avatar-orb.listening .avatar-orb-inner{
+  background:radial-gradient(circle at 35% 30%, #B8FFEE 0%, #6E8BFF 45%, #9C6CF0 100%);
+  transform:scale(calc(1 + var(--mic, 0) * 0.12));
+  transition:transform 0.09s linear;
+}
+.avatar-orb.listening .avatar-halo{
+  border-color:rgba(95,227,192,0.6);
+  transform:scale(calc(1 + var(--mic, 0) * 0.22));
+  opacity:calc(0.45 + var(--mic, 0) * 0.5);
+  transition:transform 0.09s linear, opacity 0.09s linear;
+  animation:none;
+}
+
+/* THINKING state */
+.avatar-orb.thinking .avatar-orb-inner{
+  animation:thinkHue 2s linear infinite;
+}
+.avatar-orb.thinking .avatar-orb-inner::after{opacity:1}
+@keyframes thinkHue{0%{filter:hue-rotate(0deg)}100%{filter:hue-rotate(360deg)}}
+
+/* SPEAKING state */
+.avatar-orb.speaking .avatar-orb-inner{
+  animation:speakPulse 0.35s ease-in-out infinite;
+}
+.avatar-orb.speaking .avatar-halo{
+  border-color:rgba(110,139,255,0.7);
+  animation:speakHalo 0.35s ease-in-out infinite;
+}
+@keyframes speakPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+@keyframes speakHalo{0%{transform:scale(1);opacity:0.3}50%{transform:scale(1.18);opacity:0.85}100%{transform:scale(1);opacity:0.3}}
+
+.np-info {
+  flex:1;
+  min-width:0;
+}
+
+.np-track-title {
+  font-size:16px;
+  font-weight:600;
+  color:var(--text);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  margin-bottom:3px;
+}
+
+.np-track-sub {
+  font-size:12px;
+  color:var(--text-muted);
+  margin-bottom:8px;
+}
+
+.np-badges {
+  display:flex;gap:6px;flex-wrap:wrap;
+}
+
+.np-badge {
+  padding:3px 10px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:0.03em;
+  background:rgba(110,139,255,0.12);
+  color:var(--accent);
+  border:1px solid rgba(110,139,255,0.2);
+}
+
+.np-badge.turn-badge{
+  background:rgba(95,227,192,0.12);
+  color:#3AB89A;
+  border-color:rgba(95,227,192,0.25);
+}
+
+/* STATUS LABEL */
+.listening-indicator {
+  display:none;
+  align-items:center;
+  gap:7px;
+  padding:7px 14px;
+  border-radius:20px;
+  background:rgba(95,227,192,0.15);
+  border:1px solid rgba(95,227,192,0.3);
+  font-size:12px;
+  font-weight:600;
+  color:#3AB89A;
+  width:fit-content;
+}
+.listening-indicator.visible{display:flex}
+.listening-indicator .mic-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:#5FE3C0;
+  animation:blink 0.8s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+
+/* Live mic-level waveform (JS-driven) */
+.listening-indicator .mic-wave{
+  display:flex;align-items:center;gap:2px;
+  height:14px;margin-left:2px;
+}
+.listening-indicator .mic-wave .wave-bar{
+  width:3px;
+  height:20%;
+  border-radius:2px;
+  background:linear-gradient(180deg,#5FE3C0,#3AB89A);
+  transform-origin:center;
+  /* height set per-frame via JS from state.amplitude */
+  transition:height 0.09s linear;
+}
+
+.muted-indicator {
+  display:none;
+  align-items:center;
+  gap:7px;
+  padding:7px 14px;
+  border-radius:20px;
+  background:rgba(255,107,139,0.1);
+  border:1px solid rgba(255,107,139,0.25);
+  font-size:12px;
+  font-weight:600;
+  color:var(--danger);
+  width:fit-content;
+}
+.muted-indicator.visible{display:flex}
+
+/* LYRICS / TRANSCRIPT */
+.np-lyrics {
+  font-size:13px;
+  line-height:1.7;
+  color:var(--text-muted);
+  max-height:72px;
+  overflow:hidden;
+  position:relative;
+}
+
+.np-lyrics .word {
+  transition:color 0.15s, font-weight 0.15s;
+}
+.np-lyrics .word.active {
+  color:var(--text);
+  font-weight:600;
+}
+
+/* SCRUBBER */
+.scrubber-row {
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.scrubber-track {
+  width:100%;
+  height:4px;
+  background:rgba(110,139,255,0.15);
+  border-radius:4px;
+  position:relative;
+  cursor:pointer;
+}
+
+.scrubber-fill {
+  height:100%;
+  border-radius:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  width:0%;
+  transition:width 0.5s linear;
+}
+
+.scrubber-thumb {
+  position:absolute;
+  top:50%;
+  left:0%;
+  transform:translate(-50%,-50%);
+  width:12px;height:12px;
+  border-radius:50%;
+  background:white;
+  box-shadow:0 1px 6px rgba(110,139,255,0.45);
+  transition:left 0.5s linear;
+}
+
+.scrubber-times {
+  display:flex;
+  justify-content:space-between;
+  font-size:11px;
+  color:var(--text-muted);
+  font-weight:500;
+}
+
+/* TRANSPORT CONTROLS */
+.transport {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+}
+
+.transport-btn {
+  background:none;
+  border:none;
+  cursor:pointer;
+  color:var(--text-muted);
+  font-size:20px;
+  padding:8px;
+  border-radius:50%;
+  transition:all 0.22s var(--ease);
+  display:flex;align-items:center;justify-content:center;
+}
+.transport-btn:hover{color:var(--text);background:rgba(110,139,255,0.08)}
+
+.transport-btn.primary {
+  width:52px;height:52px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  color:white;
+  font-size:22px;
+  box-shadow:0 6px 20px rgba(110,139,255,0.35);
+}
+.transport-btn.primary:hover{transform:scale(1.06);box-shadow:0 8px 28px rgba(110,139,255,0.45)}
+
+.transport-btn.mic-btn.muted {
+  color:var(--danger) !important;
+}
+
+/* REFINEMENT CHIPS */
+.refinement-chips {
+  display:flex;gap:7px;flex-wrap:wrap;
+  padding:0 20px 12px;
+}
+
+.chip {
+  padding:6px 14px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:500;
+  background:var(--surface-2);
+  border:1.5px solid var(--border);
+  cursor:pointer;
+  transition:all 0.22s var(--ease);
+  color:var(--text-muted);
+  backdrop-filter:var(--blur);
+  display:flex;align-items:center;gap:5px;
+  white-space:nowrap;
+}
+.chip:hover{
+  background:rgba(110,139,255,0.1);
+  border-color:rgba(110,139,255,0.3);
+  color:var(--accent);
+  transform:translateY(-1px);
+}
+.chip.starter{
+  background:rgba(110,139,255,0.07);
+  border-color:rgba(110,139,255,0.18);
+  color:var(--accent);
+}
+.chip.dismiss-btn{
+  padding:6px 10px;
+  opacity:0.5;
+}
+.chip.dismiss-btn:hover{opacity:0.8}
+
+/* QUEUE */
+.queue-section {
+  flex:1;
+  overflow-y:auto;
+  padding:0 0 12px;
+}
+
+.queue-header {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px 10px;
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  color:var(--text-muted);
+}
+
+.queue-item {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:10px 20px;
+  cursor:pointer;
+  border-radius:var(--radius-sm);
+  margin:0 8px;
+  transition:all 0.2s var(--ease);
+  position:relative;
+}
+.queue-item:hover{background:var(--surface-2)}
+.queue-item.playing{background:rgba(110,139,255,0.07)}
+.queue-item.interrupted{opacity:0.75}
+
+.qi-avatar {
+  width:40px;height:40px;
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;
+  flex-shrink:0;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+}
+
+.qi-avatar.voice-avatar{
+  background:rgba(110,139,255,0.1);
+  color:var(--accent);
+}
+.qi-avatar.typed-avatar{
+  background:rgba(156,108,240,0.1);
+  color:var(--accent-2);
+}
+.qi-avatar.ai-avatar{
+  background:radial-gradient(circle at 35% 35%, #B8C8FF, #9C6CF0);
+}
+.qi-avatar.app-avatar{
+  background:rgba(95,227,192,0.12);
+  color:#3AB89A;
+}
+
+.qi-info{flex:1;min-width:0}
+.qi-title {
+  font-size:13px;
+  font-weight:500;
+  color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  margin-bottom:2px;
+}
+.qi-meta {
+  font-size:11px;
+  color:var(--text-muted);
+}
+
+/* Attachment chip rendered inside a sent queue item */
+.qi-attachment {
+  display:inline-flex;align-items:center;gap:5px;
+  margin-top:5px;
+  background:rgba(110,139,255,0.08);
+  border:1px solid rgba(110,139,255,0.2);
+  border-radius:9px;
+  padding:3px 8px 3px 4px;
+  font-size:11px;
+  color:var(--accent);
+  max-width:100%;
+}
+.qi-attachment .attachment-thumb{
+  width:18px;height:18px;border-radius:4px;font-size:9px;
+}
+.qi-attachment span{
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+.qi-dur{
+  font-size:11px;
+  color:var(--text-muted);
+  flex-shrink:0;
+}
+
+.interrupted-badge {
+  font-size:9px;
+  padding:2px 7px;
+  border-radius:6px;
+  background:rgba(255,107,139,0.12);
+  color:var(--danger);
+  font-weight:600;
+  letter-spacing:0.03em;
+  flex-shrink:0;
+}
+
+/* APP CARD */
+.app-card {
+  margin:0 8px 4px;
+  border-radius:var(--radius-sm);
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  backdrop-filter:var(--blur);
+  overflow:hidden;
+}
+
+.app-card-header {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 14px 8px;
+  border-bottom:1px solid var(--border);
+}
+
+.app-card-icon {
+  width:24px;height:24px;
+  border-radius:6px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;
+  color:white;
+}
+
+.app-card-label {
+  font-size:12px;
+  font-weight:600;
+  color:var(--text-muted);
+  flex:1;
+}
+
+.app-card-expand {
+  font-size:11px;
+  color:var(--accent);
+  cursor:pointer;
+  background:none;border:none;
+  font-family:var(--font);
+  padding:0;
+}
+
+.app-card-body {
+  padding:12px 14px;
+}
+
+.weather-grid {
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.weather-main {
+  display:flex;align-items:center;gap:8px;
+}
+
+.weather-temp {
+  font-size:32px;
+  font-weight:300;
+  color:var(--text);
+  line-height:1;
+}
+
+.weather-icon-big{font-size:28px}
+.weather-detail{font-size:11px;color:var(--text-muted);line-height:1.5}
+.weather-location{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px}
+
+.card-actions {
+  display:flex;gap:8px;
+  padding:8px 14px 12px;
+}
+
+.card-btn {
+  padding:7px 16px;
+  border-radius:var(--radius-sm);
+  border:1.5px solid var(--border);
+  background:var(--surface);
+  color:var(--accent);
+  font-size:12px;
+  font-weight:600;
+  cursor:pointer;
+  font-family:var(--font);
+  transition:all 0.2s var(--ease);
+}
+.card-btn:hover{background:rgba(110,139,255,0.1)}
+.card-btn.primary{background:var(--accent);color:white;border-color:var(--accent)}
+.card-btn.primary:hover{background:#5B79FF}
+
+/* COMPOSER */
+.composer-section {
+  padding:12px 16px 16px;
+  background:var(--surface-2);
+  backdrop-filter:var(--blur);
+  border-top:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.attachment-staging {
+  display:none;
+  flex-wrap:wrap;
+  gap:7px;
+}
+.attachment-staging.visible{display:flex}
+
+.attachment-chip {
+  display:flex;align-items:center;gap:6px;
+  background:rgba(110,139,255,0.08);
+  border:1px solid rgba(110,139,255,0.2);
+  border-radius:10px;
+  padding:5px 10px 5px 7px;
+  font-size:12px;
+  color:var(--accent);
+}
+
+.attachment-thumb {
+  width:24px;height:24px;border-radius:5px;
+  background:linear-gradient(135deg,#D4E0FF,#C8AEFD);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;
+}
+
+.attachment-remove {
+  background:none;border:none;cursor:pointer;
+  color:var(--text-muted);font-size:14px;line-height:1;padding:0;margin-left:2px;
+}
+
+.composer-row {
+  display:flex;align-items:flex-end;gap:10px;
+}
+
+.attach-btn {
+  width:38px;height:38px;
+  border-radius:50%;
+  border:1.5px solid var(--border);
+  background:var(--surface-2);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+  color:var(--text-muted);
+  flex-shrink:0;
+  transition:all 0.2s var(--ease);
+}
+.attach-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+.composer-input {
+  flex:1;
+  min-height:38px;max-height:120px;
+  border:1.5px solid var(--border);
+  border-radius:20px;
+  background:var(--surface-2);
+  backdrop-filter:var(--blur);
+  padding:9px 16px;
+  font-family:var(--font);
+  font-size:14px;
+  color:var(--text);
+  resize:none;
+  outline:none;
+  line-height:1.5;
+  transition:border-color 0.2s var(--ease);
+  overflow-y:auto;
+}
+.composer-input:focus{border-color:rgba(110,139,255,0.45)}
+.composer-input::placeholder{color:var(--text-muted)}
+
+.send-btn {
+  width:38px;height:38px;
+  border-radius:50%;
+  border:none;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  box-shadow:0 4px 14px rgba(110,139,255,0.35);
+  transition:all 0.28s var(--ease);
+  position:relative;
+  overflow:hidden;
+}
+.send-btn:hover{transform:scale(1.08);box-shadow:0 6px 20px rgba(110,139,255,0.45)}
+
+.send-btn-icon {
+  position:absolute;
+  transition:all 0.28s var(--ease);
+  display:flex;align-items:center;justify-content:center;
+}
+.send-btn-icon.mic{opacity:1;transform:scale(1)}
+.send-btn-icon.send{opacity:0;transform:scale(0.7)}
+.send-btn-icon.stop{opacity:0;transform:scale(0.7)}
+
+.send-btn.show-send .mic{opacity:0;transform:scale(0.7)}
+.send-btn.show-send .send{opacity:1;transform:scale(1)}
+.send-btn.show-stop .mic{opacity:0;transform:scale(0.7)}
+.send-btn.show-stop .stop{opacity:1;transform:scale(1)}
+
+.send-btn.stop-mode{background:linear-gradient(135deg,var(--danger),#FF9B6B)}
+
+/* Suggestions */
+.suggestions-row{
+  display:flex;gap:7px;overflow-x:auto;
+  padding:0;
+  scrollbar-width:none;
+}
+.suggestions-row::-webkit-scrollbar{display:none}
+
+/* Play Demo Button */
+.demo-play-btn {
+  position:absolute;
+  top:14px;right:70px;
+  padding:6px 14px;
+  border-radius:20px;
+  border:1.5px solid rgba(110,139,255,0.3);
+  background:rgba(110,139,255,0.1);
+  color:var(--accent);
+  font-size:11px;
+  font-weight:600;
+  cursor:pointer;
+  font-family:var(--font);
+  transition:all 0.22s var(--ease);
+  z-index:10;
+}
+.demo-play-btn:hover{background:rgba(110,139,255,0.18)}
+
+/* Partial transcript */
+.partial-text{color:var(--text-muted);font-style:italic}
+
+/* scrollbar */
+.queue-section::-webkit-scrollbar{width:4px}
+.queue-section::-webkit-scrollbar-track{background:transparent}
+.queue-section::-webkit-scrollbar-thumb{background:rgba(110,139,255,0.2);border-radius:4px}
+
+@media(min-width:600px){
+  body{background-attachment:fixed}
+  .app-window{
+    width:420px;
+    min-height:760px;
+    margin:20px auto;
+  }
+}
+
+@media(min-width:960px) and (max-height:680px){
+  .app-window{
+    min-height:620px;
+    width:420px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="app-window" id="appWindow">
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <div class="header-title">Eliza</div>
+      <div class="header-sub">Now Playing</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button class="demo-play-btn" id="demoBtn">▶ Demo</button>
+      <button class="icon-btn" title="Settings">⚙</button>
+    </div>
+  </div>
+
+  <!-- NOW PLAYING PANEL -->
+  <div class="now-playing" id="nowPlaying">
+    <div class="np-cover-row">
+      <div class="avatar-orb idle" id="avatarOrb">
+        <div class="avatar-orb-inner" id="avatarInner"></div>
+        <div class="avatar-halo"></div>
+      </div>
+      <div class="np-info">
+        <div class="np-track-title" id="npTitle">San Francisco weather</div>
+        <div class="np-track-sub" id="npSub">Eliza • 0:23</div>
+        <div class="np-badges">
+          <div class="np-badge" id="stateBadge">Speaking</div>
+          <div class="np-badge turn-badge">Voice Turn</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Listening / Muted indicators -->
+    <div class="listening-indicator" id="listeningIndicator">
+      <div class="mic-dot"></div>
+      🎙 Listening…
+      <div class="mic-wave" id="micWave">
+        <span class="wave-bar"></span>
+        <span class="wave-bar"></span>
+        <span class="wave-bar"></span>
+        <span class="wave-bar"></span>
+        <span class="wave-bar"></span>
+      </div>
+    </div>
+    <div class="muted-indicator" id="mutedIndicator">
+      🔇 Muted
+    </div>
+
+    <!-- Lyrics / synced transcript -->
+    <div class="np-lyrics" id="npLyrics">
+      <span class="word">Right</span> <span class="word">now</span> <span class="word">in</span> <span class="word">San</span> <span class="word">Francisco</span> <span class="word active">it's</span> <span class="word">64°F</span> <span class="word">with</span> <span class="word">scattered</span> <span class="word">clouds.</span> <span class="word">Expect</span> <span class="word">morning</span> <span class="word">fog</span> <span class="word">through</span> <span class="word">10am,</span> <span class="word">clearing</span> <span class="word">to</span> <span class="word">partly</span> <span class="word">sunny.</span>
+    </div>
+
+    <!-- SCRUBBER -->
+    <div class="scrubber-row">
+      <div class="scrubber-track" id="scrubberTrack">
+        <div class="scrubber-fill" id="scrubberFill" style="width:42%"></div>
+        <div class="scrubber-thumb" id="scrubberThumb" style="left:42%"></div>
+      </div>
+      <div class="scrubber-times">
+        <span id="timeElapsed">0:09</span>
+        <span>0:23</span>
+      </div>
+    </div>
+
+    <!-- TRANSPORT -->
+    <div class="transport">
+      <button class="transport-btn mic-btn" id="muteBtn" title="Mute mic">🎙</button>
+      <button class="transport-btn" id="prevBtn" title="Previous">⏮</button>
+      <button class="transport-btn primary" id="playPauseBtn" title="Play/Pause">⏸</button>
+      <button class="transport-btn" id="nextBtn" title="Skip / Next suggestion">⏭</button>
+      <button class="transport-btn" title="More options">•••</button>
+    </div>
+  </div>
+
+  <!-- REFINEMENT CHIPS -->
+  <div class="refinement-chips" id="refinementChips">
+    <div class="chip" onclick="this.style.opacity='0.3'">🔁 Shorter</div>
+    <div class="chip" onclick="this.style.opacity='0.3'">🐢 Slower</div>
+    <div class="chip" onclick="this.style.opacity='0.3'">📋 Full detail</div>
+  </div>
+
+  <!-- QUEUE -->
+  <div class="queue-section" id="queueSection">
+    <div class="queue-header">
+      <span>Up Next &amp; History</span>
+      <span style="font-size:10px;font-weight:400;">4 tracks</span>
+    </div>
+
+    <!-- APP CARD (inline widget) -->
+    <div class="app-card">
+      <div class="app-card-header">
+        <div class="app-card-icon">🌤</div>
+        <div class="app-card-label">Weather · San Francisco</div>
+        <button class="app-card-expand">Fullscreen ↗</button>
+      </div>
+      <div class="app-card-body">
+        <div class="weather-main" style="margin-bottom:8px">
+          <div class="weather-icon-big">⛅</div>
+          <div>
+            <div class="weather-temp">64°</div>
+            <div style="font-size:11px;color:var(--text-muted)">Scattered Clouds</div>
+          </div>
+          <div class="weather-detail" style="margin-left:auto;text-align:right">
+            <div class="weather-location">San Francisco, CA</div>
+            <div>H: 69°  L: 58°</div>
+            <div>Humidity 76%</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="card-btn">5-Day Forecast</button>
+        <button class="card-btn primary">Add to Queue</button>
+      </div>
+    </div>
+
+    <!-- Queue items -->
+    <div class="queue-item playing">
+      <div class="qi-avatar ai-avatar"></div>
+      <div class="qi-info">
+        <div class="qi-title">San Francisco weather</div>
+        <div class="qi-meta">🎙 Voice turn · Eliza · Now playing</div>
+      </div>
+      <div class="qi-dur">0:23</div>
+    </div>
+
+    <div class="queue-item">
+      <div class="qi-avatar voice-avatar">🎙</div>
+      <div class="qi-info">
+        <div class="qi-title">What's the weather in SF?</div>
+        <div class="qi-meta">🎙 Voice · You · 0:04</div>
+      </div>
+      <div class="qi-dur">0:04</div>
+    </div>
+
+    <div class="queue-item interrupted">
+      <div class="qi-avatar ai-avatar"></div>
+      <div class="qi-info">
+        <div class="qi-title">Let me tell you about tomorrow's fore—</div>
+        <div class="qi-meta">🎙 Voice · Eliza · Interrupted</div>
+      </div>
+      <div class="interrupted-badge">Interrupted</div>
+    </div>
+
+    <div class="queue-item">
+      <div class="qi-avatar typed-avatar">⌨</div>
+      <div class="qi-info">
+        <div class="qi-title partial-text">Add fog advisory to calendar<span id="partialCursor">▋</span></div>
+        <div class="qi-meta">⌨ Typed · You · Sending…</div>
+      </div>
+      <div class="qi-dur">—</div>
+    </div>
+
+    <div class="queue-item">
+      <div class="qi-avatar typed-avatar">⌨</div>
+      <div class="qi-info">
+        <div class="qi-title">Can you summarize my calendar for today?</div>
+        <div class="qi-meta">⌨ Typed · You · 0:00</div>
+      </div>
+      <div class="qi-dur">0:08</div>
+    </div>
+
+    <!-- UP NEXT label -->
+    <div class="queue-header" style="padding-top:8px">
+      <span>Up Next</span>
+    </div>
+
+    <div class="queue-item">
+      <div class="qi-avatar app-avatar">📅</div>
+      <div class="qi-info">
+        <div class="qi-title">Today's Calendar Summary</div>
+        <div class="qi-meta">Suggestion · Tap to queue</div>
+      </div>
+      <div class="qi-dur">~0:30</div>
+    </div>
+
+    <div class="queue-item">
+      <div class="qi-avatar app-avatar">🗺</div>
+      <div class="qi-info">
+        <div class="qi-title">Commute traffic to downtown</div>
+        <div class="qi-meta">Suggestion · Tap to queue</div>
+      </div>
+      <div class="qi-dur">~0:15</div>
+    </div>
+  </div>
+
+  <!-- COMPOSER -->
+  <div class="composer-section">
+    <div class="attachment-staging" id="attachStaging"></div>
+
+    <div class="suggestions-row" id="suggestionsRow">
+      <div class="chip starter" onclick="fillSuggestion(this,'Play morning briefing')">🌅 Morning briefing</div>
+      <div class="chip starter" onclick="fillSuggestion(this,'What\'s on my calendar?')">📅 My calendar</div>
+      <div class="chip starter" onclick="fillSuggestion(this,'How\'s the traffic?')">🚗 Traffic</div>
+    </div>
+
+    <div class="composer-row">
+      <button class="attach-btn" id="attachBtn" onclick="addAttachment()" title="Add media or file">📎</button>
+      <textarea class="composer-input" id="composerInput" placeholder="Add to queue…" rows="1"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="handleSend()">
+        <span class="send-btn-icon mic">🎙</span>
+        <span class="send-btn-icon send">↑</span>
+        <span class="send-btn-icon stop">■</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================== STATE =====================
+const state = {
+  avatarState: 'idle', // idle|listening|thinking|speaking
+  isMuted: false,
+  isGenerating: false,
+  scrubberPct: 42,
+  demoRunning: false,
+  demoTimers: [],
+  wordIndex: 0,
+  amplitude: 0,
+};
+
+const avatarOrb = document.getElementById('avatarOrb');
+const avatarInner = document.getElementById('avatarInner');
+const npTitle = document.getElementById('npTitle');
+const npSub = document.getElementById('npSub');
+const stateBadge = document.getElementById('stateBadge');
+const listeningIndicator = document.getElementById('listeningIndicator');
+const mutedIndicator = document.getElementById('mutedIndicator');
+const scrubberFill = document.getElementById('scrubberFill');
+const scrubberThumb = document.getElementById('scrubberThumb');
+const timeElapsed = document.getElementById('timeElapsed');
+const playPauseBtn = document.getElementById('playPauseBtn');
+const muteBtn = document.getElementById('muteBtn');
+const composerInput = document.getElementById('composerInput');
+const sendBtn = document.getElementById('sendBtn');
+const npLyrics = document.getElementById('npLyrics');
+const suggestionsRow = document.getElementById('suggestionsRow');
+const attachStaging = document.getElementById('attachStaging');
+const partialCursor = document.getElementById('partialCursor');
+const micWaveBars = Array.from(document.querySelectorAll('#micWave .wave-bar'));
+
+// ===================== AVATAR STATE =====================
+function setAvatarState(s) {
+  state.avatarState = s;
+  avatarOrb.className = 'avatar-orb ' + s;
+  const labels = {idle:'Idle',listening:'Listening',thinking:'Thinking…',speaking:'Speaking'};
+  stateBadge.textContent = labels[s] || s;
+
+  listeningIndicator.classList.toggle('visible', s === 'listening' && !state.isMuted);
+  mutedIndicator.classList.toggle('visible', state.isMuted);
+
+  syncMicLoop();
+}
+
+// ===================== FAKED MIC LEVEL =====================
+// Drives the live "listening" indicator from a JS-simulated mic level
+// (state.amplitude). Runs ONLY while listening and not muted; the orb halo,
+// orb scale, and waveform bars all read from this value each frame.
+let micRAF = null;
+let micLastTick = 0;
+
+function micTick(ts) {
+  if (state.avatarState !== 'listening' || state.isMuted) {
+    stopMicLoop();
+    return;
+  }
+  // Throttle the random level update to ~14fps for a natural, jittery feel
+  if (ts - micLastTick > 70) {
+    state.amplitude = 0.2 + Math.random() * 0.8;
+    micLastTick = ts;
+    avatarOrb.style.setProperty('--mic', state.amplitude.toFixed(3));
+    // Each bar gets its own derived height so the waveform reads as live audio
+    micWaveBars.forEach((bar, i) => {
+      const phase = Math.sin((ts / 140) + i * 1.1) * 0.35 + 0.65;
+      const h = Math.max(0.18, Math.min(1, state.amplitude * phase));
+      bar.style.height = (h * 100).toFixed(0) + '%';
+    });
+  }
+  micRAF = requestAnimationFrame(micTick);
+}
+
+function startMicLoop() {
+  if (micRAF !== null) return;
+  micLastTick = 0;
+  micRAF = requestAnimationFrame(micTick);
+}
+
+function stopMicLoop() {
+  if (micRAF !== null) {
+    cancelAnimationFrame(micRAF);
+    micRAF = null;
+  }
+  state.amplitude = 0;
+  avatarOrb.style.setProperty('--mic', '0');
+  micWaveBars.forEach(bar => { bar.style.height = '20%'; });
+}
+
+function syncMicLoop() {
+  if (state.avatarState === 'listening' && !state.isMuted) {
+    startMicLoop();
+  } else {
+    stopMicLoop();
+  }
+}
+
+// ===================== SCRUBBER =====================
+let scrubberInterval = null;
+function startScrubber(durationSec) {
+  clearInterval(scrubberInterval);
+  const start = Date.now();
+  scrubberInterval = setInterval(() => {
+    const elapsed = (Date.now() - start) / 1000;
+    const pct = Math.min(100, (elapsed / durationSec) * 100);
+    scrubberFill.style.width = pct + '%';
+    scrubberThumb.style.left = pct + '%';
+    const s = Math.floor(elapsed);
+    timeElapsed.textContent = '0:' + String(s).padStart(2,'0');
+    if (pct >= 100) clearInterval(scrubberInterval);
+  }, 80);
+}
+
+function stopScrubber() {
+  clearInterval(scrubberInterval);
+}
+
+// Scrubber click
+document.getElementById('scrubberTrack').addEventListener('click', e => {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+  scrubberFill.style.width = pct + '%';
+  scrubberThumb.style.left = pct + '%';
+});
+
+// ===================== LYRICS HIGHLIGHT =====================
+let wordTimer = null;
+function startLyricsHighlight() {
+  const words = npLyrics.querySelectorAll('.word');
+  let idx = 0;
+  words.forEach(w => w.classList.remove('active'));
+  wordTimer = setInterval(() => {
+    words.forEach(w => w.classList.remove('active'));
+    if (idx < words.length) {
+      words[idx].classList.add('active');
+      idx++;
+    } else {
+      clearInterval(wordTimer);
+    }
+  }, 380);
+}
+
+// ===================== PLAY/PAUSE =====================
+let playing = true;
+playPauseBtn.addEventListener('click', () => {
+  playing = !playing;
+  playPauseBtn.textContent = playing ? '⏸' : '▶';
+  if (playing) {
+    setAvatarState('speaking');
+    startLyricsHighlight();
+  } else {
+    setAvatarState('idle');
+    clearInterval(wordTimer);
+  }
+});
+
+// ===================== MUTE =====================
+muteBtn.addEventListener('click', () => {
+  state.isMuted = !state.isMuted;
+  muteBtn.textContent = state.isMuted ? '🔇' : '🎙';
+  muteBtn.classList.toggle('muted', state.isMuted);
+  mutedIndicator.classList.toggle('visible', state.isMuted);
+  if (state.isMuted && state.avatarState === 'listening') {
+    // Avatar stops reacting
+    setAvatarState('idle');
+  }
+  if (!state.isMuted) {
+    mutedIndicator.classList.remove('visible');
+  }
+});
+
+// ===================== COMPOSER MORPH =====================
+composerInput.addEventListener('input', () => {
+  const hasText = composerInput.value.trim().length > 0;
+  sendBtn.classList.toggle('show-send', hasText && !state.isGenerating);
+  // Hide suggestion chips when typing
+  suggestionsRow.style.opacity = hasText ? '0.3' : '1';
+  suggestionsRow.style.pointerEvents = hasText ? 'none' : 'auto';
+  // Auto-resize
+  composerInput.style.height = 'auto';
+  composerInput.style.height = Math.min(composerInput.scrollHeight, 120) + 'px';
+});
+
+function fillSuggestion(el, text) {
+  composerInput.value = text;
+  composerInput.dispatchEvent(new Event('input'));
+  composerInput.focus();
+}
+
+// ===================== SEND =====================
+function handleSend() {
+  if (state.isGenerating) {
+    stopGeneration();
+    return;
+  }
+  const hasText = composerInput.value.trim().length > 0;
+  if (hasText) {
+    sendTypedMessage(composerInput.value.trim());
+  } else {
+    startVoiceListening();
+  }
+}
+
+function sendTypedMessage(text) {
+  composerInput.value = '';
+  composerInput.style.height = 'auto';
+  sendBtn.classList.remove('show-send','show-stop');
+  suggestionsRow.style.opacity = '1';
+  suggestionsRow.style.pointerEvents = 'auto';
+
+  // Capture any staged attachment so it travels with the sent turn, then clear staging
+  const sentAttachment = hasAttachment ? stagedAttachment : null;
+  attachStaging.classList.remove('visible');
+  attachStaging.innerHTML = '';
+  hasAttachment = false;
+  stagedAttachment = null;
+
+  // Add to queue (carrying the attachment through to the rendered turn)
+  addQueueItem('typed', 'You', text, '', sentAttachment);
+
+  // Trigger AI response
+  state.isGenerating = true;
+  sendBtn.classList.add('show-stop','stop-mode');
+  setAvatarState('thinking');
+  npTitle.textContent = 'Thinking…';
+
+  setTimeout(() => {
+    state.isGenerating = false;
+    sendBtn.classList.remove('show-stop','stop-mode');
+    setAvatarState('speaking');
+    npTitle.textContent = 'Reply to "' + text.slice(0,24) + '…"';
+    startScrubber(18);
+    startLyricsHighlight();
+    addQueueItem('ai', 'Eliza', 'Sure! Here\'s what I found…', '0:18');
+  }, 1400);
+}
+
+function stopGeneration() {
+  state.isGenerating = false;
+  sendBtn.classList.remove('show-stop','stop-mode');
+  setAvatarState('idle');
+}
+
+// ===================== VOICE LISTENING =====================
+function startVoiceListening() {
+  if (state.isMuted) return;
+  setAvatarState('listening');
+  npTitle.textContent = 'Listening to you…';
+  npSub.textContent = 'You • Live';
+
+  setTimeout(() => {
+    setAvatarState('thinking');
+    npTitle.textContent = 'Processing…';
+    listeningIndicator.classList.remove('visible');
+  }, 2500);
+
+  setTimeout(() => {
+    setAvatarState('speaking');
+    npTitle.textContent = 'Morning briefing';
+    npSub.textContent = 'Eliza • 0:45';
+    startScrubber(45);
+    startLyricsHighlight();
+  }, 4000);
+}
+
+// ===================== ATTACH =====================
+let hasAttachment = false;
+let stagedAttachment = null;
+let attachSeq = 0;
+const ATTACH_MOCKS = [
+  { glyph:'🖼', name:'screenshot.png' },
+  { glyph:'📄', name:'forecast.pdf' },
+  { glyph:'🎵', name:'voice-note.m4a' },
+  { glyph:'📍', name:'pin-location.json' },
+  { glyph:'📊', name:'commute-stats.csv' },
+];
+
+function addAttachment() {
+  // Append a distinct fresh mock attachment each click (varying glyph + filename)
+  const mock = ATTACH_MOCKS[attachSeq % ATTACH_MOCKS.length];
+  attachSeq++;
+  const id = attachSeq;
+  stagedAttachment = mock; // last-added travels with the next sent turn
+  hasAttachment = true;
+
+  const chip = document.createElement('div');
+  chip.className = 'attachment-chip';
+  chip.dataset.attachId = String(id);
+  chip.innerHTML =
+    '<div class="attachment-thumb">' + mock.glyph + '</div>' +
+    '<span>' + mock.name + '</span>' +
+    '<button class="attachment-remove" data-attach-id="' + id + '">×</button>';
+  chip.querySelector('.attachment-remove').addEventListener('click', () => removeAttachment(id));
+  attachStaging.appendChild(chip);
+  attachStaging.classList.add('visible');
+}
+
+function removeAttachment(id) {
+  const chip = attachStaging.querySelector('[data-attach-id="' + id + '"]');
+  if (chip) chip.remove();
+  if (!attachStaging.querySelector('.attachment-chip')) {
+    attachStaging.classList.remove('visible');
+    hasAttachment = false;
+    stagedAttachment = null;
+  } else {
+    // Re-derive the staged attachment from the last remaining chip
+    const remaining = attachStaging.querySelectorAll('.attachment-chip');
+    const lastName = remaining[remaining.length - 1].querySelector('span').textContent;
+    stagedAttachment = ATTACH_MOCKS.find(m => m.name === lastName) || stagedAttachment;
+    hasAttachment = true;
+  }
+}
+
+// ===================== QUEUE ITEMS =====================
+function addQueueItem(type, who, text, dur, attachment) {
+  const queueSection = document.getElementById('queueSection');
+  const item = document.createElement('div');
+  item.className = 'queue-item';
+
+  const icon = type === 'typed' ? '⌨' : '🎙';
+  const avatarClass = type === 'typed' ? 'typed-avatar' : (type === 'ai' ? 'ai-avatar' : 'voice-avatar');
+  const glyph = type === 'typed' ? '⌨ Typed' : '🎙 Voice';
+
+  const attachmentHTML = attachment
+    ? `<div class="qi-attachment"><div class="attachment-thumb">${attachment.glyph}</div><span>${attachment.name}</span></div>`
+    : '';
+
+  item.innerHTML = `
+    <div class="qi-avatar ${avatarClass}">${type === 'ai' ? '' : icon}</div>
+    <div class="qi-info">
+      <div class="qi-title">${text}</div>
+      <div class="qi-meta">${glyph} · ${who} · ${dur || 'just now'}</div>
+      ${attachmentHTML}
+    </div>
+    <div class="qi-dur">${dur}</div>
+  `;
+  // Insert after header
+  const header = queueSection.querySelector('.queue-header');
+  header.insertAdjacentElement('afterend', item);
+}
+
+// ===================== PARTIAL TRANSCRIPT CURSOR =====================
+setInterval(() => {
+  if (partialCursor) {
+    partialCursor.style.opacity = partialCursor.style.opacity === '0' ? '1' : '0';
+  }
+}, 500);
+
+// ===================== DEMO CYCLE =====================
+function clearDemoTimers() {
+  state.demoTimers.forEach(t => clearTimeout(t));
+  state.demoTimers = [];
+  stopScrubber();
+  clearInterval(wordTimer);
+}
+
+function runDemo() {
+  clearDemoTimers();
+  const push = (fn, ms) => state.demoTimers.push(setTimeout(fn, ms));
+
+  // IDLE
+  setAvatarState('idle');
+  npTitle.textContent = 'Ask Eliza anything…';
+  npSub.textContent = 'Idle';
+  stateBadge.textContent = 'Idle';
+  scrubberFill.style.width = '0%';
+  scrubberThumb.style.left = '0%';
+  document.getElementById('demoBtn').textContent = '↺ Replay';
+
+  // LISTENING
+  push(() => {
+    setAvatarState('listening');
+    npTitle.textContent = 'Listening to you…';
+    npSub.textContent = 'You • Live';
+    listeningIndicator.classList.add('visible');
+  }, 600);
+
+  // THINKING
+  push(() => {
+    setAvatarState('thinking');
+    npTitle.textContent = 'Processing…';
+    listeningIndicator.classList.remove('visible');
+  }, 3000);
+
+  // SPEAKING
+  push(() => {
+    setAvatarState('speaking');
+    npTitle.textContent = 'San Francisco weather';
+    npSub.textContent = 'Eliza • 0:23';
+    startScrubber(23);
+    startLyricsHighlight();
+    addQueueItem('voice', 'You', 'What\'s the weather in SF?', '0:04');
+  }, 4800);
+
+  // BARGE-IN → listening again
+  push(() => {
+    setAvatarState('listening');
+    npTitle.textContent = 'Listening… (barge-in)';
+    listeningIndicator.classList.add('visible');
+    stopScrubber();
+    addQueueItem('ai', 'Eliza', 'San Francisco weather — Interrupted', '0:09');
+  }, 9000);
+
+  // Back to speaking
+  push(() => {
+    setAvatarState('thinking');
+    listeningIndicator.classList.remove('visible');
+  }, 11200);
+
+  push(() => {
+    setAvatarState('speaking');
+    npTitle.textContent = 'Morning commute update';
+    npSub.textContent = 'Eliza • 0:18';
+    startScrubber(18);
+  }, 12800);
+
+  // Return to idle
+  push(() => {
+    setAvatarState('idle');
+    npTitle.textContent = 'Session complete';
+    npSub.textContent = 'Eliza • Idle';
+    stopScrubber();
+    document.getElementById('demoBtn').textContent = '▶ Demo';
+  }, 16000);
+}
+
+document.getElementById('demoBtn').addEventListener('click', runDemo);
+
+// ===================== NEXT/PREV TRANSPORT =====================
+document.getElementById('nextBtn').addEventListener('click', () => {
+  npTitle.textContent = 'Today\'s Calendar Summary';
+  npSub.textContent = 'Eliza • Up next';
+  startScrubber(30);
+});
+document.getElementById('prevBtn').addEventListener('click', () => {
+  scrubberFill.style.width = '0%';
+  scrubberThumb.style.left = '0%';
+  timeElapsed.textContent = '0:00';
+  startScrubber(23);
+});
+
+// ===================== INIT =====================
+setAvatarState('speaking');
+startScrubber(23);
+startLyricsHighlight();
+// Autostart demo after 1s
+setTimeout(runDemo, 800);
+</script>
+</body>
+</html>

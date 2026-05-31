@@ -11,12 +11,46 @@ describe("syncElizaEnvAliases", () => {
     "ELIZA_STATE_DIR",
     "MILADY_CONFIG_PATH",
     "ELIZA_CONFIG_PATH",
+    "MILADY_OAUTH_DIR",
+    "ELIZA_OAUTH_DIR",
+    "MILADY_AGENT_ORCHESTRATOR",
+    "ELIZA_AGENT_ORCHESTRATOR",
+    "MILADY_CLOUD_PROVISIONED",
+    "ELIZA_CLOUD_PROVISIONED",
+    "MILADY_CHAT_GENERATION_TIMEOUT_MS",
+    "ELIZA_CHAT_GENERATION_TIMEOUT_MS",
+    "MILADY_USE_PI_AI",
+    "ELIZA_USE_PI_AI",
+    "MILADY_SKIP_LOCAL_PLUGIN_ROLES",
+    "ELIZA_SKIP_LOCAL_PLUGIN_ROLES",
+    "MILADY_SETTINGS_DEBUG",
+    "ELIZA_SETTINGS_DEBUG",
+    "VITE_MILADY_SETTINGS_DEBUG",
+    "VITE_ELIZA_SETTINGS_DEBUG",
+    "MILADY_GOOGLE_OAUTH_DESKTOP_CLIENT_ID",
+    "ELIZA_GOOGLE_OAUTH_DESKTOP_CLIENT_ID",
     "MILADY_API_PORT",
     "ELIZA_API_PORT",
+    "MILADY_API_BIND",
+    "ELIZA_API_BIND",
     "MILADY_PORT",
     "ELIZA_UI_PORT",
     "MILADY_API_TOKEN",
     "ELIZA_API_TOKEN",
+    "MILADY_ALLOWED_ORIGINS",
+    "ELIZA_ALLOWED_ORIGINS",
+    "MILADY_ALLOWED_HOSTS",
+    "ELIZA_ALLOWED_HOSTS",
+    "MILADY_ALLOW_NULL_ORIGIN",
+    "ELIZA_ALLOW_NULL_ORIGIN",
+    "MILADY_DISABLE_AUTO_API_TOKEN",
+    "ELIZA_DISABLE_AUTO_API_TOKEN",
+    "MILADY_TASK_AGENT_AUTH_TRUSTED_HOSTS",
+    "ELIZA_TASK_AGENT_AUTH_TRUSTED_HOSTS",
+    "MILADY_TASK_AGENT_AUTH_API_BASE_URL",
+    "ELIZA_TASK_AGENT_AUTH_API_BASE_URL",
+    "MILADY_APP_ROUTE_PLUGIN_MODULES",
+    "ELIZA_APP_ROUTE_PLUGIN_MODULES",
     "ELIZA_CLOUD_MANAGED_AGENTS_API_SEGMENT",
     "ORBIT_API_PORT",
     "ORBIT_PORT",
@@ -97,22 +131,77 @@ describe("syncElizaEnvAliases", () => {
     expect(process.env.ELIZA_API_PORT).toBeUndefined();
   });
 
-  it("handles all alias pairs without throwing", () => {
-    process.env.MILADY_NAMESPACE = "m";
-    process.env.MILADY_STATE_DIR = "/s";
-    process.env.MILADY_CONFIG_PATH = "/c";
-    process.env.MILADY_API_PORT = "1";
-    process.env.MILADY_PORT = "2";
-    process.env.MILADY_API_TOKEN = "tok";
+  it.each([
+    ["MILADY_NAMESPACE", "ELIZA_NAMESPACE"],
+    ["MILADY_STATE_DIR", "ELIZA_STATE_DIR"],
+    ["MILADY_CONFIG_PATH", "ELIZA_CONFIG_PATH"],
+    ["MILADY_OAUTH_DIR", "ELIZA_OAUTH_DIR"],
+    ["MILADY_AGENT_ORCHESTRATOR", "ELIZA_AGENT_ORCHESTRATOR"],
+    ["MILADY_CLOUD_PROVISIONED", "ELIZA_CLOUD_PROVISIONED"],
+    [
+      "MILADY_CHAT_GENERATION_TIMEOUT_MS",
+      "ELIZA_CHAT_GENERATION_TIMEOUT_MS",
+    ],
+    ["MILADY_USE_PI_AI", "ELIZA_USE_PI_AI"],
+    ["MILADY_SKIP_LOCAL_PLUGIN_ROLES", "ELIZA_SKIP_LOCAL_PLUGIN_ROLES"],
+    ["MILADY_SETTINGS_DEBUG", "ELIZA_SETTINGS_DEBUG"],
+    ["VITE_MILADY_SETTINGS_DEBUG", "VITE_ELIZA_SETTINGS_DEBUG"],
+    [
+      "MILADY_GOOGLE_OAUTH_DESKTOP_CLIENT_ID",
+      "ELIZA_GOOGLE_OAUTH_DESKTOP_CLIENT_ID",
+    ],
+    ["MILADY_API_PORT", "ELIZA_API_PORT"],
+    ["MILADY_API_BIND", "ELIZA_API_BIND"],
+    ["MILADY_API_TOKEN", "ELIZA_API_TOKEN"],
+    ["MILADY_ALLOWED_ORIGINS", "ELIZA_ALLOWED_ORIGINS"],
+    ["MILADY_ALLOWED_HOSTS", "ELIZA_ALLOWED_HOSTS"],
+    ["MILADY_ALLOW_NULL_ORIGIN", "ELIZA_ALLOW_NULL_ORIGIN"],
+    ["MILADY_DISABLE_AUTO_API_TOKEN", "ELIZA_DISABLE_AUTO_API_TOKEN"],
+    [
+      "MILADY_TASK_AGENT_AUTH_TRUSTED_HOSTS",
+      "ELIZA_TASK_AGENT_AUTH_TRUSTED_HOSTS",
+    ],
+    [
+      "MILADY_TASK_AGENT_AUTH_API_BASE_URL",
+      "ELIZA_TASK_AGENT_AUTH_API_BASE_URL",
+    ],
+    ["MILADY_APP_ROUTE_PLUGIN_MODULES", "ELIZA_APP_ROUTE_PLUGIN_MODULES"],
+    ["MILADY_PORT", "ELIZA_UI_PORT"],
+  ])("maps %s to %s", (from, to) => {
+    process.env[from] = `${from}-value`;
 
-    expect(() => syncElizaEnvAliases()).not.toThrow();
+    syncElizaEnvAliases();
 
-    expect(process.env.ELIZA_NAMESPACE).toBe("m");
-    expect(process.env.ELIZA_STATE_DIR).toBe("/s");
-    expect(process.env.ELIZA_CONFIG_PATH).toBe("/c");
-    expect(process.env.ELIZA_API_PORT).toBe("1");
-    expect(process.env.ELIZA_UI_PORT).toBe("2");
-    expect(process.env.ELIZA_API_TOKEN).toBe("tok");
+    expect(process.env[to]).toBe(`${from}-value`);
+  });
+
+  it("uses default app route plugin modules when no explicit override is provided", () => {
+    syncElizaEnvAliases();
+
+    expect(process.env.ELIZA_APP_ROUTE_PLUGIN_MODULES).toBe(
+      [
+        "@elizaos/app-vincent/register-routes",
+        "@elizaos/app-shopify/register-routes",
+        "@elizaos/app-steward/register-routes",
+        "@elizaos/app-lifeops/register-routes",
+      ].join(","),
+    );
+  });
+
+  it("preserves an intentionally empty ELIZA_APP_ROUTE_PLUGIN_MODULES value", () => {
+    process.env.MILADY_APP_ROUTE_PLUGIN_MODULES =
+      "@elizaos/app-lifeops/register-routes";
+    process.env.ELIZA_APP_ROUTE_PLUGIN_MODULES = "";
+
+    syncElizaEnvAliases();
+
+    expect(process.env.ELIZA_APP_ROUTE_PLUGIN_MODULES).toBe("");
+  });
+
+  it("supports an explicit empty app route plugin module override", () => {
+    syncElizaEnvAliases({ appRoutePluginModules: [] });
+
+    expect(process.env.ELIZA_APP_ROUTE_PLUGIN_MODULES).toBe("");
   });
 
   it("supports a custom branded prefix", () => {

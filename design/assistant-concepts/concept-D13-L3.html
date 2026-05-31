@@ -1,0 +1,952 @@
+<!-- concept-D13-L3 | direction: Split Avatar + Work Canvas (Artifacts) | look: Warm Editorial Paper | targets: 420x760, 960x640 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D13 · Split Avatar + Work Canvas (Artifacts) · Warm Editorial Paper</title>
+<style>
+:root{
+  --bg:#F6F1E7;
+  --surface:#FFFDF8;
+  --surface-2:#F0E8D9;
+  --border:#E2D8C6;
+  --text:#23201A;
+  --text-muted:#7A7163;
+  --accent:#C8643C;
+  --accent-2:#4F6B57;
+  --danger:#B23A48;
+  --radius:14px;
+  --radius-sm:10px;
+  --font:"Iowan Old Style","Palatino Linotype","Georgia","Times New Roman",serif;
+  --font-ui:"Avenir Next","Segoe UI",system-ui,sans-serif;
+  --shadow:0 6px 24px rgba(60,45,25,0.10);
+  --shadow-sm:0 2px 8px rgba(60,45,25,0.07);
+  --ease:cubic-bezier(.4,.0,.2,1);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  min-height:100vh;
+  background:var(--bg);
+  font-family:var(--font-ui);
+  color:var(--text);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+
+/* Subtle paper texture */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;
+}
+
+.app-window{
+  position:relative;z-index:1;
+  width:min(960px,98vw);
+  height:min(640px,96vh);
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+
+/* Titlebar */
+.titlebar{
+  display:flex;align-items:center;gap:8px;
+  padding:11px 18px;
+  border-bottom:1px solid var(--border);
+  background:var(--surface-2);
+  flex-shrink:0;
+}
+.titlebar-dots{display:flex;gap:6px}
+.dot{width:11px;height:11px;border-radius:50%}
+.dot-r{background:#E8826B}
+.dot-y{background:#D4A847}
+.dot-g{background:#7CB58A}
+.titlebar-title{
+  flex:1;text-align:center;
+  font-size:13px;font-weight:400;
+  color:var(--text-muted);font-family:var(--font);
+  letter-spacing:0.02em;font-style:italic;
+}
+
+/* Split layout */
+.split{display:flex;flex:1;overflow:hidden}
+
+/* LEFT: Conversation column */
+.conv-col{
+  width:42%;min-width:0;
+  display:flex;flex-direction:column;
+  border-right:1px solid var(--border);
+}
+
+.conv-header{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 18px 12px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.conv-title{
+  font-size:12px;font-weight:500;
+  letter-spacing:0.08em;text-transform:uppercase;
+  color:var(--text-muted);font-family:var(--font-ui);
+}
+
+/* Ink-stroke avatar */
+.ink-wrap{
+  position:relative;
+  width:36px;height:36px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.ink-svg{
+  width:36px;height:36px;
+  overflow:visible;
+}
+.ink-path{
+  stroke:var(--accent);
+  stroke-width:2.5;
+  fill:none;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.ink-wrap.idle .ink-path{animation:ink-idle 4s ease-in-out infinite}
+@keyframes ink-idle{
+  0%,100%{d:path("M4,18 Q10,14 18,18 Q26,22 32,18");stroke-dashoffset:0}
+  50%{d:path("M4,18 Q10,22 18,18 Q26,14 32,18")}
+}
+.ink-wrap.listening .ink-path{
+  animation:ink-listen 0.5s ease-in-out infinite alternate;
+  stroke:var(--accent);
+}
+@keyframes ink-listen{
+  from{stroke-width:2;opacity:0.7}
+  to{stroke-width:3.5;opacity:1}
+}
+.ink-wrap.thinking .ink-path{
+  animation:ink-think 2s ease-in-out infinite;
+  stroke:var(--text-muted);
+}
+@keyframes ink-think{
+  0%{opacity:0.3}50%{opacity:1}100%{opacity:0.3}
+}
+.ink-wrap.speaking .ink-path{
+  animation:ink-speak 0.6s ease-in-out infinite alternate;
+  stroke:var(--accent-2);
+}
+@keyframes ink-speak{
+  from{stroke-width:2;opacity:0.8;filter:none}
+  to{stroke-width:4;opacity:1;filter:drop-shadow(0 0 3px rgba(79,107,87,0.5))}
+}
+.ink-wrap.muted .ink-path{
+  stroke:var(--danger)!important;
+  animation:none!important;
+  opacity:0.5;
+}
+
+/* Voice badge */
+.voice-badge{
+  display:none;align-items:center;gap:5px;
+  font-size:11px;color:var(--accent);
+  font-family:var(--font);font-style:italic;
+  letter-spacing:0.02em;
+}
+.voice-badge.visible{display:flex}
+.voice-badge.muted{color:var(--danger)}
+.badge-dot{
+  width:5px;height:5px;border-radius:50%;
+  background:var(--accent);
+  animation:paper-pulse 2s ease-in-out infinite;
+}
+.voice-badge.muted .badge-dot{background:var(--danger);animation:none}
+@keyframes paper-pulse{0%,100%{opacity:0.3}50%{opacity:1}}
+
+/* Chat log */
+.chat-log{
+  flex:1;overflow-y:auto;
+  padding:18px;
+  display:flex;flex-direction:column;gap:16px;
+  scroll-behavior:smooth;
+}
+.chat-log::-webkit-scrollbar{width:3px}
+.chat-log::-webkit-scrollbar-thumb{background:var(--border)}
+
+/* Messages */
+.msg{display:flex;flex-direction:column;gap:5px;animation:paper-in 0.5s var(--ease)}
+@keyframes paper-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.msg-meta{
+  display:flex;align-items:center;gap:6px;
+  font-size:10px;color:var(--text-muted);
+  font-family:var(--font-ui);letter-spacing:0.05em;
+  text-transform:uppercase;
+}
+.msg-glyph{font-size:11px}
+.msg-time{color:var(--border)}
+
+.msg.user .msg-bubble{
+  background:var(--accent);
+  color:#fff;
+  padding:10px 15px;
+  border-radius:12px 12px 4px 12px;
+  font-size:14px;line-height:1.6;
+  align-self:flex-end;max-width:88%;
+  font-family:var(--font-ui);
+  box-shadow:var(--shadow-sm);
+}
+.msg.user{align-items:flex-end}
+
+.msg.assistant .msg-body{
+  font-size:15px;line-height:1.7;
+  color:var(--text);
+  font-family:var(--font);
+}
+.msg.assistant.partial .msg-body{color:var(--text-muted);font-style:italic}
+
+/* Artifact card */
+.artifact-card{
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:12px 15px;
+  cursor:pointer;
+  transition:all 0.4s var(--ease);
+  position:relative;overflow:hidden;
+  margin-top:4px;
+}
+.artifact-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--accent);
+  border-radius:3px 0 0 3px;
+}
+.artifact-card:hover{
+  box-shadow:var(--shadow-sm);
+  transform:translateY(-1px);
+}
+.artifact-card-label{
+  font-size:10px;color:var(--text-muted);
+  font-family:var(--font-ui);letter-spacing:0.08em;
+  text-transform:uppercase;margin-bottom:4px;
+}
+.artifact-card-title{font-size:14px;font-weight:500;color:var(--text);font-family:var(--font)}
+.artifact-card-meta{font-size:11px;color:var(--text-muted);margin-top:4px;font-family:var(--font-ui)}
+.artifact-card-action{
+  float:right;margin-top:-30px;
+  font-size:11px;color:var(--accent);
+  font-family:var(--font-ui);
+}
+
+/* Attach chip */
+.attach-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:99px;
+  padding:3px 10px;
+  font-size:11px;color:var(--text-muted);
+  font-family:var(--font-ui);
+}
+.attach-chip-remove{cursor:pointer;opacity:0.6}
+.attach-chip-remove:hover{color:var(--danger);opacity:1}
+
+/* Suggestions */
+.suggestions{
+  padding:8px 18px 10px;
+  display:flex;flex-wrap:wrap;gap:6px;
+  border-top:1px solid var(--border);
+  transition:opacity 0.4s;
+}
+.chip{
+  display:inline-flex;align-items:center;
+  padding:5px 14px;
+  background:transparent;
+  border:1px solid var(--border);
+  border-radius:99px;
+  font-size:12px;color:var(--text-muted);
+  cursor:pointer;font-family:var(--font-ui);
+  transition:all 0.3s var(--ease);
+  white-space:nowrap;
+}
+.chip:hover{
+  border-color:var(--accent);color:var(--accent);
+  background:rgba(200,100,60,0.06);
+}
+
+/* Composer */
+.composer{
+  padding:10px 16px 14px;
+  border-top:1px solid var(--border);
+  flex-shrink:0;
+}
+.composer-attach-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.composer-row{
+  display:flex;align-items:center;gap:8px;
+  border-bottom:1.5px solid var(--border);
+  padding:8px 0;
+  transition:border-color 0.3s;
+}
+.composer-row:focus-within{border-color:var(--accent)}
+.composer-input{
+  flex:1;border:none;background:transparent;
+  font-size:15px;font-family:var(--font);
+  color:var(--text);outline:none;
+  caret-color:var(--accent);
+}
+.composer-input::placeholder{color:var(--text-muted);font-style:italic}
+.composer-btn{
+  width:32px;height:32px;border-radius:99px;
+  border:none;background:transparent;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all 0.3s;flex-shrink:0;
+  font-size:14px;color:var(--text-muted);
+}
+.composer-btn:hover{color:var(--accent)}
+.btn-action{
+  background:var(--accent);color:#fff;
+  width:34px;height:34px;
+}
+.btn-action:hover{background:#b05530;color:#fff}
+.btn-action.stop{background:var(--danger)}
+.btn-mute.muted{color:var(--danger)}
+
+/* Interrupted */
+.msg-interrupted{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:10px;color:var(--danger);
+  font-family:var(--font-ui);margin-top:3px;opacity:0.7;
+}
+
+/* Inline widget */
+.widget-card{
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  overflow:hidden;margin-top:6px;
+}
+.widget-header{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 14px;
+  border-bottom:1px solid var(--border);
+}
+.widget-icon{
+  width:22px;height:22px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;
+  background:rgba(200,100,60,0.1);
+}
+.widget-name{font-size:12px;font-weight:500;font-family:var(--font-ui);color:var(--text-muted);letter-spacing:0.04em;text-transform:uppercase}
+.widget-expand{margin-left:auto;font-size:11px;color:var(--accent);cursor:pointer;font-family:var(--font-ui)}
+.widget-body{padding:12px 14px;font-family:var(--font)}
+.widget-value{font-size:24px;color:var(--text)}
+.widget-sub{font-size:12px;color:var(--text-muted);font-family:var(--font-ui);margin-top:2px}
+.widget-row{display:flex;gap:20px;margin-top:8px}
+.widget-stat-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;font-family:var(--font-ui)}
+.widget-stat-val{font-size:14px;color:var(--text)}
+.widget-actions{display:flex;gap:8px;padding:0 14px 12px}
+.widget-btn{
+  flex:1;padding:7px;border-radius:99px;
+  font-size:12px;cursor:pointer;
+  font-family:var(--font-ui);transition:all 0.3s;
+}
+.widget-btn.secondary{
+  background:transparent;border:1px solid var(--border);color:var(--text-muted);
+}
+.widget-btn.secondary:hover{border-color:var(--accent);color:var(--accent)}
+.widget-btn.primary{
+  background:var(--accent);border:none;color:#fff;
+}
+
+/* RIGHT: Artifact workspace */
+.artifact-col{
+  flex:1;display:flex;flex-direction:column;min-width:0;
+  background:var(--bg);
+}
+.artifact-empty{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:16px;
+  color:var(--text-muted);padding:40px;text-align:center;
+}
+.artifact-empty-icon{
+  font-size:36px;opacity:0.25;
+}
+.artifact-empty-text{
+  font-size:15px;line-height:1.7;
+  font-family:var(--font);color:var(--text-muted);
+  max-width:240px;
+}
+
+.artifact-panel{display:flex;flex-direction:column;height:100%}
+.artifact-panel-header{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 18px;
+  border-bottom:1px solid var(--border);
+  background:var(--surface);
+  flex-shrink:0;
+}
+.artifact-panel-title{
+  font-size:15px;font-weight:400;flex:1;
+  font-family:var(--font);color:var(--text);
+  font-style:italic;
+}
+.artifact-version-sel{
+  font-size:12px;color:var(--text-muted);
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:99px;padding:3px 10px;
+  cursor:pointer;font-family:var(--font-ui);
+}
+.artifact-tabs{
+  display:flex;gap:1px;
+  border:1px solid var(--border);
+  border-radius:99px;overflow:hidden;
+}
+.artifact-tab{
+  padding:4px 13px;
+  font-size:11px;cursor:pointer;
+  color:var(--text-muted);border:none;background:transparent;
+  font-family:var(--font-ui);letter-spacing:0.04em;text-transform:uppercase;
+  transition:all 0.3s;
+}
+.artifact-tab.active{
+  background:var(--accent);color:#fff;
+}
+
+.artifact-toolbar{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 18px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.toolbar-btn{
+  display:flex;align-items:center;gap:4px;
+  padding:5px 13px;
+  background:transparent;
+  border:1px solid var(--border);
+  border-radius:99px;
+  font-size:11px;color:var(--text-muted);
+  cursor:pointer;font-family:var(--font-ui);
+  transition:all 0.3s;
+}
+.toolbar-btn:hover{color:var(--accent);border-color:var(--accent)}
+.toolbar-btn.primary{
+  border-color:var(--accent);color:var(--accent);
+}
+.toolbar-spacer{flex:1}
+.refine-chips{display:flex;gap:6px;flex-wrap:wrap}
+.refine-chip{
+  padding:4px 13px;
+  background:rgba(79,107,87,0.08);
+  border:1px solid rgba(79,107,87,0.25);
+  border-radius:99px;font-size:11px;
+  color:var(--accent-2);cursor:pointer;font-family:var(--font-ui);
+  transition:all 0.3s;
+}
+.refine-chip:hover{background:rgba(79,107,87,0.16)}
+
+.artifact-content{
+  flex:1;overflow-y:auto;padding:20px 24px;
+  font-size:14px;line-height:1.8;color:var(--text);
+}
+.artifact-content::-webkit-scrollbar{width:3px}
+.artifact-content::-webkit-scrollbar-thumb{background:var(--border)}
+.artifact-content h3{
+  font-family:var(--font);font-size:18px;font-weight:600;
+  margin-bottom:10px;margin-top:16px;color:var(--text);
+}
+.artifact-content p{
+  font-family:var(--font);font-size:15px;line-height:1.75;
+  margin-bottom:12px;
+}
+.artifact-content pre{
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:14px;overflow-x:auto;
+  font-size:12px;font-family:monospace;
+  margin:10px 0;
+}
+.artifact-content code{
+  background:rgba(200,100,60,0.08);
+  padding:1px 5px;border-radius:4px;
+  font-family:monospace;font-size:13px;color:var(--accent);
+}
+
+/* Demo btn */
+.demo-btn{
+  position:fixed;bottom:18px;right:18px;
+  padding:9px 18px;
+  background:var(--accent);
+  color:#fff;border:none;border-radius:99px;
+  font-size:12px;font-weight:500;font-family:var(--font-ui);
+  cursor:pointer;box-shadow:var(--shadow);
+  z-index:100;transition:all 0.3s;
+  letter-spacing:0.02em;
+}
+.demo-btn:hover{background:#b05530;transform:translateY(-1px)}
+
+@media(max-width:700px){
+  .app-window{width:100vw;height:100vh;border-radius:0;flex-direction:column}
+  .split{flex-direction:column}
+  .conv-col{width:100%;height:60%;border-right:none;border-bottom:1px solid var(--border)}
+  .artifact-col{height:40%}
+}
+</style>
+</head>
+<body>
+
+<div class="app-window">
+  <div class="titlebar">
+    <div class="titlebar-dots">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+    </div>
+    <div class="titlebar-title">Eliza — a quiet, thoughtful assistant</div>
+  </div>
+
+  <div class="split">
+    <!-- LEFT -->
+    <div class="conv-col">
+      <div class="conv-header">
+        <div class="ink-wrap idle" id="inkWrap">
+          <svg class="ink-svg" viewBox="0 0 36 36">
+            <path class="ink-path" id="inkPath" d="M4,18 Q10,14 18,18 Q26,22 32,18"/>
+          </svg>
+        </div>
+        <div class="conv-title">Conversation</div>
+        <div class="voice-badge" id="voiceBadge">
+          <div class="badge-dot"></div>
+          <span id="voiceLabel">Listening…</span>
+        </div>
+      </div>
+
+      <div class="chat-log" id="chatLog">
+        <div class="msg assistant">
+          <div class="msg-meta"><span class="msg-glyph">✦</span> Eliza <span class="msg-time">morning</span></div>
+          <div class="msg-body">Good morning. What shall we write, build, or think through together today?</div>
+        </div>
+
+        <div class="msg user">
+          <div class="msg-meta"><span class="msg-glyph">⌨</span> You <span class="msg-time">9:14</span></div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+            <div class="attach-chip">📎 chapter-draft.md</div>
+            <div class="msg-bubble">Can you develop this draft into a full introduction — warm, journalistic, about 400 words?</div>
+          </div>
+        </div>
+
+        <div class="msg assistant">
+          <div class="msg-meta"><span class="msg-glyph">✦</span> Eliza <span class="msg-time">9:15</span></div>
+          <div class="msg-body">I've written a full introduction — warm in register, grounded in scene-setting, roughly 390 words. It opens with the image you sketched and builds outward.</div>
+          <div class="artifact-card" onclick="openArtifact()">
+            <div class="artifact-card-label">Artifact · Long-form prose</div>
+            <div class="artifact-card-title">Introduction — v1</div>
+            <div class="artifact-card-action">Open →</div>
+            <div class="artifact-card-meta">392 words · journalistic register</div>
+          </div>
+        </div>
+
+        <div class="msg user">
+          <div class="msg-meta"><span class="msg-glyph">🎙</span> You (voice) <span class="msg-time">9:17</span></div>
+          <div class="msg-bubble">Make the opening more sensory — I want to feel the place before you explain it.</div>
+        </div>
+
+        <div class="msg assistant">
+          <div class="msg-meta"><span class="msg-glyph">✦</span> Eliza <span class="msg-time">9:18</span></div>
+          <div class="msg-body">Rewritten — the first two paragraphs now lead with smell, texture, and ambient sound before pulling back to the wider narrative. V2 in the workspace.</div>
+          <div class="artifact-card" onclick="openArtifact()">
+            <div class="artifact-card-label">Artifact · Long-form prose</div>
+            <div class="artifact-card-title">Introduction — v2</div>
+            <div class="artifact-card-action">Open →</div>
+            <div class="artifact-card-meta">418 words · sensory revision</div>
+          </div>
+          <div class="msg-interrupted">⊘ cut short</div>
+        </div>
+
+        <div class="msg assistant">
+          <div class="msg-meta"><span class="msg-glyph">✦</span> Eliza <span class="msg-time">9:19</span></div>
+          <div class="msg-body">Here's today's writing weather — when you want to set the mood for a long session:</div>
+          <div class="widget-card">
+            <div class="widget-header">
+              <div class="widget-icon">🌤</div>
+              <div class="widget-name">Writing Conditions</div>
+              <div class="widget-expand">Expand</div>
+            </div>
+            <div class="widget-body">
+              <div class="widget-value">Quiet · Overcast</div>
+              <div class="widget-sub">Perfect for long-form. Soft light, low distraction.</div>
+              <div class="widget-row">
+                <div>
+                  <div class="widget-stat-label">Focus window</div>
+                  <div class="widget-stat-val">2h 40m left</div>
+                </div>
+                <div>
+                  <div class="widget-stat-label">Words today</div>
+                  <div class="widget-stat-val">1,240</div>
+                </div>
+              </div>
+            </div>
+            <div class="widget-actions">
+              <button class="widget-btn secondary">Set a timer</button>
+              <button class="widget-btn primary">Start session</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="suggestions" id="suggestions">
+        <div class="chip" onclick="insertChip(this,'Tighten the ending')">Tighten the ending</div>
+        <div class="chip" onclick="insertChip(this,'Try a different register')">Different register</div>
+        <div class="chip" onclick="insertChip(this,'Add a scene-break')">Add a scene-break</div>
+      </div>
+
+      <div class="composer">
+        <div class="composer-attach-row" id="attachRow"></div>
+        <div class="composer-row">
+          <button class="composer-btn btn-attach" onclick="addAttachment()" title="Attach">＋</button>
+          <input class="composer-input" id="compInput" placeholder="Write, ask, or voice a revision…" oninput="onInput()" onkeydown="onKey(event)">
+          <button class="composer-btn btn-action" id="actionBtn" onclick="onAction()" title="Voice">🎙</button>
+          <button class="composer-btn btn-mute" id="muteBtn" onclick="toggleMute()" title="Mute">🔈</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Artifact workspace -->
+    <div class="artifact-col" id="artifactCol">
+      <div class="artifact-empty" id="artifactEmpty">
+        <div class="artifact-empty-icon">✦</div>
+        <div class="artifact-empty-text">Substantial pieces open here — prose drafts, documents, structured content — as versioned artifacts you can refine and export.</div>
+      </div>
+
+      <div class="artifact-panel" id="artifactPanel" style="display:none">
+        <div class="artifact-panel-header">
+          <div class="artifact-panel-title" id="panelTitle">Introduction — v2</div>
+          <select class="artifact-version-sel" id="versionSel" onchange="switchVersion(this.value)">
+            <option value="2">v2 — sensory revision</option>
+            <option value="1">v1 — original</option>
+          </select>
+          <div class="artifact-tabs">
+            <button class="artifact-tab active" onclick="switchTab('prose',this)">Prose</button>
+            <button class="artifact-tab" onclick="switchTab('outline',this)">Outline</button>
+          </div>
+        </div>
+        <div class="artifact-toolbar">
+          <div class="refine-chips">
+            <div class="refine-chip" onclick="refineArtifact('Tighten the ending')">Tighten ending</div>
+            <div class="refine-chip" onclick="refineArtifact('Make it more concise')">Make concise</div>
+            <div class="refine-chip" onclick="refineArtifact('Change the register to academic')">Academic register</div>
+          </div>
+          <div class="toolbar-spacer"></div>
+          <button class="toolbar-btn" onclick="copyArtifact()">Copy</button>
+          <button class="toolbar-btn" onclick="downloadArtifact()">Export</button>
+          <button class="toolbar-btn primary" onclick="publishArtifact()">Publish</button>
+        </div>
+        <div class="artifact-content" id="artifactContent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="demo-btn" id="demoBtn" onclick="runDemo()">▶ Play demo</button>
+
+<script>
+let state = 'idle';
+let muted = false;
+let typing = false;
+let generating = false;
+let demoTimers = [];
+let ampInterval = null;
+let ampPhase = 0;
+
+const inkWrap = document.getElementById('inkWrap');
+const inkPath = document.getElementById('inkPath');
+const voiceBadge = document.getElementById('voiceBadge');
+const voiceLabel = document.getElementById('voiceLabel');
+const actionBtn = document.getElementById('actionBtn');
+const muteBtn = document.getElementById('muteBtn');
+const compInput = document.getElementById('compInput');
+const chatLog = document.getElementById('chatLog');
+const suggEl = document.getElementById('suggestions');
+const attachRow = document.getElementById('attachRow');
+const artifactEmpty = document.getElementById('artifactEmpty');
+const artifactPanel = document.getElementById('artifactPanel');
+const artifactContent = document.getElementById('artifactContent');
+
+// Ink paths for different states
+const PATHS = {
+  idle: [
+    "M4,18 Q10,14 18,18 Q26,22 32,18",
+    "M4,18 Q10,22 18,18 Q26,14 32,18"
+  ],
+  speaking: [
+    "M4,16 Q10,8 18,18 Q26,28 32,16",
+    "M4,20 Q10,28 18,18 Q26,8 32,20"
+  ]
+};
+
+function setOrbState(s) {
+  state = s;
+  inkWrap.className = 'ink-wrap ' + s + (muted ? ' muted' : '');
+
+  if (s === 'listening' && !muted) {
+    voiceBadge.className = 'voice-badge visible';
+    voiceLabel.textContent = 'Listening…';
+    startAmpSim();
+  } else if (muted) {
+    voiceBadge.className = 'voice-badge visible muted';
+    voiceLabel.textContent = 'Muted';
+    stopAmpSim();
+  } else {
+    voiceBadge.className = 'voice-badge';
+    stopAmpSim();
+  }
+}
+
+function startAmpSim() {
+  stopAmpSim();
+  ampInterval = setInterval(() => {
+    ampPhase += 0.12;
+    const amp = 0.4 + 0.6 * Math.abs(Math.sin(ampPhase) + (Math.random()-0.5)*0.5);
+    const mid = 14 + amp * 8;
+    inkPath.setAttribute('d', `M4,18 Q10,${18-mid+14} 18,18 Q26,${18+mid-14} 32,18`);
+  }, 60);
+}
+function stopAmpSim() {
+  if (ampInterval) { clearInterval(ampInterval); ampInterval = null; }
+  inkPath.setAttribute('d', 'M4,18 Q10,14 18,18 Q26,22 32,18');
+}
+
+function toggleMute() {
+  muted = !muted;
+  muteBtn.textContent = muted ? '🔇' : '🔈';
+  muteBtn.className = 'composer-btn btn-mute' + (muted ? ' muted' : '');
+  setOrbState(state);
+}
+
+function onInput() {
+  const val = compInput.value.trim();
+  if (val.length > 0) {
+    typing = true;
+    suggEl.style.opacity = '0.3';
+    suggEl.style.pointerEvents = 'none';
+    actionBtn.textContent = generating ? '⬛' : '↑';
+    actionBtn.className = 'composer-btn btn-action' + (generating ? ' stop' : '');
+  } else {
+    typing = false;
+    suggEl.style.opacity = '';
+    suggEl.style.pointerEvents = '';
+    actionBtn.textContent = generating ? '⬛' : '🎙';
+    actionBtn.className = 'composer-btn btn-action' + (generating ? ' stop' : '');
+  }
+}
+
+function onKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onAction(); }
+}
+
+function onAction() {
+  if (generating) { stopGeneration(); return; }
+  const val = compInput.value.trim();
+  if (val) { sendTyped(val); return; }
+  if (state === 'idle') runDemo();
+}
+
+let pendingAttach = [];
+function addAttachment() {
+  const files = ['notes.md','interview-transcript.txt','outline.docx'];
+  pendingAttach.push(files[pendingAttach.length % files.length]);
+  renderAttachChips();
+}
+function renderAttachChips() {
+  attachRow.innerHTML = pendingAttach.map((f,i) =>
+    `<div class="attach-chip">📎 ${f} <span class="attach-chip-remove" onclick="removeAttach(${i})">✕</span></div>`
+  ).join('');
+}
+function removeAttach(i) { pendingAttach.splice(i,1); renderAttachChips(); }
+
+function sendTyped(val) {
+  compInput.value = '';
+  typing = false;
+  onInput();
+  const aHtml = pendingAttach.length ?
+    `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">${pendingAttach.map(f=>`<div class="attach-chip">📎 ${f}</div>`).join('')}</div>` : '';
+  pendingAttach = [];
+  attachRow.innerHTML = '';
+  addMsg('user', `${aHtml}<div class="msg-bubble">${val}</div>`, '⌨');
+  scheduleReply();
+}
+
+function insertChip(el, text) {
+  compInput.value = text;
+  onInput();
+  compInput.focus();
+}
+
+function addMsg(role, html, glyph, partial) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + role + (partial ? ' partial' : '');
+  const g = glyph || (role === 'user' ? '⌨' : '✦');
+  const name = role === 'user' ? 'You' : 'Eliza';
+  div.innerHTML = `<div class="msg-meta"><span class="msg-glyph">${g}</span> ${name} <span class="msg-time">now</span></div>${html}`;
+  chatLog.appendChild(div);
+  chatLog.scrollTop = chatLog.scrollHeight;
+  return div;
+}
+
+function scheduleReply() {
+  generating = true;
+  onInput();
+  setOrbState('thinking');
+  const t1 = setTimeout(() => {
+    setOrbState('speaking');
+    const replies = [
+      "I've rewritten that section — the register shifts to something quieter and more confident. The ending now earns its weight.",
+      "Trimmed to 310 words without losing the substance. The middle section is tighter and the rhythm reads better.",
+      "A new version in a more academic register — citations noted, argument structure explicit, hedging reduced."
+    ];
+    const r = replies[Math.floor(Math.random() * replies.length)];
+    addMsg('assistant', `<div class="msg-body">${r}</div>
+      <div class="artifact-card" onclick="openArtifact()">
+        <div class="artifact-card-label">Artifact · Long-form prose</div>
+        <div class="artifact-card-title">Introduction — v3</div>
+        <div class="artifact-card-action">Open →</div>
+        <div class="artifact-card-meta">Updated version</div>
+      </div>`);
+    const t2 = setTimeout(() => {
+      generating = false;
+      setOrbState('idle');
+      onInput();
+    }, 2000);
+    demoTimers.push(t2);
+  }, 1400);
+  demoTimers.push(t1);
+}
+
+function stopGeneration() {
+  demoTimers.forEach(clearTimeout);
+  demoTimers = [];
+  generating = false;
+  setOrbState('idle');
+  onInput();
+}
+
+const ARTIFACTS = {
+  2:`<h3>Introduction — v2</h3>
+<p>The first thing you notice is the smell — something between damp stone and burning cedar — before your eyes have adjusted to the light. The room is long and low, its whitewashed walls darkened in the corners where the windows don't reach. A single table sits in the centre, and at it, three women are working in silence so complete you can hear the scratch of reed on paper.</p>
+
+<p>This is not the beginning of a story. It is the middle of something already in motion, already several generations old, that you have wandered into by accident or by appointment — it is sometimes hard to tell the difference. The workshop has been here, in one form or another, since the early eighteen-nineties. The cedar-and-stone smell comes from the archive upstairs, where the records go back further still.</p>
+
+<p>What follows is not a history of the place so much as an account of what it makes possible — the particular kind of thinking that happens when people who disagree about almost everything agree to sit at the same table long enough to be surprised. This introduction is brief by design. The chapters that follow will be long. They need to be.</p>
+
+<p>A note on sources: all interviews were conducted in person between March and September of last year. Quotations have been lightly edited for clarity, with the knowledge and approval of each speaker. The archive is open to researchers by appointment. Three women are still at that table, if the cedar smell is any guide.</p>`,
+  1:`<h3>Introduction — v1</h3>
+<p>There is a workshop in a town whose name you would not immediately recognize that has been producing a particular kind of knowledge for over a century. It is not famous. It does not seek to be. Its practitioners are, by temperament and by training, suspicious of fame — or at least of the version of fame that arrives before the work is done.</p>
+
+<p>This book is about that workshop, and about what it represents: a way of working together that is slower, stranger, and more durable than the models we have become accustomed to in the age of the network and the platform.</p>
+
+<p>I came to it late, as most people do, and I am grateful for the lateness. Had I arrived earlier I would have understood less. The book you are holding is the record of what I found, and what I could not quite explain, and what I eventually stopped trying to explain and simply described as accurately as I was able.</p>
+
+<p>The archive is open to researchers by appointment. The work continues.</p>`
+};
+
+function openArtifact() {
+  artifactEmpty.style.display = 'none';
+  artifactPanel.style.display = 'flex';
+  artifactContent.innerHTML = ARTIFACTS[2];
+}
+
+function switchVersion(v) {
+  artifactContent.innerHTML = ARTIFACTS[parseInt(v)] || ARTIFACTS[2];
+}
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.artifact-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (tab === 'outline') {
+    artifactContent.innerHTML = `<div style="font-family:var(--font);padding:4px 0">
+      <h3 style="font-size:16px;margin-bottom:12px">Structural outline</h3>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:14px;line-height:1.7">
+        <div style="padding:10px 14px;border-left:3px solid var(--accent);background:var(--surface-2);border-radius:0 8px 8px 0"><strong>¶1–2</strong> Sensory opening — smell, texture, ambient sound. Scene established.</div>
+        <div style="padding:10px 14px;border-left:3px solid var(--border);background:var(--surface-2);border-radius:0 8px 8px 0"><strong>¶3</strong> Pivot: this is not history but account of possibility.</div>
+        <div style="padding:10px 14px;border-left:3px solid var(--border);background:var(--surface-2);border-radius:0 8px 8px 0"><strong>¶4</strong> Note on sources and duration of project.</div>
+        <div style="padding:10px 14px;border-left:3px solid var(--accent-2);background:rgba(79,107,87,0.06);border-radius:0 8px 8px 0"><strong>Epilogue callback</strong> — women still at table, cedar smell.</div>
+      </div>
+    </div>`;
+  } else {
+    artifactContent.innerHTML = ARTIFACTS[2];
+  }
+}
+
+function copyArtifact() {}
+function downloadArtifact() {}
+function publishArtifact() {}
+function refineArtifact(text) { compInput.value = text; onInput(); compInput.focus(); }
+
+function clearDemoTimers() {
+  demoTimers.forEach(clearTimeout);
+  demoTimers = [];
+  stopAmpSim();
+}
+
+function runDemo() {
+  clearDemoTimers();
+  generating = false;
+  onInput();
+  setOrbState('idle');
+
+  const t1 = setTimeout(() => {
+    setOrbState('listening');
+    actionBtn.textContent = '⏹';
+    const pm = addMsg('user',
+      `<div class="msg-bubble" style="opacity:0.5;font-style:italic">Give the opening a stronger hook…</div>`,
+      '🎙');
+    pm.classList.add('partial');
+
+    const t2 = setTimeout(() => {
+      setOrbState('thinking');
+      pm.classList.remove('partial');
+      pm.querySelector('.msg-bubble').style.opacity = '';
+      pm.querySelector('.msg-bubble').style.fontStyle = '';
+
+      const t3 = setTimeout(() => {
+        setOrbState('speaking');
+        addMsg('assistant',
+          `<div class="msg-body">v3 — the opening now begins in media res with a single declarative image, then widens. The hook is harder, the rhythm more urgent. I've kept the cedar.</div>
+          <div class="artifact-card" onclick="openArtifact()">
+            <div class="artifact-card-label">Artifact · Long-form prose</div>
+            <div class="artifact-card-title">Introduction — v3</div>
+            <div class="artifact-card-action">Open →</div>
+            <div class="artifact-card-meta">401 words · stronger hook</div>
+          </div>`);
+        openArtifact();
+        const sel = document.getElementById('versionSel');
+        if (!sel.querySelector('[value="3"]')) {
+          const o = document.createElement('option');
+          o.value='3';o.textContent='v3 — stronger hook';o.selected=true;
+          sel.insertBefore(o, sel.firstChild);
+        }
+        document.getElementById('panelTitle').textContent = 'Introduction — v3';
+        const t4 = setTimeout(() => {
+          setOrbState('idle');
+          actionBtn.textContent = '🎙';
+          onInput();
+        }, 2200);
+        demoTimers.push(t4);
+      }, 1400);
+      demoTimers.push(t3);
+    }, 2000);
+    demoTimers.push(t2);
+  }, 700);
+  demoTimers.push(t1);
+}
+
+setTimeout(runDemo, 1000);
+</script>
+</body>
+</html>

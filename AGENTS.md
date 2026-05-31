@@ -8,6 +8,10 @@ Milady is a local-first AI assistant built on [elizaOS](https://github.com/eliza
 - Say **Eliza agents** (not "elizaOS agents") in plain language.
 - The **Eliza Classic** plugin name is the one exception (Eliza = the 1966 chatbot).
 
+## Native over Docker on Linux x64
+
+Linux x86_64 dev boxes should build and run every toolchain locally — RTL sims, synthesis, formal, PD (OpenLane/OpenROAD/magic/klayout/netgen), LLVM, Chipyard, AlphaChip CUDA, QEMU, Renode. Native is faster and far easier to troubleshoot than Docker: no bind-mount syscall overhead, real stack traces, normal `gdb`/`perf`, no daemon lifecycle to babysit. Keep Docker recipes around as a documented fallback for macOS, reproducibility audits, and pinned-image CI lanes only. If a script forces Docker on Linux even when a working native binary is on `$PATH`, that's a bug — fix the script.
+
 ## Quick start (dev)
 
 ```bash

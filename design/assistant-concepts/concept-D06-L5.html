@@ -1,0 +1,789 @@
+<!-- concept-D06-L5 | direction: Terminal / CLI Hybrid | look: Brutalist Mono | targets: 420x760, 960x640 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D06 · Terminal / CLI Hybrid · Brutalist Mono</title>
+<style>
+:root{
+  --bg:#F4F2EC;
+  --surface:#FFFFFF;
+  --surface-2:#E8E5DC;
+  --border:#111111;
+  --text:#111111;
+  --text-muted:#555555;
+  --accent:#1A57FF;
+  --accent-2:#FF4A00;
+  --danger:#D90429;
+  --radius:0px;
+  --radius-sm:0px;
+  --font:"JetBrains Mono","IBM Plex Mono","SF Mono","Cascadia Mono","Courier New",monospace;
+  --shadow:4px 4px 0 #111111;
+  --shadow-sm:2px 2px 0 #111111;
+  --border-w:2px;
+  --ease:steps(1,end);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+body{
+  min-height:100vh;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font);
+  color:var(--text);
+  overflow:hidden;
+}
+
+/* Grid background */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(17,17,17,0.06) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(17,17,17,0.06) 1px,transparent 1px);
+  background-size:24px 24px;
+  pointer-events:none;
+}
+
+.app-window{
+  position:relative;z-index:1;
+  width:420px;height:760px;
+  background:var(--surface);
+  border:var(--border-w) solid var(--border);
+  box-shadow:var(--shadow);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+
+/* Title bar */
+.title-bar{
+  display:flex;align-items:center;gap:0;
+  border-bottom:var(--border-w) solid var(--border);
+  background:var(--border);
+  flex-shrink:0;
+}
+.title-text{
+  flex:1;padding:8px 12px;
+  font-size:11px;font-weight:700;
+  letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--surface);
+  background:var(--border);
+}
+.title-status{
+  padding:8px 12px;
+  font-size:10px;letter-spacing:0.08em;text-transform:uppercase;
+  color:var(--surface);
+  background:var(--accent);
+  border-left:var(--border-w) solid var(--border);
+}
+.title-status.muted-status{background:var(--danger);}
+
+/* Avatar bar — the avatar IS the waveform block */
+.avatar-bar{
+  display:flex;align-items:stretch;gap:0;
+  border-bottom:var(--border-w) solid var(--border);
+  flex-shrink:0;
+  background:var(--surface-2);
+}
+
+/* Block-character waveform avatar */
+.avatar-waveform{
+  display:flex;align-items:flex-end;gap:1px;
+  padding:8px 10px;
+  background:var(--surface-2);
+  border-right:var(--border-w) solid var(--border);
+  width:110px;flex-shrink:0;
+  min-height:52px;
+  font-size:16px;line-height:1;
+  letter-spacing:-1px;
+  align-items:flex-end;
+  font-family:var(--font);
+}
+.avatar-waveform-text{
+  font-size:10px;color:var(--text-muted);
+  font-family:var(--font);letter-spacing:0;
+  white-space:nowrap;
+}
+
+.avatar-state-panel{
+  flex:1;display:flex;flex-direction:column;justify-content:center;
+  padding:8px 12px;
+}
+.avatar-state-label{
+  font-size:12px;font-weight:700;
+  letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--text-muted);
+  transition:color var(--ease);
+  line-height:1.3;
+}
+.avatar-state-label.listening{color:var(--accent);}
+.avatar-state-label.thinking{color:var(--text);}
+.avatar-state-label.speaking{color:var(--accent-2);}
+.avatar-state-label.muted{color:var(--danger);}
+
+.avatar-spinner{
+  font-size:14px;color:var(--text-muted);margin-top:2px;
+  height:18px;overflow:hidden;
+}
+
+/* Mute controls in header row */
+.avatar-controls{
+  display:flex;flex-direction:column;justify-content:center;
+  gap:4px;padding:6px 8px;
+  border-left:var(--border-w) solid var(--border);
+}
+.hdr-btn{
+  background:var(--surface);border:var(--border-w) solid var(--border);
+  padding:4px 8px;font-size:10px;font-weight:700;letter-spacing:0.08em;
+  text-transform:uppercase;cursor:pointer;
+  font-family:var(--font);color:var(--text);
+  transition:background var(--ease),color var(--ease);
+}
+.hdr-btn:hover{background:var(--border);color:var(--surface);}
+.hdr-btn.active{background:var(--danger);color:var(--surface);border-color:var(--danger);}
+
+/* Console log */
+.console-log{
+  flex:1;overflow-y:auto;
+  padding:10px 12px;
+  font-family:var(--font);
+  font-size:13px;line-height:1.6;
+  background:var(--surface);
+  scroll-behavior:smooth;
+}
+.console-log::-webkit-scrollbar{width:8px;}
+.console-log::-webkit-scrollbar-track{background:var(--surface-2);border-left:var(--border-w) solid var(--border);}
+.console-log::-webkit-scrollbar-thumb{background:var(--border);}
+
+.log-entry{
+  display:block;word-break:break-word;padding:0.5px 0;
+}
+.log-entry.system{color:var(--text-muted);}
+.log-entry.user .prefix{color:var(--accent);font-weight:700;}
+.log-entry.assistant .prefix{color:var(--accent-2);font-weight:700;}
+.log-entry.partial{color:var(--text-muted);font-style:italic;}
+.log-entry.state{color:var(--accent);}
+.log-entry.muted-label{color:var(--danger);}
+.log-entry .glyph{margin-right:3px;font-size:11px;}
+
+/* Log rule */
+.log-rule{
+  border:none;border-top:var(--border-w) solid var(--border);
+  margin:6px 0;
+}
+
+/* Log attachment */
+.log-attach{
+  display:inline-flex;align-items:center;gap:3px;
+  background:var(--surface-2);
+  border:var(--border-w) solid var(--border);
+  padding:0 7px;font-size:11px;color:var(--text);
+  margin-right:4px;box-shadow:var(--shadow-sm);
+}
+
+/* App card — ASCII box drawing */
+.app-card{
+  border:var(--border-w) solid var(--border);
+  margin:6px 0;
+  background:var(--surface-2);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.app-card-header{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 10px;
+  border-bottom:var(--border-w) solid var(--border);
+  background:var(--border);color:var(--surface);
+}
+.app-card-icon{
+  width:18px;height:18px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:var(--surface);flex-shrink:0;
+  background:var(--accent);font-weight:700;
+}
+.app-card-title{font-size:10px;font-weight:700;color:var(--surface);letter-spacing:0.1em;text-transform:uppercase;}
+.app-card-expand{
+  margin-left:auto;font-size:10px;color:var(--surface);
+  cursor:pointer;background:var(--surface-2);color:var(--border);
+  border:none;padding:2px 8px;font-family:var(--font);
+  font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
+  transition:background var(--ease);
+}
+.app-card-expand:hover{background:var(--accent-2);color:var(--surface);}
+.app-card-body{padding:10px;background:var(--surface);}
+.weather-temp{font-size:26px;font-weight:700;color:var(--text);}
+.weather-desc{font-size:11px;color:var(--text-muted);margin-top:2px;text-transform:uppercase;letter-spacing:0.06em;}
+.weather-row{display:flex;gap:12px;margin-top:6px;}
+.weather-stat{font-size:11px;color:var(--text-muted);}
+.weather-stat span{color:var(--text);font-weight:700;}
+.weather-detail{
+  margin-top:8px;padding-top:8px;
+  border-top:var(--border-w) dashed var(--border);
+}
+.weather-detail[hidden]{display:none;}
+.weather-hourly{
+  display:flex;gap:10px;font-size:11px;color:var(--text);
+  letter-spacing:0.02em;font-variant-numeric:tabular-nums;
+}
+.weather-hourly span{white-space:nowrap;}
+.app-card-actions{
+  display:flex;gap:0;
+  border-top:var(--border-w) solid var(--border);
+}
+.card-btn{
+  flex:1;padding:6px 0;
+  border-right:var(--border-w) solid var(--border);
+  border-bottom:none;border-top:none;border-left:none;
+  background:var(--surface-2);
+  color:var(--accent);
+  font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+  cursor:pointer;font-family:var(--font);
+  transition:background var(--ease),color var(--ease);
+}
+.card-btn:last-child{border-right:none;}
+.card-btn:hover{background:var(--accent);color:var(--surface);}
+
+/* Suggestions */
+.suggestions{
+  padding:5px 12px 7px;
+  display:flex;flex-wrap:wrap;gap:4px;
+  border-top:var(--border-w) solid var(--border);
+  background:var(--surface-2);
+  transition:opacity var(--ease);flex-shrink:0;
+}
+.suggestions.hidden{opacity:0;pointer-events:none;height:0;padding:0;border:none;}
+.suggest-chip{
+  background:var(--surface);
+  border:var(--border-w) solid var(--border);
+  padding:3px 9px;
+  font-size:10px;color:var(--text);
+  cursor:pointer;font-family:var(--font);
+  font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
+  transition:background var(--ease),color var(--ease);
+  white-space:nowrap;box-shadow:var(--shadow-sm);
+}
+.suggest-chip:hover{background:var(--border);color:var(--surface);}
+
+/* Attach staging */
+.attach-staging{
+  display:flex;flex-wrap:wrap;gap:4px;
+  padding:4px 12px 0;flex-shrink:0;min-height:0;
+  background:var(--surface);
+  border-top:var(--border-w) solid var(--border);
+}
+.attach-staging:empty{border-top:none;padding:0;}
+.attach-chip{
+  display:inline-flex;align-items:center;gap:4px;
+  background:var(--surface-2);
+  border:var(--border-w) solid var(--border);
+  padding:3px 8px;font-size:10px;color:var(--text);
+  font-family:var(--font);font-weight:700;text-transform:uppercase;
+  box-shadow:var(--shadow-sm);
+}
+.attach-chip button{
+  background:none;border:none;color:var(--text-muted);
+  cursor:pointer;font-size:12px;line-height:1;padding:0;
+  font-family:var(--font);
+  transition:color var(--ease);
+}
+.attach-chip button:hover{color:var(--danger);}
+
+/* Composer */
+.composer{
+  padding:8px 12px 10px;
+  border-top:var(--border-w) solid var(--border);
+  background:var(--surface-2);
+  flex-shrink:0;
+}
+.composer-row{display:flex;align-items:center;gap:4px;}
+.composer-prompt{
+  font-family:var(--font);font-size:13px;font-weight:700;
+  color:var(--accent);flex-shrink:0;line-height:34px;
+}
+.composer-input-wrap{flex:1;position:relative;}
+.composer-input{
+  width:100%;
+  background:var(--surface);
+  border:var(--border-w) solid var(--border);
+  padding:7px 10px;
+  font-family:var(--font);font-size:12.5px;
+  color:var(--text);outline:none;resize:none;
+  height:34px;line-height:20px;
+  transition:border-color var(--ease);
+  caret-color:var(--accent);
+}
+.composer-input:focus{
+  border-color:var(--accent);
+  box-shadow:2px 2px 0 var(--accent);
+}
+.composer-input::placeholder{color:var(--text-muted);}
+
+.attach-btn{
+  width:34px;height:34px;
+  background:var(--surface);border:var(--border-w) solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text);font-size:16px;
+  transition:background var(--ease),color var(--ease);flex-shrink:0;
+  box-shadow:var(--shadow-sm);font-family:var(--font);
+}
+.attach-btn:hover{background:var(--border);color:var(--surface);}
+
+.action-btn{
+  width:34px;height:34px;
+  border:var(--border-w) solid var(--border);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;flex-shrink:0;
+  transition:background var(--ease),color var(--ease);
+  background:var(--accent);color:var(--surface);
+  font-family:var(--font);font-weight:700;
+  box-shadow:var(--shadow);
+}
+.action-btn:hover{background:var(--surface);color:var(--accent);}
+.action-btn:active{box-shadow:none;transform:translate(4px,4px);}
+.action-btn.stop{background:var(--danger);color:var(--surface);}
+.action-btn.stop:hover{background:var(--surface);color:var(--danger);}
+.action-btn.send{background:var(--accent-2);color:var(--surface);}
+.action-btn.send:hover{background:var(--surface);color:var(--accent-2);}
+
+.listening-indicator{
+  display:flex;align-items:center;gap:6px;
+  padding:2px 0 3px;
+  font-family:var(--font);font-size:10px;
+  color:var(--accent);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+  opacity:0;
+}
+.listening-indicator.visible{opacity:1;}
+.mic-dot{
+  font-size:14px;color:var(--accent);
+  animation:mic-blink 0.5s steps(1,end) infinite;
+}
+@keyframes mic-blink{0%,100%{opacity:1;}50%{opacity:0;}}
+
+.play-demo-btn{
+  display:flex;align-items:center;gap:6px;
+  margin-top:7px;padding:6px 12px;
+  background:var(--surface);border:var(--border-w) solid var(--border);
+  cursor:pointer;font-family:var(--font);font-size:10px;font-weight:700;
+  color:var(--text);letter-spacing:0.1em;text-transform:uppercase;
+  width:100%;justify-content:center;
+  transition:background var(--ease),color var(--ease);
+  box-shadow:var(--shadow);
+}
+.play-demo-btn:hover{background:var(--border);color:var(--surface);}
+.play-demo-btn:active{box-shadow:none;transform:translate(4px,4px);}
+
+@media(min-width:640px){
+  .app-window{width:460px;height:720px;}
+}
+</style>
+</head>
+<body>
+
+<div class="app-window" id="appWindow">
+  <!-- Title bar -->
+  <div class="title-bar">
+    <div class="title-text">ELIZA // REPL v2.1.0</div>
+    <div class="title-status" id="titleStatus">● ONLINE</div>
+  </div>
+
+  <!-- Avatar waveform bar -->
+  <div class="avatar-bar">
+    <div class="avatar-waveform" id="avatarWaveform">
+      <!-- block chars injected by JS -->
+    </div>
+    <div class="avatar-state-panel">
+      <div class="avatar-state-label" id="avatarLabel">IDLE</div>
+      <div class="avatar-spinner" id="avatarSpinner"></div>
+    </div>
+    <div class="avatar-controls">
+      <button class="hdr-btn" id="muteBtn" onclick="toggleMute()">MIC</button>
+    </div>
+  </div>
+
+  <!-- Console log -->
+  <div class="console-log" id="consoleLog">
+    <div class="log-entry system">################################</div>
+    <div class="log-entry system">## ELIZA BRUTALIST REPL v2.1 ##</div>
+    <div class="log-entry system">################################</div>
+    <div class="log-entry system">CMD: weather /summarize /imagine</div>
+    <hr class="log-rule">
+
+    <!-- Interrupted turn -->
+    <div class="log-entry assistant"><span class="prefix">eliza&gt;</span> <span style="color:var(--text-muted)">Dependency graph has 3 circular imports — resolving from @core/auth which imports @core/user which imports @core/au</span><span style="color:var(--danger)">— ^C [INTERRUPTED]</span></div>
+
+    <!-- Voice turn -->
+    <div class="log-entry user">
+      <span class="glyph">🎙</span><span class="prefix">you&gt;</span> check weather san francisco
+    </div>
+
+    <!-- App card reply -->
+    <div class="log-entry assistant"><span class="prefix">eliza&gt;</span> [WEATHER_FETCH OK 200ms]</div>
+    <div class="log-entry">
+      <div class="app-card">
+        <div class="app-card-header">
+          <div class="app-card-icon">W</div>
+          <div class="app-card-title">WEATHER // SAN FRANCISCO</div>
+          <button class="app-card-expand" id="weatherExpandBtn" onclick="toggleWeatherDetail(this)">EXPAND</button>
+        </div>
+        <div class="app-card-body">
+          <div class="weather-temp">68°F</div>
+          <div class="weather-desc">MOSTLY SUNNY · MARINE LAYER @17:00</div>
+          <div class="weather-row">
+            <div class="weather-stat">HUM <span>54%</span></div>
+            <div class="weather-stat">WIND <span>12MPH W</span></div>
+            <div class="weather-stat">UV <span>5</span></div>
+          </div>
+          <div class="weather-detail" id="weatherDetail" hidden>
+            <div class="weather-hourly">
+              <span>09 ▆ 64°</span><span>12 ▇ 67°</span><span>15 █ 68°</span><span>18 ▅ 63°</span><span>21 ▃ 59°</span>
+            </div>
+            <div class="weather-stat" style="margin-top:6px;">FEELS <span>66°F</span> · DEW <span>51°</span> · PRESSURE <span>1018HPA</span></div>
+          </div>
+        </div>
+        <div class="app-card-actions">
+          <button class="card-btn">7-DAY</button>
+          <button class="card-btn">ALERT</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Typed turn with attachment -->
+    <div class="log-entry user">
+      <span class="glyph">⌨</span><span class="prefix">you&gt;</span>
+      <span class="log-attach">FILE:dump.log ×</span>
+      find errors in this log file
+    </div>
+    <div class="log-entry assistant"><span class="prefix">eliza&gt;</span> GREP RESULT: 4 ERROR lines, 12 WARN lines, 0 FATAL. Critical: segfault at pid 4471 line 1847 (null ptr deref in tcp_recv_handler). Recommend patching recv buffer null check before socket reads. See dump.log:1847.</div>
+
+    <!-- Partial transcript -->
+    <div class="log-entry partial" id="partialLine" style="display:none">
+      <span class="glyph">🎙</span><span style="color:var(--accent)">you&gt;</span> <span id="partialText" style="color:var(--text-muted)"></span><span style="color:var(--accent);animation:mic-blink 0.5s steps(1,end) infinite">█</span>
+    </div>
+  </div>
+
+  <!-- Suggestions -->
+  <div class="suggestions" id="suggestions">
+    <span class="suggest-chip" onclick="insertSuggest('/imagine')">TRY:/IMAGINE</span>
+    <span class="suggest-chip" onclick="insertSuggest('/scan')">TRY:/SCAN</span>
+    <span class="suggest-chip" onclick="insertSuggest('weather')">TRY:WEATHER</span>
+    <span class="suggest-chip" onclick="insertSuggest('/timer 25m')">TRY:/TIMER</span>
+  </div>
+
+  <!-- Attach staging -->
+  <div class="attach-staging" id="attachStaging"></div>
+
+  <!-- Composer -->
+  <div class="composer">
+    <div class="listening-indicator" id="listeningIndicator">
+      <span class="mic-dot">█</span>
+      <span>LISTENING...</span>
+    </div>
+    <div class="composer-row">
+      <div class="composer-prompt">you&gt;</div>
+      <div class="composer-input-wrap">
+        <input type="text" class="composer-input" id="composerInput"
+          placeholder="enter command..." autocomplete="off">
+      </div>
+      <button class="attach-btn" id="attachBtn" title=":attach" onclick="addAttachment()">+</button>
+      <button class="action-btn" id="actionBtn" onclick="handleAction()">MIC</button>
+    </div>
+    <button class="play-demo-btn" id="demoBtn" onclick="runDemo()">[ PLAY VOICE DEMO ]</button>
+  </div>
+</div>
+
+<script>
+// ── State ──
+let state='idle';let isMuted=false;
+let demoTimer=null;let ampInterval=null;let streamInterval=null;
+let demoPartialInterval=null;let demoStreamInterval=null;
+let attachments=[];let isGenerating=false;
+
+// Block characters for waveform
+const BLOCKS=['▁','▂','▃','▄','▅','▆','▇','█'];
+
+function blockFromHeight(h01){
+  const i=Math.floor(h01*7.99);
+  return BLOCKS[Math.max(0,Math.min(7,i))];
+}
+
+// Waveform in the avatar box
+const waveformEl=document.getElementById('avatarWaveform');
+const BAR_COUNT=10;
+let wavePhase=0;
+
+function updateWaveform(ts){
+  wavePhase=ts*0.001;
+  let chars='';
+  for(let i=0;i<BAR_COUNT;i++){
+    let h;
+    if(isMuted){
+      h=0.05;
+    } else if(state==='listening'){
+      const a=window._micAmp||0.3;
+      h=Math.max(0.05,a*Math.abs(Math.sin(wavePhase*6+i*0.8+Math.random()*0.5)));
+    } else if(state==='thinking'){
+      h=0.2+0.4*Math.abs(Math.sin(wavePhase*2+i*0.9));
+    } else if(state==='speaking'){
+      const e=window._ttsEnv||0.5;
+      h=Math.max(0.05,e*Math.abs(Math.sin(wavePhase*7+i*0.5)));
+    } else {
+      h=0.1+0.12*Math.abs(Math.sin(wavePhase*0.7+i*0.6));
+    }
+    chars+=blockFromHeight(h);
+  }
+  waveformEl.textContent=chars;
+  waveformEl.style.color=
+    isMuted?'var(--danger)':
+    state==='listening'?'var(--accent)':
+    state==='thinking'?'var(--text)':
+    state==='speaking'?'var(--accent-2)':
+    'var(--text-muted)';
+}
+
+// Thinking spinner
+const SPINNER=['|','/','-','\\'];
+let spinI=0;let spinInterval=null;
+const spinnerEl=document.getElementById('avatarSpinner');
+
+function startSpinner(){
+  spinnerEl.textContent='';
+  spinInterval=setInterval(()=>{
+    spinnerEl.textContent='['+SPINNER[spinI%4]+']';spinI++;
+  },200);
+}
+function stopSpinner(){clearInterval(spinInterval);spinnerEl.textContent='';}
+
+let _rafTs=0;
+function rafLoop(ts){
+  _rafTs=ts;
+  updateWaveform(ts);
+  requestAnimationFrame(rafLoop);
+}
+requestAnimationFrame(rafLoop);
+
+function startMicSim(){window._micAmp=0.3;ampInterval=setInterval(()=>{window._micAmp=0.15+0.85*Math.pow(Math.random(),0.4);},100);}
+function stopMicSim(){clearInterval(ampInterval);window._micAmp=0;}
+function startTTSSim(){window._ttsEnv=0.5;ampInterval=setInterval(()=>{window._ttsEnv=0.3+0.7*Math.abs(Math.sin(Date.now()/700+Math.random()*0.5));},90);}
+function stopTTSSim(){clearInterval(ampInterval);window._ttsEnv=0;}
+
+// ── Avatar state ──
+const labelEl=document.getElementById('avatarLabel');
+const titleStatus=document.getElementById('titleStatus');
+function setAvatarState(s){
+  state=s;
+  labelEl.className='avatar-state-label '+(isMuted?'muted':s);
+  const lbl={idle:'IDLE',listening:'[LISTENING]',thinking:'[THINKING]',speaking:'[SPEAKING]',muted:'[MUTED]'};
+  labelEl.textContent=isMuted?'[MUTED]':(lbl[s]||s.toUpperCase());
+  if(s==='thinking'){startSpinner();}else{stopSpinner();}
+  titleStatus.textContent=isMuted?'[MUTED]':s==='listening'?'[LISTENING ▂▅▇▃▁]':s==='speaking'?'[SPEAKING]':s==='thinking'?'[THINKING]':'● ONLINE';
+  titleStatus.className='title-status'+(isMuted?' muted-status':'');
+}
+
+// ── Log ──
+const log=document.getElementById('consoleLog');
+const INITIAL_LOG_HTML=log.innerHTML;
+function resetLog(){
+  log.innerHTML=INITIAL_LOG_HTML;
+  log.scrollTop=0;
+}
+function addLog(type,html){
+  const partial=document.getElementById('partialLine');
+  const e=document.createElement('div');e.className='log-entry '+type;e.innerHTML=html;
+  log.insertBefore(e,partial);log.scrollTop=log.scrollHeight;return e;
+}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// Stop every in-flight generation/demo timer and strip any leftover blinking
+// stream cursors so a re-trigger can never append to a stale log element.
+function clearAllStreams(){
+  clearTimeout(demoTimer);demoTimer=null;
+  clearInterval(demoPartialInterval);demoPartialInterval=null;
+  clearInterval(demoStreamInterval);demoStreamInterval=null;
+  clearInterval(streamInterval);streamInterval=null;
+  log.querySelectorAll('.stream-cursor').forEach(c=>c.remove());
+}
+
+const listeningInd=document.getElementById('listeningIndicator');
+function showListening(v){listeningInd.className='listening-indicator'+(v?' visible':'');}
+
+// ── Action button ──
+const actionBtn=document.getElementById('actionBtn');
+const composerInput=document.getElementById('composerInput');
+function updateActionBtn(){
+  if(isGenerating){actionBtn.textContent='^C';actionBtn.className='action-btn stop';}
+  else if(state==='listening'){actionBtn.textContent='STP';actionBtn.className='action-btn stop';}
+  else if(composerInput.value.trim()){actionBtn.textContent='SND';actionBtn.className='action-btn send';}
+  else{actionBtn.textContent='MIC';actionBtn.className='action-btn';}
+}
+
+composerInput.addEventListener('input',()=>{
+  updateActionBtn();
+  document.getElementById('suggestions').className='suggestions'+(composerInput.value.trim()?' hidden':'');
+  if(composerInput.value.startsWith('/im')){
+    composerInput.placeholder='/imagine [description]...';
+  } else {
+    composerInput.placeholder='enter command...';
+  }
+});
+composerInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(composerInput.value.trim())sendTyped();}});
+
+function handleAction(){
+  if(isGenerating){cancelGeneration();return;}
+  if(state==='listening'){stopListening();return;}
+  if(composerInput.value.trim()){sendTyped();return;}
+  startListeningManual();
+}
+
+const REPLIES=[
+  'PROCESS: build failed at compile step. Error: undefined symbol `tcp_recv_v2` in net/socket.c:294. Likely cause: header guard mismatch after your last refactor. Fix: add explicit extern "C" block around net.h includes in socket.c.',
+  'BART CIVIC CENTER: Next dep 18:22, platform B. Alt: 18:37, 18:52. Clipper $12.40. MUNI F-line also runs Market St in 8min.',
+  'LOG ANALYSIS: 4 ERR, 12 WARN, 0 FATAL. Top issue: pid 4471 SIGSEGV in tcp_recv_handler (null ptr). Fix null check on recv buffer before socket ops. Full report: /tmp/eliza-log-analysis-1748.txt',
+  'WEATHER OK: SFO 68F SUNNY. Wind 12mph W. Marine layer ETA 17:00. Rain probability 0%. Week trend: stable, no systems in the Pacific.',
+];
+
+function sendTyped(){
+  const text=composerInput.value.trim();if(!text)return;
+  const chips=attachments.slice();composerInput.value='';updateActionBtn();
+  document.getElementById('suggestions').className='suggestions';
+  let ah=chips.map(a=>`<span class="log-attach">${a} ×</span>`).join('');
+  attachments=[];renderAttachStaging();
+  addLog('user',`<span class="glyph">⌨</span><span class="prefix">you&gt;</span> ${ah}${esc(text)}`);
+  triggerReply(text);
+}
+
+function triggerReply(trigger,isVoice=false){
+  isGenerating=true;updateActionBtn();setAvatarState('thinking');
+  addLog('state','<span style="color:var(--text-muted)">[PROC]</span> <span style="color:var(--text-muted)">processing request...</span>');
+  setTimeout(()=>{
+    if(!isGenerating)return;
+    setAvatarState('speaking');startTTSSim();
+    const reply=REPLIES[Math.floor(Math.random()*REPLIES.length)];
+    const e=addLog('assistant',`<span class="prefix">eliza&gt;</span> `);
+    let i=0;const cur=document.createElement('span');
+    cur.className='stream-cursor';
+    cur.textContent='█';cur.style.cssText='color:var(--accent);animation:mic-blink 0.5s steps(1,end) infinite;';
+    e.appendChild(cur);
+    streamInterval=setInterval(()=>{
+      if(i>=reply.length||!isGenerating){
+        clearInterval(streamInterval);cur.remove();
+        stopTTSSim();isGenerating=false;setAvatarState('idle');updateActionBtn();return;
+      }
+      cur.before(document.createTextNode(reply[i++]));log.scrollTop=log.scrollHeight;
+    },20);
+  },600+Math.random()*400);
+}
+
+function cancelGeneration(){
+  isGenerating=false;clearAllStreams();stopTTSSim();stopMicSim();
+  document.getElementById('demoBtn').textContent='[ PLAY VOICE DEMO ]';
+  const partial=document.getElementById('partialLine');if(partial)partial.style.display='none';
+  setAvatarState('idle');showListening(false);stopSpinner();updateActionBtn();
+  addLog('state','<span style="color:var(--danger)">^C</span> <span style="color:var(--text-muted)">[SIGINT] GENERATION CANCELLED</span>');
+}
+
+function startListeningManual(){
+  if(isMuted)return;
+  setAvatarState('listening');showListening(true);startMicSim();updateActionBtn();
+  setTimeout(()=>{if(state==='listening')stopListening();},3000);
+}
+function stopListening(){stopMicSim();showListening(false);setAvatarState('idle');updateActionBtn();}
+
+const muteBtn=document.getElementById('muteBtn');
+function toggleMute(){
+  isMuted=!isMuted;
+  muteBtn.className='hdr-btn'+(isMuted?' active':'');
+  muteBtn.textContent=isMuted?'MUTE':'MIC';
+  if(isMuted){
+    stopMicSim();showListening(false);setAvatarState('muted');
+    addLog('muted-label','<span style="color:var(--danger);font-weight:700">[MUTED]</span> <span style="color:var(--text-muted)">MIC OFFLINE -- /UNMUTE TO RESTORE</span>');
+  } else {
+    setAvatarState('idle');
+    addLog('state','<span style="color:var(--accent)">[ONLINE]</span> <span style="color:var(--text-muted)">MIC RESTORED</span>');
+  }
+  updateActionBtn();
+}
+
+const attachStaging=document.getElementById('attachStaging');
+const ATTACH_NAMES=['FILE:dump.log','FILE:schema.sql','IMG:screenshot.png','FILE:config.yaml','FILE:main.c'];
+function addAttachment(){
+  const name=ATTACH_NAMES[attachments.length%ATTACH_NAMES.length];
+  attachments.push(name);renderAttachStaging();
+}
+function renderAttachStaging(){
+  attachStaging.innerHTML='';
+  attachments.forEach((a,i)=>{
+    const chip=document.createElement('div');chip.className='attach-chip';
+    chip.innerHTML=`${a} <button onclick="removeAttach(${i})">×</button>`;
+    attachStaging.appendChild(chip);
+  });
+  // fix empty border
+  attachStaging.style.paddingTop=attachments.length?'4px':'0';
+  attachStaging.style.paddingBottom=attachments.length?'4px':'0';
+  attachStaging.style.borderTop=attachments.length?'var(--border-w) solid var(--border)':'none';
+}
+function removeAttach(i){attachments.splice(i,1);renderAttachStaging();}
+function insertSuggest(t){composerInput.value=t;composerInput.dispatchEvent(new Event('input'));composerInput.focus();}
+
+function toggleWeatherDetail(btn){
+  const detail=document.getElementById('weatherDetail');
+  const open=detail.hasAttribute('hidden');
+  if(open){detail.removeAttribute('hidden');btn.textContent='COLLAPSE';}
+  else{detail.setAttribute('hidden','');btn.textContent='EXPAND';}
+}
+
+// ── Demo ──
+const DEMO_PARTIAL=['git','git status','git status on','git status on the','git status on the main','git status on the main branch'];
+function runDemo(){
+  clearAllStreams();
+  isGenerating=false;stopTTSSim();stopMicSim();showListening(false);stopSpinner();
+  setAvatarState('idle');updateActionBtn();composerInput.value='';
+  resetLog();
+  const partial=document.getElementById('partialLine');
+  const partialText=document.getElementById('partialText');
+  partial.style.display='none';
+  document.getElementById('demoBtn').textContent='[ RUNNING DEMO... ]';
+
+  demoTimer=setTimeout(()=>{
+    setAvatarState('listening');showListening(true);startMicSim();updateActionBtn();
+    partial.style.display='block';partialText.textContent='';
+    addLog('state','<span style="color:var(--accent)">[LISTENING ▂▅▇▃▁]</span> <span style="color:var(--text-muted)">mic hot -- speak now</span>');
+    let pi=0;
+    demoPartialInterval=setInterval(()=>{
+      if(pi<DEMO_PARTIAL.length){partialText.textContent=DEMO_PARTIAL[pi++];log.scrollTop=log.scrollHeight;}
+      else{
+        clearInterval(demoPartialInterval);demoPartialInterval=null;
+        demoTimer=setTimeout(()=>{
+          stopMicSim();showListening(false);partial.style.display='none';
+          addLog('user',`<span class="glyph">🎙</span><span class="prefix">you&gt;</span> ${esc(DEMO_PARTIAL[DEMO_PARTIAL.length-1])}`);
+          setAvatarState('thinking');updateActionBtn();
+          addLog('state','<span style="color:var(--text-muted)">[PROC]</span> <span style="color:var(--text-muted)">processing...</span>');
+          demoTimer=setTimeout(()=>{
+            setAvatarState('speaking');startTTSSim();isGenerating=true;updateActionBtn();
+            const reply='GIT STATUS OK: On branch main. 3 files modified (packages/app-core/src/api/dev-stack.ts, apps/app/src/main.tsx, packages/ui/components/Button.tsx). 1 untracked (NOTES.md). 0 staged. Run `git add -p` to review changes before committing.';
+            const e=addLog('assistant',`<span class="prefix">eliza&gt;</span> `);
+            let ri=0;const cur=document.createElement('span');
+            cur.className='stream-cursor';
+            cur.textContent='█';cur.style.cssText='color:var(--accent);animation:mic-blink 0.5s steps(1,end) infinite;';
+            e.appendChild(cur);
+            demoStreamInterval=setInterval(()=>{
+              if(ri>=reply.length){
+                clearInterval(demoStreamInterval);demoStreamInterval=null;cur.remove();stopTTSSim();isGenerating=false;
+                setAvatarState('idle');updateActionBtn();
+                document.getElementById('demoBtn').textContent='[ PLAY AGAIN ]';
+                addLog('system','<span style="color:var(--text-muted)">CMD: <span style="color:var(--accent)">git diff</span> | <span style="color:var(--accent)">git add -p</span> | <span style="color:var(--accent)">git commit</span></span>');
+                return;
+              }
+              cur.before(document.createTextNode(reply[ri++]));log.scrollTop=log.scrollHeight;
+            },18);
+          },600);
+        },300);
+      }
+    },160);
+  },400);
+}
+
+setTimeout(runDemo,800);
+</script>
+</body>
+</html>

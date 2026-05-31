@@ -2913,7 +2913,15 @@ export default defineConfig({
       // Electrobun postBuild copies renderer HTML/assets into electrobun/build/.
       // Watching those paths triggers full reloads while deps are still optimizing,
       // which breaks with "chunk-*.js does not exist" in node_modules/.vite/deps.
-      ignored: ["**/electrobun/build/**", "**/electrobun/artifacts/**"],
+      ignored: [
+        "**/electrobun/build/**",
+        "**/electrobun/artifacts/**",
+        // Training data dirs and native C++ source trees cause EINVAL errors
+        // during watch (deep paths, large binary datasets, .cpp directory names).
+        "**/packages/training/data/raw/**",
+        "**/plugin-local-inference/native/omnivoice.cpp/**",
+        "**/plugin-local-inference/src/services/__tests__/**",
+      ],
     },
   },
 });

@@ -1,0 +1,874 @@
+<!-- concept-D15-L3 | direction: Character / Companion with Personality | look: Warm Editorial Paper | targets: 420x760, 960x640 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D15 · Character / Companion with Personality · Warm Editorial Paper</title>
+<style>
+:root{
+  --bg:#F6F1E7;
+  --surface:#FFFDF8;
+  --surface-2:#F0E8D9;
+  --border:#E2D8C6;
+  --text:#23201A;
+  --text-muted:#7A7163;
+  --accent:#C8643C;
+  --accent-2:#4F6B57;
+  --danger:#B23A48;
+  --radius:14px;
+  --radius-sm:10px;
+  --font:"Iowan Old Style","Palatino Linotype","Georgia","Times New Roman",serif;
+  --font-ui:"Avenir Next","Segoe UI",system-ui,sans-serif;
+  --shadow:0 6px 24px rgba(60,45,25,0.10);
+  --shadow-sm:0 2px 8px rgba(60,45,25,0.07);
+  --ease:cubic-bezier(.4,.0,.2,1);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);overflow-x:hidden}
+
+body{
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;
+  background:var(--bg);
+  font-family:var(--font-ui);
+}
+
+.app-window{
+  width:420px;height:760px;
+  background:var(--surface);
+  border-radius:20px;
+  border:1px solid var(--border);
+  box-shadow:var(--shadow),0 0 0 1px rgba(226,216,198,0.5);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+
+/* Header */
+.header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 22px 14px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.companion-info{display:flex;align-items:center;gap:10px}
+.companion-dot{
+  width:9px;height:9px;border-radius:50%;
+  background:var(--accent-2);
+  animation:leafPulse 3s ease-in-out infinite;
+}
+@keyframes leafPulse{0%,100%{transform:scale(1);opacity:0.9}50%{transform:scale(1.2);opacity:1}}
+.companion-name{
+  font-family:var(--font);font-size:18px;font-weight:400;
+  font-style:italic;color:var(--text);letter-spacing:-0.01em;
+}
+.companion-mood{
+  font-family:var(--font-ui);font-size:11px;color:var(--text-muted);
+  letter-spacing:0.06em;text-transform:uppercase;margin-top:1px;
+}
+.header-actions{display:flex;gap:8px}
+.icon-btn{
+  width:34px;height:34px;border-radius:var(--radius-sm);
+  border:1px solid var(--border);cursor:pointer;
+  background:var(--surface-2);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-muted);font-size:15px;
+  transition:all 0.4s var(--ease);
+}
+.icon-btn:hover{background:var(--border);color:var(--accent)}
+.mute-btn.active{background:rgba(178,58,72,0.08);border-color:var(--danger);color:var(--danger) !important}
+
+/* Avatar Stage */
+.avatar-stage{
+  flex-shrink:0;height:200px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;
+  border-bottom:1px solid var(--border);
+  overflow:hidden;
+}
+
+/* Paper texture overlay */
+.avatar-stage::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(circle at 30% 40%,rgba(200,100,60,0.04) 0%,transparent 60%),
+    radial-gradient(circle at 70% 60%,rgba(79,107,87,0.04) 0%,transparent 60%);
+  pointer-events:none;
+}
+
+/* Ink blob avatar */
+.orb-wrap{
+  position:relative;width:130px;height:110px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+
+.ink-blob{
+  width:100px;height:80px;
+  background:radial-gradient(ellipse at 40% 35%, #c8643c 0%, #a04e2e 35%, #7a3c20 60%, #3d2010 100%);
+  border-radius:55% 45% 60% 40% / 50% 55% 45% 50%;
+  position:relative;overflow:hidden;
+  animation:blobBreath 4s ease-in-out infinite;
+  box-shadow:0 4px 20px rgba(200,100,60,0.2);
+  transition:border-radius 0.7s var(--ease);
+}
+@keyframes blobBreath{
+  0%,100%{transform:scale(1) rotate(0deg);border-radius:55% 45% 60% 40% / 50% 55% 45% 50%}
+  33%{transform:scale(1.04) rotate(1deg);border-radius:48% 52% 55% 45% / 52% 48% 52% 48%}
+  66%{transform:scale(1.02) rotate(-1deg);border-radius:60% 40% 48% 52% / 45% 55% 48% 52%}
+}
+
+/* blob sheen */
+.ink-blob::before{
+  content:'';position:absolute;
+  top:12%;left:15%;width:30%;height:22%;
+  background:radial-gradient(ellipse,rgba(255,200,160,0.35) 0%,transparent 80%);
+  border-radius:50%;
+}
+
+/* Face on ink blob */
+.blob-face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.blob-eyes{display:flex;gap:14px;transform:translateY(-4px)}
+.blob-eye{
+  width:6px;height:6px;border-radius:50%;
+  background:rgba(255,240,220,0.9);
+  transition:all 0.5s var(--ease);
+}
+.blob-mouth{
+  position:absolute;
+  bottom:32%;left:50%;transform:translateX(-50%);
+  width:18px;height:6px;
+  border-bottom:1.5px solid rgba(255,240,220,0.7);
+  border-radius:0 0 9px 9px;
+  transition:all 0.5s var(--ease);
+}
+
+/* Undulating line (Pi-inspired) */
+.wave-line{
+  position:absolute;bottom:24px;width:80%;height:20px;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;
+}
+.wave-svg{width:100%;height:20px;overflow:visible}
+.wave-path{
+  fill:none;stroke:var(--accent);stroke-width:1.5;
+  stroke-linecap:round;opacity:0.5;
+}
+
+/* Listening label */
+.listening-label{
+  position:absolute;top:12px;
+  display:flex;align-items:center;gap:6px;
+  font-family:var(--font-ui);font-size:11px;color:var(--accent);
+  letter-spacing:0.06em;text-transform:uppercase;
+  opacity:0;transition:opacity 0.5s var(--ease);
+}
+.listening-label.visible{opacity:1}
+.mic-pulse{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--accent);
+  animation:micPulse 1.2s ease-in-out infinite;
+}
+@keyframes micPulse{0%,100%{transform:scale(1);opacity:0.9}50%{transform:scale(1.4);opacity:0.5}}
+
+.muted-label{
+  position:absolute;top:12px;
+  display:flex;align-items:center;gap:5px;
+  font-family:var(--font-ui);font-size:11px;color:var(--danger);
+  letter-spacing:0.06em;text-transform:uppercase;
+  opacity:0;
+}
+.muted-label.visible{opacity:1}
+
+/* Persona Row */
+.persona-row{
+  display:flex;gap:6px;padding:10px 16px;
+  overflow-x:auto;scrollbar-width:none;flex-shrink:0;
+  border-bottom:1px solid var(--border);
+}
+.persona-row::-webkit-scrollbar{display:none}
+.persona-chip{
+  flex-shrink:0;padding:5px 14px;border-radius:20px;
+  border:1px solid var(--border);
+  background:transparent;
+  font-family:var(--font-ui);font-size:11px;color:var(--text-muted);
+  cursor:pointer;white-space:nowrap;letter-spacing:0.04em;
+  transition:all 0.4s var(--ease);
+}
+.persona-chip.active,.persona-chip:hover{
+  background:var(--accent);color:#fff;border-color:var(--accent);
+  box-shadow:0 2px 10px rgba(200,100,60,0.25);
+}
+
+/* Chat */
+.chat-area{
+  flex:1;overflow-y:auto;padding:14px 18px;
+  display:flex;flex-direction:column;gap:12px;
+  scrollbar-width:thin;scrollbar-color:rgba(200,100,60,0.15) transparent;
+}
+.chat-area::-webkit-scrollbar{width:3px}
+.chat-area::-webkit-scrollbar-thumb{background:rgba(200,100,60,0.2);border-radius:2px}
+
+.empty-state{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;
+}
+.empty-greeting{
+  font-family:var(--font);font-size:17px;font-style:italic;
+  color:var(--text-muted);text-align:center;line-height:1.7;
+}
+.empty-greeting em{color:var(--accent);font-style:italic}
+
+.suggestion-chips{
+  display:flex;flex-wrap:wrap;gap:8px;justify-content:center;
+  transition:opacity 0.4s;
+}
+.suggestion-chips.hidden{opacity:0;pointer-events:none}
+.sug-chip{
+  padding:7px 16px;border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+  background:var(--surface-2);
+  font-family:var(--font-ui);font-size:12px;color:var(--text-muted);
+  cursor:pointer;
+  transition:all 0.4s var(--ease);
+}
+.sug-chip:hover{background:var(--surface);border-color:var(--accent);color:var(--accent)}
+
+/* Messages */
+.msg{display:flex;gap:8px;align-items:flex-end;animation:msgIn 0.5s var(--ease)}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{flex-direction:row-reverse}
+.bubble{
+  max-width:78%;padding:10px 14px;
+  font-family:var(--font);font-size:14px;line-height:1.65;color:var(--text);
+  position:relative;
+}
+.msg.assistant .bubble{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius) var(--radius) var(--radius) 4px;
+  box-shadow:var(--shadow-sm);
+}
+.msg.user .bubble{
+  background:var(--accent);color:#fff;
+  border-radius:var(--radius) var(--radius) 4px var(--radius);
+  box-shadow:0 2px 12px rgba(200,100,60,0.3);
+}
+.turn-glyph{
+  font-family:var(--font-ui);font-size:9px;opacity:0.5;margin-top:5px;
+  display:flex;align-items:center;gap:3px;letter-spacing:0.06em;text-transform:uppercase;
+}
+.msg.user .turn-glyph{color:rgba(255,255,255,0.7);justify-content:flex-end}
+.partial{opacity:0.4}
+.interrupted-badge{
+  font-family:var(--font-ui);font-size:9px;
+  background:rgba(178,58,72,0.08);color:var(--danger);
+  border:1px solid rgba(178,58,72,0.2);
+  border-radius:4px;padding:1px 5px;margin-left:4px;letter-spacing:0.04em;
+}
+
+/* Horizontal rule divider between sections */
+.turn-rule{
+  height:1px;background:var(--border);margin:4px 0;opacity:0.5;
+}
+
+/* App Card */
+.app-card{
+  background:var(--surface-2);
+  border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow-sm);overflow:hidden;margin-top:6px;
+  animation:msgIn 0.5s var(--ease);
+}
+.app-card-header{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 14px;border-bottom:1px solid var(--border);
+}
+.app-icon{
+  width:26px;height:26px;border-radius:8px;
+  background:linear-gradient(135deg,var(--accent),rgba(200,100,60,0.5));
+  display:flex;align-items:center;justify-content:center;font-size:13px;
+}
+.app-name{font-family:var(--font-ui);font-size:12px;font-weight:600;color:var(--text);letter-spacing:0.02em}
+.app-card-body{padding:12px 14px}
+.weather-display{display:flex;align-items:center;gap:16px}
+.weather-temp{font-family:var(--font);font-size:38px;font-weight:400;color:var(--text)}
+.weather-detail{font-family:var(--font-ui);font-size:12px;color:var(--text-muted);line-height:1.6}
+.weather-detail strong{color:var(--text)}
+.app-card-actions{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border)}
+.card-btn{
+  flex:1;padding:7px 12px;border-radius:var(--radius-sm);
+  border:none;cursor:pointer;
+  font-family:var(--font-ui);font-size:12px;font-weight:600;
+  transition:all 0.3s var(--ease);
+}
+.card-btn.primary{background:var(--accent);color:#fff}
+.card-btn.primary:hover{opacity:0.9}
+.card-btn.secondary{
+  background:transparent;color:var(--accent-2);
+  border:1px solid var(--border);
+}
+.card-btn.secondary:hover{background:var(--border)}
+
+.followup-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 12px;border-radius:var(--radius-sm);
+  background:rgba(79,107,87,0.08);
+  border:1px solid rgba(79,107,87,0.2);
+  font-family:var(--font-ui);font-size:11px;color:var(--accent-2);
+  cursor:pointer;margin-top:8px;letter-spacing:0.04em;
+  transition:all 0.3s var(--ease);
+}
+.followup-chip:hover{background:rgba(79,107,87,0.15)}
+
+/* Attachment */
+.attachment-preview{
+  display:flex;flex-wrap:wrap;gap:8px;
+  padding:8px 16px 0;flex-shrink:0;
+}
+.attach-chip{
+  display:flex;align-items:center;gap:6px;
+  padding:5px 10px;border-radius:var(--radius-sm);
+  background:var(--surface-2);border:1px solid var(--border);
+  font-family:var(--font-ui);font-size:11px;color:var(--text);
+}
+.attach-remove{
+  width:15px;height:15px;border-radius:50%;
+  background:rgba(178,58,72,0.1);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:var(--danger);
+  transition:background 0.3s;
+}
+.attach-remove:hover{background:rgba(178,58,72,0.2)}
+.attach-thumbnail{
+  width:34px;height:34px;border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+  background:linear-gradient(135deg,#f8d8c0,#d8e8cc);
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+}
+
+/* Composer */
+.composer-wrap{
+  flex-shrink:0;padding:10px 16px 16px;
+  background:var(--surface);
+  border-top:1px solid var(--border);
+}
+.composer{
+  display:flex;align-items:flex-end;gap:8px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:8px 8px 8px 14px;
+  transition:border-color 0.4s, box-shadow 0.4s;
+}
+.composer:focus-within{border-color:rgba(200,100,60,0.4);box-shadow:0 0 0 3px rgba(200,100,60,0.08)}
+.composer-input{
+  flex:1;border:none;background:transparent;
+  font-family:var(--font);font-size:14px;color:var(--text);outline:none;
+  resize:none;max-height:80px;line-height:1.5;
+}
+.composer-input::placeholder{color:var(--text-muted);font-style:italic}
+.attach-btn{
+  width:34px;height:34px;border-radius:var(--radius-sm);
+  border:1px solid var(--border);cursor:pointer;
+  background:transparent;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-muted);font-size:14px;flex-shrink:0;
+  transition:all 0.3s var(--ease);
+}
+.attach-btn:hover{background:var(--surface);color:var(--accent)}
+.send-btn{
+  width:38px;height:38px;border-radius:var(--radius-sm);border:none;cursor:pointer;
+  background:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:14px;flex-shrink:0;
+  position:relative;overflow:hidden;
+  transition:all 0.4s var(--ease);
+  box-shadow:0 2px 10px rgba(200,100,60,0.3);
+}
+.send-btn:hover{opacity:0.9;transform:scale(1.03)}
+.send-btn.mic-mode{background:var(--accent)}
+.send-btn.send-mode{background:var(--accent-2)}
+.send-btn.stop-mode{background:var(--danger)}
+.send-btn svg{position:absolute;transition:all 0.35s var(--ease)}
+.send-btn .icon-mic{opacity:1;transform:scale(1)}
+.send-btn .icon-send{opacity:0;transform:scale(0.5) translateY(4px)}
+.send-btn .icon-stop{opacity:0;transform:scale(0.5)}
+.send-btn.send-mode .icon-mic{opacity:0;transform:scale(0.5) translateY(-4px)}
+.send-btn.send-mode .icon-send{opacity:1;transform:scale(1) translateY(0)}
+.send-btn.stop-mode .icon-mic{opacity:0;transform:scale(0.5)}
+.send-btn.stop-mode .icon-stop{opacity:1;transform:scale(1)}
+
+.demo-btn{
+  width:100%;padding:6px;background:transparent;border:none;
+  font-family:var(--font-ui);font-size:10px;color:var(--text-muted);cursor:pointer;
+  letter-spacing:0.08em;text-transform:uppercase;margin-top:6px;
+  transition:color 0.3s;
+}
+.demo-btn:hover{color:var(--accent)}
+
+/* Avatar blob states */
+.ink-blob.listening{
+  animation:blobListen 0.4s ease-in-out infinite alternate;
+  border-radius:50% 50% 55% 45% / 48% 52% 48% 52%;
+  background:radial-gradient(ellipse at 40% 35%,#d87040 0%,#b05030 35%,#8a3c22 60%,#3d2010 100%);
+}
+@keyframes blobListen{
+  0%{transform:scale(1) scaleX(1)}
+  100%{transform:scale(1.06) scaleX(0.97)}
+}
+.ink-blob.thinking{
+  animation:blobThink 1.5s ease-in-out infinite;
+  border-radius:40% 60% 55% 45% / 55% 45% 55% 45%;
+}
+@keyframes blobThink{
+  0%,100%{filter:brightness(1) hue-rotate(0deg)}
+  50%{filter:brightness(1.1) hue-rotate(8deg)}
+}
+.ink-blob.speaking{
+  animation:blobSpeak 0.35s ease-in-out infinite alternate;
+  background:radial-gradient(ellipse at 40% 35%,#e8805c 0%,#c05838 35%,#943c24 60%,#3d2010 100%);
+}
+@keyframes blobSpeak{
+  0%{transform:scaleY(1) scaleX(1)}
+  100%{transform:scaleY(1.1) scaleX(0.95)}
+}
+.ink-blob.muted{
+  animation:none;
+  filter:grayscale(0.8) brightness(0.7);
+}
+
+@media(min-width:640px){.app-window{width:420px;height:760px}}
+@media(max-width:440px){.app-window{width:100%;height:100vh;border-radius:0}}
+</style>
+</head>
+<body>
+
+<div class="app-window">
+  <div class="header">
+    <div class="companion-info">
+      <div class="companion-dot"></div>
+      <div>
+        <div class="companion-name">Wren</div>
+        <div class="companion-mood" id="moodLabel">Storyteller · At rest</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn mute-btn" id="muteBtn" title="Mute">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </button>
+      <button class="icon-btn" title="Settings">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="avatar-stage" onclick="startVoice()" style="cursor:pointer">
+    <div class="listening-label" id="listeningLabel">
+      <div class="mic-pulse"></div>
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/></svg>
+      Listening…
+    </div>
+    <div class="muted-label" id="mutedLabel">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V5a3 3 0 0 0-5.94-.6"/></svg>
+      Muted
+    </div>
+
+    <div class="orb-wrap" id="orbWrap">
+      <div class="ink-blob" id="inkBlob">
+        <div class="blob-face">
+          <div>
+            <div class="blob-eyes">
+              <div class="blob-eye" id="eyeL"></div>
+              <div class="blob-eye" id="eyeR"></div>
+            </div>
+            <div class="blob-mouth" id="blobMouth"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wave line -->
+    <div class="wave-line" id="waveLine">
+      <svg class="wave-svg" viewBox="0 0 200 20" preserveAspectRatio="none">
+        <path class="wave-path" id="wavePath" d="M 0 10 Q 25 10 50 10 Q 75 10 100 10 Q 125 10 150 10 Q 175 10 200 10"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="persona-row">
+    <div class="persona-chip active" onclick="selectPersona(this,'Storyteller')">Storyteller</div>
+    <div class="persona-chip" onclick="selectPersona(this,'Coach')">Coach</div>
+    <div class="persona-chip" onclick="selectPersona(this,'Concise')">Concise</div>
+    <div class="persona-chip" onclick="selectPersona(this,'Curious')">Curious</div>
+    <div class="persona-chip" onclick="selectPersona(this,'Playful')">Playful</div>
+  </div>
+
+  <div class="chat-area" id="chatArea">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-greeting">
+        Hello, I'm <em>Wren</em>.<br>
+        Touch the mark above to speak,<br>or choose a thread below.
+      </div>
+      <div class="suggestion-chips" id="suggChips">
+        <div class="sug-chip" onclick="sendSuggestion('Tell me a story about the ocean')">Tell me a story</div>
+        <div class="sug-chip" onclick="sendSuggestion('I need a pep talk')">Pep talk</div>
+        <div class="sug-chip" onclick="sendSuggestion('What should I make for dinner?')">Dinner ideas</div>
+        <div class="sug-chip" onclick="sendSuggestion('What\'s the weather today?')">Weather check</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="attachment-preview" id="attachPreview"></div>
+
+  <div class="composer-wrap">
+    <div class="composer">
+      <button class="attach-btn" onclick="addAttachment()" title="Attach">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+      </button>
+      <textarea class="composer-input" id="composerInput" placeholder="Write to Wren…" rows="1"></textarea>
+      <button class="send-btn mic-mode" id="sendBtn" onclick="handleSendBtn()">
+        <svg class="icon-mic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        <svg class="icon-send" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        <svg class="icon-stop" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+      </button>
+    </div>
+    <button class="demo-btn" id="demoBtn" onclick="runDemo()">▶ Play voice demo</button>
+  </div>
+</div>
+
+<script>
+let state = 'idle';
+let muted = false;
+let attachments = [];
+let demoTimer = null;
+let waveAnim = null;
+let isGenerating = false;
+let currentPersona = 'Storyteller';
+
+const inkBlob = document.getElementById('inkBlob');
+const listeningLabel = document.getElementById('listeningLabel');
+const mutedLabel = document.getElementById('mutedLabel');
+const chatArea = document.getElementById('chatArea');
+const emptyState = document.getElementById('emptyState');
+const suggChips = document.getElementById('suggChips');
+const composerInput = document.getElementById('composerInput');
+const sendBtn = document.getElementById('sendBtn');
+const attachPreview = document.getElementById('attachPreview');
+const moodLabel = document.getElementById('moodLabel');
+const muteBtn = document.getElementById('muteBtn');
+const wavePath = document.getElementById('wavePath');
+
+// Wave animation
+function animateWave(mode) {
+  if (waveAnim) cancelAnimationFrame(waveAnim);
+  function draw() {
+    const t = Date.now();
+    let pts = [];
+    for (let x = 0; x <= 200; x += 10) {
+      let y = 10;
+      if (mode === 'listening') {
+        y = 10 + Math.sin((x / 200 * Math.PI * 4) + t / 120) * (5 + Math.random() * 4);
+      } else if (mode === 'thinking') {
+        y = 10 + Math.sin((x / 200 * Math.PI * 3) + t / 300) * 6;
+      } else if (mode === 'speaking') {
+        const env = 0.5 + 0.5 * Math.abs(Math.sin(t / 180));
+        y = 10 + Math.sin((x / 200 * Math.PI * 5) + t / 80) * 7 * env;
+      } else {
+        y = 10 + Math.sin((x / 200 * Math.PI * 2) + t / 800) * 2;
+      }
+      pts.push(`${x},${y}`);
+    }
+    // Build smooth path
+    let d = `M 0 ${pts[0].split(',')[1]}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const [x1,y1] = pts[i].split(',').map(Number);
+      const [x2,y2] = pts[i+1].split(',').map(Number);
+      d += ` Q ${(x1+x2)/2} ${(parseFloat(y1)+parseFloat(y2))/2} ${x2} ${y2}`;
+    }
+    wavePath.setAttribute('d', d);
+    if (mode !== 'idle' || true) waveAnim = requestAnimationFrame(draw);
+  }
+  waveAnim = requestAnimationFrame(draw);
+}
+
+function setAvatarState(s) {
+  state = s;
+  inkBlob.className = 'ink-blob ' + (muted ? 'muted' : s);
+  listeningLabel.classList.toggle('visible', s === 'listening' && !muted);
+
+  const eyeL = document.getElementById('eyeL');
+  const eyeR = document.getElementById('eyeR');
+  const mouth = document.getElementById('blobMouth');
+
+  if (muted) {
+    eyeL.style.cssText = 'width:4px;height:4px;border-radius:2px;background:rgba(150,130,110,0.3)';
+    eyeR.style.cssText = 'width:4px;height:4px;border-radius:2px;background:rgba(150,130,110,0.3)';
+    mouth.style.cssText = 'width:14px;height:4px;border-bottom:none;background:rgba(150,130,110,0.2);border-radius:2px;bottom:30%;';
+    animateWave('idle');
+    return;
+  }
+
+  if (s === 'idle') {
+    moodLabel.textContent = `${currentPersona} · At rest`;
+    eyeL.style.cssText = '';
+    eyeR.style.cssText = '';
+    mouth.style.cssText = '';
+    animateWave('idle');
+  } else if (s === 'listening') {
+    moodLabel.textContent = 'Listening…';
+    eyeL.style.cssText = 'width:7px;height:7px;background:rgba(255,240,220,0.95)';
+    eyeR.style.cssText = 'width:7px;height:7px;background:rgba(255,240,220,0.95)';
+    mouth.style.cssText = 'width:16px;height:6px;border-bottom:1.5px solid rgba(255,240,220,0.7);border-radius:0 0 8px 8px;';
+    animateWave('listening');
+  } else if (s === 'thinking') {
+    moodLabel.textContent = 'Thinking…';
+    eyeL.style.cssText = 'width:6px;height:6px;background:rgba(255,240,220,0.7)';
+    eyeR.style.cssText = 'width:3px;height:6px;border-radius:2px;background:rgba(255,240,220,0.7)';
+    mouth.style.cssText = 'width:12px;height:5px;border-bottom:1.5px solid rgba(255,240,220,0.5);border-radius:0 0 6px 6px;left:54%';
+    animateWave('thinking');
+  } else if (s === 'speaking') {
+    moodLabel.textContent = 'Speaking…';
+    eyeL.style.cssText = 'width:7px;height:7px;background:rgba(255,240,220,0.9)';
+    eyeR.style.cssText = 'width:7px;height:7px;background:rgba(255,240,220,0.9)';
+    mouth.style.cssText = 'width:22px;height:9px;border-bottom:1.5px solid rgba(255,240,220,0.7);border-radius:0 0 11px 11px;';
+    animateWave('speaking');
+  }
+}
+
+muteBtn.addEventListener('click', toggleMute);
+function toggleMute() {
+  muted = !muted;
+  muteBtn.classList.toggle('active', muted);
+  muteBtn.innerHTML = muted
+    ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V5a3 3 0 0 0-5.94-.6"/></svg>`
+    : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>`;
+  mutedLabel.classList.toggle('visible', muted);
+  listeningLabel.classList.toggle('visible', state === 'listening' && !muted);
+  setAvatarState(state);
+}
+
+composerInput.addEventListener('input', () => {
+  if (isGenerating) return;
+  const hasText = composerInput.value.trim().length > 0;
+  sendBtn.className = 'send-btn ' + (hasText ? 'send-mode' : 'mic-mode');
+  suggChips.classList.toggle('hidden', hasText);
+  composerInput.style.height = 'auto';
+  composerInput.style.height = Math.min(composerInput.scrollHeight, 80) + 'px';
+});
+
+function selectPersona(el, name) {
+  document.querySelectorAll('.persona-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  currentPersona = name;
+  if (state === 'idle') moodLabel.textContent = `${name} · At rest`;
+}
+
+function hideEmptyState() { if (emptyState.parentNode) emptyState.remove(); }
+
+function addMessage(role, text, modality, partial, interrupted) {
+  hideEmptyState();
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  const glyphSvg = modality === 'voice'
+    ? `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/></svg>`
+    : `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>`;
+  div.innerHTML = `
+    <div class="bubble${partial?' partial':''}">
+      ${text}${interrupted ? '<span class="interrupted-badge">interrupted</span>' : ''}
+      <div class="turn-glyph">${glyphSvg} ${modality}</div>
+    </div>
+  `;
+  chatArea.appendChild(div);
+  chatArea.scrollTop = chatArea.scrollHeight;
+  return div;
+}
+
+function addWeatherCard() {
+  const div = document.createElement('div');
+  div.className = 'msg assistant';
+  div.innerHTML = `
+    <div class="bubble" style="max-width:95%">
+      <div class="app-card">
+        <div class="app-card-header">
+          <div class="app-icon">🌤</div>
+          <span class="app-name">Weather — San Francisco</span>
+        </div>
+        <div class="app-card-body">
+          <div class="weather-display">
+            <div class="weather-temp">64°</div>
+            <div class="weather-detail">
+              <strong>Partly Cloudy</strong><br>
+              Feels like 61° · Humidity 72%<br>
+              Wind NW 12 mph
+            </div>
+          </div>
+        </div>
+        <div class="app-card-actions">
+          <button class="card-btn primary">5-Day Forecast</button>
+          <button class="card-btn secondary">Radar Map</button>
+        </div>
+      </div>
+      <div class="turn-glyph" style="margin-top:6px"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/></svg> voice</div>
+      <div class="followup-chip" onclick="sendSuggestion('What about this weekend?')">What about this weekend? →</div>
+    </div>
+  `;
+  chatArea.appendChild(div);
+  chatArea.scrollTop = chatArea.scrollHeight;
+}
+
+function addAttachment() {
+  if (attachments.length >= 3) return;
+  const files = ['sunset.jpg', 'meeting_notes.pdf', 'voice_idea.m4a'];
+  attachments.push(files[attachments.length % 3]);
+  renderAttachments();
+  // blob reacts
+  inkBlob.style.transform = 'scale(1.15) rotate(-3deg)';
+  inkBlob.style.transition = 'transform 0.5s var(--ease)';
+  setTimeout(() => { inkBlob.style.transform = ''; setTimeout(() => { inkBlob.style.transition = ''; }, 500); }, 500);
+}
+
+function renderAttachments() {
+  attachPreview.innerHTML = '';
+  const emojis = ['🌅','📄','🎵'];
+  attachments.forEach((name, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'attach-chip';
+    chip.innerHTML = `
+      <div class="attach-thumbnail" style="width:28px;height:28px;font-size:13px">${emojis[i%3]}</div>
+      <span>${name}</span>
+      <button class="attach-remove" onclick="removeAttachment(${i})">✕</button>
+    `;
+    attachPreview.appendChild(chip);
+  });
+}
+
+function removeAttachment(i) { attachments.splice(i,1); renderAttachments(); }
+
+function startVoice() { if (muted) return; runDemo(); }
+
+function handleSendBtn() {
+  if (isGenerating) { stopGeneration(); return; }
+  const text = composerInput.value.trim();
+  if (text.length > 0) { sendTyped(text); } else { startVoice(); }
+}
+
+function sendTyped(text) {
+  composerInput.value = '';
+  composerInput.style.height = 'auto';
+  sendBtn.className = 'send-btn mic-mode';
+  if (attachments.length > 0) {
+    const div = document.createElement('div');
+    div.className = 'msg user';
+    div.innerHTML = `<div class="bubble"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div class="attach-thumbnail" style="width:30px;height:30px;font-size:14px">🌅</div><span style="font-size:11px;color:rgba(255,255,255,0.7)">${attachments[0]}</span></div>${text}<div class="turn-glyph" style="color:rgba(255,255,255,0.6)"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/></svg> typed</div></div>`;
+    chatArea.appendChild(div);
+    chatArea.scrollTop = chatArea.scrollHeight;
+    attachments = []; renderAttachments();
+    // orb surprise
+    inkBlob.style.borderRadius = '30% 70% 40% 60% / 50% 30% 70% 50%';
+    inkBlob.style.transform = 'scale(1.2)';
+    setTimeout(() => { inkBlob.style.borderRadius = ''; inkBlob.style.transform = ''; }, 700);
+  } else {
+    addMessage('user', text, 'typed');
+  }
+  setTimeout(() => triggerAssistantReply(text), 700);
+}
+
+function sendSuggestion(text) {
+  composerInput.value = '';
+  addMessage('user', text, 'typed');
+  setTimeout(() => triggerAssistantReply(text), 700);
+}
+
+function stopGeneration() {
+  isGenerating = false;
+  setAvatarState('idle');
+  sendBtn.className = 'send-btn mic-mode';
+}
+
+function triggerAssistantReply(userText) {
+  isGenerating = true;
+  sendBtn.className = 'send-btn stop-mode';
+  setAvatarState('thinking');
+  setTimeout(() => {
+    setAvatarState('speaking');
+    let reply, hasCard = false;
+    const lower = userText.toLowerCase();
+    if (lower.includes('weather') || lower.includes('forecast')) {
+      reply = 'Let me look outside for you — San Francisco is wearing its usual grey-gold cape today.';
+      hasCard = true;
+    } else if (lower.includes('story')) {
+      reply = 'The ocean began its story before we had words to catch it. Listen — even now it\'s writing in foam against the shore, drafting letters you\'ll spend a lifetime reading. 🌊';
+    } else if (lower.includes('pep')) {
+      reply = 'Here is what I know of you: you showed up today. That alone is the whole story. The rest is just details. You are more capable than your doubt lets you believe. 💛';
+    } else if (lower.includes('dinner') || lower.includes('food')) {
+      reply = 'A simple roasted carrot soup with warm bread and good olive oil — food that says the day is over and you may rest now. 🥕';
+    } else if (lower.includes('weekend')) {
+      reply = 'The weekend promises sun on Saturday and a pleasant coolness Sunday — ideal for something unhurried and good. 🌿';
+    } else {
+      reply = 'That\'s worth sitting with for a moment. Let me share what comes to mind when I hold that question…';
+    }
+
+    const msgEl = addMessage('assistant', '', 'voice');
+    const bubble = msgEl.querySelector('.bubble');
+    let i = 0;
+    const textNode = document.createTextNode('');
+    bubble.insertBefore(textNode, bubble.querySelector('.turn-glyph'));
+    const typeInterval = setInterval(() => {
+      if (i < reply.length) {
+        textNode.textContent += reply[i++];
+        chatArea.scrollTop = chatArea.scrollHeight;
+      } else {
+        clearInterval(typeInterval);
+        if (hasCard) addWeatherCard();
+        isGenerating = false;
+        setAvatarState('idle');
+        sendBtn.className = 'send-btn mic-mode';
+      }
+    }, 28);
+  }, 1300);
+}
+
+function runDemo() {
+  if (demoTimer) clearTimeout(demoTimer);
+  if (isGenerating) stopGeneration();
+
+  setAvatarState('listening');
+
+  demoTimer = setTimeout(() => {
+    hideEmptyState();
+    const partialEl = addMessage('user', 'What\'s the weather like toda—', 'voice', true);
+
+    demoTimer = setTimeout(() => {
+      partialEl.querySelector('.bubble').classList.remove('partial');
+      partialEl.querySelector('.bubble').firstChild.textContent = 'What\'s the weather like today in San Francisco?';
+
+      setAvatarState('thinking');
+
+      demoTimer = setTimeout(() => {
+        setAvatarState('speaking');
+        const reply = 'San Francisco is wearing its favourite grey-gold today — 64 degrees, a light mist in the hills, northwest wind barely worth mentioning. Grab a light layer and you\'ll be perfectly comfortable.';
+        const msgEl = addMessage('assistant', '', 'voice');
+        const bubble = msgEl.querySelector('.bubble');
+        let i = 0;
+        const textNode = document.createTextNode('');
+        bubble.insertBefore(textNode, bubble.querySelector('.turn-glyph'));
+        const typeInterval = setInterval(() => {
+          if (i < reply.length) {
+            textNode.textContent += reply[i++];
+            chatArea.scrollTop = chatArea.scrollHeight;
+          } else {
+            clearInterval(typeInterval);
+            addWeatherCard();
+            setAvatarState('idle');
+          }
+        }, 24);
+      }, 1400);
+    }, 2300);
+  }, 2000);
+}
+
+// Init
+setAvatarState('idle');
+animateWave('idle');
+setTimeout(runDemo, 1500);
+</script>
+</body>
+</html>

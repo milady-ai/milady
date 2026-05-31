@@ -1,0 +1,1428 @@
+<!-- concept-D07-L1 | direction: Spatial 3D Depth | look: Soft Aurora Glass | targets: 420x760, 960x640 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D07 · Spatial 3D Depth · Soft Aurora Glass</title>
+<style>
+:root {
+  --bg:#EAF0FB;
+  --bg-aurora:radial-gradient(120% 90% at 18% 12%,#F3E9FB 0%,transparent 55%),radial-gradient(120% 90% at 82% 88%,#E6F7F4 0%,transparent 55%),linear-gradient(160deg,#EAF0FB,#EFEAFB);
+  --surface:rgba(255,255,255,0.55);
+  --surface-2:rgba(255,255,255,0.72);
+  --border:rgba(255,255,255,0.65);
+  --text:#1B2233;
+  --text-muted:#5A6582;
+  --accent:#6E8BFF;
+  --accent-2:#9C6CF0;
+  --accent-3:#5FE3C0;
+  --danger:#FF6B8B;
+  --radius:22px;
+  --radius-sm:14px;
+  --font:"SF Pro Display","Segoe UI Variable","Helvetica Neue",system-ui,sans-serif;
+  --shadow:0 12px 40px rgba(80,90,160,0.18);
+  --shadow-sm:0 4px 16px rgba(80,90,160,0.12);
+  --blur:saturate(1.4) blur(24px);
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+body {
+  font-family: var(--font);
+  background: #D8DCF0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.app-window {
+  width: 420px;
+  height: 760px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 32px;
+  box-shadow: 0 32px 80px rgba(80,90,160,0.28), 0 0 0 1px rgba(255,255,255,0.6);
+  background: var(--bg);
+}
+
+/* Aurora background */
+.aurora-bg {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-aurora);
+  animation: auroraShift 30s ease-in-out infinite alternate;
+  z-index: 0;
+}
+
+@keyframes auroraShift {
+  0% { filter: hue-rotate(0deg) brightness(1); }
+  33% { filter: hue-rotate(15deg) brightness(1.03); }
+  66% { filter: hue-rotate(-10deg) brightness(0.98); }
+  100% { filter: hue-rotate(8deg) brightness(1.02); }
+}
+
+/* Depth layer for chrome that floats above the scrolling scene */
+.layer-fore { z-index: 10; }
+
+/* Header */
+.header {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background: rgba(255,255,255,0.38);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border-bottom: 1px solid var(--border);
+  z-index: 10;
+}
+
+.header-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.header-sub {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.header-right {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.icon-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  backdrop-filter: var(--blur);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.24s var(--ease);
+  color: var(--text-muted);
+  font-size: 16px;
+}
+.icon-btn:hover { background: rgba(255,255,255,0.85); color: var(--text); transform: scale(1.05); }
+
+/* Mute button */
+.mute-btn { position: relative; }
+.mute-btn.muted { background: rgba(255,107,139,0.18); border-color: rgba(255,107,139,0.4); color: var(--danger); }
+
+/* Muted label */
+.muted-label {
+  position: absolute;
+  top: -6px; right: -6px;
+  background: var(--danger);
+  color: white;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 6px;
+  letter-spacing: 0.04em;
+  opacity: 0;
+  transition: opacity 0.24s var(--ease);
+  text-transform: uppercase;
+}
+.mute-btn.muted .muted-label { opacity: 1; }
+
+/* Avatar orb container */
+.orb-wrap {
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 120px;
+  z-index: 2;
+  transition: transform 0.4s var(--ease);
+}
+
+.orb {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #a8c4ff 0%, #6E8BFF 35%, #9C6CF0 65%, #5FE3C0 100%);
+  box-shadow:
+    0 0 40px rgba(110,139,255,0.4),
+    0 0 80px rgba(156,108,240,0.2),
+    inset 0 0 20px rgba(255,255,255,0.3),
+    inset -10px -10px 30px rgba(95,227,192,0.2);
+  animation: orbIdle 4s ease-in-out infinite;
+  position: relative;
+  transition: box-shadow 0.4s var(--ease);
+}
+
+/* Specular highlight */
+.orb::before {
+  content: '';
+  position: absolute;
+  top: 12px; left: 16px;
+  width: 28px; height: 18px;
+  background: radial-gradient(ellipse, rgba(255,255,255,0.85) 0%, transparent 100%);
+  border-radius: 50%;
+  animation: specularGlide 4s ease-in-out infinite;
+}
+
+/* Bloom halo */
+.orb-halo {
+  position: absolute;
+  inset: -20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(110,139,255,0.25) 0%, transparent 70%);
+  animation: haloBreath 4s ease-in-out infinite;
+}
+
+@keyframes orbIdle {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+@keyframes haloBreath {
+  0%,100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.08); }
+}
+
+@keyframes specularGlide {
+  0%,100% { transform: translate(0,0); opacity: 0.85; }
+  50% { transform: translate(2px, 1px); opacity: 0.7; }
+}
+
+/* Listening state */
+.orb.listening {
+  animation: none;
+  background: radial-gradient(circle at 35% 30%, #c4d6ff 0%, #6E8BFF 30%, #9C6CF0 60%, #5FE3C0 100%);
+  box-shadow:
+    0 0 60px rgba(110,139,255,0.6),
+    0 0 120px rgba(95,227,192,0.3),
+    inset 0 0 20px rgba(255,255,255,0.4);
+}
+
+/* Thinking state */
+.orb.thinking {
+  animation: orbThink 1.5s ease-in-out infinite;
+  background: radial-gradient(circle at 50% 50%, #b8a0ff 0%, #9C6CF0 40%, #6E8BFF 70%, #5FE3C0 100%);
+}
+
+@keyframes orbThink {
+  0%,100% { filter: hue-rotate(0deg) brightness(1); }
+  25% { filter: hue-rotate(20deg) brightness(1.1); }
+  50% { filter: hue-rotate(40deg) brightness(0.95); }
+  75% { filter: hue-rotate(-15deg) brightness(1.05); }
+}
+
+/* Speaking state */
+.orb.speaking {
+  animation: orbSpeak 0.6s ease-in-out infinite;
+  box-shadow:
+    0 0 50px rgba(95,227,192,0.5),
+    0 0 100px rgba(110,139,255,0.3),
+    inset 0 0 30px rgba(95,227,192,0.3);
+}
+
+@keyframes orbSpeak {
+  0%,100% { transform: scale(1); box-shadow: 0 0 50px rgba(95,227,192,0.5),0 0 100px rgba(110,139,255,0.3); }
+  50% { transform: scale(1.06); box-shadow: 0 0 70px rgba(95,227,192,0.7),0 0 120px rgba(110,139,255,0.4); }
+}
+
+/* Muted state */
+.orb.muted {
+  animation: orbMuted 6s ease-in-out infinite;
+  filter: saturate(0.3) brightness(0.8);
+  transform: scale(0.9) translateY(8px);
+}
+
+@keyframes orbMuted {
+  0%,100% { transform: scale(0.9) translateY(8px); }
+  50% { transform: scale(0.92) translateY(6px); }
+}
+
+/* Ripple rings */
+.ripple-container {
+  position: absolute;
+  inset: -30px;
+  pointer-events: none;
+}
+
+.ripple {
+  position: absolute;
+  inset: 30px;
+  border-radius: 50%;
+  border: 2px solid rgba(110,139,255,0.6);
+  animation: rippleOut 1.2s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes rippleOut {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* Listening indicator */
+.listening-indicator {
+  position: absolute;
+  top: 178px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(110,139,255,0.15);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(110,139,255,0.3);
+  border-radius: 20px;
+  padding: 6px 14px;
+  opacity: 0;
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+  transform: translateX(-50%) translateY(4px);
+  white-space: nowrap;
+  z-index: 5;
+}
+
+.listening-indicator.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.listening-indicator .mic-glyph {
+  font-size: 13px;
+  color: var(--accent);
+}
+
+.listening-indicator span {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 0.03em;
+}
+
+/* Waveform bars (listening) */
+.waveform {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 16px;
+}
+
+.wave-bar {
+  width: 3px;
+  background: var(--accent);
+  border-radius: 2px;
+  height: 4px;
+  transition: height 0.08s ease;
+}
+
+/* Chat scroll area */
+.chat-area {
+  position: absolute;
+  top: 72px;
+  left: 0; right: 0;
+  bottom: 132px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px 16px 0;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  z-index: 2;
+}
+
+.chat-area::-webkit-scrollbar { width: 3px; }
+.chat-area::-webkit-scrollbar-track { background: transparent; }
+.chat-area::-webkit-scrollbar-thumb { background: rgba(110,139,255,0.3); border-radius: 2px; }
+
+/* Orb space */
+.orb-space {
+  height: 230px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  transition: height 0.55s var(--ease);
+}
+
+/* Collapsed orb hero once a conversation is active */
+.chat-area.has-turns .orb-space {
+  height: 116px;
+}
+.chat-area.has-turns .orb-wrap {
+  top: 6px;
+}
+.chat-area.has-turns .orb-halo { opacity: 0.5; }
+
+/* Spacer keeps the last message above the floating suggestion chips */
+.chat-tail { height: 4px; transition: height 0.3s var(--ease); }
+.chat-area.has-turns .chat-tail { height: 84px; }
+
+/* Turn cards */
+.turn {
+  margin-bottom: 12px;
+  animation: cardRiseFromDepth 0.5s var(--ease) forwards;
+  opacity: 0;
+}
+
+@keyframes cardRiseFromDepth {
+  0% { opacity: 0; transform: translateY(20px) scale(0.96); filter: blur(4px); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+.turn.user {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.turn.assistant {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.turn-bubble {
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  font-size: 15px;
+  line-height: 1.5;
+  position: relative;
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+}
+
+.turn.user .turn-bubble {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: white;
+  border-radius: var(--radius) var(--radius) 4px var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.turn.assistant .turn-bubble {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius) var(--radius) var(--radius) 4px;
+  box-shadow: var(--shadow);
+}
+
+.turn.assistant .turn-bubble.partial {
+  color: var(--text-muted);
+}
+
+.turn-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 5px;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.modality-glyph {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.interrupted-badge {
+  display: inline-block;
+  background: rgba(255,107,139,0.15);
+  color: var(--danger);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 8px;
+  margin-left: 6px;
+  border: 1px solid rgba(255,107,139,0.25);
+  letter-spacing: 0.03em;
+}
+
+/* App card */
+.app-card {
+  background: var(--surface-2);
+  backdrop-filter: var(--blur);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-top: 8px;
+  box-shadow: var(--shadow);
+  max-width: 100%;
+  animation: cardRiseFromDepth 0.6s 0.1s var(--ease) both;
+}
+
+.app-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.app-icon {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+
+.app-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+}
+
+.expand-btn {
+  font-size: 11px;
+  color: var(--accent);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: var(--font);
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+.expand-btn:hover { background: rgba(110,139,255,0.12); }
+
+.app-card-body {
+  padding: 14px;
+}
+
+.weather-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.weather-temp {
+  font-size: 42px;
+  font-weight: 300;
+  color: var(--text);
+  letter-spacing: -2px;
+}
+
+.weather-icon-big { font-size: 40px; }
+
+.weather-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.weather-details {
+  display: flex;
+  gap: 14px;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.app-card-actions {
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+}
+
+.card-btn {
+  flex: 1;
+  padding: 8px;
+  border-radius: 12px;
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+}
+
+.card-btn-primary {
+  background: var(--accent);
+  color: white;
+}
+.card-btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+.card-btn-ghost {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid rgba(110,139,255,0.3);
+}
+.card-btn-ghost:hover { background: rgba(110,139,255,0.1); }
+
+/* Attachment chip on turn */
+.attach-chip-turn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.6);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  backdrop-filter: blur(8px);
+}
+
+/* Suggestion chips */
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+  position: absolute;
+  bottom: 132px;
+  left: 0; right: 0;
+  z-index: 5;
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+}
+
+.suggestions.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(4px);
+}
+
+.chip {
+  background: var(--surface-2);
+  backdrop-filter: var(--blur);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.24s var(--ease);
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+}
+
+.chip:hover {
+  background: rgba(110,139,255,0.15);
+  border-color: rgba(110,139,255,0.4);
+  color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+/* Composer */
+.composer {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 12px 16px 20px;
+  background: rgba(255,255,255,0.45);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border-top: 1px solid var(--border);
+  z-index: 10;
+}
+
+/* Staged attachments */
+.staged-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+  min-height: 0;
+}
+
+.staged-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(110,139,255,0.12);
+  border: 1px solid rgba(110,139,255,0.3);
+  border-radius: 10px;
+  padding: 4px 8px 4px 10px;
+  font-size: 12px;
+  color: var(--accent);
+  animation: chipDock 0.3s var(--ease);
+}
+
+@keyframes chipDock {
+  0% { opacity: 0; transform: translateY(-8px) scale(0.9); }
+  100% { opacity: 1; transform: none; }
+}
+
+.staged-chip-remove {
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 2px;
+  transition: color 0.2s;
+}
+.staged-chip-remove:hover { color: var(--danger); }
+
+/* Composer row */
+.composer-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 26px;
+  padding: 8px 8px 8px 16px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.3s var(--ease), border-color 0.3s;
+}
+
+.composer-row:focus-within {
+  box-shadow: 0 0 0 3px rgba(110,139,255,0.2), var(--shadow-sm);
+  border-color: rgba(110,139,255,0.4);
+}
+
+.attach-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+  transition: color 0.2s, background 0.2s;
+  flex-shrink: 0;
+}
+.attach-btn:hover { color: var(--accent); background: rgba(110,139,255,0.1); }
+
+.composer-input {
+  flex: 1;
+  border: none;
+  background: none;
+  font-size: 15px;
+  font-family: var(--font);
+  color: var(--text);
+  outline: none;
+  resize: none;
+  line-height: 1.4;
+  max-height: 100px;
+  min-height: 22px;
+}
+
+.composer-input::placeholder { color: var(--text-muted); }
+
+/* Action button */
+.action-btn {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 18px;
+  transition: all 0.28s var(--ease);
+  position: relative;
+}
+
+.action-btn.mic {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: white;
+  box-shadow: 0 4px 16px rgba(110,139,255,0.4);
+}
+
+.action-btn.send {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 4px 12px rgba(110,139,255,0.35);
+  animation: btnPop 0.25s var(--ease);
+}
+
+.action-btn.stop {
+  background: var(--danger);
+  color: white;
+  box-shadow: 0 4px 12px rgba(255,107,139,0.4);
+  animation: btnPop 0.25s var(--ease);
+}
+
+@keyframes btnPop {
+  0% { transform: scale(0.85); }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.action-btn:hover { transform: scale(1.08); }
+
+/* Demo controls */
+.demo-bar {
+  position: absolute;
+  bottom: -52px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 20;
+  white-space: nowrap;
+}
+
+.demo-btn {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(110,139,255,0.3);
+  border-radius: 20px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+  font-family: var(--font);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s var(--ease);
+}
+.demo-btn:hover { background: white; transform: translateY(-2px); box-shadow: var(--shadow); }
+
+/* Outer wrapper for centering + demo btn */
+.outer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media (min-width: 640px) {
+  body { background: #C8CEDE; }
+  .app-window {
+    width: 420px;
+    height: 760px;
+  }
+}
+
+@media (max-width: 440px) {
+  .app-window {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="outer">
+<div class="app-window" id="app">
+
+  <!-- Aurora background layer -->
+  <div class="aurora-bg"></div>
+
+  <!-- Header -->
+  <div class="header layer-fore">
+    <div>
+      <div class="header-title">Eliza</div>
+      <div class="header-sub">AI Assistant</div>
+    </div>
+    <div class="header-right">
+      <div class="icon-btn mute-btn" id="muteBtn" title="Mute" onclick="toggleMute()">
+        🎙
+        <div class="muted-label">MUTED</div>
+      </div>
+      <div class="icon-btn" title="More">···</div>
+    </div>
+  </div>
+
+  <!-- Chat / Scene area -->
+  <div class="chat-area" id="chatArea">
+
+    <!-- Orb hero space -->
+    <div class="orb-space">
+      <div class="orb-wrap" id="orbWrap">
+        <div class="orb-halo" id="orbHalo"></div>
+        <div class="ripple-container" id="rippleContainer"></div>
+        <div class="orb" id="orb"></div>
+      </div>
+    </div>
+
+    <!-- Chat turns injected here -->
+    <div id="turnList"></div>
+
+    <!-- Spacer so the last turn clears the floating suggestion chips -->
+    <div class="chat-tail"></div>
+
+  </div>
+
+  <!-- Listening indicator -->
+  <div class="listening-indicator" id="listeningIndicator">
+    <span class="mic-glyph">🎙</span>
+    <div class="waveform" id="waveform">
+      <div class="wave-bar" id="wb1"></div>
+      <div class="wave-bar" id="wb2"></div>
+      <div class="wave-bar" id="wb3"></div>
+      <div class="wave-bar" id="wb4"></div>
+      <div class="wave-bar" id="wb5"></div>
+    </div>
+    <span>Listening…</span>
+  </div>
+
+  <!-- Suggestion chips -->
+  <div class="suggestions" id="suggestions">
+    <div class="chip" onclick="useChip(this, 'What\'s the weather today?')">☀️ Weather today</div>
+    <div class="chip" onclick="useChip(this, 'Set a 10 min timer')">⏱ Set a timer</div>
+    <div class="chip" onclick="useChip(this, 'Play lo-fi music')">🎵 Play lo-fi</div>
+    <div class="chip" onclick="useChip(this, 'What\'s on my calendar?')">📅 My calendar</div>
+  </div>
+
+  <!-- Composer -->
+  <div class="composer layer-fore">
+
+    <div class="staged-attachments" id="stagedAttachments"></div>
+
+    <div class="composer-row">
+      <button class="attach-btn" title="Attach" onclick="addAttachment()">📎</button>
+      <textarea
+        class="composer-input"
+        id="composerInput"
+        placeholder="Ask anything…"
+        rows="1"
+        oninput="onInput(this)"
+        onkeydown="onKeydown(event)"
+      ></textarea>
+      <button class="action-btn mic" id="actionBtn" onclick="onActionBtn()">🎙</button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Demo button below window -->
+<div class="demo-bar">
+  <button class="demo-btn" onclick="runDemo()">▶ Play Demo</button>
+</div>
+</div>
+
+<script>
+// ─── State ───────────────────────────────────────────────────────────────────
+let appState = 'idle'; // idle | listening | thinking | speaking | muted
+let isMuted = false;
+let inputHasText = false;
+let isGenerating = false;
+let stagedFiles = [];
+let demoTimers = [];
+let waveAnimFrame = null;
+let amplitude = 0;
+let targetAmplitude = 0;
+
+// Schedule a demo step and track its timer so cancelDemo() can clear every pending step
+function demoStep(fn, delay) {
+  const id = setTimeout(fn, delay);
+  demoTimers.push(id);
+  return id;
+}
+
+// ─── DOM refs ─────────────────────────────────────────────────────────────────
+const orb = document.getElementById('orb');
+const orbWrap = document.getElementById('orbWrap');
+const orbHalo = document.getElementById('orbHalo');
+const rippleContainer = document.getElementById('rippleContainer');
+const listeningIndicator = document.getElementById('listeningIndicator');
+const muteBtn = document.getElementById('muteBtn');
+const actionBtn = document.getElementById('actionBtn');
+const composerInput = document.getElementById('composerInput');
+const chatArea = document.getElementById('chatArea');
+const turnList = document.getElementById('turnList');
+const suggestions = document.getElementById('suggestions');
+const stagedAttachments = document.getElementById('stagedAttachments');
+const waveBars = [
+  document.getElementById('wb1'),
+  document.getElementById('wb2'),
+  document.getElementById('wb3'),
+  document.getElementById('wb4'),
+  document.getElementById('wb5'),
+];
+
+// ─── Orb state machine ────────────────────────────────────────────────────────
+function setOrbState(state) {
+  appState = state;
+  orb.className = 'orb';
+  if (state !== 'idle') orb.classList.add(state);
+
+  // Muted override
+  if (isMuted) orb.classList.add('muted');
+
+  // Listening indicator
+  const isListening = state === 'listening' && !isMuted;
+  listeningIndicator.classList.toggle('visible', isListening);
+
+  // Base scale collapses the hero orb once a conversation is underway
+  const collapsed = turnList.children.length > 0;
+  const base = collapsed ? 0.62 : 1;
+  const tx = 'translateX(-50%)';
+
+  // Orb depth position
+  if (state === 'listening') {
+    orbWrap.style.transform = `${tx} scale(${base * 1.1}) translateZ(20px)`;
+    startWaveAnim();
+  } else if (state === 'thinking') {
+    orbWrap.style.transform = `${tx} scale(${base * 0.95})`;
+    stopWaveAnim();
+  } else if (state === 'speaking') {
+    orbWrap.style.transform = `${tx} scale(${base * 1.05})`;
+    emitRipple();
+    stopWaveAnim();
+  } else if (isMuted) {
+    orbWrap.style.transform = `${tx} scale(${base * 0.85}) translateY(10px)`;
+    stopWaveAnim();
+  } else {
+    orbWrap.style.transform = `${tx} scale(${base})`;
+    stopWaveAnim();
+  }
+}
+
+// ─── Waveform animation ───────────────────────────────────────────────────────
+function startWaveAnim() {
+  if (waveAnimFrame) return;
+  function frame() {
+    targetAmplitude = 0.3 + 0.7 * Math.abs(Math.sin(Date.now() / 200 + Math.random() * 0.5));
+    amplitude += (targetAmplitude - amplitude) * 0.15;
+    waveBars.forEach((bar, i) => {
+      const h = 4 + amplitude * 14 * (0.4 + 0.6 * Math.abs(Math.sin(Date.now() / 130 + i * 0.9)));
+      bar.style.height = h + 'px';
+    });
+    waveAnimFrame = requestAnimationFrame(frame);
+  }
+  waveAnimFrame = requestAnimationFrame(frame);
+}
+
+function stopWaveAnim() {
+  if (waveAnimFrame) { cancelAnimationFrame(waveAnimFrame); waveAnimFrame = null; }
+  waveBars.forEach(b => b.style.height = '4px');
+  amplitude = 0;
+}
+
+// ─── Ripple ───────────────────────────────────────────────────────────────────
+let rippleInterval = null;
+function emitRipple() {
+  clearInterval(rippleInterval);
+  rippleInterval = setInterval(() => {
+    if (appState !== 'speaking') { clearInterval(rippleInterval); return; }
+    const r = document.createElement('div');
+    r.className = 'ripple';
+    rippleContainer.appendChild(r);
+    setTimeout(() => r.remove(), 1200);
+  }, 600);
+}
+
+// ─── Mute ─────────────────────────────────────────────────────────────────────
+function toggleMute() {
+  isMuted = !isMuted;
+  muteBtn.classList.toggle('muted', isMuted);
+  muteBtn.textContent = isMuted ? '🔇' : '🎙';
+  if (isMuted) {
+    const label = document.createElement('div');
+    label.className = 'muted-label';
+    label.textContent = 'MUTED';
+    muteBtn.appendChild(label);
+    setOrbState('idle');
+  } else {
+    setOrbState('idle');
+  }
+}
+
+// ─── Input handling ───────────────────────────────────────────────────────────
+function onInput(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+  const hasText = el.value.trim().length > 0;
+  if (hasText !== inputHasText) {
+    inputHasText = hasText;
+    updateActionBtn();
+    suggestions.classList.toggle('hidden', hasText);
+  }
+}
+
+function onKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    onActionBtn();
+  }
+}
+
+function updateActionBtn() {
+  if (isGenerating) {
+    actionBtn.className = 'action-btn stop';
+    actionBtn.textContent = '⏹';
+  } else if (inputHasText) {
+    actionBtn.className = 'action-btn send';
+    actionBtn.textContent = '↑';
+  } else {
+    actionBtn.className = 'action-btn mic';
+    actionBtn.textContent = '🎙';
+  }
+}
+
+// ─── Action button ─────────────────────────────────────────────────────────────
+function onActionBtn() {
+  if (isGenerating) {
+    stopGeneration();
+    return;
+  }
+  if (inputHasText) {
+    sendTypedMessage();
+    return;
+  }
+  // Mic — start voice cycle
+  runVoiceCycle();
+}
+
+// ─── Attachments ──────────────────────────────────────────────────────────────
+const mockFiles = ['📷 photo.jpg', '📄 brief.pdf', '🎵 audio.m4a'];
+let fileIdx = 0;
+function addAttachment() {
+  const name = mockFiles[fileIdx % mockFiles.length];
+  fileIdx++;
+  stagedFiles.push(name);
+  renderStagedAttachments();
+}
+
+function renderStagedAttachments() {
+  stagedAttachments.innerHTML = '';
+  stagedFiles.forEach((f, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'staged-chip';
+    chip.innerHTML = `<span>${f}</span><span class="staged-chip-remove" onclick="removeStaged(${i})">×</span>`;
+    stagedAttachments.appendChild(chip);
+  });
+}
+
+function removeStaged(i) {
+  stagedFiles.splice(i, 1);
+  renderStagedAttachments();
+}
+
+// ─── Chip click ───────────────────────────────────────────────────────────────
+function useChip(el, text) {
+  composerInput.value = text;
+  onInput(composerInput);
+  composerInput.focus();
+}
+
+// ─── Send typed message ───────────────────────────────────────────────────────
+function sendTypedMessage() {
+  const text = composerInput.value.trim();
+  if (!text) return;
+  const attachments = [...stagedFiles];
+  stagedFiles = [];
+  renderStagedAttachments();
+  composerInput.value = '';
+  composerInput.style.height = 'auto';
+  inputHasText = false;
+  updateActionBtn();
+  suggestions.classList.remove('hidden');
+
+  addTurn({ role: 'user', text, modality: 'typed', attachments });
+
+  // Trigger assistant reply
+  triggerAssistantReply(text);
+}
+
+// ─── Add turn to log ──────────────────────────────────────────────────────────
+function addTurn({ role, text, modality='typed', attachments=[], partial=false, interrupted=false, card=null }) {
+  const turn = document.createElement('div');
+  turn.className = `turn ${role}`;
+
+  const meta = document.createElement('div');
+  meta.className = 'turn-meta';
+
+  if (role === 'user') {
+    const glyph = modality === 'voice' ? '🎙' : '⌨';
+    meta.innerHTML = `<span class="modality-glyph">${glyph}</span> You`;
+    if (interrupted) meta.innerHTML += '<span class="interrupted-badge">Interrupted</span>';
+  } else {
+    meta.innerHTML = `<span class="modality-glyph">${modality === 'voice' ? '🔊' : '✦'}</span> Eliza`;
+    if (interrupted) meta.innerHTML += '<span class="interrupted-badge">Interrupted</span>';
+  }
+
+  const bubble = document.createElement('div');
+  bubble.className = `turn-bubble${partial ? ' partial' : ''}`;
+  bubble.textContent = text;
+
+  turn.appendChild(meta);
+  turn.appendChild(bubble);
+
+  if (attachments.length) {
+    attachments.forEach(a => {
+      const chip = document.createElement('div');
+      chip.className = 'attach-chip-turn';
+      chip.textContent = a;
+      turn.appendChild(chip);
+    });
+  }
+
+  if (card) {
+    turn.appendChild(buildCard(card));
+  }
+
+  turnList.appendChild(turn);
+  syncConversationLayout();
+  scrollToBottom();
+  return { turn, bubble, meta };
+}
+
+// Keep the hero-orb collapse + listening indicator position in sync with turn count
+function syncConversationLayout() {
+  const hasTurns = turnList.children.length > 0;
+  chatArea.classList.toggle('has-turns', hasTurns);
+  listeningIndicator.style.top = hasTurns ? '108px' : '178px';
+}
+
+// ─── Streaming assistant reply ─────────────────────────────────────────────────
+function triggerAssistantReply(userText, isVoice=false) {
+  isGenerating = true;
+  updateActionBtn();
+  setOrbState('thinking');
+
+  const responses = getResponse(userText);
+
+  setTimeout(() => {
+    setOrbState('speaking');
+    const { turn, bubble } = addTurn({ role: 'assistant', text: '', modality: isVoice ? 'voice' : 'typed', partial: true });
+
+    let i = 0;
+    const fullText = responses.text;
+
+    function stream() {
+      if (i < fullText.length) {
+        bubble.textContent = fullText.slice(0, i + 1);
+        bubble.classList.add('partial');
+        i += 2;
+        scrollToBottom();
+        if (isGenerating) setTimeout(stream, 18);
+      } else {
+        bubble.classList.remove('partial');
+        bubble.textContent = fullText;
+        isGenerating = false;
+        updateActionBtn();
+        setOrbState('idle');
+        if (responses.card) {
+          turn.appendChild(buildCard(responses.card));
+          scrollToBottom();
+        }
+        addFollowUpChips(responses.followups);
+      }
+    }
+    stream();
+  }, 900);
+}
+
+function stopGeneration() {
+  isGenerating = false;
+  updateActionBtn();
+  setOrbState('idle');
+}
+
+// ─── Response data ────────────────────────────────────────────────────────────
+function getResponse(text) {
+  const t = text.toLowerCase();
+  if (t.includes('weather')) return {
+    text: "It's currently 72°F and partly cloudy in San Francisco. Expect some sun this afternoon — perfect for a walk!",
+    card: { type: 'weather' },
+    followups: ['What about tomorrow?', 'Hourly forecast', 'Air quality']
+  };
+  if (t.includes('timer')) return {
+    text: "I've set a 10-minute timer for you. I'll let you know when it's up.",
+    card: null,
+    followups: ['Pause timer', 'Set another', 'Cancel']
+  };
+  if (t.includes('music') || t.includes('lo-fi')) return {
+    text: "Playing lo-fi chill beats — curated playlist for focus. Volume at 60%.",
+    card: null,
+    followups: ['Next track', 'Increase volume', 'Add to library']
+  };
+  if (t.includes('calendar')) return {
+    text: "You have 3 events today: a 10am standup, lunch with Maya at noon, and a 3pm design review.",
+    card: null,
+    followups: ['Add event', 'Set reminder', 'Free slots']
+  };
+  return {
+    text: "I'm here to help! Whether it's questions, tasks, or just a chat — I've got you.",
+    card: null,
+    followups: ['Tell me more', 'What can you do?']
+  };
+}
+
+// ─── Build widget card ────────────────────────────────────────────────────────
+function buildCard(data) {
+  if (data.type === 'weather') {
+    const card = document.createElement('div');
+    card.className = 'app-card';
+    card.innerHTML = `
+      <div class="app-card-header">
+        <div class="app-icon">⛅</div>
+        <div class="app-card-title">Weather · San Francisco</div>
+        <button class="expand-btn">Expand ↗</button>
+      </div>
+      <div class="app-card-body">
+        <div class="weather-row">
+          <div>
+            <div class="weather-temp">72°</div>
+            <div class="weather-desc">Partly Cloudy · Feels like 70°</div>
+          </div>
+          <div class="weather-icon-big">⛅</div>
+        </div>
+        <div class="weather-details">
+          <span>💧 62% humidity</span>
+          <span>💨 12 mph NW</span>
+          <span>🌅 6:42am / 8:17pm</span>
+        </div>
+      </div>
+      <div class="app-card-actions">
+        <button class="card-btn card-btn-primary">7-Day Forecast</button>
+        <button class="card-btn card-btn-ghost">Hourly</button>
+      </div>
+    `;
+    return card;
+  }
+  return document.createElement('div');
+}
+
+// ─── Suggestion chips ───────────────────────────────────────────────────────
+const DEFAULT_CHIPS = [
+  { label: '☀️ Weather today', text: "What's the weather today?" },
+  { label: '⏱ Set a timer', text: 'Set a 10 min timer' },
+  { label: '🎵 Play lo-fi', text: 'Play lo-fi music' },
+  { label: '📅 My calendar', text: "What's on my calendar?" },
+];
+
+function resetSuggestions() {
+  suggestions.innerHTML = '';
+  DEFAULT_CHIPS.forEach(({ label, text }) => {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.textContent = label;
+    chip.onclick = () => useChip(chip, text);
+    suggestions.appendChild(chip);
+  });
+  suggestions.classList.remove('hidden');
+}
+
+// ─── Follow-up chips ──────────────────────────────────────────────────────────
+function addFollowUpChips(chips) {
+  if (!chips || !chips.length) return;
+  suggestions.innerHTML = '';
+  chips.forEach(text => {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.textContent = text;
+    chip.onclick = () => useChip(chip, text);
+    suggestions.appendChild(chip);
+  });
+}
+
+// ─── Scroll ───────────────────────────────────────────────────────────────────
+// Instant scroll (CSS smooth-scroll is for user gestures only); double-rAF so the
+// pin lands after newly inserted cards/animations have been laid out.
+function scrollToBottom() {
+  chatArea.scrollTo({ top: chatArea.scrollHeight, behavior: 'auto' });
+  requestAnimationFrame(() => {
+    chatArea.scrollTo({ top: chatArea.scrollHeight, behavior: 'auto' });
+  });
+}
+
+// ─── DEMO VOICE CYCLE ─────────────────────────────────────────────────────────
+function runDemo() {
+  cancelDemo();
+
+  // Reset to a clean, deterministic starting point so every run looks identical
+  turnList.innerHTML = '';
+  composerInput.value = '';
+  inputHasText = false;
+  updateActionBtn();
+  suggestions.classList.remove('hidden');
+  resetSuggestions();
+  setOrbState('idle');
+  syncConversationLayout();
+
+  // Seed prior history so the conversation never reads empty
+  seedHistory();
+
+  // idle -> listening -> thinking -> speaking, streaming a voice reply into the log
+  demoStep(() => {
+    setOrbState('listening');
+
+    demoStep(() => {
+      setOrbState('thinking');
+
+      demoStep(() => {
+        setOrbState('speaking');
+
+        // Voice user turn streams from a partial transcript to the finalized text
+        const userText = "What's the weather looking like today?";
+        const { bubble } = addTurn({ role: 'user', text: userText.slice(0, 12) + '…', modality: 'voice', partial: true });
+        bubble.classList.add('partial');
+
+        demoStep(() => {
+          bubble.textContent = userText;
+          bubble.classList.remove('partial');
+
+          demoStep(() => {
+            isGenerating = true;
+            updateActionBtn();
+            const { turn: aTurn, bubble: aBubble } = addTurn({ role: 'assistant', text: '', modality: 'voice', partial: true });
+
+            const fullReply = "It's 72°F and partly cloudy right now. A great day to head outside — the afternoon should clear up nicely!";
+            let i = 0;
+            function streamVoice() {
+              if (i < fullReply.length) {
+                aBubble.textContent = fullReply.slice(0, i + 1);
+                scrollToBottom();
+                i += 4;
+                demoStep(streamVoice, 16);
+              } else {
+                aBubble.textContent = fullReply;
+                aBubble.classList.remove('partial');
+                isGenerating = false;
+                updateActionBtn();
+                setOrbState('idle');
+                aTurn.appendChild(buildCard({ type: 'weather' }));
+                scrollToBottom();
+                addFollowUpChips(['Tomorrow\'s forecast', 'Hourly view', 'Air quality index']);
+              }
+            }
+            streamVoice();
+          }, 300);
+        }, 500);
+      }, 600);
+    }, 1100);
+  }, 500);
+}
+
+function seedHistory() {
+  addTurn({ role: 'user', text: 'Can you remind me about my 3pm meeting?', modality: 'typed' });
+  addTurn({ role: 'assistant', text: "Sure! You have a Design Review at 3:00 PM with the product team. I'll send a reminder 10 minutes before.", modality: 'typed', partial: false });
+  addTurn({ role: 'user', text: 'Thanks. Also play some background music.', modality: 'voice' });
+  addTurn({ role: 'assistant', text: 'Playing ambient focus music now. Enjoy your session!', modality: 'voice', interrupted: true });
+}
+
+function cancelDemo() {
+  demoTimers.forEach(clearTimeout);
+  demoTimers = [];
+  isGenerating = false;
+  stopWaveAnim();
+  clearInterval(rippleInterval);
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+// Seed a short lived-in history so the idle screen reads complete (collapsed orb +
+// real conversation) rather than an empty hero.
+seedHistory();
+setOrbState('idle');
+updateActionBtn();
+scrollToBottom();
+
+// Autostart the full voice demo once the idle frame has settled.
+setTimeout(runDemo, 2200);
+</script>
+</body>
+</html>

@@ -1,0 +1,702 @@
+[
+  {
+    "id": "D01-L1",
+    "file": "concept-D01-L1.html",
+    "ok": true,
+    "activated": false,
+    "errors": []
+  },
+  {
+    "id": "D01-L2",
+    "file": "concept-D01-L2.html",
+    "ok": true,
+    "activated": false,
+    "errors": []
+  },
+  {
+    "id": "D01-L4",
+    "file": "concept-D01-L4.html",
+    "ok": true,
+    "activated": false,
+    "errors": []
+  },
+  {
+    "id": "D02-L1",
+    "file": "concept-D02-L1.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D01-L5",
+    "file": "concept-D01-L5.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D01-L3",
+    "file": "concept-D01-L3.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D02-L2",
+    "file": "concept-D02-L2.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D02-L4",
+    "file": "concept-D02-L4.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D02-L3",
+    "file": "concept-D02-L3.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D03-L3",
+    "file": "concept-D03-L3.html",
+    "ok": true,
+    "activated": false,
+    "errors": []
+  },
+  {
+    "id": "D03-L4",
+    "file": "concept-D03-L4.html",
+    "ok": true,
+    "activated": false,
+    "errors": []
+  },
+  {
+    "id": "D04-L1",
+    "file": "concept-D04-L1.html",
+    "ok": true,
+    "activated": false,
+    "errors": []
+  },
+  {
+    "id": "D02-L5",
+    "file": "concept-D02-L5.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D04-L2",
+    "file": "concept-D04-L2.html",
+    "ok": true,
+    "activated": false,
+    "errors": []
+  },
+  {
+    "id": "D04-L3",
+    "file": "concept-D04-L3.html",
+    "ok": true,
+    "activated": false,
+    "errors": []
+  },
+  {
+    "id": "D03-L2",
+    "file": "concept-D03-L2.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D03-L1",
+    "file": "concept-D03-L1.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D04-L4",
+    "file": "concept-D04-L4.html",
+    "ok": true,
+    "activated": false,
+    "errors": []
+  },
+  {
+    "id": "D04-L5",
+    "file": "concept-D04-L5.html",
+    "ok": true,
+    "activated": false,
+    "errors": []
+  },
+  {
+    "id": "D03-L5",
+    "file": "concept-D03-L5.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D05-L1",
+    "file": "concept-D05-L1.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D05-L3",
+    "file": "concept-D05-L3.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D05-L2",
+    "file": "concept-D05-L2.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D05-L4",
+    "file": "concept-D05-L4.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D05-L5",
+    "file": "concept-D05-L5.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D06-L4",
+    "file": "concept-D06-L4.html",
+    "ok": true,
+    "activated": false,
+    "errors": []
+  },
+  {
+    "id": "D06-L1",
+    "file": "concept-D06-L1.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D06-L2",
+    "file": "concept-D06-L2.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D06-L3",
+    "file": "concept-D06-L3.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D06-L5",
+    "file": "concept-D06-L5.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D07-L1",
+    "file": "concept-D07-L1.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D07-L2",
+    "file": "concept-D07-L2.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D07-L5",
+    "file": "concept-D07-L5.html",
+    "ok": true,
+    "activated": false,
+    "errors": []
+  },
+  {
+    "id": "D07-L3",
+    "file": "concept-D07-L3.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D07-L4",
+    "file": "concept-D07-L4.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D08-L1",
+    "file": "concept-D08-L1.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D08-L2",
+    "file": "concept-D08-L2.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D08-L3",
+    "file": "concept-D08-L3.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D08-L4",
+    "file": "concept-D08-L4.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D08-L5",
+    "file": "concept-D08-L5.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D09-L1",
+    "file": "concept-D09-L1.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D09-L2",
+    "file": "concept-D09-L2.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D09-L3",
+    "file": "concept-D09-L3.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D09-L4",
+    "file": "concept-D09-L4.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D09-L5",
+    "file": "concept-D09-L5.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D10-L1",
+    "file": "concept-D10-L1.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D10-L2",
+    "file": "concept-D10-L2.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D10-L3",
+    "file": "concept-D10-L3.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D10-L4",
+    "file": "concept-D10-L4.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D10-L5",
+    "file": "concept-D10-L5.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D11-L1",
+    "file": "concept-D11-L1.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D11-L2",
+    "file": "concept-D11-L2.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D11-L3",
+    "file": "concept-D11-L3.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D11-L4",
+    "file": "concept-D11-L4.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D11-L5",
+    "file": "concept-D11-L5.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D12-L1",
+    "file": "concept-D12-L1.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D12-L2",
+    "file": "concept-D12-L2.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D12-L3",
+    "file": "concept-D12-L3.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D12-L4",
+    "file": "concept-D12-L4.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D12-L5",
+    "file": "concept-D12-L5.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D13-L1",
+    "file": "concept-D13-L1.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D13-L2",
+    "file": "concept-D13-L2.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D13-L3",
+    "file": "concept-D13-L3.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D13-L4",
+    "file": "concept-D13-L4.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D13-L5",
+    "file": "concept-D13-L5.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D14-L1",
+    "file": "concept-D14-L1.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D14-L2",
+    "file": "concept-D14-L2.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D14-L3",
+    "file": "concept-D14-L3.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D14-L4",
+    "file": "concept-D14-L4.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D14-L5",
+    "file": "concept-D14-L5.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D15-L1",
+    "file": "concept-D15-L1.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D15-L2",
+    "file": "concept-D15-L2.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D15-L3",
+    "file": "concept-D15-L3.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D15-L4",
+    "file": "concept-D15-L4.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D15-L5",
+    "file": "concept-D15-L5.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D16-L1",
+    "file": "concept-D16-L1.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D17-L2",
+    "file": "concept-D17-L2.html",
+    "ok": true,
+    "activated": false,
+    "errors": []
+  },
+  {
+    "id": "D16-L2",
+    "file": "concept-D16-L2.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D16-L3",
+    "file": "concept-D16-L3.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D16-L4",
+    "file": "concept-D16-L4.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D16-L5",
+    "file": "concept-D16-L5.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D17-L1",
+    "file": "concept-D17-L1.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D17-L4",
+    "file": "concept-D17-L4.html",
+    "ok": true,
+    "activated": false,
+    "errors": []
+  },
+  {
+    "id": "D17-L3",
+    "file": "concept-D17-L3.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D17-L5",
+    "file": "concept-D17-L5.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D18-L1",
+    "file": "concept-D18-L1.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D18-L2",
+    "file": "concept-D18-L2.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D18-L3",
+    "file": "concept-D18-L3.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D18-L4",
+    "file": "concept-D18-L4.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D19-L1",
+    "file": "concept-D19-L1.html",
+    "ok": true,
+    "activated": false,
+    "errors": []
+  },
+  {
+    "id": "D19-L2",
+    "file": "concept-D19-L2.html",
+    "ok": true,
+    "activated": false,
+    "errors": []
+  },
+  {
+    "id": "D19-L3",
+    "file": "concept-D19-L3.html",
+    "ok": true,
+    "activated": false,
+    "errors": []
+  },
+  {
+    "id": "D18-L5",
+    "file": "concept-D18-L5.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D19-L4",
+    "file": "concept-D19-L4.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D19-L5",
+    "file": "concept-D19-L5.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D20-L1",
+    "file": "concept-D20-L1.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D20-L2",
+    "file": "concept-D20-L2.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D20-L3",
+    "file": "concept-D20-L3.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D20-L4",
+    "file": "concept-D20-L4.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  },
+  {
+    "id": "D20-L5",
+    "file": "concept-D20-L5.html",
+    "ok": true,
+    "activated": true,
+    "errors": []
+  }
+]

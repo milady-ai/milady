@@ -1,0 +1,713 @@
+<!-- concept-D09-L2 | direction: Conversation-as-Vertical-Timeline | look: OLED Neon Cyber | targets: 420x760, 960x640 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D09 · Conversation-as-Vertical-Timeline · OLED Neon Cyber</title>
+<style>
+:root {
+  --bg:#000000;
+  --surface:#0B0E14;
+  --surface-2:#131826;
+  --border:rgba(0,229,255,0.28);
+  --text:#E8FBFF;
+  --text-muted:#6B7A90;
+  --accent:#00E5FF;
+  --accent-2:#FF3DCB;
+  --accent-3:#B6FF3D;
+  --danger:#FF2E4D;
+  --radius:8px;
+  --radius-sm:5px;
+  --font:"SF Pro Text","Inter","Segoe UI",system-ui,sans-serif;
+  --font-mono:"SF Mono","JetBrains Mono","Cascadia Mono",ui-monospace,monospace;
+  --shadow:0 0 0 1px rgba(0,229,255,0.25),0 0 24px rgba(0,229,255,0.35);
+  --shadow-sm:0 0 12px rgba(0,229,255,0.25);
+  --glow-cyan:0 0 16px rgba(0,229,255,0.6);
+  --glow-magenta:0 0 16px rgba(255,61,203,0.6);
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--font);background:#000;overflow:hidden}
+
+body {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:radial-gradient(ellipse 70% 50% at 50% -10%, rgba(0,229,255,0.06) 0%, transparent 60%),#000;
+}
+
+.app-window {
+  width:420px;
+  height:760px;
+  display:flex;
+  flex-direction:column;
+  background:var(--bg);
+  border:1px solid rgba(0,229,255,0.35);
+  border-radius:var(--radius);
+  box-shadow:0 0 0 1px rgba(0,229,255,0.15), 0 0 60px rgba(0,229,255,0.12), inset 0 0 0 1px rgba(0,229,255,0.05);
+  overflow:hidden;
+  position:relative;
+}
+
+/* Scanline effect */
+.app-window::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  background:repeating-linear-gradient(to bottom, transparent 0px, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px);
+  pointer-events:none;
+  z-index:100;
+  opacity:0.3;
+}
+
+/* Header */
+.header {
+  padding:12px 16px;
+  background:var(--surface);
+  border-bottom:1px solid rgba(0,229,255,0.2);
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-shrink:0;
+  position:relative;
+  z-index:10;
+}
+
+/* Orb: waveform / particle field */
+.orb-wrap {
+  position:relative;
+  width:44px;
+  height:44px;
+  flex-shrink:0;
+}
+
+.orb-canvas {
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  border:1px solid rgba(0,229,255,0.4);
+  box-shadow:0 0 12px rgba(0,229,255,0.3), inset 0 0 12px rgba(0,229,255,0.05);
+  overflow:hidden;
+}
+
+.orb-state-label {
+  position:absolute;
+  bottom:-16px;
+  left:50%;
+  transform:translateX(-50%);
+  font-family:var(--font-mono);
+  font-size:7px;
+  color:var(--accent);
+  white-space:nowrap;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+}
+
+.header-info{flex:1;min-width:0}
+.header-title {
+  font-family:var(--font-mono);
+  font-size:13px;font-weight:600;
+  color:var(--text);
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+}
+.header-sub {
+  font-family:var(--font-mono);
+  font-size:10px;
+  color:var(--text-muted);
+  margin-top:2px;
+  letter-spacing:0.06em;
+}
+
+.header-actions{display:flex;gap:6px;align-items:center}
+.icon-btn {
+  width:30px;height:30px;
+  border-radius:var(--radius-sm);
+  border:1px solid rgba(0,229,255,0.2);
+  background:var(--surface-2);
+  color:var(--text-muted);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;
+  transition:all 0.15s var(--ease);
+}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent);box-shadow:var(--glow-cyan)}
+
+.mute-btn {
+  width:30px;height:30px;
+  border-radius:var(--radius-sm);
+  border:1px solid rgba(0,229,255,0.2);
+  background:var(--surface-2);
+  color:var(--text-muted);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;
+  transition:all 0.15s var(--ease);
+  font-family:var(--font-mono);
+}
+.mute-btn.muted{border-color:var(--danger);color:var(--danger);box-shadow:0 0 12px rgba(255,46,77,0.4);background:rgba(255,46,77,0.1)}
+
+/* Status indicators */
+.status-bar {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:5px 16px;
+  background:rgba(0,229,255,0.03);
+  border-bottom:1px solid rgba(0,229,255,0.1);
+  min-height:28px;
+  flex-shrink:0;
+}
+.status-pill {
+  display:none;
+  align-items:center;
+  gap:5px;
+  font-family:var(--font-mono);
+  font-size:10px;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+}
+.status-pill.active{display:flex}
+.status-pill.listening{color:var(--accent-3)}
+.status-pill.muted-s{color:var(--danger)}
+.status-dot{width:5px;height:5px;border-radius:50%;background:currentColor;animation:blink-d 0.7s steps(1) infinite}
+@keyframes blink-d{0%,100%{opacity:1}50%{opacity:0}}
+
+/* Timeline area */
+.timeline-area {
+  flex:1;
+  overflow-y:auto;
+  overflow-x:hidden;
+  display:flex;
+  position:relative;
+}
+.timeline-area::-webkit-scrollbar{width:2px}
+.timeline-area::-webkit-scrollbar-track{background:transparent}
+.timeline-area::-webkit-scrollbar-thumb{background:rgba(0,229,255,0.3)}
+
+/* Rail */
+.time-rail {
+  width:52px;
+  flex-shrink:0;
+  position:relative;
+  padding-top:12px;
+}
+.rail-line {
+  position:absolute;
+  top:0;bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:1px;
+  background:linear-gradient(to bottom,transparent,rgba(0,229,255,0.3) 5%,rgba(0,229,255,0.3) 95%,transparent);
+  box-shadow:0 0 4px rgba(0,229,255,0.2);
+}
+.rail-time {
+  font-family:var(--font-mono);
+  font-size:8px;
+  color:var(--text-muted);
+  letter-spacing:0.06em;
+  position:absolute;
+  left:3px;
+  line-height:1;
+}
+
+/* Events */
+.events-col {
+  flex:1;
+  padding:12px 14px 12px 0;
+  display:flex;
+  flex-direction:column;
+  gap:0;
+}
+
+.event-row{display:flex;align-items:flex-start;position:relative;margin-bottom:2px}
+
+.event-node {
+  width:8px;height:8px;
+  border-radius:50%;
+  background:var(--accent);
+  box-shadow:var(--glow-cyan);
+  flex-shrink:0;
+  margin-top:14px;
+  margin-left:-4px;
+  margin-right:10px;
+  position:relative;z-index:2;
+}
+.event-node.user-node{background:var(--accent-2);box-shadow:var(--glow-magenta)}
+.event-node.voice-node{background:var(--accent-3);box-shadow:0 0 12px rgba(182,255,61,0.5)}
+
+.event-bubble {
+  flex:1;
+  background:var(--surface);
+  border:1px solid rgba(0,229,255,0.15);
+  border-radius:var(--radius-sm);
+  padding:8px 11px;
+  margin-bottom:8px;
+  position:relative;
+}
+.event-bubble.user-bubble{border-color:rgba(255,61,203,0.2);background:rgba(255,61,203,0.04)}
+.event-bubble.partial{opacity:0.5;border-style:dashed}
+
+.bubble-header{display:flex;align-items:center;gap:5px;margin-bottom:4px}
+.modality-glyph{font-size:9px;color:var(--text-muted);font-family:var(--font-mono);letter-spacing:0.05em}
+.bubble-role{font-family:var(--font-mono);font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em}
+.bubble-ts{font-family:var(--font-mono);font-size:8px;color:var(--text-muted);margin-left:auto;letter-spacing:0.04em}
+.bubble-text{font-size:12.5px;line-height:1.5;color:var(--text)}
+.interrupted-badge{font-family:var(--font-mono);font-size:8px;color:var(--danger);border:1px solid rgba(255,46,77,0.3);border-radius:3px;padding:1px 4px;letter-spacing:0.06em}
+
+/* App card */
+.app-card {
+  margin-top:8px;
+  border:1px solid rgba(0,229,255,0.2);
+  border-radius:var(--radius-sm);
+  overflow:hidden;
+  background:var(--surface-2);
+}
+.app-card-header{display:flex;align-items:center;gap:8px;padding:7px 10px;border-bottom:1px solid rgba(0,229,255,0.1)}
+.app-icon{width:18px;height:18px;border-radius:4px;background:linear-gradient(135deg,#00E5FF22,#00E5FF44);border:1px solid rgba(0,229,255,0.3);display:flex;align-items:center;justify-content:center;font-size:10px}
+.app-name{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--accent);letter-spacing:0.08em;text-transform:uppercase}
+.app-expand-btn{margin-left:auto;font-size:9px;color:var(--text-muted);cursor:pointer;background:none;border:none;font-family:var(--font-mono);letter-spacing:0.06em;text-transform:uppercase}
+.app-card-body{padding:10px}
+.weather-display{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.weather-temp{font-family:var(--font-mono);font-size:26px;font-weight:700;color:var(--accent);letter-spacing:-0.02em}
+.weather-icon{font-size:22px}
+.weather-desc{font-size:11px;color:var(--text);font-family:var(--font-mono)}
+.weather-detail{font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:0.04em;margin-top:2px}
+.card-actions{display:flex;gap:6px;margin-top:8px}
+.card-btn{flex:1;padding:6px 10px;border-radius:var(--radius-sm);border:1px solid rgba(0,229,255,0.3);background:transparent;color:var(--accent);font-family:var(--font-mono);font-size:10px;cursor:pointer;letter-spacing:0.06em;text-transform:uppercase;transition:all 0.15s}
+.card-btn:hover{background:rgba(0,229,255,0.1);box-shadow:var(--glow-cyan)}
+.card-btn.primary{background:rgba(0,229,255,0.15);border-color:var(--accent)}
+
+.attach-sub{display:flex;align-items:center;gap:5px;margin-top:5px;padding:3px 7px;background:rgba(255,61,203,0.08);border:1px solid rgba(255,61,203,0.2);border-radius:4px;font-family:var(--font-mono);font-size:9px;color:var(--accent-2);width:fit-content;letter-spacing:0.04em}
+
+/* Ghost chips */
+.ghost-chip{background:rgba(0,229,255,0.05);border:1px dashed rgba(0,229,255,0.25);border-radius:4px;padding:4px 10px;font-family:var(--font-mono);font-size:10px;color:var(--accent);cursor:pointer;letter-spacing:0.05em;text-transform:uppercase;transition:all 0.12s}
+.ghost-chip:hover{background:rgba(0,229,255,0.12);box-shadow:var(--glow-cyan)}
+
+/* Composer */
+.composer-area {
+  flex-shrink:0;
+  padding:8px 14px 12px;
+  background:var(--surface);
+  border-top:1px solid rgba(0,229,255,0.15);
+}
+.suggestions-row{display:flex;gap:5px;margin-bottom:6px;overflow-x:auto;padding-bottom:2px;transition:opacity 0.2s}
+.suggestions-row::-webkit-scrollbar{display:none}
+.suggestion-chip{white-space:nowrap;padding:4px 10px;border-radius:4px;background:var(--surface-2);border:1px solid rgba(0,229,255,0.15);font-family:var(--font-mono);font-size:9px;color:var(--text-muted);cursor:pointer;letter-spacing:0.06em;text-transform:uppercase;transition:all 0.12s;flex-shrink:0}
+.suggestion-chip:hover{border-color:var(--accent);color:var(--accent)}
+
+.staged-attachments{display:none;gap:5px;margin-bottom:5px;flex-wrap:wrap}
+.staged-attachments.has-items{display:flex}
+.attach-chip{display:flex;align-items:center;gap:4px;background:rgba(255,61,203,0.1);border:1px solid rgba(255,61,203,0.25);border-radius:4px;padding:3px 7px;font-family:var(--font-mono);font-size:9px;color:var(--accent-2);letter-spacing:0.04em}
+.attach-chip-remove{cursor:pointer;opacity:0.6;margin-left:2px;font-size:12px;line-height:1}
+.attach-chip-remove:hover{opacity:1;color:var(--danger)}
+
+.composer-row{display:flex;align-items:flex-end;gap:6px;background:var(--surface-2);border:1px solid rgba(0,229,255,0.2);border-radius:var(--radius-sm);padding:6px 6px 6px 10px;box-shadow:var(--shadow-sm)}
+
+.composer-input{flex:1;border:none;background:transparent;font-family:var(--font-mono);font-size:12px;color:var(--text);outline:none;resize:none;max-height:80px;line-height:1.5;min-height:22px;letter-spacing:0.02em}
+.composer-input::placeholder{color:var(--text-muted)}
+
+.attach-btn{width:28px;height:28px;border-radius:var(--radius-sm);border:1px solid rgba(0,229,255,0.15);background:transparent;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all 0.12s;flex-shrink:0}
+.attach-btn:hover{border-color:var(--accent);color:var(--accent);box-shadow:var(--glow-cyan)}
+
+.morph-btn{width:34px;height:34px;border-radius:var(--radius-sm);border:1px solid var(--accent);background:rgba(0,229,255,0.12);color:var(--accent);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all 0.15s var(--ease);flex-shrink:0;box-shadow:var(--glow-cyan);position:relative;overflow:hidden}
+.morph-btn:hover{background:rgba(0,229,255,0.2)}
+.morph-btn.send-mode{border-color:var(--accent);background:rgba(0,229,255,0.18)}
+.morph-btn.stop-mode{border-color:var(--danger);background:rgba(255,46,77,0.15);color:var(--danger);box-shadow:0 0 14px rgba(255,46,77,0.4)}
+.morph-btn svg{position:absolute;transition:all 0.15s var(--ease)}
+.morph-btn .icon-mic{opacity:1;transform:scale(1)}
+.morph-btn .icon-send{opacity:0;transform:scale(0.3)}
+.morph-btn .icon-stop{opacity:0;transform:scale(0.3)}
+.morph-btn.send-mode .icon-mic{opacity:0;transform:scale(0.3)}
+.morph-btn.send-mode .icon-send{opacity:1;transform:scale(1)}
+.morph-btn.stop-mode .icon-mic{opacity:0;transform:scale(0.3)}
+.morph-btn.stop-mode .icon-send{opacity:0;transform:scale(0.3)}
+.morph-btn.stop-mode .icon-stop{opacity:1;transform:scale(1)}
+
+.demo-btn{position:absolute;top:8px;right:8px;padding:4px 10px;border-radius:4px;border:1px solid rgba(0,229,255,0.3);background:var(--surface-2);color:var(--accent);font-family:var(--font-mono);font-size:9px;cursor:pointer;z-index:20;letter-spacing:0.08em;text-transform:uppercase;transition:all 0.12s}
+.demo-btn:hover{box-shadow:var(--glow-cyan);background:rgba(0,229,255,0.1)}
+
+.partial-cursor{display:inline-block;width:6px;height:11px;background:var(--accent);margin-left:2px;vertical-align:middle;animation:blink-d 0.7s steps(1) infinite}
+
+@media (min-width:700px){
+  body{background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(0,229,255,0.04) 0%,transparent 60%),#000}
+  .app-window{width:440px;height:720px}
+}
+</style>
+</head>
+<body>
+<div class="app-window" id="appWindow">
+  <button class="demo-btn" onclick="runDemo()">▶ DEMO</button>
+
+  <div class="header">
+    <div class="orb-wrap">
+      <canvas class="orb-canvas" id="orbCanvas" width="44" height="44"></canvas>
+      <div class="orb-state-label" id="orbStateLabel">IDLE</div>
+    </div>
+    <div class="header-info">
+      <div class="header-title">ELIZA//SYS</div>
+      <div class="header-sub" id="statusLabel">STANDBY · SESSION 4821</div>
+    </div>
+    <div class="header-actions">
+      <button class="mute-btn" id="muteBtn" onclick="toggleMute()">MIC</button>
+      <button class="icon-btn">⚙</button>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-pill listening" id="listenPill">
+      <span class="status-dot"></span>LISTENING
+    </div>
+    <div class="status-pill muted-s" id="mutedPill">
+      <span class="status-dot"></span>MUTED
+    </div>
+  </div>
+
+  <div class="timeline-area" id="timelineArea">
+    <div class="time-rail" id="timeRail">
+      <div class="rail-line"></div>
+    </div>
+    <div class="events-col" id="eventsCol"></div>
+  </div>
+
+  <div class="composer-area">
+    <div class="suggestions-row" id="suggestionsRow"></div>
+    <div class="staged-attachments" id="stagedAttachments"></div>
+    <div class="composer-row">
+      <button class="attach-btn" onclick="stageAttachment()">📎</button>
+      <textarea class="composer-input" id="composerInput" placeholder="// input message…" rows="1"></textarea>
+      <button class="morph-btn" id="morphBtn" onclick="handleMorph()">
+        <svg class="icon-mic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0014 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/></svg>
+        <svg class="icon-send" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        <svg class="icon-stop" width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Canvas orb ─────────────────────────────────────────────────────────────
+const canvas = document.getElementById('orbCanvas');
+const ctx = canvas.getContext('2d');
+let orbState = 'idle';
+let amp = 0, ampT = 0, phase = 0, thinkPhase = 0;
+let bars = Array.from({length:12}, (_,i) => ({h:0,t:0,phase:i*0.52}));
+
+function drawOrb() {
+  const W = canvas.width, H = canvas.height, cx = W/2, cy = H/2, r = 20;
+  ctx.clearRect(0,0,W,H);
+
+  phase += 0.06;
+  thinkPhase += 0.04;
+
+  // Background gradient
+  const grd = ctx.createRadialGradient(cx,cy,0,cx,cy,r);
+  if (orbState==='idle') {
+    grd.addColorStop(0,'rgba(0,229,255,0.25)');
+    grd.addColorStop(1,'rgba(0,100,140,0.05)');
+  } else if (orbState==='listening') {
+    grd.addColorStop(0,'rgba(182,255,61,0.3)');
+    grd.addColorStop(1,'rgba(0,180,80,0.05)');
+  } else if (orbState==='thinking') {
+    grd.addColorStop(0,'rgba(255,61,203,0.3)');
+    grd.addColorStop(1,'rgba(140,0,100,0.05)');
+  } else {
+    grd.addColorStop(0,'rgba(0,229,255,0.4)');
+    grd.addColorStop(1,'rgba(0,100,140,0.1)');
+  }
+  ctx.fillStyle=grd;
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();
+
+  // Draw waveform bars
+  const numBars = 8;
+  const barW = 2.5;
+  const totalW = numBars * (barW + 2) - 2;
+  const startX = cx - totalW/2;
+
+  for (let i=0;i<numBars;i++) {
+    let bh;
+    const ph = bars[i].phase;
+    if (orbState==='idle') {
+      bh = 3 + 3*Math.abs(Math.sin(phase + ph));
+    } else if (orbState==='listening') {
+      bh = 4 + 13 * amp * Math.abs(Math.sin(phase*1.8 + ph));
+    } else if (orbState==='thinking') {
+      bh = 4 + 8*Math.abs(Math.sin(thinkPhase*2.1 + ph));
+    } else { // speaking
+      bh = 5 + 11 * amp * Math.abs(Math.sin(phase*1.4 + ph + i*0.3));
+    }
+    bars[i].h += (bh - bars[i].h) * 0.25;
+
+    const x = startX + i*(barW+2);
+    const color = orbState==='listening' ? '#B6FF3D' : orbState==='thinking' ? '#FF3DCB' : '#00E5FF';
+    ctx.fillStyle = color;
+    ctx.shadowBlur=6;ctx.shadowColor=color;
+    ctx.fillRect(x, cy - bars[i].h/2, barW, bars[i].h);
+    ctx.shadowBlur=0;
+  }
+
+  // Outer ring
+  ctx.strokeStyle = orbState==='listening' ? 'rgba(182,255,61,0.6)' : orbState==='thinking' ? 'rgba(255,61,203,0.5)' : 'rgba(0,229,255,0.5)';
+  ctx.lineWidth=1;
+  const pulseR = r + (orbState==='speaking' ? 2*Math.abs(Math.sin(phase)) : 0);
+  ctx.beginPath();ctx.arc(cx,cy,pulseR,0,Math.PI*2);ctx.stroke();
+  ctx.shadowBlur=0;
+
+  requestAnimationFrame(drawOrb);
+}
+drawOrb();
+
+// ── State ──────────────────────────────────────────────────────────────────
+let appState='idle', isMuted=false, hasText=false, demoTimer=null, msgCounter=100;
+
+const orbStateLabel = document.getElementById('orbStateLabel');
+const statusLabel = document.getElementById('statusLabel');
+const morphBtn = document.getElementById('morphBtn');
+const muteBtn = document.getElementById('muteBtn');
+const listenPill = document.getElementById('listenPill');
+const mutedPill = document.getElementById('mutedPill');
+const eventsCol = document.getElementById('eventsCol');
+const timeRail = document.getElementById('timeRail');
+const composerInput = document.getElementById('composerInput');
+const suggestionsRow = document.getElementById('suggestionsRow');
+const stagedAttachments = document.getElementById('stagedAttachments');
+
+// ── Amplitude loop ─────────────────────────────────────────────────────────
+let ampPhase2 = 0;
+function tickAmp() {
+  ampPhase2 += 0.08;
+  if ((appState==='listening'||appState==='speaking') && !isMuted) {
+    ampT = 0.4 + 0.55*Math.abs(Math.sin(ampPhase2*1.9))*Math.random();
+  } else { ampT = 0.05; }
+  amp += (ampT - amp) * 0.2;
+  requestAnimationFrame(tickAmp);
+}
+tickAmp();
+
+// ── Initial events ─────────────────────────────────────────────────────────
+const initialEvents = [
+  {id:'e1',type:'assistant',time:'21:42',text:'System ready. How can I help you tonight?'},
+  {id:'e2',type:'user',time:'21:43',text:'Pull up weather for the weekend.',modality:'typed'},
+  {id:'e3',type:'assistant',time:'21:43',text:'Data retrieved.',card:{icon:'🌤',name:'WEATHER',temp:'72°F',desc:'PARTLY CLOUDY',detail:'SAT: 72° / SUN: 68° · PRECIP: 20%'}},
+  {id:'e4',type:'user',time:'21:45',text:'Can we plan a hike for Saturday—',modality:'voice',interrupted:true},
+  {id:'e5',type:'assistant',time:'21:45',text:'Understood. Preferred range — local or within two hours drive?'},
+  {id:'e6',type:'user',time:'21:46',text:'Under an hour. Good elevation gain.',modality:'typed',attachment:{name:'trailmap.png',emoji:'🗺'}},
+  {id:'e7',type:'assistant',time:'21:47',text:'Scanning trail database…',partial:true},
+];
+
+function renderEvent(ev) {
+  const row = document.createElement('div');
+  row.className='event-row';row.id='row-'+ev.id;
+
+  const nodeClass = ev.type==='user'
+    ? (ev.modality==='voice'?'event-node voice-node':'event-node user-node')
+    : 'event-node';
+
+  let modalGlyph = '';
+  if (ev.modality==='voice') modalGlyph='<span class="modality-glyph">[MIC]</span>';
+  else if (ev.modality==='typed') modalGlyph='<span class="modality-glyph">[KBD]</span>';
+
+  let card='';
+  if (ev.card) {
+    card=`<div class="app-card">
+      <div class="app-card-header">
+        <div class="app-icon">${ev.card.icon}</div>
+        <span class="app-name">${ev.card.name}</span>
+        <button class="app-expand-btn" onclick="this.textContent=this.textContent==='[EXPAND]'?'[COLLAPSE]':'[EXPAND]'">[EXPAND]</button>
+      </div>
+      <div class="app-card-body">
+        <div class="weather-display">
+          <span class="weather-icon">${ev.card.icon}</span>
+          <span class="weather-temp">${ev.card.temp}</span>
+          <div><div class="weather-desc">${ev.card.desc}</div></div>
+        </div>
+        <div class="weather-detail">${ev.card.detail}</div>
+        <div class="card-actions">
+          <button class="card-btn">5-DAY</button>
+          <button class="card-btn primary">HOURLY</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  const intBadge = ev.interrupted?'<span class="interrupted-badge">INTERRUPTED</span>':'';
+  const attachHtml = ev.attachment?`<div class="attach-sub">${ev.attachment.emoji} ${ev.attachment.name}</div>`:'';
+  const cursor = ev.partial?'<span class="partial-cursor"></span>':'';
+
+  row.innerHTML=`
+    <div class="event-node ${nodeClass}" style="margin-top:14px"></div>
+    <div class="event-bubble ${ev.type==='user'?'user-bubble':''} ${ev.partial?'partial':''}">
+      <div class="bubble-header">
+        ${modalGlyph}
+        <span class="bubble-role">${ev.type==='user'?'USER':'ELIZA'}</span>
+        ${intBadge}
+        <span class="bubble-ts">${ev.time}</span>
+      </div>
+      <div class="bubble-text">${ev.text}${cursor}</div>
+      ${card}${attachHtml}
+    </div>`;
+  eventsCol.appendChild(row);
+}
+
+function initTimeline() {
+  initialEvents.forEach(renderEvent);
+  addRailTime('21:42','8%');addRailTime('21:45','42%');addRailTime('21:47','72%');
+  renderSuggestions();scrollToBottom();
+}
+
+function addRailTime(t,top) {
+  const el=document.createElement('div');
+  el.className='rail-time';el.style.top=top;el.textContent=t;
+  timeRail.appendChild(el);
+}
+
+// ── Suggestions ────────────────────────────────────────────────────────────
+const followUps=['> SHOW TRAILS','> ADD TO CAL','> CHECK GEAR'];
+const idleChips=['> STATUS?','> BRIEF ME','> NEXT TASK'];
+
+function renderSuggestions(chips) {
+  suggestionsRow.innerHTML='';
+  (chips||followUps).forEach(s=>{
+    const ch=document.createElement('button');
+    ch.className='suggestion-chip';ch.textContent=s;
+    ch.onclick=()=>{composerInput.value=s;updateMorphBtn();suggestionsRow.style.opacity='0'};
+    suggestionsRow.appendChild(ch);
+  });
+  suggestionsRow.style.opacity='1';
+}
+
+// ── Attachment ─────────────────────────────────────────────────────────────
+let pendingAttach=null;
+function stageAttachment(){
+  pendingAttach={name:'capture.jpg',emoji:'📷'};
+  stagedAttachments.innerHTML=`<div class="attach-chip">📷 capture.jpg <span class="attach-chip-remove" onclick="removeAttachment()">×</span></div>`;
+  stagedAttachments.classList.add('has-items');
+}
+function removeAttachment(){pendingAttach=null;stagedAttachments.innerHTML='';stagedAttachments.classList.remove('has-items')}
+
+// ── setState ───────────────────────────────────────────────────────────────
+function setState(s) {
+  appState=s;orbState=s;
+  const labels={idle:'STANDBY · SESSION 4821',listening:'RECEIVING INPUT…',thinking:'PROCESSING…',speaking:'TRANSMITTING…'};
+  statusLabel.textContent=isMuted?'MUTED':labels[s];
+  orbStateLabel.textContent=isMuted?'MUTED':s.toUpperCase();
+  listenPill.classList.toggle('active',s==='listening'&&!isMuted);
+  mutedPill.classList.toggle('active',isMuted);
+}
+
+// ── Morph ──────────────────────────────────────────────────────────────────
+function updateMorphBtn(){
+  hasText=composerInput.value.trim().length>0;
+  if(appState==='thinking'||appState==='speaking'){
+    morphBtn.className='morph-btn stop-mode';
+  } else if(hasText){
+    morphBtn.className='morph-btn send-mode';
+  } else {
+    morphBtn.className='morph-btn';
+  }
+  suggestionsRow.style.opacity=hasText?'0':'1';
+  suggestionsRow.style.pointerEvents=hasText?'none':'';
+}
+
+composerInput.addEventListener('input',()=>{
+  updateMorphBtn();
+  composerInput.style.height='auto';
+  composerInput.style.height=Math.min(composerInput.scrollHeight,80)+'px';
+});
+composerInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg()}});
+
+function handleMorph(){
+  if(appState==='thinking'||appState==='speaking')stopGen();
+  else if(hasText)sendMsg();
+  else runDemo();
+}
+
+// ── Send typed ─────────────────────────────────────────────────────────────
+function sendMsg(){
+  const text=composerInput.value.trim();if(!text)return;
+  const ev={id:'u'+(++msgCounter),type:'user',time:nowTime(),text,modality:'typed'};
+  if(pendingAttach){ev.attachment=pendingAttach;removeAttachment()}
+  renderEvent(ev);
+  composerInput.value='';composerInput.style.height='';updateMorphBtn();scrollToBottom();
+  setTimeout(()=>triggerReply(),700);
+}
+
+const replies=[
+  'Mount Tamalpais has a 2.5-mile loop with 1,200ft gain — solid views of the bay. Trailhead is 40 min north.',
+  'Mission Peak is another strong pick. 6.5 miles, 2,100ft gain, starts at Fremont BART. Rating: 4.2★',
+  'Adding to your Saturday. Weather check set for 06:00. Packing list queued.'
+];
+
+function triggerReply(){
+  setState('thinking');updateMorphBtn();
+  setTimeout(()=>{
+    setState('speaking');updateMorphBtn();
+    streamAssistant(replies[Math.floor(Math.random()*replies.length)]);
+  },900);
+}
+
+function streamAssistant(text){
+  const id='a'+(++msgCounter);
+  renderEvent({id,type:'assistant',time:nowTime(),text:'',partial:true});
+  scrollToBottom();
+  const bEl=document.querySelector('#row-'+id+' .bubble-text');
+  const bubEl=document.querySelector('#row-'+id+' .event-bubble');
+  let i=0;
+  const step=()=>{
+    if(i<=text.length){
+      bEl.innerHTML=text.slice(0,i)+(i<text.length?'<span class="partial-cursor"></span>':'');
+      i+=2;scrollToBottom();setTimeout(step,22);
+    } else {
+      bubEl.classList.remove('partial');bEl.innerHTML=text;
+      setState('idle');updateMorphBtn();renderSuggestions();scrollToBottom();
+    }
+  };step();
+}
+
+function stopGen(){setState('idle');updateMorphBtn()}
+
+// ── Mute ──────────────────────────────────────────────────────────────────
+function toggleMute(){
+  isMuted=!isMuted;
+  muteBtn.className='mute-btn'+(isMuted?' muted':'');
+  muteBtn.textContent=isMuted?'🔇':'MIC';
+  setState(isMuted?'idle':appState);
+  updateMorphBtn();
+}
+
+// ── Demo ──────────────────────────────────────────────────────────────────
+function runDemo(){
+  if(demoTimer)clearTimeout(demoTimer);
+  setState('idle');updateMorphBtn();
+
+  const id='demo'+Date.now();
+  renderEvent({id,type:'user',time:nowTime(),text:'Any Italian restaurants within walking distance?',modality:'voice',partial:true});
+  scrollToBottom();
+  const bEl=document.querySelector('#row-'+id+' .bubble-text');
+  const bubEl=document.querySelector('#row-'+id+' .event-bubble');
+
+  setState('listening');updateMorphBtn();
+
+  demoTimer=setTimeout(()=>{
+    bubEl.classList.remove('partial');
+    bEl.innerHTML='Any Italian restaurants within walking distance?';
+    setState('thinking');updateMorphBtn();
+    demoTimer=setTimeout(()=>{
+      setState('speaking');updateMorphBtn();
+      streamAssistant('Osteria Morini is 0.3 miles away — excellent house pasta. Trattoria Roma at 0.6 miles has strong wood-fired pizza. Both accept walk-ins tonight.');
+    },1100);
+  },2000);
+}
+
+// ── Utils ─────────────────────────────────────────────────────────────────
+function scrollToBottom(){const a=document.getElementById('timelineArea');requestAnimationFrame(()=>a.scrollTop=a.scrollHeight)}
+function nowTime(){const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+initTimeline();updateMorphBtn();
+setTimeout(runDemo,1800);
+</script>
+</body>
+</html>

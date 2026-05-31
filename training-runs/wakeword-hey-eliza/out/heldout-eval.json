@@ -1,0 +1,211 @@
+{
+  "threshold": 0.85,
+  "trueAcceptRate": 0.7,
+  "falseAcceptRate": 0.05,
+  "heldOutPositives": 20,
+  "heldOutNegatives": 20,
+  "positives": [
+    {
+      "wav": "hpos-00000.wav",
+      "score": 0.9958,
+      "fired": true
+    },
+    {
+      "wav": "hpos-00001.wav",
+      "score": 0.9997,
+      "fired": true
+    },
+    {
+      "wav": "hpos-00002.wav",
+      "score": 0.7306,
+      "fired": false
+    },
+    {
+      "wav": "hpos-00003.wav",
+      "score": 0.9912,
+      "fired": true
+    },
+    {
+      "wav": "hpos-00004.wav",
+      "score": 0.9999,
+      "fired": true
+    },
+    {
+      "wav": "hpos-00005.wav",
+      "score": 0.9995,
+      "fired": true
+    },
+    {
+      "wav": "hpos-00006.wav",
+      "score": 0.9878,
+      "fired": true
+    },
+    {
+      "wav": "hpos-00007.wav",
+      "score": 0.1438,
+      "fired": false
+    },
+    {
+      "wav": "hpos-00008.wav",
+      "score": 0.9954,
+      "fired": true
+    },
+    {
+      "wav": "hpos-00009.wav",
+      "score": 0.9956,
+      "fired": true
+    },
+    {
+      "wav": "hpos-00010.wav",
+      "score": 0.2576,
+      "fired": false
+    },
+    {
+      "wav": "hpos-00011.wav",
+      "score": 0.9965,
+      "fired": true
+    },
+    {
+      "wav": "hpos-00012.wav",
+      "score": 0.9996,
+      "fired": true
+    },
+    {
+      "wav": "hpos-00013.wav",
+      "score": 0.9845,
+      "fired": true
+    },
+    {
+      "wav": "hpos-00014.wav",
+      "score": 0.9994,
+      "fired": true
+    },
+    {
+      "wav": "hpos-00015.wav",
+      "score": 0.3217,
+      "fired": false
+    },
+    {
+      "wav": "hpos-00016.wav",
+      "score": 0.4577,
+      "fired": false
+    },
+    {
+      "wav": "hpos-00017.wav",
+      "score": 0.9995,
+      "fired": true
+    },
+    {
+      "wav": "hpos-00018.wav",
+      "score": 0.2661,
+      "fired": false
+    },
+    {
+      "wav": "hpos-00019.wav",
+      "score": 0.9991,
+      "fired": true
+    }
+  ],
+  "negatives": [
+    {
+      "wav": "hneg-00000.wav",
+      "score": 0.0002,
+      "fired": false
+    },
+    {
+      "wav": "hneg-00001.wav",
+      "score": 0.0001,
+      "fired": false
+    },
+    {
+      "wav": "hneg-00002.wav",
+      "score": 0.5254,
+      "fired": false
+    },
+    {
+      "wav": "hneg-00003.wav",
+      "score": 0.0006,
+      "fired": false
+    },
+    {
+      "wav": "hneg-00004.wav",
+      "score": 0.0002,
+      "fired": false
+    },
+    {
+      "wav": "hneg-00005.wav",
+      "score": 0.9982,
+      "fired": true
+    },
+    {
+      "wav": "hneg-00006.wav",
+      "score": 0.0023,
+      "fired": false
+    },
+    {
+      "wav": "hneg-00007.wav",
+      "score": 0.6465,
+      "fired": false
+    },
+    {
+      "wav": "hneg-00008.wav",
+      "score": 0.4903,
+      "fired": false
+    },
+    {
+      "wav": "hneg-00009.wav",
+      "score": 0.0044,
+      "fired": false
+    },
+    {
+      "wav": "hneg-00010.wav",
+      "score": 0.0003,
+      "fired": false
+    },
+    {
+      "wav": "hneg-00011.wav",
+      "score": 0.0001,
+      "fired": false
+    },
+    {
+      "wav": "hneg-00012.wav",
+      "score": 0.0339,
+      "fired": false
+    },
+    {
+      "wav": "hneg-00013.wav",
+      "score": 0.4856,
+      "fired": false
+    },
+    {
+      "wav": "hneg-00014.wav",
+      "score": 0.0001,
+      "fired": false
+    },
+    {
+      "wav": "hneg-00015.wav",
+      "score": 0.0,
+      "fired": false
+    },
+    {
+      "wav": "hneg-00016.wav",
+      "score": 0.0,
+      "fired": false
+    },
+    {
+      "wav": "hneg-00017.wav",
+      "score": 0.0,
+      "fired": false
+    },
+    {
+      "wav": "hneg-00018.wav",
+      "score": 0.0001,
+      "fired": false
+    },
+    {
+      "wav": "hneg-00019.wav",
+      "score": 0.0,
+      "fired": false
+    }
+  ]
+}

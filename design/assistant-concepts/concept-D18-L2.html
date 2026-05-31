@@ -1,0 +1,845 @@
+<!-- concept-D18-L2 | direction: Gesture / Swipe-Driven | look: OLED Neon Cyber | targets: 420x760, 960x640 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D18 · Gesture / Swipe-Driven · OLED Neon Cyber</title>
+<style>
+:root{
+  --bg:#000000;
+  --surface:#0B0E14;
+  --surface-2:#131826;
+  --border:rgba(0,229,255,0.28);
+  --text:#E8FBFF;
+  --text-muted:#6B7A90;
+  --accent:#00E5FF;
+  --accent-2:#FF3DCB;
+  --accent-3:#B6FF3D;
+  --danger:#FF2E4D;
+  --radius:8px;
+  --radius-sm:5px;
+  --font:"SF Pro Text","Inter","Segoe UI",system-ui,sans-serif;
+  --font-mono:"SF Mono","JetBrains Mono","Cascadia Mono",ui-monospace,monospace;
+  --shadow:0 0 0 1px rgba(0,229,255,0.25),0 0 24px rgba(0,229,255,0.35);
+  --shadow-sm:0 0 12px rgba(0,229,255,0.25);
+  --glow-cyan:0 0 16px rgba(0,229,255,0.6);
+  --glow-magenta:0 0 16px rgba(255,61,203,0.6);
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:var(--font);
+  background:#000;
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  position:relative;
+}
+
+/* Scanline overlay */
+body::after{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,229,255,0.015) 2px,rgba(0,229,255,0.015) 4px);
+  pointer-events:none;z-index:100;
+  animation:scanlines 8s linear infinite;
+}
+@keyframes scanlines{0%{background-position:0 0;}100%{background-position:0 100px;}}
+
+.device{
+  position:relative;z-index:1;
+  width:420px;height:760px;
+  background:var(--bg);
+  border:1px solid rgba(0,229,255,0.3);
+  box-shadow:0 0 0 1px rgba(0,229,255,0.1),0 0 40px rgba(0,229,255,0.15),inset 0 0 60px rgba(0,0,0,0.8);
+  border-radius:var(--radius);
+  overflow:hidden;
+  display:flex;flex-direction:column;
+  user-select:none;
+}
+
+/* Top bar */
+.top-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px 10px;
+  border-bottom:1px solid rgba(0,229,255,0.1);
+  flex-shrink:0;
+}
+.system-label{
+  font-family:var(--font-mono);
+  font-size:10px;letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:var(--accent);
+}
+.top-controls{display:flex;gap:8px;align-items:center;}
+.demo-btn{
+  font-family:var(--font-mono);
+  font-size:10px;letter-spacing:0.1em;text-transform:uppercase;
+  background:transparent;border:1px solid rgba(0,229,255,0.4);
+  color:var(--accent);padding:4px 10px;cursor:pointer;
+  border-radius:var(--radius-sm);
+  transition:all 0.15s;
+}
+.demo-btn:hover{background:rgba(0,229,255,0.1);box-shadow:var(--glow-cyan);}
+.mute-btn{
+  width:32px;height:32px;
+  background:transparent;border:1px solid rgba(0,229,255,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;cursor:pointer;border-radius:var(--radius-sm);
+  transition:all 0.15s;font-family:var(--font-mono);
+}
+.mute-btn:hover{border-color:var(--accent);box-shadow:var(--glow-cyan);}
+.mute-btn.muted{border-color:var(--danger);color:var(--danger);box-shadow:0 0 12px rgba(255,46,77,0.4);}
+
+/* Orb zone */
+.orb-zone{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+
+/* Canvas orb */
+.orb-canvas-wrap{
+  position:relative;width:180px;height:180px;
+}
+#orbCanvas{display:block;}
+
+/* State label */
+.state-label{
+  margin-top:16px;
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--font-mono);
+  font-size:11px;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--accent);
+  height:20px;
+}
+.state-label .mic-glyph{font-size:13px;}
+.state-label.hidden{visibility:hidden;}
+.state-label.muted-state{color:var(--danger);text-shadow:0 0 8px rgba(255,46,77,0.6);}
+.state-label.listening-state{color:var(--accent);text-shadow:var(--glow-cyan);}
+
+/* Suggestions */
+.suggestion-fan{
+  position:absolute;bottom:80px;
+  display:flex;gap:6px;flex-wrap:wrap;justify-content:center;
+  padding:0 20px;
+  transition:opacity 0.2s;
+}
+.chip{
+  background:transparent;
+  border:1px solid rgba(0,229,255,0.3);
+  border-radius:var(--radius-sm);
+  padding:5px 12px;
+  font-family:var(--font-mono);
+  font-size:10px;letter-spacing:0.06em;text-transform:uppercase;
+  color:var(--accent);cursor:pointer;
+  transition:all 0.15s;white-space:nowrap;
+}
+.chip:hover{background:rgba(0,229,255,0.08);box-shadow:var(--shadow-sm);}
+.chip.follow-up{border-color:rgba(255,61,203,0.4);color:var(--accent-2);}
+.chip.follow-up:hover{background:rgba(255,61,203,0.08);box-shadow:var(--glow-magenta);}
+
+.swipe-hint{
+  position:absolute;bottom:120px;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;
+  color:rgba(0,229,255,0.35);
+}
+.swipe-arrow{font-size:16px;animation:blinkArrow 1.5s steps(1,end) infinite;}
+@keyframes blinkArrow{0%,100%{opacity:1;}50%{opacity:0;}}
+
+/* Transcript sheet */
+.transcript-sheet{
+  position:absolute;inset:0;z-index:10;
+  background:rgba(0,0,0,0.96);
+  border:1px solid rgba(0,229,255,0.2);
+  transform:translateY(100%);
+  transition:transform 0.22s var(--ease);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+.transcript-sheet.open{transform:translateY(0);}
+.sheet-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;
+  border-bottom:1px solid rgba(0,229,255,0.15);
+}
+.sheet-title{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:0.12em;
+  text-transform:uppercase;color:var(--accent);
+}
+.sheet-close{
+  font-family:var(--font-mono);font-size:10px;
+  color:var(--text-muted);cursor:pointer;letter-spacing:0.08em;
+  text-transform:uppercase;
+  transition:color 0.15s;
+}
+.sheet-close:hover{color:var(--accent);}
+.transcript-scroll{
+  flex:1;overflow-y:auto;padding:12px 16px 16px;
+  display:flex;flex-direction:column;gap:12px;
+}
+.transcript-scroll::-webkit-scrollbar{width:2px;}
+.transcript-scroll::-webkit-scrollbar-track{background:transparent;}
+.transcript-scroll::-webkit-scrollbar-thumb{background:rgba(0,229,255,0.3);}
+
+.turn{display:flex;flex-direction:column;gap:3px;}
+.turn-meta{
+  display:flex;align-items:center;gap:5px;
+  font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;
+  text-transform:uppercase;color:var(--text-muted);
+}
+.bubble{
+  padding:10px 13px;
+  border:1px solid;
+  border-radius:var(--radius-sm);
+  font-size:13px;line-height:1.55;
+  max-width:88%;
+}
+.user-turn{align-items:flex-end;}
+.user-turn .bubble{
+  background:rgba(0,229,255,0.06);
+  border-color:rgba(0,229,255,0.35);
+  color:var(--text);
+  box-shadow:var(--shadow-sm);
+  border-radius:var(--radius-sm) var(--radius-sm) 2px var(--radius-sm);
+}
+.user-turn.typed .bubble{
+  background:rgba(0,229,255,0.04);
+  border-color:rgba(0,229,255,0.2);
+}
+.assistant-turn{align-items:flex-start;}
+.assistant-turn .bubble{
+  background:rgba(255,61,203,0.04);
+  border-color:rgba(255,61,203,0.2);
+  color:var(--text);
+  border-radius:var(--radius-sm) var(--radius-sm) var(--radius-sm) 2px;
+  box-shadow:0 0 12px rgba(255,61,203,0.1);
+}
+.partial .bubble{opacity:0.45;font-style:italic;}
+.interrupted-badge{
+  font-family:var(--font-mono);
+  font-size:9px;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--danger);
+  border:1px solid rgba(255,46,77,0.3);
+  padding:2px 6px;
+  border-radius:var(--radius-sm);
+  align-self:flex-start;margin-top:2px;
+  box-shadow:0 0 8px rgba(255,46,77,0.2);
+}
+
+/* App card */
+.app-card{
+  margin-top:8px;
+  background:var(--surface);
+  border:1px solid rgba(0,229,255,0.2);
+  border-radius:var(--radius);
+  overflow:hidden;
+  max-width:280px;
+  box-shadow:var(--shadow);
+}
+.app-card-header{
+  display:flex;align-items:center;gap:8px;
+  padding:9px 13px;
+  border-bottom:1px solid rgba(0,229,255,0.15);
+  background:rgba(0,229,255,0.04);
+}
+.app-icon{
+  width:22px;height:22px;border-radius:4px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  display:flex;align-items:center;justify-content:center;font-size:12px;
+}
+.app-card-title{
+  font-family:var(--font-mono);font-size:10px;
+  letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);
+}
+.app-card-body{padding:12px 13px;}
+.weather-temp{font-size:32px;font-weight:300;color:var(--accent);font-family:var(--font-mono);text-shadow:var(--glow-cyan);}
+.weather-desc{font-size:11px;color:var(--text-muted);font-family:var(--font-mono);letter-spacing:0.08em;margin-top:2px;}
+.weather-detail{display:flex;gap:16px;margin-top:8px;}
+.weather-item{font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;color:var(--text-muted);}
+.weather-item span{color:var(--text);}
+.app-card-actions{display:flex;gap:6px;padding:0 13px 12px;}
+.card-btn{
+  flex:1;padding:7px;
+  border:1px solid rgba(0,229,255,0.3);
+  background:transparent;color:var(--accent);
+  font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;
+  cursor:pointer;border-radius:var(--radius-sm);
+  transition:all 0.15s;
+}
+.card-btn:hover{background:rgba(0,229,255,0.08);box-shadow:var(--glow-cyan);}
+.card-btn.primary{background:rgba(0,229,255,0.12);border-color:var(--accent);box-shadow:var(--shadow-sm);}
+.expand-hint{
+  font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--text-muted);text-align:right;padding:0 13px 8px;cursor:pointer;
+}
+.expand-hint:hover{color:var(--accent);}
+
+/* Composer */
+.composer-area{
+  padding:10px 14px 16px;
+  background:var(--surface);
+  border-top:1px solid rgba(0,229,255,0.15);
+  display:flex;flex-direction:column;gap:8px;
+}
+.attachment-staging{display:flex;gap:6px;flex-wrap:wrap;}
+.attachment-chip{
+  display:flex;align-items:center;gap:5px;
+  border:1px solid rgba(0,229,255,0.3);
+  background:rgba(0,229,255,0.05);
+  padding:4px 9px;border-radius:var(--radius-sm);
+  font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;color:var(--accent);
+  cursor:pointer;transition:all 0.15s;
+}
+.attachment-chip:hover{border-color:var(--danger);color:var(--danger);}
+.att-thumb{font-size:14px;}
+.att-remove{opacity:0.6;margin-left:2px;}
+
+.composer-row{display:flex;align-items:center;gap:8px;}
+.attach-btn{
+  width:36px;height:36px;
+  background:transparent;border:1px solid rgba(0,229,255,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;cursor:pointer;border-radius:var(--radius-sm);
+  transition:all 0.15s;flex-shrink:0;color:var(--accent);
+}
+.attach-btn:hover{border-color:var(--accent);box-shadow:var(--glow-cyan);}
+
+.text-input{
+  flex:1;background:rgba(0,229,255,0.04);
+  border:1px solid rgba(0,229,255,0.2);
+  border-radius:var(--radius-sm);
+  padding:8px 12px;
+  font-size:13px;font-family:var(--font);
+  color:var(--text);outline:none;
+  transition:all 0.15s;
+}
+.text-input::placeholder{color:var(--text-muted);font-family:var(--font-mono);font-size:11px;letter-spacing:0.06em;}
+.text-input:focus{border-color:rgba(0,229,255,0.5);box-shadow:0 0 0 2px rgba(0,229,255,0.08),var(--glow-cyan);}
+
+.action-btn{
+  width:38px;height:38px;
+  border:1px solid;
+  border-radius:var(--radius-sm);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;cursor:pointer;
+  transition:all 0.12s;flex-shrink:0;
+  font-family:var(--font-mono);
+}
+.action-btn.mic-mode{background:rgba(0,229,255,0.08);border-color:rgba(0,229,255,0.4);color:var(--accent);box-shadow:var(--shadow-sm);}
+.action-btn.send-mode{background:rgba(0,229,255,0.15);border-color:var(--accent);color:var(--accent);box-shadow:var(--glow-cyan);}
+.action-btn.stop-mode{background:rgba(255,46,77,0.12);border-color:var(--danger);color:var(--danger);box-shadow:0 0 12px rgba(255,46,77,0.3);}
+.action-btn:active{transform:scale(0.9);}
+
+.follow-ups{display:flex;gap:6px;flex-wrap:wrap;}
+
+/* Radial menu */
+.radial-menu{
+  position:absolute;bottom:90px;left:50%;transform:translateX(-50%) scaleY(0.8);
+  background:var(--surface-2);border:1px solid rgba(0,229,255,0.3);
+  border-radius:var(--radius);padding:10px 14px;
+  display:flex;gap:16px;
+  box-shadow:var(--shadow);
+  opacity:0;pointer-events:none;
+  transition:all 0.15s var(--ease);
+  transform-origin:bottom center;
+}
+.radial-menu.open{opacity:1;pointer-events:all;transform:translateX(-50%) scaleY(1);}
+.radial-item{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  cursor:pointer;padding:6px;border:1px solid transparent;
+  border-radius:var(--radius-sm);transition:all 0.12s;
+}
+.radial-item:hover{border-color:rgba(0,229,255,0.3);background:rgba(0,229,255,0.06);}
+.ri-icon{font-size:20px;}
+.ri-label{font-family:var(--font-mono);font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);}
+
+@media(min-width:600px){
+  body{background:radial-gradient(ellipse at 50% 50%,#050A12,#000);}
+}
+@media(max-width:440px){
+  .device{width:100vw;height:100dvh;border-radius:0;}
+}
+</style>
+</head>
+<body>
+<div class="device" id="device">
+  <!-- Top bar -->
+  <div class="top-bar">
+    <div class="system-label">ELIZA // GESTURE</div>
+    <div class="top-controls">
+      <button class="demo-btn" id="demoBtn">▶ DEMO</button>
+      <button class="mute-btn" id="muteBtn">🎙</button>
+    </div>
+  </div>
+
+  <!-- Orb zone -->
+  <div class="orb-zone" id="orbZone">
+    <div class="orb-canvas-wrap">
+      <canvas id="orbCanvas" width="180" height="180"></canvas>
+    </div>
+
+    <div class="state-label hidden" id="stateLabel">
+      <span class="mic-glyph" id="stateGlyph">🎙</span>
+      <span id="stateLabelText">LISTENING</span>
+    </div>
+
+    <div class="suggestion-fan" id="suggestionFan">
+      <div class="chip" onclick="useSuggestion(this,'STATUS_UPDATE')">SYS STATUS</div>
+      <div class="chip" onclick="useSuggestion(this,'WEATHER_CHECK')">WEATHER</div>
+      <div class="chip" onclick="useSuggestion(this,'SCHEDULE')">SCHEDULE</div>
+    </div>
+
+    <div class="swipe-hint" id="swipeHint">
+      <span class="swipe-arrow">↓</span>
+      <span>SWIPE — TRANSCRIPT</span>
+    </div>
+  </div>
+
+  <!-- Composer -->
+  <div class="composer-area">
+    <div class="attachment-staging" id="attachStaging"></div>
+    <div class="composer-row">
+      <button class="attach-btn" id="attachBtn">+</button>
+      <input class="text-input" id="textInput" placeholder="TYPE_QUIETLY //" autocomplete="off">
+      <button class="action-btn mic-mode" id="actionBtn">🎙</button>
+    </div>
+    <div class="follow-ups" id="followUpChips"></div>
+  </div>
+
+  <!-- Radial menu -->
+  <div class="radial-menu" id="radialMenu">
+    <div class="radial-item" onclick="attachFile('📷','PHOTO')"><span class="ri-icon">📷</span><span class="ri-label">CAM</span></div>
+    <div class="radial-item" onclick="attachFile('🖼️','IMAGE')"><span class="ri-icon">🖼️</span><span class="ri-label">IMG</span></div>
+    <div class="radial-item" onclick="attachFile('📄','FILE')"><span class="ri-icon">📄</span><span class="ri-label">FILE</span></div>
+    <div class="radial-item" onclick="attachFile('📍','LOC')"><span class="ri-icon">📍</span><span class="ri-label">LOC</span></div>
+  </div>
+
+  <!-- Transcript -->
+  <div class="transcript-sheet" id="transcriptSheet">
+    <div class="sheet-header">
+      <div class="sheet-title">// TRANSCRIPT LOG</div>
+      <div class="sheet-close" onclick="closeTranscript()">[ CLOSE ]</div>
+    </div>
+    <div class="transcript-scroll" id="transcriptScroll">
+      <div class="turn user-turn typed">
+        <div class="turn-meta" style="justify-content:flex-end"><span>USER</span><span>⌨️</span></div>
+        <div class="bubble" style="display:flex;flex-direction:column;gap:4px;">
+          <span style="font-size:10px;opacity:0.6;font-family:var(--font-mono);">📎 REPORT_Q2.PDF</span>
+          Analyze this for key risks.
+        </div>
+      </div>
+      <div class="turn assistant-turn">
+        <div class="turn-meta"><span>ELIZA</span></div>
+        <div class="bubble">
+          Three primary risk vectors identified: supply chain concentration in APAC (high), regulatory exposure in EU markets (medium), and talent attrition in engineering (medium). Full breakdown follows.
+        </div>
+        <div class="interrupted-badge">⚡ BARGE-IN</div>
+      </div>
+      <div class="turn user-turn">
+        <div class="turn-meta" style="justify-content:flex-end"><span>USER</span><span>🎙</span></div>
+        <div class="bubble partial">Focus on the EU risk…</div>
+      </div>
+      <div class="turn user-turn">
+        <div class="turn-meta" style="justify-content:flex-end"><span>USER</span><span>🎙</span></div>
+        <div class="bubble">Focus on the EU regulatory risk specifically.</div>
+      </div>
+      <div class="turn assistant-turn">
+        <div class="turn-meta"><span>ELIZA</span></div>
+        <div class="bubble">
+          EU exposure stems from GDPR Article 22 (automated decision-making) and the AI Act high-risk classification. Recommended: appoint a DPO, conduct DPIA, and file for sandbox exemption by Q3.
+        </div>
+        <div class="app-card">
+          <div class="app-card-header">
+            <div class="app-icon">🌤</div>
+            <span class="app-card-title">WEATHER // SAN FRANCISCO</span>
+          </div>
+          <div class="app-card-body">
+            <div style="display:flex;align-items:baseline;gap:8px;">
+              <div class="weather-temp">62°F</div>
+              <div>
+                <div style="color:var(--accent-3);font-family:var(--font-mono);font-size:11px;letter-spacing:0.08em;">PARTLY_CLOUDY</div>
+                <div class="weather-desc">FEELS_LIKE 59°F</div>
+              </div>
+            </div>
+            <div class="weather-detail">
+              <div class="weather-item">WIND <span>8mph</span></div>
+              <div class="weather-item">HMD <span>72%</span></div>
+              <div class="weather-item">UV <span>3</span></div>
+            </div>
+          </div>
+          <div class="app-card-actions">
+            <button class="card-btn">5-DAY</button>
+            <button class="card-btn primary">MAPS</button>
+          </div>
+          <div class="expand-hint" onclick="alert('full screen')">↑ EXPAND</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STATES = {IDLE:'idle',LISTENING:'listening',THINKING:'thinking',SPEAKING:'speaking',MUTED:'muted'};
+let state = STATES.IDLE;
+let muted = false;
+let ampPhase = 0;
+let ampVal = 0;
+let demoTimer = null;
+let genInterval = null;
+let isTyping = false;
+let isGenerating = false;
+let rafId = null;
+
+const canvas = document.getElementById('orbCanvas');
+const ctx = canvas.getContext('2d');
+const stateLabel = document.getElementById('stateLabel');
+const stateLabelText = document.getElementById('stateLabelText');
+const stateGlyph = document.getElementById('stateGlyph');
+const muteBtn = document.getElementById('muteBtn');
+const demoBtn = document.getElementById('demoBtn');
+const textInput = document.getElementById('textInput');
+const actionBtn = document.getElementById('actionBtn');
+const attachBtn = document.getElementById('attachBtn');
+const attachStaging = document.getElementById('attachStaging');
+const radialMenu = document.getElementById('radialMenu');
+const suggestionFan = document.getElementById('suggestionFan');
+const followUpChips = document.getElementById('followUpChips');
+const transcriptSheet = document.getElementById('transcriptSheet');
+const transcriptScroll = document.getElementById('transcriptScroll');
+const orbZone = document.getElementById('orbZone');
+const swipeHint = document.getElementById('swipeHint');
+
+// Canvas orb rendering
+let orbFrame = 0;
+let particleAngles = Array.from({length:24},(_,i)=>i*(Math.PI*2/24));
+let particleR = Array.from({length:24},()=>70+Math.random()*10);
+let particleSpeed = Array.from({length:24},()=>0.008+Math.random()*0.006);
+
+function drawOrb() {
+  ctx.clearRect(0,0,180,180);
+  const cx=90,cy=90;
+
+  if(state === STATES.IDLE) {
+    drawIdleOrb(cx,cy);
+  } else if(state === STATES.LISTENING) {
+    drawListeningOrb(cx,cy);
+  } else if(state === STATES.THINKING) {
+    drawThinkingOrb(cx,cy);
+  } else if(state === STATES.SPEAKING) {
+    drawSpeakingOrb(cx,cy);
+  } else if(state === STATES.MUTED) {
+    drawMutedOrb(cx,cy);
+  }
+}
+
+function drawIdleOrb(cx,cy) {
+  orbFrame+=0.01;
+  const r = 50 + Math.sin(orbFrame)*3;
+  const grd = ctx.createRadialGradient(cx-12,cy-12,5,cx,cy,r);
+  grd.addColorStop(0,'rgba(0,229,255,0.6)');
+  grd.addColorStop(0.5,'rgba(0,150,200,0.3)');
+  grd.addColorStop(1,'rgba(0,229,255,0.0)');
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.fillStyle=grd;ctx.fill();
+  // ring
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.strokeStyle='rgba(0,229,255,0.4)';ctx.lineWidth=1;ctx.stroke();
+  // glow
+  const g2 = ctx.createRadialGradient(cx,cy,0,cx,cy,r*1.6);
+  g2.addColorStop(0,'rgba(0,229,255,0.08)');
+  g2.addColorStop(1,'rgba(0,229,255,0)');
+  ctx.beginPath();ctx.arc(cx,cy,r*1.6,0,Math.PI*2);
+  ctx.fillStyle=g2;ctx.fill();
+}
+
+function drawListeningOrb(cx,cy) {
+  orbFrame+=0.03;
+  const base = 50;
+  const numBars = 32;
+  for(let i=0;i<numBars;i++) {
+    const angle = (i/numBars)*Math.PI*2;
+    const noise = Math.sin(orbFrame*3.1+i*0.7)*0.5+0.5;
+    const barH = base + ampVal*28*noise + Math.random()*4;
+    const x1 = cx + Math.cos(angle)*base;
+    const y1 = cy + Math.sin(angle)*base;
+    const x2 = cx + Math.cos(angle)*(base+barH*0.6);
+    const y2 = cy + Math.sin(angle)*(base+barH*0.6);
+    const a = 0.4+noise*0.6;
+    ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
+    ctx.strokeStyle=`rgba(0,229,255,${a})`;ctx.lineWidth=1.5;ctx.stroke();
+  }
+  const g = ctx.createRadialGradient(cx,cy,0,cx,cy,50);
+  g.addColorStop(0,'rgba(0,229,255,0.25)');
+  g.addColorStop(1,'rgba(0,229,255,0.0)');
+  ctx.beginPath();ctx.arc(cx,cy,50,0,Math.PI*2);
+  ctx.fillStyle=g;ctx.fill();
+}
+
+function drawThinkingOrb(cx,cy) {
+  orbFrame+=0.02;
+  // magenta inner churn
+  for(let i=0;i<particleAngles.length;i++) {
+    particleAngles[i]+=particleSpeed[i];
+    const r = particleR[i]+Math.sin(orbFrame*2+i)*8;
+    const x = cx+Math.cos(particleAngles[i])*r*0.55;
+    const y = cy+Math.sin(particleAngles[i])*r*0.55;
+    const sz = 1.5+Math.sin(orbFrame+i)*1;
+    const hue = 300+Math.sin(orbFrame+i*0.3)*30;
+    ctx.beginPath();ctx.arc(x,y,sz,0,Math.PI*2);
+    ctx.fillStyle=`hsla(${hue},100%,65%,0.7)`;ctx.fill();
+  }
+  // outer ring
+  ctx.beginPath();ctx.arc(cx,cy,55+Math.sin(orbFrame)*5,0,Math.PI*2);
+  ctx.strokeStyle='rgba(255,61,203,0.3)';ctx.lineWidth=1;ctx.stroke();
+}
+
+function drawSpeakingOrb(cx,cy) {
+  orbFrame+=0.04;
+  const numBars = 24;
+  const env = 0.4+Math.sin(orbFrame*2.1)*0.3+Math.sin(orbFrame*3.7)*0.15;
+  for(let i=0;i<numBars;i++) {
+    const angle = (i/numBars)*Math.PI*2;
+    const h = 40 + env*35 + Math.sin(orbFrame*2+i*1.3)*10;
+    const x1 = cx+Math.cos(angle)*42;
+    const y1 = cy+Math.sin(angle)*42;
+    const x2 = cx+Math.cos(angle)*(42+h);
+    const y2 = cy+Math.sin(angle)*(42+h);
+    const r = i%3===0?'255,61,203':'0,229,255';
+    ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
+    ctx.strokeStyle=`rgba(${r},${0.5+env*0.4})`;ctx.lineWidth=2;ctx.stroke();
+  }
+  ctx.beginPath();ctx.arc(cx,cy,42,0,Math.PI*2);
+  const g=ctx.createRadialGradient(cx,cy,0,cx,cy,42);
+  g.addColorStop(0,'rgba(0,229,255,0.15)');
+  g.addColorStop(1,'rgba(0,229,255,0)');
+  ctx.fillStyle=g;ctx.fill();
+}
+
+function drawMutedOrb(cx,cy) {
+  orbFrame+=0.008;
+  const r = 48+Math.sin(orbFrame)*2;
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.strokeStyle='rgba(255,46,77,0.4)';ctx.lineWidth=1;ctx.stroke();
+  const g=ctx.createRadialGradient(cx,cy,0,cx,cy,r);
+  g.addColorStop(0,'rgba(255,46,77,0.08)');
+  g.addColorStop(1,'rgba(255,46,77,0)');
+  ctx.fillStyle=g;ctx.fill();
+  // slash line
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(orbFrame*0.2);
+  ctx.beginPath();ctx.moveTo(-20,-20);ctx.lineTo(20,20);
+  ctx.strokeStyle='rgba(255,46,77,0.3)';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.restore();
+}
+
+function animate() {
+  ampPhase+=0.12;
+  if(state===STATES.LISTENING){
+    ampVal = Math.max(0.2, Math.abs(Math.sin(ampPhase*1.7+0.3)*0.6+Math.sin(ampPhase*2.9)*0.35+Math.random()*0.15));
+  } else {
+    ampVal = 0;
+  }
+  drawOrb();
+  rafId = requestAnimationFrame(animate);
+}
+animate();
+
+function setState(s) {
+  state = s;
+  stateLabel.className = 'state-label';
+  if(s===STATES.LISTENING && !muted) {
+    stateLabel.classList.add('listening-state');
+    stateLabel.classList.remove('hidden');
+    stateGlyph.textContent='🎙';
+    stateLabelText.textContent='LISTENING';
+  } else if(s===STATES.THINKING) {
+    stateLabel.classList.remove('hidden');
+    stateGlyph.textContent='⚙';
+    stateLabelText.textContent='THINKING';
+  } else if(s===STATES.SPEAKING) {
+    stateLabel.classList.remove('hidden');
+    stateGlyph.textContent='◉';
+    stateLabelText.textContent='SPEAKING';
+  } else if(muted) {
+    stateLabel.classList.add('muted-state');
+    stateLabel.classList.remove('hidden');
+    stateGlyph.textContent='🚫';
+    stateLabelText.textContent='MUTED';
+  } else {
+    stateLabel.classList.add('hidden');
+  }
+  updateMuteBtn();
+}
+
+function updateMuteBtn() {
+  if(muted){muteBtn.textContent='🔇';muteBtn.classList.add('muted');}
+  else{muteBtn.textContent='🎙';muteBtn.classList.remove('muted');}
+}
+
+function updateActionBtn() {
+  if(isGenerating){actionBtn.className='action-btn stop-mode';actionBtn.textContent='⏹';}
+  else if(isTyping){actionBtn.className='action-btn send-mode';actionBtn.textContent='↑';}
+  else{actionBtn.className='action-btn mic-mode';actionBtn.textContent='🎙';}
+}
+
+textInput.addEventListener('input',()=>{
+  isTyping=textInput.value.trim().length>0;
+  updateActionBtn();
+  suggestionFan.style.opacity=isTyping?'0':'1';
+  suggestionFan.style.pointerEvents=isTyping?'none':'all';
+});
+
+actionBtn.addEventListener('click',()=>{
+  if(isGenerating)stopGeneration();
+  else if(isTyping)sendTyped();
+  else runVoiceCycle();
+});
+
+function sendTyped() {
+  const text=textInput.value.trim();if(!text)return;
+  addTurn('user',text,'typed',attachStaging.children.length?'REPORT_Q2.PDF':null);
+  textInput.value='';isTyping=false;attachStaging.innerHTML='';
+  updateActionBtn();triggerReply();
+}
+
+function addTurn(role,text,modality,attachment) {
+  const turn=document.createElement('div');
+  turn.className=`turn ${role}-turn`;
+  if(modality==='typed')turn.classList.add('typed');
+  const isUser=role==='user';
+  turn.style.alignItems=isUser?'flex-end':'flex-start';
+  const glyph=modality==='voice'?'🎙':'⌨️';
+  let attachHTML=attachment?`<span style="font-size:10px;opacity:0.6;font-family:var(--font-mono);">📎 ${attachment}</span>`:'';
+  turn.innerHTML=`
+    <div class="turn-meta" style="${isUser?'justify-content:flex-end':''}">
+      ${isUser?`<span>USER</span><span>${glyph}</span>`:'<span>ELIZA</span>'}
+    </div>
+    <div class="bubble" style="${isUser?'':''}">
+      ${attachHTML}${attachHTML?'<span>'+text+'</span>':text}
+    </div>`;
+  transcriptScroll.appendChild(turn);
+  transcriptScroll.scrollTop=transcriptScroll.scrollHeight;
+  return turn;
+}
+
+function addPartialTurn(text) {
+  const turn=document.createElement('div');
+  turn.className='turn user-turn partial';
+  turn.style.alignItems='flex-end';
+  turn.innerHTML=`
+    <div class="turn-meta" style="justify-content:flex-end"><span>USER</span><span>🎙</span></div>
+    <div class="bubble">${text}</div>`;
+  transcriptScroll.appendChild(turn);
+  transcriptScroll.scrollTop=transcriptScroll.scrollHeight;
+  return turn;
+}
+
+function finalizePartial(el,text) {
+  el.classList.remove('partial');
+  el.querySelector('.bubble').textContent=text;
+}
+
+function triggerReply() {
+  isGenerating=true;updateActionBtn();setState(STATES.THINKING);
+  setTimeout(()=>{
+    setState(STATES.SPEAKING);
+    const replies=[
+      "Signal acquired. Here's what I found: three key data points you'll want to act on immediately.",
+      "Processing complete. The answer is more nuanced than it looks — let me break it down.",
+      "Done. Task queued and confirmed. Anything else in the pipeline?"
+    ];
+    const reply=replies[Math.floor(Math.random()*replies.length)];
+    const t=addTurn('assistant','','voice',null);
+    const b=t.querySelector('.bubble');b.textContent='';
+    let i=0;
+    genInterval=setInterval(()=>{
+      if(i>=reply.length){clearInterval(genInterval);isGenerating=false;updateActionBtn();setState(STATES.IDLE);showFollowUpChips();return;}
+      b.textContent+=reply[i++];
+      transcriptScroll.scrollTop=transcriptScroll.scrollHeight;
+    },30);
+  },800);
+}
+
+function stopGeneration(){clearInterval(genInterval);isGenerating=false;setState(STATES.IDLE);updateActionBtn();}
+
+function showFollowUpChips() {
+  followUpChips.innerHTML='';
+  ['ELABORATE','SEND_BRIEF','SCHEDULE_IT'].forEach(c=>{
+    const el=document.createElement('div');el.className='chip follow-up';el.textContent=c;
+    el.onclick=()=>{textInput.value=c.toLowerCase().replace('_',' ');isTyping=true;updateActionBtn();followUpChips.innerHTML='';};
+    followUpChips.appendChild(el);
+  });
+}
+
+function useSuggestion(el,text) {
+  textInput.value=text.toLowerCase().replace(/_/g,' ');isTyping=true;updateActionBtn();
+  suggestionFan.style.opacity='0';
+}
+
+attachBtn.addEventListener('click',()=>radialMenu.classList.toggle('open'));
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#attachBtn')&&!e.target.closest('#radialMenu'))radialMenu.classList.remove('open');
+});
+
+function attachFile(icon,name) {
+  radialMenu.classList.remove('open');
+  const chip=document.createElement('div');chip.className='attachment-chip';
+  chip.innerHTML=`<span class="att-thumb">${icon}</span><span>${name}</span><span class="att-remove">✕</span>`;
+  chip.querySelector('.att-remove').onclick=()=>chip.remove();
+  attachStaging.appendChild(chip);
+}
+
+muteBtn.addEventListener('click',()=>{
+  muted=!muted;
+  if(muted)setState(STATES.MUTED);else setState(STATES.IDLE);
+});
+
+// Touch swipe
+let touchStartY=0;
+orbZone.addEventListener('touchstart',e=>{touchStartY=e.touches[0].clientY;},{passive:true});
+orbZone.addEventListener('touchend',e=>{
+  const dy=e.changedTouches[0].clientY-touchStartY;
+  if(dy>60)openTranscript();else if(dy<-60)closeTranscript();
+},{passive:true});
+swipeHint.addEventListener('click',openTranscript);
+
+function openTranscript(){transcriptSheet.classList.add('open');}
+function closeTranscript(){transcriptSheet.classList.remove('open');}
+
+function runVoiceCycle() {
+  clearTimeout(demoTimer);clearInterval(genInterval);
+  isGenerating=false;updateActionBtn();
+  setState(STATES.LISTENING);
+  demoTimer=setTimeout(()=>{
+    const p=addPartialTurn('What\'s the weather right now…');
+    openTranscript();
+    demoTimer=setTimeout(()=>{
+      finalizePartial(p,'What\'s the weather right now in San Francisco?');
+      setState(STATES.THINKING);
+      demoTimer=setTimeout(()=>{
+        setState(STATES.SPEAKING);isGenerating=true;updateActionBtn();
+        const reply="62 degrees Fahrenheit. Partly cloudy. Wind 8 miles per hour from the northwest. UV index low. Good conditions for outdoor work.";
+        const t=addTurn('assistant','','voice',null);
+        const b=t.querySelector('.bubble');b.textContent='';
+        let i=0;
+        genInterval=setInterval(()=>{
+          if(i>=reply.length){clearInterval(genInterval);isGenerating=false;updateActionBtn();setState(STATES.IDLE);showFollowUpChips();return;}
+          b.textContent+=reply[i++];
+          transcriptScroll.scrollTop=transcriptScroll.scrollHeight;
+        },25);
+      },800);
+    },2000);
+  },2200);
+}
+
+demoBtn.addEventListener('click',()=>{
+  clearTimeout(demoTimer);clearInterval(genInterval);runVoiceCycle();
+});
+textInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(isTyping)sendTyped();}});
+
+setTimeout(runVoiceCycle,600);
+</script>
+</body>
+</html>
