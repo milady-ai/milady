@@ -31,19 +31,23 @@ env:
   BUN_VERSION: "1.3.14"
   NODE_VERSION: "22.20.0"
 
+# Default to least privilege. Override per-job where needed.
+permissions:
+  contents: read
+
 jobs:
   pre-review:
     name: Pre-Review
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 0
           # Published-only CI restores required non-eliza submodules during setup.
           submodules: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -73,12 +77,12 @@ jobs:
           fi
 
       - name: Generate i18n keyword data
-        if: ${{ hashFiles('eliza/package.json') != '' }}
+        if: ${{ hashFiles('eliza/packages/shared/scripts/generate-keywords.mjs') != '' }}
         run: node packages/shared/scripts/generate-keywords.mjs --target ts
         working-directory: eliza
 
       - name: Build eliza packages required for typecheck
-        if: ${{ hashFiles('eliza/package.json') != '' }}
+        if: ${{ hashFiles('eliza/packages/core/package.json') != '' }}
         run: |
           if [ ! -f eliza/packages/core/dist/index.node.js ] || [ ! -f eliza/packages/core/dist/index.d.ts ]; then
             (cd eliza/packages/core && bun run build)
@@ -101,13 +105,13 @@ jobs:
     name: Lint & Format
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           # Published-only CI restores required non-eliza submodules during setup.
           submodules: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -132,17 +136,25 @@ jobs:
       - name: Biome format check
         run: bunx @biomejs/biome format scripts/validate-ci-bootstrap-contract.mjs
 
+      - name: Flow guard (topology)
+        # Plumber guard: fail fast if apps/app reaches by relative path into the
+        # gitignored eliza/ clone source (the recurring vite.config CI break), plus
+        # a circular-dependency check. See .dependency-cruiser.cjs + .claude/topology.md.
+        run: |
+          bun run check:flow
+          bun run check:cycles
+
   typecheck:
     name: Type Check
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           # Published-only CI restores required non-eliza submodules during setup.
           submodules: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -170,12 +182,12 @@ jobs:
           fi
 
       - name: Generate i18n keyword data
-        if: ${{ hashFiles('eliza/package.json') != '' }}
+        if: ${{ hashFiles('eliza/packages/shared/scripts/generate-keywords.mjs') != '' }}
         run: node packages/shared/scripts/generate-keywords.mjs --target ts
         working-directory: eliza
 
       - name: Build eliza packages required for typecheck
-        if: ${{ hashFiles('eliza/package.json') != '' }}
+        if: ${{ hashFiles('eliza/packages/core/package.json') != '' }}
         run: |
           if [ ! -f eliza/packages/core/dist/index.node.js ] || [ ! -f eliza/packages/core/dist/index.d.ts ]; then
             (cd eliza/packages/core && bun run build)
@@ -191,13 +203,13 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           # Published-only CI restores required non-eliza submodules during setup.
           submodules: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -223,13 +235,13 @@ jobs:
     name: Build
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           # Published-only CI restores required non-eliza submodules during setup.
           submodules: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -249,7 +261,7 @@ jobs:
         run: node scripts/align-eliza-ci-node-modules.mjs
 
       - name: Build eliza packages required for typecheck
-        if: ${{ hashFiles('eliza/package.json') != '' }}
+        if: ${{ hashFiles('eliza/packages/core/package.json') != '' }}
         run: |
           if [ ! -f eliza/packages/core/dist/index.node.js ] || [ ! -f eliza/packages/core/dist/index.d.ts ]; then
             (cd eliza/packages/core && bun run build)
@@ -266,14 +278,20 @@ jobs:
           if [ -f eliza/plugins/plugin-pdf/package.json ] && [ ! -f eliza/plugins/plugin-pdf/dist/index.d.ts ]; then
             (cd eliza/plugins/plugin-pdf && bun run build)
           fi
-          if [ -f eliza/plugins/plugin-sql/package.json ] && [ ! -f eliza/plugins/plugin-sql/typescript/dist/index.d.ts ]; then
+          if [ -f eliza/plugins/plugin-sql/package.json ] && [ ! -f eliza/plugins/plugin-sql/src/dist/index.d.ts ]; then
             (cd eliza/plugins/plugin-sql && bun run build)
           fi
           if [ ! -f eliza/plugins/plugin-streaming/dist/index.d.ts ]; then
             (cd eliza/plugins/plugin-streaming && bun run build)
           fi
 
+      - name: Link local @elizaos workspace packages
+        if: ${{ hashFiles('eliza/packages/app-core/package.json') != '' }}
+        run: node eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs
+
       - name: Build project
+        env:
+          MILADY_FORCE_LOCAL_UPSTREAMS: ${{ hashFiles('eliza/packages/app-core/package.json') != '' && '1' || '' }}
         run: bun run build
 
       - name: Build homepage

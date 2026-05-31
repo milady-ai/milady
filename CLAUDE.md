@@ -8,6 +8,47 @@ Architecture commandments, QA protocol, git workflow: [AGENTS.md](AGENTS.md). Sa
 
 Write **elizaOS** (not `ElizaOS`). npm scope `@elizaos/*`. Plain language: **Eliza agents**. Exception: **Eliza Classic** plugin keeps `Eliza` (the 1966 chatbot).
 
+## Cloud frontend visual review (REQUIRED for any UI change)
+
+> Path/mode note: `cloud-frontend` lives at `eliza/packages/cloud-frontend` and is on disk only in **local mode** (`bun run eliza:local`). Every `packages/cloud-frontend/…` path in this section is relative to `eliza/packages/cloud-frontend/`.
+
+For ANY change in `eliza/packages/cloud-frontend/` (or any shared package whose UI bleeds into cloud-frontend), follow this loop until every touched page reaches verdict `good`:
+
+```bash
+bun run --cwd eliza/packages/cloud-frontend audit:cloud
+```
+
+This boots the dev server, performs an injected-ethereum login (synthetic JWT in `localStorage.steward_session_token`), visits every route in `src/App.tsx` at desktop + mobile, captures rest + hover screenshots, and writes:
+
+```
+packages/cloud-frontend/aesthetic-audit-output/
+  desktop/<slug>.png            rest screenshot
+  desktop/<slug>--hover.png     primary-button hover state
+  mobile/<slug>.png
+  mobile/<slug>--hover.png
+  manual-review/<slug>.md       REQUIRED per-page verdict markdown (auto-stubbed)
+  contact-sheet.html            grid index
+  report.json                   machine-readable findings
+```
+
+**The 5-loop grind:**
+
+1. Run the audit.
+2. Open `contact-sheet.html`. Walk every affected page.
+3. Fill in the verdict in `manual-review/<slug>.md`: visual issues, color/hover violations, layout breaks, e2e gaps, `good` · `needs-work` · `needs-eyeball` · `broken`.
+4. Fix issues in source.
+5. Commit screenshots + reviews + fixes together.
+6. Re-run. Repeat until every page is `good`. Five loops is the floor for any meaningful redesign.
+
+**Hard rules:**
+
+- Every page has a screenshot AND a `manual-review/<slug>.md` checked in.
+- `needs-work` / `broken` pages block "done."
+- Brand orange is accent only. No blue anywhere. Orange-resting → darker-orange hover (never orange→black). Neutral resting → neutral-with-opacity hover.
+- In local dev, the admin pages are accessible to any authenticated user (production keeps the role gate).
+
+Full protocol + checklist template: [packages/cloud-frontend/AGENTS.md](packages/cloud-frontend/AGENTS.md). Color rules: [packages/cloud-frontend/docs/HOVER_SYSTEM.md](packages/cloud-frontend/docs/HOVER_SYSTEM.md). E2E gap catalog: [packages/cloud-frontend/docs/E2E_COVERAGE_GAPS.md](packages/cloud-frontend/docs/E2E_COVERAGE_GAPS.md). Dashboard IA: [packages/cloud-frontend/docs/DASHBOARD_REDESIGN.md](packages/cloud-frontend/docs/DASHBOARD_REDESIGN.md).
+
 ## Scope Discipline
 
 - Do NOT invent features, grace periods, or product behaviors not explicitly requested or documented.
@@ -52,10 +93,24 @@ Loopback endpoints — use instead of hardcoding ports:
 - `GET /api/dev/console-log?maxLines=400` — tail of Vite + API + Electrobun logs.
 - `bun run desktop:stack-status -- --json` — one-shot probe.
 
+## Electrobun Agentic Desktop 2026
+
+The local rules pack is installed for desktop-shell work. Use root `AGENTS.md`
+as authoritative, then read `rules/`, `checklists/`, `hooks/README.md`,
+`commands/README.md`, `docs/research-brief-2026.md`, and
+`docs/porting-map-from-apple-swift.md` when changing Electrobun, desktop RPC,
+webviews, tray/menu/deep-link surfaces, updater/release code, or local
+model/tool orchestration.
+
+Milady's Electrobun workspace is `eliza/packages/app-core/platforms/electrobun`;
+the renderer app is `apps/app`. The original pack is archived at
+`docs/agent-packs/electrobun-agentic-desktop-2026/`. Its workflow examples are
+not active CI unless explicitly approved.
+
 ## Training & inference (locked)
 
 - **Training always uses APOLLO optimizer** (memory-efficient). No alternatives.
-- **Inference always applies every optimization** we have (DSPy artifacts under `~/.milady/optimized-prompts/<task>/` auto-load at boot via `OptimizedPromptService`).
+- **Inference always applies every optimization** we have (DSPy artifacts under `~/.local/state/milady/optimized-prompts/<task>/` auto-load at boot via `OptimizedPromptService`).
 - **Recommended local model: `eliza-1`** — not enforced. Users can search + download any HuggingFace model via the models surface.
 
 ## Deployment topologies
@@ -71,7 +126,7 @@ Prefer Cloud primitives over inventing custom backend infra.
 
 ## Environment variables
 
-- `MILADY_STATE_DIR` / `ELIZA_STATE_DIR` — per-user state root. Default `~/.milady`.
+- `MILADY_STATE_DIR` / `ELIZA_STATE_DIR` — per-user state root. Default `~/.local/state/milady`.
 - `MILADY_WORKSPACE_DIR` / `ELIZA_WORKSPACE_DIR` — override agent workspace (else follows runtime `cwd` if it has `package.json` / `AGENTS.md` / `skills/`).
 - `ELIZA_DISABLE_TRAJECTORY_LOGGING=1` — opt out of trajectory writes (also off when `NODE_ENV=test`).
 - Ports (never hardcode — orchestrator auto-shifts + syncs): `MILADY_API_PORT` (31337), `MILADY_PORT` (2138), `MILADY_GATEWAY_PORT` (18789), `MILADY_HOME_PORT` (2142), `MILADY_WECHAT_WEBHOOK_PORT` (18790).
@@ -94,9 +149,13 @@ Two skill systems — don't conflate.
 
 ## Project layout
 
+# Runtime source-of-truth is the @elizaos/* packages: consumed from npm (packages
+# mode, the default) or from the gitignored eliza/ clone (local mode). Root
+# packages/ does NOT exist — only apps/, scripts/, and (in local mode) eliza/ are
+# on disk at the repo root. The eliza/packages/* paths below exist only in local mode.
 ```
-packages/
-  app-core/     Main runtime (source of truth)
+eliza/packages/     Runtime source (local mode) == published @elizaos/* (packages mode)
+  app-core/         Main runtime
     src/entry.ts             CLI bootstrap
     src/cli/                 Commander CLI (milady)
     src/runtime/eliza.ts     Agent loader (sets NODE_PATH, loads plugins)
@@ -105,13 +164,13 @@ packages/
     src/config/              Plugin auto-enable, schemas
     src/connectors/          Connector code
     src/services/            Business logic
-  agent/        Upstream elizaOS agent
-  ui/           Shared component library
-  shared/       Shared utils
-apps/
+  agent/          Upstream elizaOS agent
+  ui/             Shared component library
+  shared/         Shared utils (runtime-env, dev-settings, env aliases)
+apps/             Milady-owned client (committable in this repo)
   app/          Web + desktop UI (Vite + React); electrobun/ = desktop shell
   homepage/     Marketing site
-scripts/
+scripts/          Milady-owned automation (committable in this repo)
   dev-ui.mjs                Dev orchestrator (API + Vite)
   eliza-source-mode.mjs     local ↔ packages mode
   setup-upstreams.mjs       Init repo-local upstreams (eliza:local)

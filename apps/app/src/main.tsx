@@ -43,25 +43,21 @@ import {
   installLocalProviderCloudPreferencePatch,
   isAppWindowRoute,
   isDetachedWindowShell,
-  isPillWindowShell,
   getWindowNavigationPath,
   resolveWindowShellRoute,
   shouldInstallMainWindowOnboardingPatches,
   syncDetachedShellLocation,
 } from "@elizaos/app-core";
 import {
+  type ConversationMessage,
   createVoiceCapture,
   type VoiceCaptureHandle,
+  type VoiceCaptureSegment as VoiceCaptureTranscriptSegment,
   type VoiceCaptureState,
-  type VoiceCaptureTranscriptSegment,
-} from "@elizaos/ui/voice";
-import type { ConversationMessage } from "@elizaos/ui/api/client-types-chat";
-// @ts-expect-error The published @elizaos/ui voice subpath types lag the local
-// runtime barrel that Vite aliases for the app build.
-import {
+  normalizePillMessage,
   VoicePill,
   type VoicePillMessage,
-} from "@elizaos/ui/voice";
+} from "./pill-stubs";
 import { AppWindowRenderer } from "@elizaos/app-core";
 import { dispatchQueuedLifeOpsGithubCallbackFromUrl } from "@elizaos/app-lifeops/platform";
 import type { ShareTargetPayload } from "@elizaos/app-core/platform";
@@ -250,6 +246,23 @@ function isDesktopPlatform(): boolean {
 
 const windowShellRoute = resolveWindowShellRoute();
 
+// `isPillWindowShell` is not yet exported from the published @elizaos/app-core
+// alpha. The pill window is launched with `?shell=pill` by the Electrobun
+// host, so we detect that locally until the upstream helper ships.
+function isPillWindowShellRoute(route: unknown): boolean {
+  if (route && typeof route === "object") {
+    const kind = (route as { kind?: unknown }).kind;
+    if (typeof kind === "string" && kind === "pill") return true;
+  }
+  if (typeof window === "undefined") return false;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("shell") === "pill";
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Adds `eliza-electrobun-frameless` for CSS `-webkit-app-region` (Chromium/CEF).
  * macOS WKWebView move/resize are still driven by native overlays in
@@ -416,11 +429,21 @@ try {
     for (const key of STALE_BOOTSTRAP_KEYS) {
       try {
         window.localStorage.removeItem(key);
-      } catch {}
+      } catch (err) {
+        console.warn(`${APP_LOG_PREFIX} Failed to clear stale bootstrap key:`, {
+          key,
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
     }
     try {
       window.localStorage.setItem(SELF_HOSTED_TOKEN_KEY, fragmentToken);
-    } catch {}
+    } catch (err) {
+      console.warn(
+        `${APP_LOG_PREFIX} Failed to persist fragment bootstrap token:`,
+        err instanceof Error ? err.message : err,
+      );
+    }
   }
   if (fragmentToken || hasQueryToken) {
     url.hash = "";
@@ -431,7 +454,12 @@ try {
     try {
       const saved = window.localStorage.getItem(SELF_HOSTED_TOKEN_KEY)?.trim();
       if (saved) bootstrapToken = saved;
-    } catch {}
+    } catch (err) {
+      console.warn(
+        `${APP_LOG_PREFIX} Failed to read persisted bootstrap token:`,
+        err instanceof Error ? err.message : err,
+      );
+    }
   }
   // On AOSP/Milady the agent runs in the same APK and exposes its
   // per-boot bearer through `window.ElizaNative.getLocalAgentToken()`
@@ -453,16 +481,31 @@ try {
         // the bridge to be available at that moment.
         try {
           window.localStorage.setItem(SELF_HOSTED_TOKEN_KEY, nativeToken);
-        } catch {}
+        } catch (err) {
+          console.warn(
+            `${APP_LOG_PREFIX} Failed to persist native bootstrap token:`,
+            err instanceof Error ? err.message : err,
+          );
+        }
       }
-    } catch {}
+    } catch (err) {
+      console.warn(
+        `${APP_LOG_PREFIX} Failed to load native bootstrap token:`,
+        err instanceof Error ? err.message : err,
+      );
+    }
   }
   if (bootstrapToken) {
     appBootConfig.apiToken = bootstrapToken;
     appBootConfig.apiBase ??= window.location.origin;
     try {
       client.setToken(bootstrapToken);
-    } catch {}
+    } catch (err) {
+      console.warn(
+        `${APP_LOG_PREFIX} Failed to install bootstrap token on API client:`,
+        err instanceof Error ? err.message : err,
+      );
+    }
   }
 } catch (err) {
   console.warn(
@@ -514,7 +557,12 @@ forceDesktopDevLocalActiveServer();
         client.setToken(token);
         try {
           window.localStorage.setItem(SELF_HOSTED_TOKEN_KEY, token);
-        } catch {}
+        } catch (err) {
+          console.warn(
+            `${APP_LOG_PREFIX} Failed to persist watchdog bootstrap token:`,
+            err instanceof Error ? err.message : err,
+          );
+        }
         return;
       }
     } catch (err) {
@@ -921,30 +969,6 @@ function projectPillMessages(
     if (pill) projected.push(pill);
   }
   return projected;
-}
-
-function normalizePillMessage(raw: unknown): ConversationMessage {
-  const record =
-    raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
-  const id =
-    typeof record.id === "string" && record.id
-      ? record.id
-      : `pill-message-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  const role = record.role === "user" ? "user" : "assistant";
-  const text = typeof record.text === "string" ? record.text : "";
-  const timestamp =
-    typeof record.timestamp === "number"
-      ? record.timestamp
-      : typeof record.timestamp === "string"
-        ? Date.parse(record.timestamp)
-        : Date.now();
-  return {
-    ...(raw && typeof raw === "object" ? (raw as ConversationMessage) : {}),
-    id,
-    role,
-    text,
-    timestamp: Number.isFinite(timestamp) ? timestamp : Date.now(),
-  };
 }
 
 function readPillConversationId(): string | null {
@@ -1636,7 +1660,7 @@ async function main(): Promise<void> {
     preSeedAndroidLocalRuntimeIfFresh();
   }
 
-  if (isPillWindowShell(windowShellRoute)) {
+  if (isPillWindowShellRoute(windowShellRoute)) {
     // Pill overlay window: minimal renderer that only mounts <VoicePill>.
     // No AppProvider, no chrome, no platform init — the pill is a standalone
     // OS-level overlay launched alongside the main shell from the Electrobun

@@ -6,7 +6,7 @@ Milady is local-first by design, but "local-first" isn't "nothing ever leaves yo
 
 ## What lives on your machine
 
-Everything below lives in `~/.milady/` (macOS/Linux) or `%USERPROFILE%\.milady\` (Windows):
+Everything below lives in `~/.local/state/milady/` (macOS/Linux) or `%USERPROFILE%\.local\state\milady\` (Windows):
 
 | What | Where | Notes |
 | --- | --- | --- |
@@ -21,7 +21,7 @@ Everything below lives in `~/.milady/` (macOS/Linux) or `%USERPROFILE%\.milady\`
 This directory is **your data**. Back it up if you care. Migrate it to a new machine by copying it. Never delete it in anger.
 
 <Callout kind="tip">
-If you want to know what's in your Milady install without opening the app, open <code>~/.milady/</code> in a file browser. The directory structure is human-readable. The only thing you can't inspect directly is the SQLite conversation database (use a SQLite browser if you really want to).
+If you want to know what's in your Milady install without opening the app, open <code>~/.local/state/milady/</code> in a file browser. The directory structure is human-readable. The only thing you can't inspect directly is the SQLite conversation database (use a SQLite browser if you really want to).
 </Callout>
 
 ## What leaves your machine during normal use
@@ -83,7 +83,7 @@ Every plugin you install can make its own network requests. A web search plugin 
 - Your conversation history — it's stored locally. The provider sees individual messages during inference but never has a persistent copy of your full history.
 - Your `milady.json` config — never transmitted anywhere.
 - Your local database.
-- Your `~/.milady/` directory as a whole.
+- Your `~/.local/state/milady/` directory as a whole.
 - Your wallet private keys (if you use the wallet features) — stored encrypted at rest, used for signing locally, only the signed transactions go out on-chain.
 
 ## The "fully local" setup

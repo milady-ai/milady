@@ -18,6 +18,7 @@ export default defineConfig({
   reporter: "list",
   use: {
     baseURL: BASE_URL,
+    ignoreHTTPSErrors: true,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },

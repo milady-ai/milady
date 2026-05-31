@@ -5,8 +5,49 @@
     "vercel@claude-plugins-official": false,
     "vercel-plugin@vercel-vercel-plugin": false
   },
-  "// hooks.Stop": "End-of-turn typecheck + lint via `bun run verify`. asyncRewake means: runs in background (does NOT block the user), silent on success, and wakes the model with the tailed error output on failure (exit 2). Catches type errors before they compound across phases without the latency of a synchronous hook on this 953-file monorepo. PostToolUse on Edit/Write would be unworkable — it'd re-run verify after every single edit.",
+  "// hooks.Stop": "End-of-turn typecheck + lint via `bun run verify`. asyncRewake means: runs in background (does NOT block the user), silent on success, and wakes the model with the tailed error output on failure (exit 2). Catches type errors before they compound across phases without the latency of a synchronous hook on this 953-file monorepo.",
+  "// hooks.Electrobun": "Local Electrobun agentic desktop hooks from docs/agent-packs/electrobun-agentic-desktop-2026. The guard hooks block obvious destructive/secret-exposing operations and print focused follow-up checks; they do not replace Milady's background verify hook.",
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/pre-bash-guard.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/pre-edit-guard.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/post-edit-validate.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/post-bash-summary.sh"
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
@@ -16,6 +57,15 @@
             "asyncRewake": true,
             "timeout": 240,
             "statusMessage": "Running bun run verify (background)"
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/stop-checklist.sh"
           }
         ]
       }

@@ -1,0 +1,46 @@
+# Prometheus scrape + alerting skeleton for Eliza Cloud observability.
+#
+# Most metrics arrive via the OTel Collector remote-write, not direct scrape.
+# Scrape config below is for components that expose Prometheus endpoints natively
+# (the collector itself, prometheus, loki, grafana, node-exporter).
+#
+# Policy ref: ../../../POLICIES/14-logging-monitoring.md
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+  external_labels:
+    cluster: eliza-cloud
+    environment: prod  # override per deployment
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+rule_files:
+  - alerts/security.yml
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: [localhost:9090]
+
+  - job_name: otel-collector
+    static_configs:
+      - targets: [otel-collector:8888]
+
+  - job_name: loki
+    static_configs:
+      - targets: [loki:3100]
+
+  - job_name: grafana
+    static_configs:
+      - targets: [grafana:3000]
+
+  - job_name: node
+    static_configs:
+      - targets: [node-exporter:9100]
+
+# Metrics from cloud-api, agent-runtime, training, etc. arrive via OTel
+# Collector remote-write. No direct scrape needed; the collector is the funnel.

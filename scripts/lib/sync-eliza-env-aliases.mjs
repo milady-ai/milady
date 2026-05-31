@@ -44,8 +44,19 @@ function buildEnvPairs(brandedPrefix) {
       "ELIZA_GOOGLE_OAUTH_DESKTOP_CLIENT_ID",
     ],
     [prefixed("API_PORT"), "ELIZA_API_PORT"],
+    [prefixed("HOME_PORT"), "ELIZA_HOME_PORT"],
+    [prefixed("GATEWAY_PORT"), "ELIZA_GATEWAY_PORT"],
     [prefixed("API_BIND"), "ELIZA_API_BIND"],
     [prefixed("API_TOKEN"), "ELIZA_API_TOKEN"],
+    [prefixed("API_BASE"), "ELIZA_API_BASE"],
+    [prefixed("API_BASE_URL"), "ELIZA_API_BASE_URL"],
+    [prefixed("DESKTOP_API_BASE"), "ELIZA_DESKTOP_API_BASE"],
+    [prefixed("DESKTOP_TEST_API_BASE"), "ELIZA_DESKTOP_TEST_API_BASE"],
+    [
+      prefixed("DESKTOP_SKIP_EMBEDDED_AGENT"),
+      "ELIZA_DESKTOP_SKIP_EMBEDDED_AGENT",
+    ],
+    [prefixed("RENDERER_URL"), "ELIZA_RENDERER_URL"],
     [prefixed("ALLOWED_ORIGINS"), "ELIZA_ALLOWED_ORIGINS"],
     [prefixed("ALLOWED_HOSTS"), "ELIZA_ALLOWED_HOSTS"],
     [prefixed("ALLOW_NULL_ORIGIN"), "ELIZA_ALLOW_NULL_ORIGIN"],
@@ -68,19 +79,27 @@ function buildEnvPairs(brandedPrefix) {
  * need to resolve one canonical namespace internally.
  */
 export function syncElizaEnvAliases(options = {}) {
+  const env = options.env ?? process.env;
   const brandedPrefix = normalizeBrandedPrefix(options.brandedPrefix);
   const pairs = buildEnvPairs(brandedPrefix);
   for (const [from, to] of pairs) {
-    if (process.env[to] === undefined && process.env[from] !== undefined) {
-      process.env[to] = process.env[from];
+    if (env[to] === undefined && env[from] !== undefined) {
+      env[to] = env[from];
     }
   }
-  if (!process.env.ELIZA_CLOUD_MANAGED_AGENTS_API_SEGMENT) {
-    process.env.ELIZA_CLOUD_MANAGED_AGENTS_API_SEGMENT =
+  if (
+    options.defaultNamespace &&
+    env.ELIZA_NAMESPACE === undefined &&
+    env[`${brandedPrefix}_NAMESPACE`] === undefined
+  ) {
+    env.ELIZA_NAMESPACE = options.defaultNamespace;
+  }
+  if (!env.ELIZA_CLOUD_MANAGED_AGENTS_API_SEGMENT) {
+    env.ELIZA_CLOUD_MANAGED_AGENTS_API_SEGMENT =
       options.cloudManagedAgentsApiSegment ?? "milady";
   }
-  if (process.env.ELIZA_APP_ROUTE_PLUGIN_MODULES === undefined) {
-    process.env.ELIZA_APP_ROUTE_PLUGIN_MODULES = (
+  if (env.ELIZA_APP_ROUTE_PLUGIN_MODULES === undefined) {
+    env.ELIZA_APP_ROUTE_PLUGIN_MODULES = (
       options.appRoutePluginModules ?? DEFAULT_APP_ROUTE_PLUGIN_MODULES
     ).join(",");
   }

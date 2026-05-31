@@ -16,4 +16,4 @@ prompt is automatically substituted.
 The dataset is written to
 `eliza/plugins/app-training/datasets/action_planner_from_benchmark.jsonl`
 (plus a sibling `.meta.json`), and artifacts land under
-`~/.milady/optimized-prompts/action_planner/`.
+`~/.local/state/milady/optimized-prompts/action_planner/`.

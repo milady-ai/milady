@@ -50,7 +50,6 @@
       "@elizaos/skills": ["./node_modules/@elizaos/skills"],
       "@elizaos/skills/*": ["./node_modules/@elizaos/skills/*"],
       "@elizaos/ui": ["./node_modules/@elizaos/ui"],
-      "@elizaos/ui/voice": ["./src/elizaos-ui-voice-shim.ts"],
       "@elizaos/ui/*": ["./node_modules/@elizaos/ui/*"],
       "react": ["./node_modules/@types/react/index.d.ts"],
       "react/jsx-runtime": ["./node_modules/@types/react/jsx-runtime.d.ts"],

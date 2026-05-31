@@ -12,16 +12,20 @@ concurrency:
 env:
   BUN_VERSION: "1.3.14"
 
+# Default to least privilege. Override per-job where needed.
+permissions:
+  contents: read
+
 jobs:
   lint:
     name: Lint & Format
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == true)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: 22
 
@@ -47,10 +51,10 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == true)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: 22
 
@@ -73,10 +77,10 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == true)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: 22
 
@@ -101,10 +105,10 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == true)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: 22
 
@@ -119,7 +123,23 @@ jobs:
       - name: Restore eliza workspace paths for repo scripts
         run: node scripts/restore-local-eliza-workspace.mjs
 
+      # Link local @elizaos workspace packages into node_modules. `bun run build`
+      # invokes vite (via scripts/run-production-build.mjs), which imports
+      # symbols from @elizaos/ui (createVoiceCapture, VoicePill, VoicePillMessage,
+      # VoiceCaptureHandle) that ship in repo-local eliza/packages/ui but have
+      # not landed on the npm alpha dist-tag yet (currently
+      # @elizaos/ui@2.0.0-alpha.537). Without this step, vite resolves
+      # @elizaos/ui from npm and the build fails with
+      # `"createVoiceCapture" is not exported by "@elizaos/ui"`.
+      - name: Link local @elizaos workspace packages
+        run: node eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs
+
+      # MILADY_FORCE_LOCAL_UPSTREAMS=1 forces apps/app/vite.config.ts to treat
+      # the freshly-linked eliza/ checkout as the source of truth for the
+      # @elizaos/* aliases.
       - name: Build project
+        env:
+          MILADY_FORCE_LOCAL_UPSTREAMS: "1"
         run: bun run build
 
       - name: Build homepage

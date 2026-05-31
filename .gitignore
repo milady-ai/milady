@@ -310,3 +310,6 @@ eliza-merge-review/
 reports/ai-qa/
 reports/qa/
 package.json.pre-disable-backup
+
+# Generated analysis-tool scratch (understand-anything / knowledge-workflow output)
+.understand-anything/

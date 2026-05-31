@@ -81,6 +81,10 @@ env:
   LANG: en_US.UTF-8
   LC_ALL: en_US.UTF-8
 
+# Default to least privilege. Override per-job where needed.
+permissions:
+  contents: read
+
 jobs:
   prepare:
     name: Prepare
@@ -92,7 +96,7 @@ jobs:
       build_macos: ${{ steps.targets.outputs.macos }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Determine version
         id: ver
@@ -139,15 +143,15 @@ jobs:
       FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
@@ -229,7 +233,7 @@ jobs:
 
       - name: Setup Ruby
         if: steps.validate_ios.outputs.ready == 'true'
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@afeafc3d1ab54a631816aba4c914a0081c12ff2f
         with:
           ruby-version: "4.0.3"
           bundler-cache: true
@@ -274,7 +278,7 @@ jobs:
 
       - name: Upload IPA artifact
         if: steps.validate_ios.outputs.ready == 'true'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: ios-ipa
           path: apps/app/ios/build/Eliza.ipa
@@ -300,15 +304,15 @@ jobs:
       APP_STORE_API_ISSUER_ID: ${{ secrets.APP_STORE_API_ISSUER_ID }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
@@ -379,9 +383,26 @@ jobs:
           echo '{"type":"module"}' > dist/package.json
           node --import tsx scripts/write-build-info.ts
 
+      # Link local @elizaos workspace packages into node_modules. The vite build
+      # below imports symbols from @elizaos/ui (createVoiceCapture, VoicePill,
+      # VoicePillMessage, VoiceCaptureHandle) that ship in repo-local
+      # eliza/packages/ui but have not landed on the npm alpha dist-tag yet
+      # (currently @elizaos/ui@2.0.0-alpha.537). Without this step, vite resolves
+      # @elizaos/ui from npm and the build fails with
+      # `"createVoiceCapture" is not exported by "@elizaos/ui"`.
+      - name: Link local @elizaos workspace packages
+        if: steps.validate_mas.outputs.ready == 'true'
+        run: node eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs
+
+      # MILADY_FORCE_LOCAL_UPSTREAMS=1 forces apps/app/vite.config.ts to treat
+      # the freshly-linked eliza/ checkout as the source of truth for the
+      # @elizaos/* aliases. Without this, the config falls back to its
+      # auto-detect heuristic and may resolve @elizaos/ui from npm.
       - name: Build renderer
         if: steps.validate_mas.outputs.ready == 'true'
         working-directory: apps/app
+        env:
+          MILADY_FORCE_LOCAL_UPSTREAMS: "1"
         run: |
           bun install --ignore-scripts
           if [ -f node_modules/bun/install.js ]; then (cd node_modules/bun && node install.js); fi
@@ -489,7 +510,7 @@ jobs:
 
       - name: Upload pkg artifact
         if: steps.validate_mas.outputs.ready == 'true'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: macos-mas-pkg
           path: ${{ env.PKG_PATH }}

@@ -17,15 +17,36 @@ on:
         required: false
         type: boolean
         default: true
+    # NPM_TOKEN is no longer required — publish uses npm OIDC trusted
+    # publishing (id-token: write). Kept as an *optional* secret for the
+    # transition window; once the npm "Trusted Publishers" entry is live for
+    # this workflow, remove the secret entirely.
     secrets:
       NPM_TOKEN:
-        required: true
+        required: false
+
+# Required for npm OIDC trusted publishing. The publish job mints a short-lived
+# OIDC token via GitHub's id-token endpoint; npm verifies the token against the
+# Trusted Publisher configuration on npmjs.com.
+#
+# HUMAN-IN-LOOP — operator must configure on npmjs.com:
+#   Track the final organization/package values in docs/security/SOC2-OPERATOR-CHECKLIST.md.
+#   https://docs.npmjs.com/trusted-publishers
+#   Settings -> Packages -> miladyai -> Trusted publishers -> Add
+#     Publisher:     GitHub Actions
+#     Organization:  elizaos (or current owner)
+#     Repository:    milady
+#     Workflow:      .github/workflows/reusable-npm-publish.yml
+#     Environment:   (leave blank unless we add one)
+# Until this is configured npm publish will fall back to NPM_TOKEN.
+permissions:
+  contents: read
+  id-token: write
 
 env:
-  # Pin upstream eliza checkout to a known-good SHA. Upstream develop landed a
-  # cloud-migration squash that broke milady CI; pinning here keeps reproducibility.
-  # Bump after upstream stabilizes (or override with MILADY_ELIZA_REF env var).
-  MILADY_ELIZA_REF: "f7a4e0bc50f966174ea42c41db787359ca6d8e67"
+  # Pin the canonical elizaOS/eliza checkout to the latest verified develop SHA.
+  # Override with MILADY_ELIZA_REF only for a specific upstream release test.
+  MILADY_ELIZA_REF: "f4991bc6059514f10a0fc1a8ec3f199478c415ae"
   MILADY_SKIP_LOCAL_UPSTREAMS: "1"
 
 jobs:
@@ -35,12 +56,12 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           submodules: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: "22"
           check-latest: false
@@ -112,6 +133,13 @@ jobs:
         # --ignore-scripts: dist/ was already built above; the prepack lifecycle
         # would re-invoke `rt.mjs run build` which expects a milady workspace
         # install, not the CI ./dist staging.
+        #
+        # Auth: prefers npm OIDC trusted publishing (id-token: write above);
+        # NODE_AUTH_TOKEN is the transition fallback and can be removed once
+        # the Trusted Publisher is verified on npmjs.com.
+        # NPM_CONFIG_PROVENANCE=true emits an SLSA provenance attestation
+        # alongside the package tarball (SOC2 CC9.2).
         run: npm publish --tag ${{ inputs.dist_tag }} --access public --ignore-scripts
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "true"

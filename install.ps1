@@ -177,8 +177,35 @@ if (-not $nodeOk) {
             $msiUrl = "https://nodejs.org/dist/v${RequiredNodeVersion}/node-v${RequiredNodeVersion}-${nodeArch}.msi"
             $msiPath = Join-Path $env:TEMP "node-v${RequiredNodeVersion}-${nodeArch}.msi"
 
+            # Pinned SHA-256 of the Node.js MSI installer. Sourced from the
+            # official manifest:
+            #   https://nodejs.org/dist/v${RequiredNodeVersion}/SHASUMS256.txt
+            # If you bump $RequiredNodeVersion above, also update these hashes.
+            # SOC2 CC6.8 / CC9.2 — integrity of third-party software.
+            $expectedSha = switch ($nodeArch) {
+                "x64" { "5fa43604523be95f8e73c4c98337a5c2bf02450a6525ad25ec2926e464e6bcef" }
+                "x86" { "97fd52500c6947d5886c616ce37c93d40f5b0b811a1f87f89783c25e0de345e3" }
+                default { $null }
+            }
+            if (-not $expectedSha) {
+                Write-Err "No pinned SHA-256 for architecture '$nodeArch'. Refusing to install unverified binary."
+                exit 1
+            }
+
             Write-Info "Downloading Node.js installer..."
             Invoke-WebRequest -Uri $msiUrl -OutFile $msiPath -UseBasicParsing
+
+            Write-Info "Verifying SHA-256..."
+            $actualSha = (Get-FileHash -Path $msiPath -Algorithm SHA256).Hash.ToLower()
+            if ($actualSha -ne $expectedSha) {
+                Remove-Item $msiPath -ErrorAction SilentlyContinue
+                Write-Err "SHA-256 mismatch for Node.js installer."
+                Write-Err "  Expected: $expectedSha"
+                Write-Err "  Actual:   $actualSha"
+                Write-Err "Refusing to run a binary that does not match the pinned hash."
+                exit 1
+            }
+            Write-Ok "Installer SHA-256 verified."
 
             Write-Info "Running installer (may require elevation)..."
             Start-Process msiexec.exe -ArgumentList "/i `"$msiPath`" /qn" -Wait -Verb RunAs

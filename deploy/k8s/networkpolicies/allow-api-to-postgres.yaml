@@ -1,0 +1,46 @@
+# Edge: API -> Postgres (CNPG cluster in eliza-infra).
+# API egress allow + Postgres ingress allow, scoped by label.
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-api-to-postgres-egress
+  namespace: eliza-agents
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: api
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: eliza-infra
+          podSelector:
+            matchLabels:
+              cnpg.io/cluster: eliza-pg
+      ports:
+        - protocol: TCP
+          port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-api-to-postgres-ingress
+  namespace: eliza-infra
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: eliza-pg
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: eliza-agents
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/component: api
+      ports:
+        - protocol: TCP
+          port: 5432
