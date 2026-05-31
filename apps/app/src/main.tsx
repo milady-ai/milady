@@ -50,13 +50,18 @@ import {
   syncDetachedShellLocation,
 } from "@elizaos/app-core";
 import {
-  type Conversation,
-  type ConversationMessage,
   createVoiceCapture,
   type VoiceCaptureHandle,
+  type VoiceCaptureState,
+  type VoiceCaptureTranscriptSegment,
+} from "@elizaos/ui/voice";
+import type { ConversationMessage } from "@elizaos/ui/api/client-types-chat";
+// @ts-expect-error The published @elizaos/ui voice subpath types lag the local
+// runtime barrel that Vite aliases for the app build.
+import {
   VoicePill,
   type VoicePillMessage,
-} from "@elizaos/ui";
+} from "@elizaos/ui/voice";
 import { AppWindowRenderer } from "@elizaos/app-core";
 import { dispatchQueuedLifeOpsGithubCallbackFromUrl } from "@elizaos/app-lifeops/platform";
 import type { ShareTargetPayload } from "@elizaos/app-core/platform";
@@ -275,7 +280,7 @@ installDesktopPermissionsClientPatch(client);
 window.__ELIZA_APP_CHARACTER_EDITOR__ = CharacterEditor;
 getAppWindow()[BRANDED_WINDOW_KEYS.characterEditor] = CharacterEditor;
 
-import { getStylePresets } from "@elizaos/shared/onboarding-presets";
+import { getStylePresets } from "@elizaos/shared/character-presets";
 
 // Derive VRM roster from STYLE_PRESETS so character names stay in one place.
 const APP_STYLE_PRESETS = getStylePresets();
@@ -918,6 +923,30 @@ function projectPillMessages(
   return projected;
 }
 
+function normalizePillMessage(raw: unknown): ConversationMessage {
+  const record =
+    raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+  const id =
+    typeof record.id === "string" && record.id
+      ? record.id
+      : `pill-message-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const role = record.role === "user" ? "user" : "assistant";
+  const text = typeof record.text === "string" ? record.text : "";
+  const timestamp =
+    typeof record.timestamp === "number"
+      ? record.timestamp
+      : typeof record.timestamp === "string"
+        ? Date.parse(record.timestamp)
+        : Date.now();
+  return {
+    ...(raw && typeof raw === "object" ? (raw as ConversationMessage) : {}),
+    id,
+    role,
+    text,
+    timestamp: Number.isFinite(timestamp) ? timestamp : Date.now(),
+  };
+}
+
 function readPillConversationId(): string | null {
   try {
     return window.localStorage.getItem(PILL_CONVERSATION_STORAGE_KEY);
@@ -961,9 +990,7 @@ function pickNewestConversation(
   let best = conversations[0];
   for (let i = 1; i < conversations.length; i++) {
     const candidate = conversations[i];
-    if (
-      conversationUpdatedAtMs(candidate) > conversationUpdatedAtMs(best)
-    ) {
+    if (conversationUpdatedAtMs(candidate) > conversationUpdatedAtMs(best)) {
       best = candidate;
     }
   }
@@ -1126,9 +1153,14 @@ function PillRoot() {
           upsertMessage({
             id: assistantMsgId,
             role: "assistant",
-            text: result.text,
+            text: result.text ?? "",
             timestamp: Date.now(),
-            ...(result.failureKind ? { failureKind: result.failureKind } : {}),
+            ...(typeof result.failureKind === "string"
+              ? {
+                  failureKind:
+                    result.failureKind as ConversationMessage["failureKind"],
+                }
+              : {}),
           });
         } finally {
           sendInFlightRef.current = false;
@@ -1159,7 +1191,7 @@ function PillRoot() {
     if (recording) {
       if (!voiceCaptureRef.current) {
         voiceCaptureRef.current = createVoiceCapture({
-          onTranscript: (segment) => {
+          onTranscript: (segment: VoiceCaptureTranscriptSegment) => {
             if (!segment.final) {
               // Interim segments are best-guess partials — useful for a future
               // live caption surface but not safe to submit. Log only.
@@ -1173,7 +1205,7 @@ function PillRoot() {
             if (!submit) return;
             submit(segment.text);
           },
-          onStateChange: (state, error) => {
+          onStateChange: (state: VoiceCaptureState, error?: Error) => {
             if (error) {
               console.warn(
                 `${APP_LOG_PREFIX} [pill] voice ${state}`,

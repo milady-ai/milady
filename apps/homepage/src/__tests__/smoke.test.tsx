@@ -51,8 +51,11 @@ describe("homepage", () => {
     expect(toggle).toHaveAttribute("aria-expanded", "true");
     const mobileDocs = screen.getAllByRole("link", { name: "DOCS" }).at(-1);
     expect(mobileDocs).toHaveAttribute("href", "/docs");
+    if (!mobileDocs) {
+      throw new Error("Expected mobile docs link to exist");
+    }
 
-    fireEvent.click(mobileDocs!);
+    fireEvent.click(mobileDocs);
 
     expect(toggle).toHaveAttribute("aria-expanded", "false");
   });

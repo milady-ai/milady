@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  type BunRuntimePluginBase,
   buildLocalAgentReply,
   buildSendMessagePayload,
   dispatchLocalAgentEvent,
   getLocalAgentStatusFromPlugin,
   loadBunRuntimePlugin,
-  type BunRuntimePluginBase,
 } from "../src/mobile-local-runtime-shared";
 
 describe("mobile local runtime shared helpers", () => {
@@ -50,21 +50,26 @@ describe("mobile local runtime shared helpers", () => {
       }),
     } as unknown as BunRuntimePluginBase;
 
-    await expect(getLocalAgentStatusFromPlugin(readyPlugin, "[test]")).resolves
-      .toEqual({
-        ready: true,
-        model: "local-model",
-        tokensPerSecond: 42,
-      });
+    await expect(
+      getLocalAgentStatusFromPlugin(readyPlugin, "[test]"),
+    ).resolves.toEqual({
+      ready: true,
+      model: "local-model",
+      tokensPerSecond: 42,
+    });
 
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const failingPlugin = {
       getStatus: vi.fn().mockRejectedValue(new Error("bridge down")),
     } as unknown as BunRuntimePluginBase;
 
-    await expect(getLocalAgentStatusFromPlugin(failingPlugin, "[test]")).resolves
-      .toEqual({ ready: false });
-    expect(warn).toHaveBeenCalledWith("[test] getStatus() failed:", "bridge down");
+    await expect(
+      getLocalAgentStatusFromPlugin(failingPlugin, "[test]"),
+    ).resolves.toEqual({ ready: false });
+    expect(warn).toHaveBeenCalledWith(
+      "[test] getStatus() failed:",
+      "bridge down",
+    );
   });
 
   it("treats an installed native module without ElizaBunRuntime as unavailable", async () => {

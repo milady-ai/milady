@@ -148,9 +148,7 @@ describe("redirectPopupToCloudAgent", () => {
     await pending;
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(popup.location.href).toBe(
-      "https://agent.test/pair?token=tok-retry",
-    );
+    expect(popup.location.href).toBe("https://agent.test/pair?token=tok-retry");
   });
 
   it("uses Retry-After header seconds when the body omits retryAfterMs", async () => {

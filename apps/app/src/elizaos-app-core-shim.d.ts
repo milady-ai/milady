@@ -233,9 +233,9 @@ declare module "@elizaos/app-core/api" {
   export type WhitelistStatus = unknown;
 }
 
-declare module "@elizaos/shared/onboarding-presets" {
+declare module "@elizaos/shared/character-presets" {
   // Minimal shape needed by character-catalog.ts and main.tsx.
-  // buildElizaCharacterCatalog is the real export from onboarding-presets.ts;
+  // buildElizaCharacterCatalog is the real export from character-presets.ts;
   // the dist publish may lag the workspace source, so it is shimmed here.
   export interface StylePreset {
     name: string;
@@ -252,6 +252,44 @@ declare module "@elizaos/shared/dist/index.js" {
   // `import { ELIZA_DEFAULT_THEME } from "@elizaos/shared/dist/index.js"`
   // typechecks until the upstream beta publish lifts the export.
   export const ELIZA_DEFAULT_THEME: unknown;
+}
+
+declare module "@elizaos/ui/voice" {
+  export interface VoiceCaptureTranscriptSegment {
+    text: string;
+    final: boolean;
+    backend: string;
+  }
+  export type VoiceCaptureState =
+    | "idle"
+    | "starting"
+    | "listening"
+    | "stopped"
+    | "error";
+  export interface VoiceCaptureHandle {
+    start(): Promise<void>;
+    stop(): Promise<void>;
+    dispose(): void;
+    isActive(): boolean;
+    getAnalyser(): AnalyserNode | null;
+  }
+  export function createVoiceCapture(args: {
+    onTranscript: (segment: VoiceCaptureTranscriptSegment) => void;
+    onStateChange?: (state: VoiceCaptureState, error?: Error) => void;
+    [key: string]: unknown;
+  }): VoiceCaptureHandle;
+  export interface VoicePillMessage {
+    id: string;
+    role: "user" | "agent";
+    text: string;
+  }
+  export interface VoicePillProps {
+    messages?: VoicePillMessage[];
+    onSubmit?: (text: string) => void;
+    onRecordingChange?: (recording: boolean) => void;
+    ariaLabel?: string;
+  }
+  export const VoicePill: import("react").ComponentType<VoicePillProps>;
 }
 
 declare module "@elizaos/contracts" {

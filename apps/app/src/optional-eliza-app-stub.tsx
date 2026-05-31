@@ -28,6 +28,15 @@ import type {
 import type { ComponentType } from "react";
 import * as THREE from "three";
 
+type PromptOptions = {
+  title?: string;
+  description?: string;
+  placeholder?: string;
+  defaultValue?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+};
+
 const EmptyComponent: ComponentType = () => null;
 
 export function CompanionShell(_props: CompanionShellComponentProps): null {

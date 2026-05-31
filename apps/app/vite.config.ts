@@ -33,6 +33,16 @@ const _require = createRequire(import.meta.url);
 const here = path.dirname(fileURLToPath(import.meta.url));
 const miladyRoot = path.resolve(here, "../..");
 const capacitorCoreEntry = _require.resolve("@capacitor/core");
+const publishedSharedCharacterPresetsEntry = (() => {
+  try {
+    return _require.resolve("@elizaos/shared/character-presets");
+  } catch {
+    return path.resolve(
+      here,
+      "../../eliza/packages/shared/dist/character-presets.js",
+    );
+  }
+})();
 const patheEntry = _require.resolve("pathe");
 const optionalElizaAppStubEntry = path.join(
   here,
@@ -70,6 +80,7 @@ function shouldUseLocalElizaSource(): boolean {
   return (
     process.env.MILADY_FORCE_LOCAL_UPSTREAMS === "1" ||
     process.env.ELIZA_FORCE_LOCAL_UPSTREAMS === "1" ||
+    fs.existsSync(path.join(localElizaRoot, "package.json")) ||
     resolvesInsideLocalElizaWorkspace("@elizaos/app-core/package.json")
   );
 }
@@ -110,6 +121,10 @@ const appCoreNativePluginEntrypoints = (() => {
   }
   return requireResolve("@elizaos/app-core/platform/native-plugin-entrypoints");
 })();
+const appCoreBrowserCompatEntry = path.join(
+  here,
+  "src/elizaos-app-core-browser-compat.js",
+);
 const uiPkgRoot = hasLocalElizaWorkspace
   ? path.join(localElizaRoot, "packages/ui")
   : null;
@@ -240,6 +255,32 @@ function resolveLocalUiAliases(): Alias[] {
     {
       find: /^@elizaos\/ui$/,
       replacement: path.join(uiPkgRoot, "src/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/api$/,
+      replacement: path.join(uiPkgRoot, "src/api/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/browser$/,
+      replacement: path.join(uiPkgRoot, "src/browser.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/platform$/,
+      replacement: path.join(uiPkgRoot, "src/platform/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/platform\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/platform/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/voice$/,
+      replacement: path.join(uiPkgRoot, "src/voice/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/voice\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/voice/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
     },
     {
       find: /^@elizaos\/ui\/components\/ui\/(.*)$/,
@@ -442,14 +483,6 @@ function resolveLocalAppCoreAliases(): Alias[] {
   const agentRootEntry = appCoreSrcRoot
     ? path.join(localElizaRoot, "packages/agent/src/index.ts")
     : emptyNodeModuleEntry;
-  const sharedDistEntry = path.join(
-    localElizaRoot,
-    "packages/shared/dist/index.js",
-  );
-  const sharedDist = fs.existsSync(sharedDistEntry) ? sharedDistEntry : null;
-  const sharedDistDir = sharedDist
-    ? path.join(localElizaRoot, "packages/shared/dist")
-    : null;
   const packageAgnosticAliases: Alias[] = [
     {
       find: /^@elizaos\/agent$/,
@@ -458,6 +491,10 @@ function resolveLocalAppCoreAliases(): Alias[] {
     {
       find: /^@elizaos\/core$/,
       replacement: resolveElizaCoreBundlePath(),
+    },
+    {
+      find: /^@elizaos\/shared\/character-presets$/,
+      replacement: publishedSharedCharacterPresetsEntry,
     },
     // When a local eliza workspace is present and @elizaos/shared has been
     // built, prefer the local dist over the bun-store published copy which
@@ -474,7 +511,7 @@ function resolveLocalAppCoreAliases(): Alias[] {
   }
 
   const appCorePkgDir = path.dirname(appCorePkgPath);
-  const appCoreBrowserEntry = path.join(appCorePkgDir, "src/browser.ts");
+  const appCoreBrowserEntry = appCoreBrowserCompatEntry;
   const appCorePkg = JSON.parse(fs.readFileSync(appCorePkgPath, "utf8")) as {
     exports?: Record<string, unknown>;
   };
@@ -496,7 +533,6 @@ function resolveLocalAppCoreAliases(): Alias[] {
 
   for (const [key, value] of Object.entries(appCorePkg.exports || {})) {
     if (key === ".") continue; // handled by the explicit bare alias above
-    if (typeof value !== "string") continue;
     const aliasKey =
       key === "."
         ? "@elizaos/app-core"
@@ -2197,6 +2233,12 @@ function nativeModuleStubPlugin(): Plugin {
               "platform/elizaos-plugin-elizacloud-browser-stub.ts",
             )
           : VIRTUAL_PREFIX + id;
+      }
+      // Some published/browser-side packages still deep-import this app-core
+      // compatibility module even though the local app-core export map does
+      // not list it. Intercept before commonjs--resolver validates exports.
+      if (id === "@elizaos/app-core/ui-compat" && appCoreSrcRoot) {
+        return path.join(appCoreSrcRoot, "ui-compat.ts");
       }
       // Intercept ALL node: builtins before Vite externalizes them.
       // The @elizaos/core node entry uses many Node APIs (crypto, fs, module,
