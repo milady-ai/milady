@@ -49,6 +49,8 @@ on:
         required: false
       APP_STORE_API_ISSUER_ID:
         required: false
+      APP_STORE_API_KEY_P8:
+        required: false
   workflow_dispatch:
     inputs:
       platform:
@@ -198,6 +200,18 @@ jobs:
             echo "ready=true" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Initialize eliza source checkout
+        if: steps.validate_ios.outputs.ready == 'true'
+        run: |
+          if [ ! -f eliza/package.json ]; then
+            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
+            if [ -n "${MILADY_ELIZA_REF:-}" ]; then
+              git -C eliza fetch --depth=1 origin "$MILADY_ELIZA_REF"
+              git -C eliza checkout --quiet FETCH_HEAD
+              echo "Pinned eliza to ${MILADY_ELIZA_REF}"
+            fi
+          fi
+
       - name: Prepare CocoaPods trunk repo
         if: steps.validate_ios.outputs.ready == 'true'
         run: bash eliza/packages/app-core/scripts/prepare-ios-cocoapods.sh
@@ -302,6 +316,7 @@ jobs:
       MAS_INSTALLER_KEY_PASSWORD: ${{ secrets.MAS_INSTALLER_KEY_PASSWORD }}
       APP_STORE_API_KEY_ID: ${{ secrets.APP_STORE_API_KEY_ID }}
       APP_STORE_API_ISSUER_ID: ${{ secrets.APP_STORE_API_ISSUER_ID }}
+      APP_STORE_API_KEY_P8: ${{ secrets.APP_STORE_API_KEY_P8 }}
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
@@ -334,6 +349,7 @@ jobs:
           [[ -z "$MAS_INSTALLER_KEY_PASSWORD" ]] && missing+=("MAS_INSTALLER_KEY_PASSWORD")
           [[ -z "$APP_STORE_API_KEY_ID" ]] && missing+=("APP_STORE_API_KEY_ID")
           [[ -z "$APP_STORE_API_ISSUER_ID" ]] && missing+=("APP_STORE_API_ISSUER_ID")
+          [[ -z "$APP_STORE_API_KEY_P8" ]] && missing+=("APP_STORE_API_KEY_P8")
           if [[ ${#missing[@]} -gt 0 ]]; then
             echo "::warning::Skipping Mac App Store build — missing signing secrets: ${missing[*]}"
             echo "ready=false" >> "$GITHUB_OUTPUT"
