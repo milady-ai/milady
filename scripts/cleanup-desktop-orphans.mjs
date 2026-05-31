@@ -61,9 +61,13 @@ const ORPHAN_PATTERNS = [
   "bun --watch eliza/packages/app-core/src/runtime/dev-server.ts",
   // Bun executing dev-server.ts without --watch (release-style dev).
   "eliza/packages/app-core/src/runtime/dev-server.ts",
-  // Milady-dev.app launcher binary and its bun child.
+  // Milady-dev.app launcher binary and its bun child (macOS).
   "Milady-dev.app/Contents/MacOS/launcher",
   "Milady-dev.app/Contents/MacOS/../Resources/main.js",
+  // Linux launcher binary inside the dev bundle.
+  "Milady-dev/bin/launcher",
+  // Windows launcher binary.
+  "launcher.exe",
   // The dev-platform orchestrator itself.
   "eliza/packages/app-core/scripts/dev-platform.mjs",
   // The Milady-side wrapper that delegates to dev-platform.mjs.

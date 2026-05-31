@@ -96,9 +96,13 @@ toolchain doctor when Node or Python would break native install scripts.
 
 ### Run the App (Desktop)
 
+The `build:desktop` / `dev:desktop` scripts live only at the **repo root**, not in
+`apps/app`. They also require **local mode** first (`bun run eliza:local`) — packages
+mode ships no `platforms/` directory for Electrobun to resolve against.
+
 ```bash
-cd apps/app
-bun install
+# from the repo root
+bun run eliza:local       # one-time: clone + link the local elizaOS source
 bun run build:desktop
 bun run dev:desktop
 ```
