@@ -265,6 +265,7 @@ brew install --cask milady   # Desktop app (macOS only)
 ```
 
 <a id="linux"></a>
+
 ### Linux
 
 The Linux desktop app ships as a single installer tarball: **`stable-linux-x64-Milady-Setup.tar.gz`** on the [latest release](https://github.com/milady-ai/milady/releases/latest). There is no AppImage, `.deb`, Snap, Flatpak, or APT repo today.

@@ -1,0 +1,9 @@
+---
+# Codacy configuration.
+#
+# Exclude generated/reference artifacts from static analysis. The deployment
+# audit reports under docs/ are machine-generated multi-agent output (committed
+# as reference), not hand-authored source — markdown-lint on them is noise.
+exclude_paths:
+  - "docs/*-deployment-audit-*.md"
+  - "eliza/**"
