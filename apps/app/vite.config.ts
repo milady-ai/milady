@@ -2823,6 +2823,15 @@ export default defineConfig({
         replacement: optionalElizaAppStubEntry,
       },
       {
+        // @elizaos/plugin-task-coordinator is imported as a side-effect from
+        // apps/app/src/main.tsx#L97 for the /orchestrator route registration,
+        // but the package's dist/ doesn't include a `register` subpath export.
+        // Fall through to the optional-stub so typecheck + build both resolve.
+        // Tracked as Finding #2 in qa-findings.md.
+        find: /^@elizaos\/plugin-task-coordinator(\/.*)?$/,
+        replacement: optionalElizaAppStubEntry,
+      },
+      {
         find: optionalElizaAppAliasPattern,
         replacement: optionalElizaAppStubEntry,
       },
