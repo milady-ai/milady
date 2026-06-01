@@ -89,20 +89,28 @@ _(pending)_
 - **Behavior:** dev orchestrator boots, prints `[milady] Waiting for API server...`, repeatedly crashes the API child process. After 6 crashes in 10s the orchestrator gives up: `[milady] API exited with code 1 6 times in 10s — giving up. Fix the underlying issue and restart the dev process.`
 - **Effect:** entire desktop+web smoke checklist (onboarding / VRM / chat / settings / console / stack-status) cannot be executed against `develop` HEAD on Windows.
 
-### Finding #7 — apps/app dev cannot boot on Windows: `ERR_MODULE_NOT_FOUND` for `@elizaos/plugin-remote-manifest/dist/rpc-mac.js`
+### Finding #7 — apps/app dev cannot boot: `@elizaos/plugin-remote-manifest` dist never built
 
 - **Failing import chain:**
-  `eliza/packages/plugin-worker-runtime/src/dispatch.ts` → `@elizaos/plugin-remote-manifest/dist/rpc-mac.js`
+  [eliza/packages/plugin-worker-runtime/src/dispatch.ts:23](eliza/packages/plugin-worker-runtime/src/dispatch.ts#L23) → `@elizaos/plugin-remote-manifest/rpc-mac`
 - **Error:**
   ```
   Error [ERR_MODULE_NOT_FOUND]: Cannot find module
   'A:\…\eliza\packages\plugin-worker-runtime\node_modules\@elizaos\plugin-remote-manifest\dist\rpc-mac.js'
   imported from .\eliza\packages\plugin-worker-runtime\src\dispatch.ts
   ```
-- **Cause hypothesis:** `dispatch.ts` unconditionally imports `rpc-mac.js`, but `plugin-remote-manifest` only ships that file on macOS builds (or the build matrix forgot Windows). Should be a platform-conditional import.
-- **Severity:** **high.** Blocks all local dev of `apps/app` on Windows. Same code path likely affects Linux. Only macOS would boot.
-- **Repro:** clean clone on Windows, `bun install`, `bun run dev`.
-- **Verification of fix (Windows perspective only):** confirming the gating works on Windows is doable here; confirming the fix doesn't regress macOS dev would need a Mac runner — flag as **macOS-side verification out of scope** for this branch.
+- **REVISED ROOT CAUSE (was wrong initially):**
+  - `rpc-mac.ts` is **Message Authentication Code (HMAC for SOC2 A-4)**, **not** macOS. Has zero platform-specific logic. The name misled the initial diagnosis.
+  - `@elizaos/plugin-remote-manifest` is a `"private": true` workspace package that is NOT on npm. Its `package.json` declares `"./rpc-mac"` as an export resolving to `./dist/rpc-mac.js`, but `dist/` is **empty** in this repo.
+  - The package's build (`tsc -p tsconfig.build.json`) is never triggered by any of the install scripts. Trying to run it manually also fails because its own workspace dep `@elizaos/security` is similarly unbuilt — there's a whole **chain** of unbuilt workspace packages.
+- **Platform impact:** universal (not Windows-only as initially thought). Mac/Linux would hit the same `ERR_MODULE_NOT_FOUND`.
+- **Severity:** **high.** Blocks all local dev of `apps/app` everywhere.
+- **Fix path — significantly larger than initially scoped:**
+  - Option A: Add a workspace-build step to `scripts/milady-postinstall-repo-setup.mjs` that builds `@elizaos/security` → `@elizaos/plugin-remote-manifest` → any consumers, in dependency order.
+  - Option B: Change consumers to import from `src/*.ts` directly and rely on the tsx loader (works in dev, may break production bundling).
+  - Option C: Have the build of the eliza/ workspace happen as part of `setup-upstreams.mjs` or `eliza:packages`.
+  - Owner: someone with context on the eliza workspace build orchestration — this is a build-pipeline change, not a one-line fix.
+- **Repro:** clean clone on any platform, `bun install`, `bun run dev`.
 
 ### 2.2 apps/homepage — ✅ GREEN
 
