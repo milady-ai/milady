@@ -230,19 +230,36 @@ async function fulfillJson(route: Route, body: unknown, status = 200) {
   });
 }
 
-async function installOrchestratorRoutes(page: Page) {
-  let currentTask = detail();
+async function installOrchestratorRoutes(page: Page, initialTask = detail()) {
+  let currentTask = initialTask;
   const postedMessages: string[] = [];
   const addedAgents: unknown[] = [];
   const createdTasks: unknown[] = [];
+  const validations: unknown[] = [];
 
   const currentTasks = () => [
     task({
+      id: currentTask.id,
+      title: currentTask.title,
+      kind: currentTask.kind,
       status: currentTask.status,
       priority: currentTask.priority,
       paused: currentTask.paused,
+      originalRequest: currentTask.originalRequest,
+      summary: currentTask.summary,
       sessionCount: currentTask.sessionCount,
       activeSessionCount: currentTask.activeSessionCount,
+      latestSessionId: currentTask.latestSessionId,
+      latestSessionLabel: currentTask.latestSessionLabel,
+      latestWorkdir: currentTask.latestWorkdir,
+      latestRepo: currentTask.latestRepo,
+      latestActivityAt: currentTask.latestActivityAt,
+      decisionCount: currentTask.decisionCount,
+      usage: currentTask.usage,
+      createdAt: currentTask.createdAt,
+      updatedAt: currentTask.updatedAt,
+      closedAt: currentTask.closedAt,
+      archivedAt: currentTask.archivedAt,
     }),
   ];
 
@@ -394,6 +411,42 @@ async function installOrchestratorRoutes(page: Page) {
 
   await page.route("**/api/orchestrator/tasks/*", async (route) => {
     const method = route.request().method();
+    const url = new URL(route.request().url());
+    const segments = url.pathname.split("/").filter(Boolean);
+    const action = segments.at(-1);
+    if (method === "POST" && action === "validate") {
+      const input = route.request().postDataJSON() as {
+        passed: boolean;
+        humanOverride?: boolean;
+      };
+      validations.push(input);
+      currentTask = detail({
+        ...currentTask,
+        status: input.passed ? "done" : "active",
+        closedAt: input.passed ? ISO : null,
+        events: [
+          ...currentTask.events,
+          {
+            id: `validation-${validations.length}`,
+            threadId: currentTask.id,
+            sessionId: null,
+            eventType: input.passed ? "validation_passed" : "validation_failed",
+            summary: input.passed
+              ? "Human approved in the orchestrator UI."
+              : "Human rejected in the orchestrator UI.",
+            data: { humanOverride: input.humanOverride === true },
+            timestamp: NOW + validations.length,
+            createdAt: ISO,
+          },
+        ],
+      });
+      await fulfillJson(route, currentTask);
+      return;
+    }
+    if (segments.length !== 4) {
+      await route.fallback();
+      return;
+    }
     if (method === "GET") {
       await fulfillJson(route, currentTask);
       return;
@@ -409,7 +462,190 @@ async function installOrchestratorRoutes(page: Page) {
     await route.fallback();
   });
 
-  return { postedMessages, addedAgents, createdTasks };
+  return { postedMessages, addedAgents, createdTasks, validations };
+}
+
+function manyTaskFixtures() {
+  const active = Array.from({ length: 10 }, (_, index) =>
+    task({
+      id: `task-active-${index + 1}`,
+      title: `Active app build ${index + 1}`,
+      status: "active",
+      priority: index === 0 ? "urgent" : "normal",
+      sessionCount: 2,
+      activeSessionCount: 2,
+      latestSessionLabel: `Codex worker ${index + 1}`,
+      latestActivityAt: NOW - index * 10_000,
+      usage: {
+        ...usage,
+        totalTokens: usage.totalTokens + index,
+      },
+    }),
+  );
+  const archived = Array.from({ length: 20 }, (_, index) =>
+    task({
+      id: `task-archived-${index + 1}`,
+      title: `Archived app build ${index + 1}`,
+      status: "archived",
+      priority: "low",
+      sessionCount: 1,
+      activeSessionCount: 0,
+      latestSessionLabel: `Eliza reviewer ${index + 1}`,
+      latestActivityAt: NOW - (index + 20) * 10_000,
+      closedAt: ISO,
+      archivedAt: ISO,
+    }),
+  );
+  return { active, archived, all: [...active, ...archived] };
+}
+
+async function installManyOrchestratorRoutes(page: Page) {
+  const fixtures = manyTaskFixtures();
+  const byId = new Map(
+    fixtures.all.map((item) => [
+      item.id,
+      detail({
+        ...item,
+        goal: `Build and verify ${item.title} with visible browser evidence.`,
+        roomId: `room-${item.id}`,
+        taskRoomId: `room-${item.id}`,
+        acceptanceCriteria: [
+          "Implementation committed in the workdir.",
+          "E2E test checks expected screen data.",
+          "Status report is posted back to the task room.",
+        ],
+        sessions:
+          item.status === "archived"
+            ? [
+                {
+                  ...detail().sessions[1],
+                  id: `session-row-${item.id}`,
+                  threadId: item.id,
+                  sessionId: `session-${item.id}`,
+                  label: item.latestSessionLabel,
+                  status: "completed",
+                },
+              ]
+            : [
+                {
+                  ...detail().sessions[0],
+                  id: `session-row-${item.id}-codex`,
+                  threadId: item.id,
+                  sessionId: `session-${item.id}-codex`,
+                  label: item.latestSessionLabel,
+                },
+                {
+                  ...detail().sessions[1],
+                  id: `session-row-${item.id}-eliza`,
+                  threadId: item.id,
+                  sessionId: `session-${item.id}-eliza`,
+                  label: `Eliza reviewer ${item.id.split("-").at(-1)}`,
+                },
+              ],
+      }),
+    ]),
+  );
+
+  await page.route("**/api/orchestrator/status", async (route) => {
+    await fulfillJson(route, {
+      taskCount: fixtures.active.length,
+      activeTaskCount: fixtures.active.length,
+      pausedTaskCount: 0,
+      blockedTaskCount: 0,
+      validatingTaskCount: 0,
+      sessionCount: fixtures.active.length * 2,
+      activeSessionCount: fixtures.active.length * 2,
+      usage,
+      byStatus: {
+        open: 0,
+        active: fixtures.active.length,
+        waiting_on_user: 0,
+        blocked: 0,
+        validating: 0,
+        done: 0,
+        failed: 0,
+        archived: 0,
+        interrupted: 0,
+      },
+    });
+  });
+
+  await page.route("**/api/orchestrator/tasks", async (route) => {
+    const url = new URL(route.request().url());
+    const includeArchived = url.searchParams.get("includeArchived") === "true";
+    const search = url.searchParams.get("search")?.toLowerCase() ?? "";
+    const rows = (includeArchived ? fixtures.all : fixtures.active).filter(
+      (item) => !search || item.title.toLowerCase().includes(search),
+    );
+    await fulfillJson(route, { tasks: rows });
+  });
+  await page.route("**/api/orchestrator/tasks?*", async (route) => {
+    const url = new URL(route.request().url());
+    const includeArchived = url.searchParams.get("includeArchived") === "true";
+    const search = url.searchParams.get("search")?.toLowerCase() ?? "";
+    const rows = (includeArchived ? fixtures.all : fixtures.active).filter(
+      (item) => !search || item.title.toLowerCase().includes(search),
+    );
+    await fulfillJson(route, { tasks: rows });
+  });
+
+  await page.route("**/api/orchestrator/tasks/*/messages", async (route) => {
+    await fulfillJson(route, {
+      items: [
+        {
+          id: "message-scale-status",
+          threadId: "task-active-1",
+          sessionId: "session-task-active-1-codex",
+          senderKind: "sub_agent",
+          direction: "stdout",
+          content: "Status: browser E2E is checking visible screen data.",
+          timestamp: NOW,
+          metadata: {},
+          createdAt: ISO,
+        },
+      ],
+      nextCursor: null,
+    });
+  });
+  await page.route("**/api/orchestrator/tasks/*/messages?*", async (route) => {
+    await fulfillJson(route, { items: [], nextCursor: null });
+  });
+  await page.route("**/api/orchestrator/tasks/*/events", async (route) => {
+    await fulfillJson(route, {
+      items: [
+        {
+          id: "event-scale-command",
+          threadId: "task-active-1",
+          sessionId: "session-task-active-1-codex",
+          eventType: "tool_running",
+          summary: "Codex worker is running bun test --filter visible-data",
+          data: {},
+          timestamp: NOW + 1,
+          createdAt: ISO,
+        },
+      ],
+      nextCursor: null,
+    });
+  });
+  await page.route("**/api/orchestrator/tasks/*/events?*", async (route) => {
+    await fulfillJson(route, { items: [], nextCursor: null });
+  });
+  await page.route("**/api/orchestrator/tasks/*", async (route) => {
+    const segments = new URL(route.request().url()).pathname
+      .split("/")
+      .filter(Boolean);
+    if (segments.length !== 4) {
+      await route.fallback();
+      return;
+    }
+    const id = segments[3];
+    const found = id ? byId.get(id) : undefined;
+    await fulfillJson(
+      route,
+      found ?? { error: "Task not found" },
+      found ? 200 : 404,
+    );
+  });
 }
 
 test.beforeEach(async ({ page }) => {
@@ -427,11 +663,17 @@ test("orchestrator workbench renders live task data and supports task operations
   await expect(page.getByTestId("orchestrator-workbench")).toBeVisible();
 
   await expect(page.getByText("Orchestrator", { exact: true })).toBeVisible();
-  await expect(page.getByLabel("Tasks", { exact: true })).toContainText("1");
-  await expect(page.getByLabel("Active", { exact: true })).toContainText("1");
-  await expect(page.getByLabel("Agents", { exact: true })).toContainText("1/2");
+  await expect(page.getByTestId("orchestrator-workbench")).toContainText(
+    "1 tasks",
+  );
+  await expect(page.getByTestId("orchestrator-workbench")).toContainText(
+    "1 active",
+  );
+  await expect(page.getByTestId("orchestrator-workbench")).toContainText(
+    "1/2 agents",
+  );
   await expect(page.getByText("Build Pixel Notes app")).toBeVisible();
-  await expect(page.getByLabel("Usage", { exact: true })).toContainText(
+  await expect(page.getByTestId("orchestrator-workbench")).toContainText(
     "22.3K",
   );
 
@@ -526,5 +768,73 @@ test("orchestrator workbench renders live task data and supports task operations
   );
   await expect(page.getByTestId("orchestrator-inspector")).toContainText(
     "Timer pauses",
+  );
+});
+
+test("orchestrator validation actions supply human evidence", async ({
+  page,
+}) => {
+  const routeState = await installOrchestratorRoutes(
+    page,
+    detail({
+      id: "task-validate-notes",
+      title: "Validate Notes release",
+      status: "validating",
+      activeSessionCount: 0,
+      summary: "Waiting for human validation.",
+    }),
+  );
+
+  await openAppPath(page, "/orchestrator");
+  await page.getByRole("button", { name: /Validate Notes release/ }).click();
+  await expect(page.getByTestId("orchestrator-approve")).toBeVisible();
+  await page.getByTestId("orchestrator-approve").click();
+  await expect
+    .poll(() => routeState.validations[0])
+    .toMatchObject({
+      passed: true,
+      humanOverride: true,
+    });
+  await expect(page.getByTestId("orchestrator-timeline")).toContainText(
+    "Human approved in the orchestrator UI.",
+  );
+});
+
+test("orchestrator handles ten active tasks and twenty archived tasks", async ({
+  page,
+}) => {
+  await installManyOrchestratorRoutes(page);
+
+  await openAppPath(page, "/orchestrator");
+  await expect(page.getByTestId("orchestrator-workbench")).toBeVisible();
+  await expect(page.getByTestId("orchestrator-workbench")).toContainText(
+    "10 tasks",
+  );
+  await expect(page.getByTestId("orchestrator-workbench")).toContainText(
+    "10 active",
+  );
+  await expect(page.getByTestId("orchestrator-workbench")).toContainText(
+    "20/20 agents",
+  );
+  await expect(page.getByTestId("orchestrator-task-item")).toHaveCount(10);
+  await expect(page.getByText("Active app build 1")).toBeVisible();
+  await expect(page.getByText("Archived app build 1")).toHaveCount(0);
+
+  await page.getByTestId("orchestrator-show-archived").check();
+  await expect(page.getByTestId("orchestrator-task-item")).toHaveCount(30);
+  await expect(page.getByText("Archived app build 20")).toBeVisible();
+
+  await page.getByText("Active app build 1").click();
+  await expect(page.getByTestId("orchestrator-timeline")).toContainText(
+    "Status: browser E2E is checking visible screen data.",
+  );
+  await expect(page.getByTestId("orchestrator-timeline")).toContainText(
+    "Codex worker is running bun test --filter visible-data",
+  );
+  await expect(page.getByTestId("orchestrator-inspector")).toContainText(
+    "Build and verify Active app build 1",
+  );
+  await expect(page.getByTestId("orchestrator-inspector")).toContainText(
+    "Status report is posted back to the task room.",
   );
 });
