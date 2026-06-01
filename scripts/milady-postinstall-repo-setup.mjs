@@ -50,11 +50,6 @@ if (packageMode) {
 // link-external-plugins, etc.) and we want our patches to win on top.
 // Remove an entry once the corresponding upstream PR lands and a new
 // compatible package is published.
-const localSourceBridgePatchScripts = [
-  // Temporary overlay for elizaOS/eliza Windows smoke startup trace drift.
-  "patch-eliza-electrobun-windows-smoke-startup.mjs",
-];
-
 const packageSafeBridgePatchScripts = [
   "repair-elizaos-package-links.mjs",
   "ensure-elizaos-optional-app-stubs.mjs",
@@ -62,27 +57,14 @@ const packageSafeBridgePatchScripts = [
   "patch-elizaos-app-core-native-browser-package.mjs",
   "patch-noble-curves-hashes-v2.mjs",
   "patch-elizaos-app-core-windows-shell.mjs",
-  "patch-elizaos-app-core-mobile-package.mjs",
   "patch-elizaos-plugin-browser-bridge-package.mjs",
   // milady-only fix for claude.ai OAuth tier — see script header.
   "patch-coding-agent-adapters-tools-flag.mjs",
   // milady-only fix for codex 0.128 — see script header.
   "patch-coding-agent-adapters-codex-full-auto.mjs",
-  // milady-only fix: build llama-cpp-capacitor JNI for x86_64 too (Cuttlefish
-  // / emulators). Adds 'x86_64' to abiFilters and swaps in an ABI-aware
-  // CMakeLists.txt; without it, x86_64 builds use the arm64 -march flag and
-  // ndk-clang aborts with "unknown target CPU 'armv8-a'".
-  "patch-llama-cpp-capacitor-x86_64.mjs",
-  // milady-only fix: rewrite jni.cpp's NewStringUTF helper so 4-byte UTF-8
-  // tokens (most emoji, CJK extension blocks) don't crash the host app.
-  "patch-llama-cpp-capacitor-utf8.mjs",
 ];
 
-const miladyBridgePatchScripts = packageMode
-  ? packageSafeBridgePatchScripts
-  : [...localSourceBridgePatchScripts, ...packageSafeBridgePatchScripts];
-
-for (const scriptName of miladyBridgePatchScripts) {
+for (const scriptName of packageSafeBridgePatchScripts) {
   const scriptPath = path.join(repoRoot, "scripts", scriptName);
   await new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [scriptPath], {
