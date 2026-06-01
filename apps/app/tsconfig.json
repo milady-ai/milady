@@ -75,6 +75,12 @@
       "@elizaos/app-task-coordinator/*": [
         "./apps/app/src/optional-eliza-app-stub.tsx"
       ],
+      "@elizaos/plugin-task-coordinator": [
+        "./apps/app/src/optional-eliza-app-stub.tsx"
+      ],
+      "@elizaos/plugin-task-coordinator/*": [
+        "./apps/app/src/optional-eliza-app-stub.tsx"
+      ],
       "@elizaos/app-companion": ["./apps/app/src/optional-eliza-app-stub.tsx"],
       "@elizaos/app-companion/*": [
         "./apps/app/src/optional-eliza-app-stub.tsx"

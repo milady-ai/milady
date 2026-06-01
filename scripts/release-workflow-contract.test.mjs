@@ -797,7 +797,7 @@ test("Electrobun release has a lightweight PR contract workflow", () => {
 
   assert.match(workflowText, /^name: Validate Electrobun Release Workflow$/m);
   assert.match(workflowText, /branches: \[main, develop\]/);
-  assert.match(workflowText, /BUN_VERSION: "1\.3\.13"/);
+  assert.match(workflowText, /BUN_VERSION: "1\.3\.14"/);
   assert.match(
     workflowText,
     /git clone --depth=1 --branch "\$\{MILADY_ELIZA_BRANCH:-develop\}" https:\/\/github\.com\/elizaOS\/eliza\.git eliza/,
