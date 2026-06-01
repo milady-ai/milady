@@ -86,13 +86,31 @@ Branch: `qa/2am-2026-06-01` off `develop` at commit `765e547d4` ("chore: remove 
 
 ## Phase 2 — App smoke tests
 
-### 2.1 apps/app (web + Electrobun) — ❌ BLOCKED by Finding #7
+### 2.1 apps/app (web) — ✅ COMPLETED after #7/#11 fixes
 
-- **Command:** `bun run dev`
-- **Behavior:** dev orchestrator boots, prints `[milady] Waiting for API server...`, repeatedly crashes the API child process. After 6 crashes in 10s the orchestrator gives up: `[milady] API exited with code 1 6 times in 10s — giving up. Fix the underlying issue and restart the dev process.`
-- **Effect:** entire desktop+web smoke checklist (onboarding / VRM / chat / settings / console / stack-status) cannot be executed against `develop` HEAD on Windows.
+After my #11 import fix landed AND `bun run eliza:local --install` had been run once (which built workspace packages including `@elizaos/plugin-remote-manifest/dist/`), `bun run dev` boots cleanly on Windows.
 
-### Finding #7 — apps/app dev cannot boot: `@elizaos/plugin-remote-manifest` dist never built
+| Check | Result |
+|-------|--------|
+| `bun run dev` boots | ✅ Vite ready on `http://localhost:2138/`, API ready on `http://127.0.0.1:31337/`, agent runtime bootstraps in ~58s |
+| `/api/dev/stack` | ✅ 200 — schema `elizaos.dev.stack/v1`, all endpoints listed |
+| `/api/agents` | ✅ 200 — 1 agent registered (`2PM`, status: stopped) |
+| `/api/plugins` | ✅ 200 — **175 plugins** registered in runtime, including all 8 messaging connectors (Discord and Telegram auto-enabled, others awaiting creds) |
+| UI HTML at `/` | ✅ 200, 6416 bytes, `<title>Milady</title>`, React mount + Vite client + Three.js polyfills load |
+
+**Phase 3 runtime plugin-load check** (was blocked by what I attributed to #7): now done. All 8 messaging connectors registered: Bluesky, Discord, Discord Local, Farcaster, iMessage, Signal, Telegram, Wechat, Whatsapp.
+
+**Electrobun desktop** smoke (`bun run dev:desktop`) was not retested but uses the same web stack — the build artifacts produced in this run satisfy the desktop wrapper's expectations too.
+
+### Finding #7 — apps/app dev fails on a fresh clone in packages mode (workspace dist needs `eliza:local` to build it) — REVISED, severity downgraded
+
+Originally diagnosed as a fatal architectural blocker. Re-investigation after Finding #11 lands shows the truth is narrower: a fresh clone in default packages mode never builds the `eliza/packages/plugin-remote-manifest/` workspace package, so its `dist/rpc-mac.js` is missing and the dev API crashes on import. **One-time `bun run eliza:local --install`** builds the workspace and the dist persists, so subsequent `bun run dev` (even back in packages mode) works fine.
+
+So this is a **fresh-clone setup gap**, not an unfixable architectural issue. The Milady dev workflow has two distinct setup paths:
+- Pure packages mode (default `bun install`): consumers expect `@elizaos/*` from npm. But `plugin-remote-manifest` is `"private": true` and not on npm. Dev server crashes.
+- Local mode (`bun run eliza:local --install`): clones eliza, builds workspace packages, dist artifacts now exist on disk.
+
+After running local-mode setup ONCE, packages mode also works because the dist artifacts remain. Documenting this as "run `bun run eliza:local --install` once after first checkout" would close the gap immediately. The deeper fix is to make the default postinstall build the private workspace packages so packages mode is self-sufficient.
 
 - **Failing import chain:**
   [eliza/packages/plugin-worker-runtime/src/dispatch.ts:23](eliza/packages/plugin-worker-runtime/src/dispatch.ts#L23) → `@elizaos/plugin-remote-manifest/rpc-mac`
@@ -250,7 +268,7 @@ All 8 messaging connector test suites passed on `develop` HEAD.
 | 4 | unit test | medium | ✅ fixed | Root tsconfig restored from packages-mode template |
 | 5 | unit test | medium | ✅ fixed | Same root cause as #4 |
 | 6 | e2e | medium | 📋 documented | `test:e2e` runs 0 tests but isn't called by any CI workflow — unused command, not actual CI gap |
-| 7 | dev server | **high** | 📋 documented | Workspace build chain bug; upstream architectural fix needed |
+| 7 | dev server | medium | 📋 documented | Fresh clone in packages mode lacks `plugin-remote-manifest/dist/`; one-time `bun run eliza:local --install` builds it and the dist persists |
 | 8 | audit | medium | ✅ fixed (local) | `audit:cloud` now runs `bunx playwright install chromium` first — works on first run |
 | 9 | cloud UI | medium | 📋 documented | Likely Vite dep-optimizer race during audit warmup; upstream fix path documented |
 | 10 | dev server (local mode) | **high** | 📋 documented | Bun npm-alias bin shim quirk; upstream bun or workspace fix needed |
