@@ -788,6 +788,10 @@ test("orchestrator validation actions supply human evidence", async ({
   await openAppPath(page, "/orchestrator");
   await page.getByRole("button", { name: /Validate Notes release/ }).click();
   await expect(page.getByTestId("orchestrator-approve")).toBeVisible();
+  await expect(page.getByTestId("orchestrator-inspector")).toContainText(
+    "Waiting for human validation.",
+  );
+  await expect(page.getByTestId("orchestrator-approve")).toBeVisible();
   await page.getByTestId("orchestrator-approve").click();
   await expect
     .poll(() => routeState.validations[0])
