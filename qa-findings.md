@@ -83,28 +83,77 @@ Branch: `qa/2am-2026-06-01` off `develop` at commit `765e547d4` ("chore: remove 
 
 _(pending)_
 
-### 2.1 apps/app (web + Electrobun)
+### 2.1 apps/app (web + Electrobun) — ❌ BLOCKED by Finding #7
 
-### 2.2 apps/homepage
+- **Command:** `bun run dev`
+- **Behavior:** dev orchestrator boots, prints `[milady] Waiting for API server...`, repeatedly crashes the API child process. After 6 crashes in 10s the orchestrator gives up: `[milady] API exited with code 1 6 times in 10s — giving up. Fix the underlying issue and restart the dev process.`
+- **Effect:** entire desktop+web smoke checklist (onboarding / VRM / chat / settings / console / stack-status) cannot be executed against `develop` HEAD on Windows.
+
+### Finding #7 — apps/app dev cannot boot on Windows: `ERR_MODULE_NOT_FOUND` for `@elizaos/plugin-remote-manifest/dist/rpc-mac.js`
+
+- **Failing import chain:**
+  `eliza/packages/plugin-worker-runtime/src/dispatch.ts` → `@elizaos/plugin-remote-manifest/dist/rpc-mac.js`
+- **Error:**
+  ```
+  Error [ERR_MODULE_NOT_FOUND]: Cannot find module
+  'A:\…\eliza\packages\plugin-worker-runtime\node_modules\@elizaos\plugin-remote-manifest\dist\rpc-mac.js'
+  imported from .\eliza\packages\plugin-worker-runtime\src\dispatch.ts
+  ```
+- **Cause hypothesis:** `dispatch.ts` unconditionally imports `rpc-mac.js`, but `plugin-remote-manifest` only ships that file on macOS builds (or the build matrix forgot Windows). Should be a platform-conditional import.
+- **Severity:** **high.** Blocks all local dev of `apps/app` on Windows. Same code path likely affects Linux. Only macOS would boot.
+- **Repro:** clean clone on Windows, `bun install`, `bun run dev`.
+
+### 2.2 apps/homepage — ✅ GREEN
+
+| Check | Result |
+|-------|--------|
+| `bun run dev:web` boots | ✅ Vite ready in 153.7s, served on `http://localhost:2139/` (auto-shifted from 2138 because apps/app took it) |
+| HTTP root responds | ✅ 200, HTML 1944 bytes, title `Milady | Local-First Control` |
+| `bun run --cwd apps/homepage test` | ✅ 27 tests / 9 files pass in 70s |
+| `bun run --cwd apps/homepage test:e2e` | ⏭ skipped (Playwright Chromium issue — see #8; will re-run if Phase 2.3 retry succeeds) |
+
+No homepage findings.
 
 ### 2.3 eliza/packages/cloud-frontend visual audit
+
+Initial run: ❌ all 112 routes failed because Playwright Chromium wasn't installed (see Finding #8). After installing Chromium via `bun x playwright install chromium`, re-running.
+
+### Finding #8 — `audit:cloud` doesn't ensure Playwright browsers are installed
+
+- **Command:** `bun run --cwd eliza/packages/cloud-frontend audit:cloud`
+- **Initial failure:** every one of 112 test cases failed at `browserType.launch`:
+  ```
+  Error: browserType.launch: Executable doesn't exist at
+  C:\Users\…\ms-playwright\chromium_headless_shell-1223\chrome-headless-shell-win64\chrome-headless-shell.exe
+  ```
+- **Workaround:** run `bun x playwright install chromium` once. Downloads ~294 MB (Chrome 148 + headless shell). After that the audit boots browsers normally.
+- **Cause:** the `audit:cloud` script does not include a `playwright install` step. The pre-tests-run hook is missing.
+- **Severity:** medium. Blocks any first-time contributor from running the documented visual audit. Easy fix: add `playwright install --with-deps chromium` to the script preface, or document it as a one-time prereq in [eliza/packages/cloud-frontend/AGENTS.md](eliza/packages/cloud-frontend/AGENTS.md).
+- **Output state from first run:** `aesthetic-audit-output/manual-review/` (56 stub `.md` files) was generated. `desktop/` and `mobile/` screenshot dirs are empty.
 
 ---
 
 ## Phase 3 — Connector verification
 
-_(pending)_
+All 8 messaging connector test suites passed on `develop` HEAD.
 
-| Connector | Test status | Notes |
-|-----------|-------------|-------|
-| Discord | | |
-| Telegram | | |
-| WhatsApp | | |
-| Signal | | |
-| WeChat | | |
-| iMessage | | |
-| Bluesky | | |
-| Farcaster | | |
+| Connector | Test status | Time | Notes |
+|-----------|-------------|------|-------|
+| Discord | ✅ | 81s | `vitest run` |
+| Telegram | ✅ | 16s | `vitest run` |
+| WhatsApp | ✅ | 114s | `vitest run --config ./vitest.config.ts` |
+| Signal | ✅ | 24s | `vitest run` |
+| WeChat | ✅ | 2s | `vitest run --config ./vitest.config.ts` (note: very fast — verify test file count) |
+| iMessage | ✅ | 8s | `vitest run --config vitest.config.ts` |
+| Bluesky | ✅ | 40s | `vitest run` |
+| Farcaster | ✅ | 39s | `npx -y vitest@4.0.18 run` (note: pinned to vitest 4.0.18 vs. repo's 4.1.6 — possible mismatch worth checking) |
+
+**Plugin-load verification** (probe `/api/agents` for registered plugins while `bun run dev` is up): ⚠ **BLOCKED by Finding #7**. Can't boot apps/app dev, so can't inspect plugin registry at runtime. Code-level imports look intact (connector tests run, which exercise plugin module loading).
+
+### Sub-findings worth noting (not blocking)
+
+- **plugin-wechat tests in 2s** — extremely fast vs. the others. Could indicate an empty test file or all tests skipped. Worth manual inspection.
+- **plugin-farcaster pins vitest@4.0.18** in its `test` script while the rest of the repo uses 4.1.6. Inconsistent versioning; would not block CI but is a maintenance smell.
 
 ---
 
