@@ -630,6 +630,20 @@ const requiredElectrobunConfigSnippets`,
   return patched;
 }
 
+function patchCloudFrontendAuditChromium(raw) {
+  // Finding #8: bun run --cwd eliza/packages/cloud-frontend audit:cloud fails
+  // on first run because Playwright Chromium isn't installed. Prepend a
+  // bunx playwright install step to the audit:cloud script so it self-bootstraps.
+  // Idempotent: bail if the install step is already present.
+  if (raw.includes("bunx playwright install chromium && node scripts/run-e2e.mjs tests/e2e/aesthetic-audit.spec.ts")) {
+    return raw;
+  }
+  return raw.replace(
+    '"audit:cloud": "node scripts/run-e2e.mjs tests/e2e/aesthetic-audit.spec.ts',
+    '"audit:cloud": "bunx playwright install chromium && node scripts/run-e2e.mjs tests/e2e/aesthetic-audit.spec.ts',
+  );
+}
+
 function patchWhisperBuildWindowsConfig(raw) {
   // Normalize CRLF -> LF so multi-line anchors match on Windows runners,
   // where `git clone` of the eliza submodule applies autocrlf=true (the
@@ -1351,6 +1365,12 @@ function applyReleaseSourcePatches() {
     path.join(elizaDir, "packages", "app-core", "scripts", "release-check.ts"),
     patchAppCoreReleaseCheck,
     "app-core release-check Milady wrappers",
+  );
+
+  replaceFileText(
+    path.join(elizaDir, "packages", "cloud-frontend", "package.json"),
+    patchCloudFrontendAuditChromium,
+    "cloud-frontend audit:cloud self-installs Playwright Chromium (Finding #8)",
   );
 
   replaceFileText(
