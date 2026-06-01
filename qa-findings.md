@@ -94,8 +94,6 @@ Branch: `qa/2am-2026-06-01` off `develop` at commit `765e547d4` ("chore: remove 
 
 ## Phase 2 — App smoke tests
 
-_(pending)_
-
 ### 2.1 apps/app (web + Electrobun) — ❌ BLOCKED by Finding #7
 
 - **Command:** `bun run dev`
@@ -142,7 +140,7 @@ _(pending)_
 | Check | Result |
 |-------|--------|
 | `bun run dev:web` boots | ✅ Vite ready in 153.7s, served on `http://localhost:2139/` (auto-shifted from 2138 because apps/app took it) |
-| HTTP root responds | ✅ 200, HTML 1944 bytes, title `Milady | Local-First Control` |
+| HTTP root responds | ✅ 200, HTML 1944 bytes, title `Milady \| Local-First Control` |
 | `bun run --cwd apps/homepage test` | ✅ 27 tests / 9 files pass in 70s |
 | `bun run --cwd apps/homepage test:e2e` | ✅ 42 tests pass in 1.9m (run after installing Chromium per #8) |
 
@@ -158,6 +156,7 @@ Initial run: ❌ all 112 routes failed because Playwright Chromium wasn't instal
 - `dashboard-billing-success` (desktop + mobile) — billing success page hangs
 
 Output artifacts produced (committed under `aesthetic-audit-output/`):
+
 - `desktop/` — 98 PNGs (rest + hover for 49 routes)
 - `mobile/` — 65 PNGs (rest + hover for 32 routes that have it, rest only for others)
 - `manual-review/` — 56 stub markdown files (one per route)
@@ -264,7 +263,7 @@ All 8 messaging connector test suites passed on `develop` HEAD.
 
 ### Suggested triage order (severity × blast radius)
 
-1. **#7** apps/app Windows boot — blocks every Windows developer. Quick fix: gate the `rpc-mac.js` import behind `process.platform === "darwin"`.
+1. **#7** apps/app Windows boot — blocks every Windows developer. Root cause is workspace build chain (`@elizaos/plugin-remote-manifest` private workspace package never built); fix is to add the missing build step to `scripts/milady-postinstall-repo-setup.mjs` so `security` → `plugin-remote-manifest` build in dep order. (Earlier "gate behind `process.platform === 'darwin'`" suggestion was wrong — `rpc-mac.ts` is HMAC, not macOS.)
 2. **#6** test:e2e false-green — silent CI gap; fix `include` pattern in `vitest.e2e.config.ts` to also match `test/**/*.e2e.test.ts`.
 3. **#2** apps/app typecheck — blocks `bun run verify`. Either install `@elizaos/plugin-task-coordinator` or remove the unused side-effect import.
 4. **#4 / #5** tsconfig drift — restore packages-mode tsconfig; investigate why local-mode tsconfig got committed.
