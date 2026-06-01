@@ -235,7 +235,20 @@ All 8 messaging connector test suites passed on `develop` HEAD.
 | Plugin-load runtime check | ⚠ unable | Blocked by #7. |
 | Automated test suites | ⚠ mixed | Lint green; typecheck broken (#2); 3 unit-test failures (#3, #4, #5); test:e2e silently runs nothing (#6); verify:secrets eventually green. |
 
-### Finding inventory (10 total) — post-loop state
+### Finding #11 — apps/app imports from `@elizaos/shared/character-presets` (doesn't exist)
+
+- **Discovered:** CI Build job log after fixing #2.
+- **Symptom:**
+  ```
+  [vite:load-fallback] Could not load eliza/packages/shared/dist/character-presets.js
+  (imported by src/main.tsx): ENOENT
+  ```
+- **Cause:** [apps/app/src/main.tsx:296](apps/app/src/main.tsx#L296) and [apps/app/src/character-catalog.ts:2](apps/app/src/character-catalog.ts#L2) both import from `@elizaos/shared/character-presets`. This subpath **doesn't exist anywhere**: the npm-published `@elizaos/shared` has `onboarding-presets` (and `onboarding-presets.characters`) but no `character-presets`; the local source under `eliza/packages/shared/src/` also has no such file. The `vite.config.ts` has a try/catch fallback at line 51-60 pointing to `eliza/packages/shared/dist/character-presets.js` — but that fallback file doesn't exist either.
+- **What the imports actually need:** `getStylePresets` and `buildElizaCharacterCatalog` both live in `@elizaos/shared/onboarding-presets` (verified by grep in both the npm package and the local source).
+- **Severity:** **high.** Blocks every CI Build on Linux runners. Bug was masked by local typecheck-only verify (we don't run apps/app build locally).
+- **Fix:** changed both imports from `…/character-presets` to `…/onboarding-presets`. The vite.config.ts fallback alias + `elizaos-app-core-shim.d.ts` module declaration are now dead code; can be removed in a cleanup pass.
+
+### Finding inventory (11 total) — post-loop state
 
 | # | Surface | Severity | Status | One-line |
 |---|---------|----------|--------|----------|
@@ -249,6 +262,7 @@ All 8 messaging connector test suites passed on `develop` HEAD.
 | 8 | audit | medium | ✅ fixed (local) | `audit:cloud` now runs `bunx playwright install chromium` first — works on first run |
 | 9 | cloud UI | medium | 📋 documented | Likely Vite dep-optimizer race during audit warmup; upstream fix path documented |
 | 10 | dev server (local mode) | **high** | 📋 documented | Bun npm-alias bin shim quirk; upstream bun or workspace fix needed |
+| 11 | apps/app build | **high** | ✅ fixed | `apps/app/src/main.tsx` + `character-catalog.ts` imported `@elizaos/shared/character-presets` (doesn't exist) — corrected to `onboarding-presets` |
 
 **Fixed in this branch (5):** #2, #3, #4, #5, #8 (+ partial #1).
 **Documented but not fixable locally (5):** #1 layer 2, #6, #7, #9, #10. All need either upstream PRs to elizaOS/eliza or architectural input from maintainers. Each finding has a concrete proposed fix path.
