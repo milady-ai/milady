@@ -39,7 +39,7 @@ Branch: `qa/2am-2026-06-01` off `develop` at commit `765e547d4` ("chore: remove 
 | 1.2 `bun run verify:lint` | ✅ | 5s | All Biome checks passed: submodule contract, repo (37+40+40+9+16+40+40+38+12 files), apps/app (81), apps/homepage (81). Zero fixes needed. |
 | 1.3 `bun run test` | ❌ **Findings #3, #4, #5** | ~70s | 207 passed, 3 failed, 1 skipped across 31 test files. Two files affected: `scripts/release-workflow-contract.test.mjs` (1 fail) and `scripts/standalone-eliza-package-contract.test.ts` (2 fails). |
 | 1.4 `bun run test:e2e` | ⚠ **Finding #6** | <1s | Exit 0 but "No test files found, exiting with code 0" — false-green. |
-| 1.5 `bun run verify:secrets` | ⚠ inconclusive | >5 min hung | Script `check-secret-hygiene.mjs` produced no output, no exit. Suspected hang. Not blocking. |
+| 1.5 `bun run verify:secrets` | ✅ | ~10 min | Eventually completed exit 0. Slow (no output during scan) but clean. |
 
 ### Finding #6 — `bun run test:e2e` finds no test files (false-green)
 
@@ -110,13 +110,31 @@ _(pending)_
 | `bun run dev:web` boots | ✅ Vite ready in 153.7s, served on `http://localhost:2139/` (auto-shifted from 2138 because apps/app took it) |
 | HTTP root responds | ✅ 200, HTML 1944 bytes, title `Milady | Local-First Control` |
 | `bun run --cwd apps/homepage test` | ✅ 27 tests / 9 files pass in 70s |
-| `bun run --cwd apps/homepage test:e2e` | ⏭ skipped (Playwright Chromium issue — see #8; will re-run if Phase 2.3 retry succeeds) |
+| `bun run --cwd apps/homepage test:e2e` | ✅ 42 tests pass in 1.9m (run after installing Chromium per #8) |
 
 No homepage findings.
 
 ### 2.3 eliza/packages/cloud-frontend visual audit
 
-Initial run: ❌ all 112 routes failed because Playwright Chromium wasn't installed (see Finding #8). After installing Chromium via `bun x playwright install chromium`, re-running.
+Initial run: ❌ all 112 routes failed because Playwright Chromium wasn't installed (see Finding #8). After installing Chromium via `bun x playwright install chromium`, re-ran successfully.
+
+**Retry result: 94 passed / 18 failed in 4.2 min.** All 18 failures were `page.goto: Timeout 60000ms exceeded` against only **2 unique routes** (× 2 viewports × retry attempts):
+
+- `landing` (desktop + mobile) — main marketing route doesn't respond within 60s in the preview server
+- `dashboard-billing-success` (desktop + mobile) — billing success page hangs
+
+Output artifacts produced (committed under `aesthetic-audit-output/`):
+- `desktop/` — 98 PNGs (rest + hover for 49 routes)
+- `mobile/` — 65 PNGs (rest + hover for 32 routes that have it, rest only for others)
+- `manual-review/` — 56 stub markdown files (one per route)
+- `contact-sheet.html`, `report.json`, `LOOP_1_TRIAGE.md`
+
+### Finding #9 — cloud-frontend `landing` and `dashboard-billing-success` time out under audit
+
+- **Audit spec:** [eliza/packages/cloud-frontend/tests/e2e/aesthetic-audit.spec.ts:833](eliza/packages/cloud-frontend/tests/e2e/aesthetic-audit.spec.ts#L833)
+- **Behavior:** `page.goto(<route>)` exceeds the 60s default timeout for these two routes only. All other 51 routes load fine.
+- **Severity:** medium. The fact that **landing** — the public marketing root of the cloud dashboard — won't even load under a headless Vite preview is a regression worth investigating. `dashboard-billing-success` may legitimately depend on a session/token that the audit fixture doesn't provide, but landing should be entirely public.
+- **Likely cause hypothesis:** these routes either pull external resources (CDN, fonts, analytics) that block document-ready, or have a synchronous hang in their JS entry. Inspect with `npx playwright show-trace test-results/aesthetic-audit-…-landing*/trace.zip`.
 
 ### Finding #8 — `audit:cloud` doesn't ensure Playwright browsers are installed
 
@@ -159,4 +177,49 @@ All 8 messaging connector test suites passed on `develop` HEAD.
 
 ## Summary
 
-_(filled at end of pass)_
+**Overall verdict:** `develop` HEAD (`765e547d4`) is **partially broken on Windows**. Marketing site and connector test suites are healthy. The core desktop/web app cannot boot. CI contract tests have drifted from the artifacts they protect. The documented visual audit is missing a setup step.
+
+### Per-surface verdict
+
+| Surface | Verdict | Notes |
+|---------|---------|-------|
+| apps/app (web + Electrobun desktop) | ❌ **broken** | Cannot boot dev server (#7). Smoke checklist 0% executed. |
+| apps/homepage | ✅ **good** | Unit tests + Playwright e2e both green. Server serves 200. |
+| eliza/packages/cloud-frontend visual audit | ⚠ **mostly good** | 94/112 pass after Chromium install (#8). 2 routes (`landing`, `dashboard-billing-success`) timeout (#9). |
+| 8 messaging connectors | ✅ **good (all 8/8 green)** | plugin-wechat finishes suspiciously fast (2s) — verify test coverage. |
+| Plugin-load runtime check | ⚠ unable | Blocked by #7. |
+| Automated test suites | ⚠ mixed | Lint green; typecheck broken (#2); 3 unit-test failures (#3, #4, #5); test:e2e silently runs nothing (#6); verify:secrets eventually green. |
+
+### Finding inventory (9 total)
+
+| # | Surface | Severity | One-line |
+|---|---------|----------|----------|
+| 1 | doctor | medium | `bun run doctor` fails: `Module not found "eliza.mjs"` |
+| 2 | typecheck | medium-high | apps/app/src/main.tsx imports `@elizaos/plugin-task-coordinator/register` which has no types/exports |
+| 3 | unit test | low | `release-workflow-contract.test.mjs:800` expects BUN_VERSION 1.3.13, workflow file has 1.3.14 |
+| 4 | unit test | medium | `standalone-eliza-package-contract.test.ts` — root tsconfig has `./eliza/` paths in packages mode |
+| 5 | unit test | medium | Same root cause as #4 — checked-in tsconfig diverges from packages-mode template |
+| 6 | e2e | **high** | `bun run test:e2e` runs zero tests but exits 0 (false-green CI gate) |
+| 7 | dev server | **high** | apps/app dev cannot boot on Windows — ERR_MODULE_NOT_FOUND for `rpc-mac.js` |
+| 8 | audit | medium | `audit:cloud` script doesn't install Playwright browsers — first-time runs always fail |
+| 9 | cloud UI | medium | `landing` and `dashboard-billing-success` routes timeout under audit |
+
+### Suggested triage order (severity × blast radius)
+
+1. **#7** apps/app Windows boot — blocks every Windows developer. Quick fix: gate the `rpc-mac.js` import behind `process.platform === "darwin"`.
+2. **#6** test:e2e false-green — silent CI gap; fix `include` pattern in `vitest.e2e.config.ts` to also match `test/**/*.e2e.test.ts`.
+3. **#2** apps/app typecheck — blocks `bun run verify`. Either install `@elizaos/plugin-task-coordinator` or remove the unused side-effect import.
+4. **#4 / #5** tsconfig drift — restore packages-mode tsconfig; investigate why local-mode tsconfig got committed.
+5. **#9** cloud-frontend landing timeout — investigate. Public marketing root must load.
+6. **#1** doctor — fix the missing `eliza.mjs` resolution in `run-node.mjs doctor`.
+7. **#8** audit:cloud chromium prereq — one-line fix to install browsers as part of audit script.
+8. **#3** stale BUN_VERSION regex — one-character fix.
+
+### Out of scope for this pass (documented, not executed)
+
+- Live messaging platform end-to-end for connectors (requires real platform credentials).
+- Heavy e2e (`test:e2e:heavy`, `smoke:lifeops`, `smoke:api-status`).
+- Packaged desktop smoke (`test:desktop:packaged:windows`) — not run; #7 makes packaged-app smoke moot until dev boots.
+- Mobile (iOS/Android via Capacitor).
+- The visual audit's 5-loop manual-review protocol — only 1 loop run, no per-page verdicts written into `manual-review/*.md` stubs (out of scope at smoke depth).
+
