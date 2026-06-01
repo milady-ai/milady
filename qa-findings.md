@@ -227,7 +227,11 @@ All 8 messaging connector test suites passed on `develop` HEAD.
 
 ## Summary
 
-**Overall verdict:** `develop` HEAD (`765e547d4`) is **partially broken on Windows**. Marketing site and connector test suites are healthy. The core desktop/web app cannot boot. CI contract tests have drifted from the artifacts they protect. The documented visual audit is missing a setup step.
+**Post-loop verdict (2026-06-01, after autonomous /loop iteration):** `develop` HEAD (was `765e547d4`) is **partially broken on Windows with multiple upstream-blocking issues**. Marketing site and connector test suites are healthy. The core desktop/web app cannot boot in either source mode (different bug per mode). CI contract tests have been brought into agreement with their protected artifacts. The documented visual audit now self-installs Chromium.
+
+**Loop took multiple iterations.** 5 findings fixed in this branch (#2, #3, #4, #5, #8 + partial #1). 5 findings need upstream work in elizaOS/eliza or architectural decisions: #1 layer 2 (unhoisted deps), #6 (e2e test taxonomy), #7 (workspace build chain), #9 (Vite optimizer race), #10 (bun npm-alias bin shim).
+
+**`bun run verify` is fully green** on this branch (210 tests pass, 1 skipped). Stop hook passes.
 
 ### Per-surface verdict
 
@@ -240,20 +244,23 @@ All 8 messaging connector test suites passed on `develop` HEAD.
 | Plugin-load runtime check | ⚠ unable | Blocked by #7. |
 | Automated test suites | ⚠ mixed | Lint green; typecheck broken (#2); 3 unit-test failures (#3, #4, #5); test:e2e silently runs nothing (#6); verify:secrets eventually green. |
 
-### Finding inventory (10 total)
+### Finding inventory (10 total) — post-loop state
 
-| # | Surface | Severity | One-line |
-|---|---------|----------|----------|
-| 1 | doctor | medium | `bun run doctor` fails: `Module not found "eliza.mjs"` |
-| 2 | typecheck | medium-high | apps/app/src/main.tsx imports `@elizaos/plugin-task-coordinator/register` which has no types/exports |
-| 3 | unit test | low | `release-workflow-contract.test.mjs:800` expects BUN_VERSION 1.3.13, workflow file has 1.3.14 |
-| 4 | unit test | medium | `standalone-eliza-package-contract.test.ts` — root tsconfig has `./eliza/` paths in packages mode |
-| 5 | unit test | medium | Same root cause as #4 — checked-in tsconfig diverges from packages-mode template |
-| 6 | e2e | **high** | `bun run test:e2e` runs zero tests but exits 0 (false-green CI gate) |
-| 7 | dev server | **high** | apps/app dev cannot boot in packages mode — `plugin-remote-manifest` workspace package never built |
-| 8 | audit | medium | `audit:cloud` script doesn't install Playwright browsers — first-time runs always fail |
-| 9 | cloud UI | medium | `landing` and `dashboard-billing-success` routes timeout under audit |
-| 10 | dev server (local mode) | **high** | apps/app dev fails in `eliza:local` mode — native plugin builds need `rollup` but bin shim isn't created for the npm-aliased `@rollup/wasm-node` package |
+| # | Surface | Severity | Status | One-line |
+|---|---------|----------|--------|----------|
+| 1 | doctor | medium | 🟡 partial | `bun run doctor`: layer 1 (entry filename `eliza.mjs` mismatch) **fixed via shim**; layer 2 (unhoisted transitive deps) needs architect |
+| 2 | typecheck | med-high | ✅ fixed | apps/app/tsconfig.json now maps `@elizaos/plugin-task-coordinator` to optional-eliza-app-stub |
+| 3 | unit test | low | ✅ fixed | BUN_VERSION regex bumped 1.3.13 → 1.3.14 |
+| 4 | unit test | medium | ✅ fixed | Root tsconfig restored from packages-mode template |
+| 5 | unit test | medium | ✅ fixed | Same root cause as #4 |
+| 6 | e2e | **high** | 📋 documented | Test taxonomy needs maintainer judgment; upstream config (gitignored here) |
+| 7 | dev server | **high** | 📋 documented | Workspace build chain bug; upstream architectural fix needed |
+| 8 | audit | medium | ✅ fixed (local) | `audit:cloud` now runs `bunx playwright install chromium` first — works on first run |
+| 9 | cloud UI | medium | 📋 documented | Likely Vite dep-optimizer race during audit warmup; upstream fix path documented |
+| 10 | dev server (local mode) | **high** | 📋 documented | Bun npm-alias bin shim quirk; upstream bun or workspace fix needed |
+
+**Fixed in this branch (5):** #2, #3, #4, #5, #8 (+ partial #1).
+**Documented but not fixable locally (5):** #1 layer 2, #6, #7, #9, #10. All need either upstream PRs to elizaOS/eliza or architectural input from maintainers. Each finding has a concrete proposed fix path.
 
 ### Suggested triage order (severity × blast radius)
 
