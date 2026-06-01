@@ -16,18 +16,19 @@ Branch: `qa/2am-2026-06-01` off `develop` at commit `765e547d4` ("chore: remove 
 | Create `.env` with `ANTHROPIC_API_KEY` | ✅ | `.env` confirmed gitignored (line 7 of `.gitignore`) |
 | `bun run doctor` | ❌ **Finding #1** | See below |
 
-### Finding #1 — `bun run doctor` fails with `Module not found "eliza.mjs"`
+### Finding #1 — `bun run doctor` fails (two layers: entry filename + unhoisted deps) — REVISED, partially fixed
 
 - **Command:** `bun run doctor` (alias of `bun run milady:doctor`)
-- **What happens:** `tsdown` build phase succeeds (rebuilds `dist/entry.js`, `dist/eliza.js`, `dist/server.js`, `dist/index.js`, and 20 chunks totalling 7.6 MB). Then the doctor script invocation fails:
-  ```
-  error: Module not found "eliza.mjs"
-  error: script "milady:doctor" exited with code 1
-  error: script "doctor" exited with code 1
-  ```
-- **Invocation chain:** `package.json` → `bun run milady:doctor` → `node scripts/run-eliza-app-core-script.mjs run-node.mjs doctor`. The `run-node.mjs doctor` step is what resolves to `eliza.mjs`, which is missing.
-- **Severity:** medium. Build artifacts produced successfully, so deps and patches are healthy. The doctor subcommand alone is broken, which blocks anyone using it as the documented "is my setup OK?" check.
-- **Repro:** clean clone, `bun install`, `bun run doctor`.
+- **Layer 1 (entry filename mismatch) — FIXED on this branch:**
+  - [eliza/packages/app-core/scripts/run-node.mjs:176](eliza/packages/app-core/scripts/run-node.mjs#L176) hard-codes `eliza.mjs` as the entry filename: `spawn(execPath, ["eliza.mjs", ...args], ...)`. Milady's fork renamed the entry to `milady.mjs`, so this fails with `Module not found "eliza.mjs"`.
+  - **Fix on this branch:** added a 1-line shim [eliza.mjs](eliza.mjs) at repo root that imports `./milady.mjs`. Re-running `bun run doctor` now progresses past the entry resolution.
+  - **Proper upstream fix:** make `run-node.mjs` read the entry filename from an env var (e.g. `ELIZA_ENTRY_FILE`) so forks can override it.
+- **Layer 2 (unhoisted transitive deps) — NOT FIXED, architectural:**
+  - After the shim, `bun run doctor` builds `dist/entry.js` successfully (~7.6 MB across 20 chunks) and runs it. The bundled entry imports transitive deps (`jose`, `@node-rs/argon2`, likely more) as external packages. These deps live in bun's content-addressable store under the install root but are not linked at the top level where Node-style resolution looks.
+  - Manually creating a Windows junction from the top-level install dir to bun's store for `jose` resolved that import, but the next call immediately hit `Cannot find module '@node-rs/argon2'`. Whack-a-mole pattern suggests dozens more would follow.
+  - This is broader than doctor: any command that runs `dist/entry.js` outside bun's workspace-aware loader would hit the same wall.
+- **Severity:** medium (layer 1 alone was the original blocker; layer 2 is broader, possibly affects other runtime commands too).
+- **Proper fix for layer 2 needs an architect**: either (a) bundle transitive deps inline in `dist/entry.js` (`tsdown` config change — `external` → `bundle`), (b) declare all needed runtime deps as direct deps of Milady's root package.json so they hoist to the top level, or (c) ship a runtime that knows how to resolve into bun's store.
 
 ---
 
