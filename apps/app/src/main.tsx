@@ -34,8 +34,8 @@ import {
   ANDROID_LOCAL_AGENT_API_BASE,
   MOBILE_RUNTIME_MODE_STORAGE_KEY,
   normalizeMobileRuntimeMode,
-} from "@elizaos/ui/first-run/mobile-runtime-mode";
-import { preSeedAndroidLocalRuntimeIfFresh } from "@elizaos/ui/first-run/pre-seed-local-runtime";
+  preSeedAndroidLocalRuntimeIfFresh,
+} from "./first-run/mobile-runtime-mode";
 import {
   getWindowNavigationPath,
   isAppWindowRoute,
