@@ -36,26 +36,24 @@ import {
   normalizeMobileRuntimeMode,
   preSeedAndroidLocalRuntimeIfFresh,
 } from "./first-run/mobile-runtime-mode";
+// Navigation + platform helpers are re-exported from the published
+// @elizaos/app-core barrel (which bridges @elizaos/ui). Importing them from
+// app-core keeps package-mode builds green; the granular @elizaos/ui/* subpaths
+// these symbols live under are not published on the `alpha` dist-tag.
 import {
-  getWindowNavigationPath,
-  isAppWindowRoute,
-} from "@elizaos/ui/navigation/index";
-import {
+  applyForceFreshOnboardingReset,
   applyLaunchConnection,
   applyLaunchConnectionFromUrl,
-} from "@elizaos/ui/platform/browser-launch";
-import { installLocalProviderCloudPreferencePatch } from "@elizaos/ui/platform/cloud-preference-patch";
-import { installDesktopPermissionsClientPatch } from "@elizaos/ui/platform/desktop-permissions-client";
-import {
-  applyForceFreshFirstRunReset as applyForceFreshOnboardingReset,
-  installForceFreshFirstRunClientPatch as installForceFreshOnboardingClientPatch,
-} from "@elizaos/ui/platform/first-run-reset";
-import {
+  getWindowNavigationPath,
+  installDesktopPermissionsClientPatch,
+  installForceFreshOnboardingClientPatch,
+  installLocalProviderCloudPreferencePatch,
+  isAppWindowRoute,
   isDetachedWindowShell,
   resolveWindowShellRoute,
-  shouldInstallMainWindowFirstRunPatches as shouldInstallMainWindowOnboardingPatches,
+  shouldInstallMainWindowOnboardingPatches,
   syncDetachedShellLocation,
-} from "@elizaos/ui/platform/window-shell";
+} from "@elizaos/app-core";
 // Pill / voice-capture symbols live in upstream @elizaos/ui source but are
 // not yet published on the `alpha` dist-tag. Route through the local stub so
 // package-mode builds stay green; see apps/app/src/pill-stubs.tsx.
