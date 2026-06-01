@@ -163,12 +163,18 @@ Output artifacts produced (committed under `aesthetic-audit-output/`):
 - `manual-review/` — 56 stub markdown files (one per route)
 - `contact-sheet.html`, `report.json`, `LOOP_1_TRIAGE.md`
 
-### Finding #9 — cloud-frontend `landing` and `dashboard-billing-success` time out under audit
+### Finding #9 — cloud-frontend `landing` and `dashboard-billing-success` time out under audit — investigated, likely non-deterministic
 
-- **Audit spec:** [eliza/packages/cloud-frontend/tests/e2e/aesthetic-audit.spec.ts:833](eliza/packages/cloud-frontend/tests/e2e/aesthetic-audit.spec.ts#L833)
-- **Behavior:** `page.goto(<route>)` exceeds the 60s default timeout for these two routes only. All other 51 routes load fine.
-- **Severity:** medium. The fact that **landing** — the public marketing root of the cloud dashboard — won't even load under a headless Vite preview is a regression worth investigating. `dashboard-billing-success` may legitimately depend on a session/token that the audit fixture doesn't provide, but landing should be entirely public.
-- **Likely cause hypothesis:** these routes either pull external resources (CDN, fonts, analytics) that block document-ready, or have a synchronous hang in their JS entry. Inspect with `npx playwright show-trace test-results/aesthetic-audit-…-landing*/trace.zip`.
+- **Audit spec:** [eliza/packages/cloud-frontend/tests/e2e/aesthetic-audit.spec.ts:1364](eliza/packages/cloud-frontend/tests/e2e/aesthetic-audit.spec.ts#L1364)
+- **Behavior:** `page.goto(<route>, { waitUntil: "domcontentloaded", timeout: 60_000 })` exceeds the 60s timeout for these two routes only. All other 51 routes load fine.
+- **Investigation (2026-06-01):**
+  1. Booted the audit's Vite dev server independently and probed `/` and `/dashboard/billing/success` via `Invoke-WebRequest` — both returned HTTP 200 with full 10443-byte HTML in <1s.
+  2. The HTML for `/` is **byte-for-byte identical** to `/os` (which the audit passes), via Vite's SPA shell. Server-side is innocent.
+  3. Inspected Vite module endpoints (`/@react-refresh`, `/@vite/client`, `/src/main.tsx`) — all responded 200 in 0s.
+  4. The audit log showed `[vite] (client) [optimizer] scanning dependencies... bundling dependencies...` during the first route — suggests Vite dep-optimizer race.
+- **Most likely cause:** Vite's dev-mode dependency optimizer fires when the FIRST route is loaded (alphabetically that's `landing`/`/`), and the optimizer's bundling step delays `DOMContentLoaded` past 60s under Playwright's headless Chromium. `dashboard-billing-success` may hit a separate code path (or also be timing-dependent). The two routes share no obvious semantic similarity.
+- **Severity:** medium-low (likely flaky / environment-dependent, not a real product regression). But still worth fixing because it makes the audit unreliable.
+- **Suggested fix:** make the audit use `bun vite preview` (production build, no dep optimizer) instead of `bun vite` (dev mode). The [eliza/packages/cloud-frontend/playwright.config.ts](eliza/packages/cloud-frontend/playwright.config.ts) `webServer.command` currently runs dev mode; switching to preview after a build would eliminate the optimizer race. Alternative: add a warm-up `page.goto(LOCAL_URL)` in `globalSetup` so the optimizer finishes before timed routes start.
 
 ### Finding #8 — `audit:cloud` doesn't ensure Playwright browsers are installed
 
@@ -180,7 +186,17 @@ Output artifacts produced (committed under `aesthetic-audit-output/`):
   ```
 - **Workaround:** run `bun x playwright install chromium` once. Downloads ~294 MB (Chrome 148 + headless shell). After that the audit boots browsers normally.
 - **Cause:** the `audit:cloud` script does not include a `playwright install` step. The pre-tests-run hook is missing.
-- **Severity:** medium. Blocks any first-time contributor from running the documented visual audit. Easy fix: add `playwright install --with-deps chromium` to the script preface, or document it as a one-time prereq in [eliza/packages/cloud-frontend/AGENTS.md](eliza/packages/cloud-frontend/AGENTS.md).
+- **Severity:** medium. Blocks any first-time contributor from running the documented visual audit.
+- **Concrete fix path** (upstream in elizaOS/eliza — file is gitignored in Milady so editing locally doesn't propagate):
+  - Change [eliza/packages/cloud-frontend/package.json](eliza/packages/cloud-frontend/package.json) `audit:cloud` script from:
+    ```
+    "audit:cloud": "node scripts/run-e2e.mjs tests/e2e/aesthetic-audit.spec.ts --project=chromium-desktop --workers=4 && node -e ..."
+    ```
+    to:
+    ```
+    "audit:cloud": "bunx playwright install chromium && node scripts/run-e2e.mjs ..."
+    ```
+  - OR add a one-time prereq line to [eliza/packages/cloud-frontend/AGENTS.md](eliza/packages/cloud-frontend/AGENTS.md) under "Run the audit": `Prereq: bunx playwright install chromium (one-time, ~294 MB).`
 - **Output state from first run:** `aesthetic-audit-output/manual-review/` (56 stub `.md` files) was generated. `desktop/` and `mobile/` screenshot dirs are empty.
 
 ---
