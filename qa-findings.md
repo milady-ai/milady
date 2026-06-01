@@ -22,7 +22,7 @@ Branch: `qa/2am-2026-06-01` off `develop` at commit `765e547d4` ("chore: remove 
 - **Layer 1 (entry filename mismatch) — FIXED on this branch:**
   - [eliza/packages/app-core/scripts/run-node.mjs:176](eliza/packages/app-core/scripts/run-node.mjs#L176) hard-codes `eliza.mjs` as the entry filename: `spawn(execPath, ["eliza.mjs", ...args], ...)`. Milady's fork renamed the entry to `milady.mjs`, so this fails with `Module not found "eliza.mjs"`.
   - **Fix on this branch:** added a 1-line shim [eliza.mjs](eliza.mjs) at repo root that imports `./milady.mjs`. Re-running `bun run doctor` now progresses past the entry resolution.
-  - **Proper upstream fix:** make `run-node.mjs` read the entry filename from an env var (e.g. `ELIZA_ENTRY_FILE`) so forks can override it.
+  - **Upstream PR:** https://github.com/elizaOS/eliza/pull/8126 — adds `ELIZA_ENTRY_FILE` env var override. Once that lands and Milady bumps `@elizaos/app-core`, the shim file becomes unnecessary.
 - **Layer 2 (unhoisted transitive deps) — NOT FIXED, architectural:**
   - After the shim, `bun run doctor` builds `dist/entry.js` successfully (~7.6 MB across 20 chunks) and runs it. The bundled entry imports transitive deps (`jose`, `@node-rs/argon2`, likely more) as external packages. These deps live in bun's content-addressable store under the install root but are not linked at the top level where Node-style resolution looks.
   - Manually creating a Windows junction from the top-level install dir to bun's store for `jose` resolved that import, but the next call immediately hit `Cannot find module '@node-rs/argon2'`. Whack-a-mole pattern suggests dozens more would follow.
@@ -178,16 +178,8 @@ Output artifacts produced (committed under `aesthetic-audit-output/`):
 - **Workaround:** run `bun x playwright install chromium` once. Downloads ~294 MB (Chrome 148 + headless shell). After that the audit boots browsers normally.
 - **Cause:** the `audit:cloud` script does not include a `playwright install` step. The pre-tests-run hook is missing.
 - **Severity:** medium. Blocks any first-time contributor from running the documented visual audit.
-- **Concrete fix path** (upstream in elizaOS/eliza — file is gitignored in Milady so editing locally doesn't propagate):
-  - Change [eliza/packages/cloud-frontend/package.json](eliza/packages/cloud-frontend/package.json) `audit:cloud` script from:
-    ```
-    "audit:cloud": "node scripts/run-e2e.mjs tests/e2e/aesthetic-audit.spec.ts --project=chromium-desktop --workers=4 && node -e ..."
-    ```
-    to:
-    ```
-    "audit:cloud": "bunx playwright install chromium && node scripts/run-e2e.mjs ..."
-    ```
-  - OR add a one-time prereq line to [eliza/packages/cloud-frontend/AGENTS.md](eliza/packages/cloud-frontend/AGENTS.md) under "Run the audit": `Prereq: bunx playwright install chromium (one-time, ~294 MB).`
+- **Concrete fix path** (upstream in elizaOS/eliza — file is gitignored in Milady so editing locally doesn't propagate, but Milady's `apply-eliza-ci-patches.mjs` now patches it):
+  - **Upstream PR:** https://github.com/elizaOS/eliza/pull/8125 — prepends `bunx playwright install chromium` to the `audit:cloud` script. Once that lands and Milady bumps its alpha pin, the Milady-side patch becomes redundant.
 - **Output state from first run:** `aesthetic-audit-output/manual-review/` (56 stub `.md` files) was generated. `desktop/` and `mobile/` screenshot dirs are empty.
 
 ---
