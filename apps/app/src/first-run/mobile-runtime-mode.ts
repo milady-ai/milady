@@ -1,4 +1,7 @@
-import { dispatchAppEvent, MOBILE_RUNTIME_MODE_CHANGED_EVENT } from "@elizaos/app-core";
+import {
+  dispatchAppEvent,
+  MOBILE_RUNTIME_MODE_CHANGED_EVENT,
+} from "@elizaos/app-core";
 import { DEFAULT_DESKTOP_API_PORT } from "@elizaos/shared";
 
 /**
@@ -91,9 +94,7 @@ function persistLocalMobileRuntimeMode(): void {
   }
 }
 
-function isAospElizaUserAgent(
-  userAgent: string | null | undefined,
-): boolean {
+function isAospElizaUserAgent(userAgent: string | null | undefined): boolean {
   if (typeof userAgent !== "string" || userAgent.length === 0) return false;
   return /\bElizaOS\/\S/.test(userAgent);
 }
