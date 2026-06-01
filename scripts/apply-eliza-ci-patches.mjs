@@ -635,7 +635,11 @@ function patchCloudFrontendAuditChromium(raw) {
   // on first run because Playwright Chromium isn't installed. Prepend a
   // bunx playwright install step to the audit:cloud script so it self-bootstraps.
   // Idempotent: bail if the install step is already present.
-  if (raw.includes("bunx playwright install chromium && node scripts/run-e2e.mjs tests/e2e/aesthetic-audit.spec.ts")) {
+  if (
+    raw.includes(
+      "bunx playwright install chromium && node scripts/run-e2e.mjs tests/e2e/aesthetic-audit.spec.ts",
+    )
+  ) {
     return raw;
   }
   return raw.replace(
