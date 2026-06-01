@@ -123,6 +123,18 @@ _(pending)_
   - Option C: Have the build of the eliza/ workspace happen as part of `setup-upstreams.mjs` or `eliza:packages`.
   - Owner: someone with context on the eliza workspace build orchestration — this is a build-pipeline change, not a one-line fix.
 - **Repro:** clean clone on any platform, `bun install`, `bun run dev`.
+- **Tried `bun run eliza:local` as a workaround (2026-06-01):** local mode also fails to boot, but with a DIFFERENT error: native plugin builds invoke `rollup`, which is aliased in [eliza/package.json](eliza/package.json) via `"rollup": "npm:@rollup/wasm-node@4.60.3"`. Bun installs the package but does NOT create a `rollup` bin shim in the workspace `.bin/` directory — a known quirk with npm-aliased packages whose alias name differs from the resolved package name. Every native plugin's `bun run build` then fails with `bun: command not found: rollup`. So both source modes fail apps/app dev for different reasons. Documented as Finding #10.
+
+### Finding #10 — `rollup` bin shim missing in eliza/ local-mode install
+
+- **Trigger:** `bun run eliza:local --install`, then `bun run dev`. The native-plugin builder ([eliza/packages/app-core/scripts/build-native-plugins.mjs](eliza/packages/app-core/scripts/build-native-plugins.mjs)) iterates plugins under `eliza/packages/native/plugins/` and runs each plugin's `bun run build`, which is typically `bun run clean && tsc && rollup -c rollup.config.mjs`.
+- **Symptom:** every plugin fails with `bun: command not found: rollup`, dev script aborts.
+- **Cause:** [eliza/package.json](eliza/package.json) declares `"rollup": "npm:@rollup/wasm-node@4.60.3"`. Bun installs the package into its content-addressable store but does not create the `rollup` bin shim in `eliza/`'s install directory. Bun appears to not link bin entries when the alias name differs from the resolved package name.
+- **Workarounds tried (none worked):**
+  - Re-running `bun install` inside `eliza/` (no change — still no shim).
+  - Manual bin shim creation deferred (Bun's `.bunx` shim format is a binary blob, not easy to hand-author).
+- **Suggested fix:** drop the npm: alias and use plain `"rollup": "^4.60.3"` (the official `rollup` package on npm has the same name as the bin), OR add an explicit shim-link step in postinstall, OR file an upstream bun bug.
+- **Severity:** **high.** Blocks local mode = blocks the only documented workaround for #7.
 
 ### 2.2 apps/homepage — ✅ GREEN
 
@@ -211,7 +223,7 @@ All 8 messaging connector test suites passed on `develop` HEAD.
 | Plugin-load runtime check | ⚠ unable | Blocked by #7. |
 | Automated test suites | ⚠ mixed | Lint green; typecheck broken (#2); 3 unit-test failures (#3, #4, #5); test:e2e silently runs nothing (#6); verify:secrets eventually green. |
 
-### Finding inventory (9 total)
+### Finding inventory (10 total)
 
 | # | Surface | Severity | One-line |
 |---|---------|----------|----------|
@@ -221,9 +233,10 @@ All 8 messaging connector test suites passed on `develop` HEAD.
 | 4 | unit test | medium | `standalone-eliza-package-contract.test.ts` — root tsconfig has `./eliza/` paths in packages mode |
 | 5 | unit test | medium | Same root cause as #4 — checked-in tsconfig diverges from packages-mode template |
 | 6 | e2e | **high** | `bun run test:e2e` runs zero tests but exits 0 (false-green CI gate) |
-| 7 | dev server | **high** | apps/app dev cannot boot on Windows — ERR_MODULE_NOT_FOUND for `rpc-mac.js` |
+| 7 | dev server | **high** | apps/app dev cannot boot in packages mode — `plugin-remote-manifest` workspace package never built |
 | 8 | audit | medium | `audit:cloud` script doesn't install Playwright browsers — first-time runs always fail |
 | 9 | cloud UI | medium | `landing` and `dashboard-billing-success` routes timeout under audit |
+| 10 | dev server (local mode) | **high** | apps/app dev fails in `eliza:local` mode — native plugin builds need `rollup` but bin shim isn't created for the npm-aliased `@rollup/wasm-node` package |
 
 ### Suggested triage order (severity × blast radius)
 
