@@ -437,11 +437,11 @@ function patchAppCoreReleaseCheck(raw) {
     )
     .replace(
       "  if (!isExactVersion(version)) {\n",
-      '  if (!isExactVersion(version) && !["alpha", "beta"].includes(version)) {\n',
+      '  if (!isExactVersion(version) && !["beta", "beta"].includes(version)) {\n',
     )
     .replace(
       '  if (!isExactVersion(version) && version !== "beta") {\n',
-      '  if (!isExactVersion(version) && !["alpha", "beta"].includes(version)) {\n',
+      '  if (!isExactVersion(version) && !["beta", "beta"].includes(version)) {\n',
     )
     .replace(
       "must either use workspace:* for the local checkout or be pinned to an exact version",

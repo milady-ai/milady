@@ -80,8 +80,8 @@ describe("disable local eliza workspace", () => {
     });
 
     expect(changed).toBe(true);
-    expect(pkg.overrides["@elizaos/shared"]).toBe("alpha");
-    expect(pkg.overrides["@elizaos/ui"]).toBe("alpha");
+    expect(pkg.overrides["@elizaos/shared"]).toBe("beta");
+    expect(pkg.overrides["@elizaos/ui"]).toBe("beta");
     expect(pkg.overrides["@elizaos/app-core"]).toBeUndefined();
   });
 });

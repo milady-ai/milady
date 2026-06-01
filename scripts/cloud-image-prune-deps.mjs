@@ -42,7 +42,7 @@ const ELIZAOS_PACKAGE_SPECIFIER =
   process.env.ELIZAOS_DIST_TAG ??
   process.env.MILADY_ELIZAOS_NPM_TAG ??
   process.env.ELIZAOS_NPM_TAG ??
-  "alpha";
+  "beta";
 const PUBLISHED_RELEASE_DEPS = new Map([
   ["@elizaos/plugin-elizacloud", ELIZAOS_PACKAGE_SPECIFIER],
 ]);

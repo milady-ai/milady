@@ -182,7 +182,7 @@ jobs:
                   echo "::error::Auto-bump for stable releases is not supported — supply an explicit inputs.tag." >&2
                   return 1
                   ;;
-                *)     ident="alpha" ;;
+                *)     ident="beta" ;;
               esac
             fi
             n="$(highest_in_series "$base" "$ident")"

@@ -266,7 +266,7 @@ jobs:
 
           case "$CHANNEL" in
             canary)
-              PRE_ID="alpha"
+              PRE_ID="beta"
               NPM_DIST_TAG="canary"
               ANDROID_TRACK="internal"
               APPLE_TRACK="testflight"

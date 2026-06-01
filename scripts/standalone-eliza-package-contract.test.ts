@@ -229,7 +229,7 @@ test("elizaOS package channel is configurable instead of alpha-only", () => {
   assert.match(disableScript, /selectRegistryPackageVersion/);
   assert.doesNotMatch(disableScript, /\.alpha/);
   assert.match(setupScript, /getElizaosPackageSpecifier/);
-  assert.doesNotMatch(setupScript, /FALLBACK_TAG = "alpha"/);
+  assert.doesNotMatch(setupScript, /FALLBACK_TAG = "beta"/);
   assert.match(fallbackDeps, /ELIZAOS_PACKAGE_SPECIFIER/);
   assert.doesNotMatch(fallbackDeps, /@alpha/);
   assert.notEqual(
