@@ -307,6 +307,7 @@
     "@elizaos/plugin-openai": "alpha",
     "@elizaos/plugin-sql": "alpha",
     "@elizaos/plugin-telegram": "alpha",
+    "@elizaos/agent": "alpha",
     "@elizaos/core": "alpha",
     "@elizaos/schemas": "alpha",
     "@elizaos/shared": "alpha",
