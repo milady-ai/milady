@@ -42,26 +42,18 @@ Branch: `qa/2am-2026-06-01` off `develop` at commit `765e547d4` ("chore: remove 
 | 1.4 `bun run test:e2e` | ⚠ **Finding #6** | <1s | Exit 0 but "No test files found, exiting with code 0" — false-green. |
 | 1.5 `bun run verify:secrets` | ✅ | ~10 min | Eventually completed exit 0. Slow (no output during scan) but clean. |
 
-### Finding #6 — `bun run test:e2e` finds no test files (false-green) — REVISED with deeper analysis
+### Finding #6 — `bun run test:e2e` finds no test files (false-green) — REVISED again after patch attempt
 
 - **Command:** `bun run test:e2e` → `bunx vitest run --config eliza/packages/app-core/vitest.e2e.config.ts --passWithNoTests --exclude ...`
 - **Behavior:** prints `No test files found, exiting with code 0` and reports success.
-- **Initial cause (surface):** the include pattern in [eliza/packages/app-core/vitest.e2e.config.ts](eliza/packages/app-core/vitest.e2e.config.ts) is `src/**/*.e2e.test.ts`, but no e2e tests live under `src/` — they live under `test/`.
-- **Deeper analysis (discovered while attempting the fix):**
-  1. The file [eliza/packages/app-core/vitest.e2e.config.ts](eliza/packages/app-core/vitest.e2e.config.ts) is **inside the gitignored `eliza/` tree** in this repo — so any fix made here is local-only and wouldn't propagate. The real fix must land in upstream `github.com/elizaOS/eliza`.
-  2. **All 4 e2e tests in `eliza/packages/app-core/test/app/`** are `.live.` or `.real.` variants. None are "plain" e2e tests. Expanding the include to `test/app/**` picks them up, but the package.json file-specific `--exclude` flags have partial-match behavior — some files get excluded, others (like `streaming-visible-text.live.e2e.test.ts`) slip through.
-  3. **Many plugin packages have plain `.e2e.test.ts` files** that are entirely outside this config's reach: e.g., `plugin-lifeops/test/booking-preferences.e2e.test.ts`, `plugin-lifeops/test/relationships.e2e.test.ts`, `plugin-computeruse/test/computeruse-cross-platform.e2e.test.ts`, `plugin-vision/test/vision-cross-platform.e2e.test.ts`. These never run via `bun run test:e2e`.
-  4. The naming convention documented in [eliza/packages/test/vitest/default.config.ts](eliza/packages/test/vitest/default.config.ts) header (`*.live.e2e.test.ts` for live, `*.real.e2e.test.ts` for "real infra") is **not strictly followed** by the package.json `test:e2e` command, which uses file-specific excludes rather than pattern-based ones.
-- **Effect:** `bun run test:e2e` runs **zero tests** and passes. CI gets no e2e coverage from this command. Plenty of plain e2e tests exist in plugin packages but are unreachable through this config.
-- **Severity:** **high.** Silent CI hole.
-- **Why I'm not landing a fix here:**
-  - Config lives upstream in elizaOS/eliza — Milady fork would diverge from main.
-  - Need maintainer judgment: should `test:e2e` cover plugin tests too? Which `.real.` files belong in the default suite vs. on-demand? Pattern-based exclude (e.g. `**/*.live.e2e.test.ts`) vs. file-specific?
-- **Recommended fix path** (for whoever owns the upstream config):
-  1. Decide naming convention enforcement: pattern-level exclude `**/*.live.e2e.test.{ts,tsx}` for non-default suite.
-  2. Expand `include` in `vitest.e2e.config.ts` to: `src/**/*.e2e.test.{ts,tsx}`, `test/app/**/*.e2e.test.{ts,tsx}`, AND somehow reach plugin e2e tests (workspace-aware glob, or per-plugin configs aggregated by a runner).
-  3. Audit which `.real.` files belong in default `test:e2e` (some need test-env setup; others need real APIs).
-  4. Optionally drop `--passWithNoTests` so a 0-file run fails loudly until the include is fixed.
+- **Investigation summary:**
+  1. The include pattern in [eliza/packages/app-core/vitest.e2e.config.ts](eliza/packages/app-core/vitest.e2e.config.ts) is `src/**/*.e2e.test.ts`, but no e2e tests live under `src/`.
+  2. The 4 e2e tests under `eliza/packages/app-core/test/app/` are all `.live.` or `.real.` variants. Even if the include is expanded, the package.json `--exclude` flags (3 of the 4 files) plus heavy-pattern excludes wipe them out — net result is still 0 tests run.
+  3. Many plain `.e2e.test.ts` files exist in plugin packages (e.g. `plugin-lifeops/test/booking-preferences.e2e.test.ts`, `plugin-computeruse/test/computeruse-cross-platform.e2e.test.ts`, `plugin-vision/test/vision-cross-platform.e2e.test.ts`, etc.), but they're outside the app-core config's reach.
+- **Patch attempt (reverted):** I wrote a `patchAppCoreE2eConfigInclude` function for [scripts/apply-eliza-ci-patches.mjs](scripts/apply-eliza-ci-patches.mjs) that expanded the include to `test/app/**` with absolute paths + Windows-safe forward-slash normalization, plus pattern-level exclude for `**/*.live.e2e.test.{ts,tsx}`. Confirmed via `bun run test:e2e`: result was still **0 tests run** (all test/app/ files filtered out by either explicit excludes or the new live-pattern). Reverted because adding ineffective patch noise to the install pipeline isn't worth it.
+- **Effect:** `bun run test:e2e` runs zero tests today and will continue to until someone (a) adds plain (non-heavy) `*.e2e.test.ts` files under `test/app/` or `src/`, OR (b) restructures the config to aggregate plugin-package e2e tests.
+- **Severity:** **high** but **not fixable purely via config changes** — needs new test files OR architectural decision to bring plugin e2e tests under the same runner.
+- **Recommended next step:** drop `--passWithNoTests` from the root [package.json](package.json) `test:e2e` script so a 0-file run fails loudly. This surfaces the gap on every PR until plain e2e tests are added.
 
 ### Finding #2 — apps/app typecheck: missing `@elizaos/plugin-task-coordinator/register`
 
