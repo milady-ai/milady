@@ -1,0 +1,23 @@
+{
+  "name": "@miladyai/app-nextgen",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Milady nextgen white-label renderer — own UI shell, talks to the eliza runtime over HTTP/SSE (see docs/milady-nextgen-architecture.md).",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react-swc": "^4.2.1",
+    "typescript": "^6.0.0",
+    "vite": "^6.4.2"
+  }
+}

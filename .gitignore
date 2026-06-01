@@ -313,3 +313,6 @@ package.json.pre-disable-backup
 
 # Generated analysis-tool scratch (understand-anything / knowledge-workflow output)
 .understand-anything/
+
+# synced at dev time by syncRendererPublicAssets — not source
+apps/app-nextgen/public/brand/
