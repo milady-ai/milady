@@ -33,4 +33,6 @@ Violations are reviewed by People Ops + Security Lead. Outcomes range from coach
 
 ## Open Items For Human Sign-Off
 
+Track conduct-reporting decisions in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this policy.
+
 - Confirm reporting channel (`conduct@elizaos.ai` or equivalent).

@@ -52,5 +52,7 @@ Govern the lifecycle of AI/ML models Eliza ships or hosts: training data provena
 
 ## Open Items For Human Sign-Off
 
+Track AI/ML governance decisions in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this policy.
+
 - Final consent UI copy.
 - Red-team vendor or internal owner.

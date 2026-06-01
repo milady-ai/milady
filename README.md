@@ -34,7 +34,7 @@ Milady ships with native **BNB Smart Chain (BSC)** support — your agent can tr
 
 The built-in `EXECUTE_TRADE` action lets your agent swap tokens on BSC via PancakeSwap. Supports buy/sell with configurable slippage.
 
-To enable BSC trading, add to your `.env` or `~/.milady/.env`:
+To enable BSC trading, add to your `.env` or `~/.local/state/milady/.env`:
 
 ```bash
 EVM_PRIVATE_KEY=0x...                    # wallet private key (hex, 0x-prefixed)
@@ -179,9 +179,16 @@ cd milady
 
 ./install                 # Unix / macOS — chmod +x install if needed
 # install.cmd on Windows
-# Both wrappers run `bun install` with MILADY_ELIZA_SOURCE=packages.
+# With no args, the wrapper opens a Space/Enter multi-select picker:
+# packages, local elizaOS source, or all developer paths.
 
-# Plain `bun install` also works once you've cloned.
+# Non-interactive examples:
+./install --profile packages
+./install --profile local
+./install --profile all
+
+# Plain `bun install` is package-mode only and runs a preflight doctor.
+# If Node/Python is outside the supported native install lane, run ./install.
 ```
 
 #### elizaOS source modes (eject / uneject)
@@ -505,7 +512,7 @@ MILADY_GATEWAY_PORT=19000 MILADY_PORT=3000 milady start
 
 ## Config
 
-Lives at `~/.milady/milady.json` (override with `MILADY_CONFIG_PATH` or `MILADY_STATE_DIR`)
+Lives at `~/.local/state/milady/milady.json` (override with `MILADY_CONFIG_PATH` or `MILADY_STATE_DIR`)
 
 ```json5
 {
@@ -519,7 +526,7 @@ Lives at `~/.milady/milady.json` (override with `MILADY_CONFIG_PATH` or `MILADY_
 }
 ```
 
-Or use `~/.milady/.env` for secrets.
+Or use `~/.local/state/milady/.env` for secrets.
 
 ---
 
@@ -561,7 +568,7 @@ ollama pull gemma3:4b
 
 > **⚠️ Known issue:** The `@elizaos/plugin-ollama` has an SDK version incompatibility with the current AI SDK. Use Ollama's **OpenAI-compatible endpoint** as a workaround:
 
-Edit `~/.milady/milady.json`:
+Edit `~/.local/state/milady/milady.json`:
 
 ```json5
 {
@@ -606,10 +613,14 @@ This routes through the OpenAI plugin instead of the broken Ollama plugin. Works
 ```bash
 git clone https://github.com/milady-ai/milady.git
 cd milady
-bun install          # runs postinstall hooks (patches deps, seeds skills, etc.)
+./install            # interactive source setup picker (Space selects, Enter installs)
 bun run build
 bun run milady start
 ```
+
+For scripted package-mode setup, run `./install --profile packages`. Plain
+`bun install` remains supported when you only need the default published-package
+dependency graph.
 
 > `bun run build` runs the production build via Node ([scripts/run-production-build.mjs](scripts/run-production-build.mjs) — forks between published `@elizaos/app-core` and the local `eliza/` checkout depending on `MILADY_ELIZA_SOURCE`).
 
@@ -635,7 +646,7 @@ bun run dev:desktop:watch  # + Vite dev server and MILADY_RENDERER_URL (HMR for 
 
 **Why a separate flow:** the desktop stack runs **multiple processes** (orchestrator, Vite and/or built assets, API, Electrobun). The orchestrator **pre-allocates** free **API** and **Vite** ports when defaults are taken so every child gets consistent env—**why:** misaligned ports cause blank UI or 502s on `/api`. See **[docs/apps/desktop-local-development.md](docs/apps/desktop-local-development.md)** (including [when default ports are busy](docs/apps/desktop-local-development.md#when-default-ports-are-busy)) for signals, shutdown when you quit the app, and env vars.
 
-**IDE / agent hooks** — Editors and agents do not see the native window or auto-discover localhost. **Why we added hooks:** with desktop dev running, the API exposes **`GET /api/dev/stack`** (JSON: ports, renderer URL, which features are on). **`bun run desktop:stack-status -- --json`** probes ports and merges stack + health + status. By default, **`.milady/desktop-dev-console.log`** mirrors prefixed child logs and **`GET /api/dev/cursor-screenshot`** (loopback) returns a full-screen PNG via OS capture — both are opt-out via env (see doc). Cursor uses **`.cursor/rules/milady-desktop-dev-observability.mdc`** plus that guide.
+**IDE / agent hooks** — Editors and agents do not see the native window or auto-discover localhost. **Why we added hooks:** with desktop dev running, the API exposes **`GET /api/dev/stack`** (JSON: ports, renderer URL, which features are on). **`bun run desktop:stack-status -- --json`** probes ports and merges stack + health + status. By default, **`~/.local/state/milady/desktop-dev-console.log`** mirrors prefixed child logs and **`GET /api/dev/cursor-screenshot`** (loopback) returns a full-screen PNG via OS capture — both are opt-out via env (see doc). Cursor uses **`.cursor/rules/milady-desktop-dev-observability.mdc`** plus that guide.
 
 ```bash
 bun run verify       # typecheck + lint + test (run before committing; `check` aliases this)

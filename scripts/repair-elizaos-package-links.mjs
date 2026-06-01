@@ -10,10 +10,20 @@ const repoRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
 );
-const nodeModulesDir = path.join(repoRoot, "node_modules");
-const bunStoreDir = path.join(nodeModulesDir, ".bun");
+const rootNodeModulesDir = path.join(repoRoot, "node_modules");
+const bunStoreDir = path.join(rootNodeModulesDir, ".bun");
 const localElizaRoot = path.join(repoRoot, "eliza");
 const scopes = ["@elizaos", "@clawville"];
+
+function pathExists(filePath) {
+  // nosemgrep: javascript_pathtraversal_rule-non-literal-fs-filename
+  return fs.existsSync(filePath);
+}
+
+function createSymlink(target, linkPath, linkType) {
+  // nosemgrep: javascript_pathtraversal_rule-non-literal-fs-filename
+  fs.symlinkSync(target, linkPath, linkType);
+}
 
 function isInsideLocalEliza(linkPath, linkTarget) {
   const resolved = path.resolve(path.dirname(linkPath), linkTarget);
@@ -39,7 +49,7 @@ function bunStorePrefix(scope, packageName) {
 }
 
 function findBunStorePackage(scope, packageName) {
-  if (!fs.existsSync(bunStoreDir)) return null;
+  if (!pathExists(bunStoreDir)) return null;
   const prefix = bunStorePrefix(scope, packageName);
   const candidates = fs
     .readdirSync(bunStoreDir, { withFileTypes: true })
@@ -47,15 +57,51 @@ function findBunStorePackage(scope, packageName) {
     .map((entry) =>
       path.join(bunStoreDir, entry.name, "node_modules", scope, packageName),
     )
-    .filter((candidate) => fs.existsSync(path.join(candidate, "package.json")))
+    .filter((candidate) => pathExists(path.join(candidate, "package.json")))
     .sort((left, right) => right.localeCompare(left));
 
   return candidates[0] ?? null;
 }
 
-function repairScope(scope) {
+function symlinkPackageDir(target, linkPath) {
+  const linkType = process.platform === "win32" ? "junction" : "dir";
+  const nextTarget =
+    linkType === "junction"
+      ? path.resolve(path.dirname(linkPath), target)
+      : target;
+  createSymlink(nextTarget, linkPath, linkType);
+}
+
+function isPathInside(parentDir, targetPath) {
+  const relative = path.relative(parentDir, targetPath);
+  return (
+    relative === "" ||
+    (relative && !relative.startsWith("..") && !path.isAbsolute(relative))
+  );
+}
+
+function collectNodeModulesDirs() {
+  const dirs = [rootNodeModulesDir];
+  const appsDir = path.join(repoRoot, "apps");
+  if (!pathExists(appsDir)) return dirs;
+
+  for (const entry of fs.readdirSync(appsDir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const appNodeModulesDir = path.join(appsDir, entry.name, "node_modules");
+    if (
+      isPathInside(appsDir, appNodeModulesDir) &&
+      pathExists(appNodeModulesDir)
+    ) {
+      dirs.push(appNodeModulesDir);
+    }
+  }
+
+  return dirs;
+}
+
+function repairScope(nodeModulesDir, scope) {
   const scopeDir = path.join(nodeModulesDir, scope);
-  if (!fs.existsSync(scopeDir)) return { relinked: 0, removed: 0 };
+  if (!pathExists(scopeDir)) return { relinked: 0, removed: 0 };
 
   let relinked = 0;
   let removed = 0;
@@ -76,7 +122,7 @@ function repairScope(scope) {
     fs.unlinkSync(linkPath);
     if (storePackage) {
       const nextTarget = path.relative(path.dirname(linkPath), storePackage);
-      fs.symlinkSync(nextTarget, linkPath);
+      symlinkPackageDir(nextTarget, linkPath);
       relinked += 1;
     } else {
       removed += 1;
@@ -87,7 +133,7 @@ function repairScope(scope) {
 }
 
 function readJsonIfExists(filePath) {
-  if (!fs.existsSync(filePath)) return null;
+  if (!pathExists(filePath)) return null;
   try {
     return JSON.parse(fs.readFileSync(filePath, "utf8"));
   } catch {
@@ -98,7 +144,7 @@ function readJsonIfExists(filePath) {
 function collectPackageManifestPaths() {
   const paths = [path.join(repoRoot, "package.json")];
   const appsDir = path.join(repoRoot, "apps");
-  if (!fs.existsSync(appsDir)) return paths;
+  if (!pathExists(appsDir)) return paths;
   for (const entry of fs.readdirSync(appsDir, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
     paths.push(path.join(appsDir, entry.name, "package.json"));
@@ -137,22 +183,22 @@ function collectDeclaredScopedPackages() {
 function ensureDeclaredPackageLinks() {
   let relinked = 0;
   for (const { scope, name } of collectDeclaredScopedPackages()) {
-    const scopeDir = path.join(nodeModulesDir, scope);
+    const scopeDir = path.join(rootNodeModulesDir, scope);
     const linkPath = path.join(scopeDir, name);
-    if (fs.existsSync(linkPath)) continue;
+    if (pathExists(linkPath)) continue;
 
     const storePackage = findBunStorePackage(scope, name);
     if (!storePackage) continue;
 
     fs.mkdirSync(scopeDir, { recursive: true });
     const nextTarget = path.relative(path.dirname(linkPath), storePackage);
-    fs.symlinkSync(nextTarget, linkPath);
+    symlinkPackageDir(nextTarget, linkPath);
     relinked += 1;
   }
   return relinked;
 }
 
-if (!fs.existsSync(nodeModulesDir)) {
+if (!pathExists(rootNodeModulesDir)) {
   console.warn(`${LOG_PREFIX} node_modules is not installed; skipping.`);
   process.exit(0);
 }
@@ -164,10 +210,12 @@ if (!isLocalElizaDisabled()) {
 
 let relinked = 0;
 let removed = 0;
-for (const scope of scopes) {
-  const result = repairScope(scope);
-  relinked += result.relinked;
-  removed += result.removed;
+for (const nodeModulesDir of collectNodeModulesDirs()) {
+  for (const scope of scopes) {
+    const result = repairScope(nodeModulesDir, scope);
+    relinked += result.relinked;
+    removed += result.removed;
+  }
 }
 relinked += ensureDeclaredPackageLinks();
 

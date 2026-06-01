@@ -1,0 +1,1 @@
+Read AGENTS.md and rules/. Electrobun/Bun/TypeScript only. Inspect before edit. Prefer typed RPC, sandboxed webviews, Bun tests, Bun.secrets, bun:sqlite, Electrobun updater/signing automation. Do not invent Apple-only APIs in this port.

@@ -82,10 +82,18 @@ bun run setup:upstreams    # initialize repo-local ./eliza and link local @eliza
 Desktop dev observability (Codex cannot see the native window):
 
 - `GET /api/dev/stack` (or `bun run desktop:stack-status -- --json`) — running window/process state.
-- `GET /api/dev/console-log` — loopback tail of `.milady/desktop-dev-console.log` (default-on aggregated log).
+- `GET /api/dev/console-log` — loopback tail of `~/.local/state/milady/desktop-dev-console.log` (default-on aggregated log).
 - `GET /api/dev/cursor-screenshot` — loopback full-screen OS capture (default-on).
 
 See `eliza/docs/apps/desktop-local-development.md`.
+
+## Electrobun agentic desktop rules pack
+
+The Electrobun Agentic Desktop 2026 rules pack is applied locally for desktop-shell work. Root project guidance remains authoritative; use the pack as an additional checklist when touching `eliza/packages/app-core/platforms/electrobun`, `apps/app`, desktop RPC, webviews, tray/menu/deep-link surfaces, updater/release code, or local model/tool orchestration.
+
+Read `rules/`, `checklists/`, `hooks/README.md`, `commands/README.md`, `docs/research-brief-2026.md`, and `docs/porting-map-from-apple-swift.md` before implementing Electrobun-specific changes. The original source bundle is preserved under `docs/agent-packs/electrobun-agentic-desktop-2026/`.
+
+Do not activate the archived workflow examples under `docs/agent-packs/electrobun-agentic-desktop-2026/.github/workflows/` without explicit approval for CI/CD changes.
 
 ## Build & test
 
@@ -102,7 +110,7 @@ bun run db:check    # database security + readonly tests
 First-party packages, apps, and orchestrator scripts live under the `eliza/` submodule. The top-level repo holds Milady-specific glue (`apps/app/`, `packages/{vault,confidant}/`, top-level `scripts/`).
 
 ```
-eliza/                              Submodule (milady-ai/eliza) — source of truth for runtime
+eliza/                              Local elizaOS/eliza checkout — source of truth for runtime
   packages/
     app-core/                       Main runtime package
       src/
@@ -197,11 +205,11 @@ When Eliza Cloud is enabled or requested, prefer it as the managed backend (app 
 - All `@elizaos/*` packages use the `alpha` dist-tag. `bun run setup:upstreams` links repo-local `./eliza` and `./plugins` packages so changes are picked up immediately. `MILADY_SKIP_LOCAL_UPSTREAMS=1` falls back to npm.
 - `@elizaos/plugin-agent-orchestrator` resolves from `eliza/plugins/plugin-agent-orchestrator` via `workspace:*`. Updating the submodule updates the orchestrator.
 - All official elizaOS plugin repos live under https://github.com/elizaOS-plugins. For plugin work, prefer adding the plugin repo as a git submodule under `eliza/plugins/` (tracked in `eliza/.gitmodules`) and depending via `workspace:*`. Publish to npm when ready.
-- The eliza submodule is hosted at **milady-ai/eliza**, not the personal `Dexploarer` fork. Pushes and PRs always go to `milady-ai/eliza`.
+- The eliza source checkout is hosted at **elizaOS/eliza**. Pushes and PRs always go to `elizaOS/eliza`.
 
 ## Environment variables (commonly touched)
 
-- `MILADY_STATE_DIR` / `ELIZA_STATE_DIR` — per-user state root (default `~/.milady`).
+- `MILADY_STATE_DIR` / `ELIZA_STATE_DIR` — per-user state root (default `~/.local/state/milady`).
 - `MILADY_CONFIG_PATH` / `ELIZA_CONFIG_PATH` — config file resolution.
 - `ELIZA_DISABLE_TRAJECTORY_LOGGING=1` (or `NODE_ENV=test`) — opt out of trajectory persistence.
 - `MILADY_DISABLE_AUTO_BOOTSTRAP=1` — skip the runtime native-optimization bootstrap.
@@ -222,7 +230,7 @@ Port env vars (never hardcoded — the dev orchestrator auto-shifts to the next 
 - `USE_SKILL` is the only canonical entry point for invoking an enabled skill. Legacy `RUN_SKILL_SCRIPT` / `GET_SKILL_GUIDANCE` are removed; `RUN_SKILL` / `INVOKE_SKILL` remain as similes.
 - The `enabled_skills` provider runs at position `-10` and surfaces eligible skills to the planner each turn.
 - Trajectory persistence is on by default. Every turn lands in the `trajectories` table unless `ELIZA_DISABLE_TRAJECTORY_LOGGING=1`.
-- Native optimization (`--backend native`) is the default training backend (MIPRO / GEPA / bootstrap-fewshot). Outputs land under `~/.milady/optimized-prompts/<task>/` and `OptimizedPromptService` auto-loads at boot.
+- Native optimization (`--backend native`) is the default training backend (MIPRO / GEPA / bootstrap-fewshot). Outputs land under `~/.local/state/milady/optimized-prompts/<task>/` and `OptimizedPromptService` auto-loads at boot.
 - Auto-training defaults: 100 trajectories per task, 12h cooldown. Adjust via `/api/training/auto/config` or Settings → Auto-Training.
 - The privacy filter at `eliza/apps/app-training/src/core/privacy-filter.ts` is mandatory on every write path that touches real user trajectories — both the nightly export cron and the on-demand training orchestrator run it before any JSONL is written.
 

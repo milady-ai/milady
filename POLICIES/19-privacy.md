@@ -42,6 +42,8 @@ Eliza Cloud is not directed at users under 16. Accounts known to be under that a
 
 ## Open Items For Human Sign-Off
 
+Track privacy-owner and public-URL decisions in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this policy.
+
 - Final privacy notice URL.
 - Named DPO (or designate Security Lead).
 - Decide whether to include Privacy TSC in SOC2 scope or rely on separate posture.

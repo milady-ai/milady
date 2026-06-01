@@ -122,7 +122,7 @@ in parallel where dependencies permit.
 - `eliza/plugins/plugin-agent-orchestrator/src/services/spawn-trajectory.ts`
 
 **Approach.**
-1. On `task_complete` event, locate `~/.milady/workspaces/<sessionId>/.claude/session-logs/`.
+1. On `task_complete` event, locate `~/.local/state/milady/workspaces/<sessionId>/.claude/session-logs/`.
 2. Parse each file (JSONL of message + tool blocks).
 3. Normalize to the parent's trajectory step shape: per tool call → step,
    per reasoning block → reasoning sub-step.

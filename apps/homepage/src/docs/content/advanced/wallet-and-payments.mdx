@@ -96,7 +96,7 @@ Turn on approval-required mode for the first week. It's a pain, but it means you
 
 ## Things that can go wrong
 
-- **Your private key leaks.** If your machine is compromised or your `~/.milady/` directory gets exfiltrated, anyone with the key can drain the wallet. This is why you use a fresh wallet with minimal funds.
+- **Your private key leaks.** If your machine is compromised or your `~/.local/state/milady/` directory gets exfiltrated, anyone with the key can drain the wallet. This is why you use a fresh wallet with minimal funds.
 - **A prompt injection tricks your agent into sending funds.** If your agent is reading messages from a connector (Discord, Telegram) and someone sends a cleverly-crafted message, it's theoretically possible to get the agent to take an action you didn't intend. Vincent limits the blast radius but doesn't eliminate the risk.
 - **Gas spikes strand a transaction.** Your agent submits a tx with a gas price that's too low for current network conditions, the tx sits in the mempool forever. Steward handles most of this, but not all of it.
 - **A contract call behaves unexpectedly.** Smart contracts have bugs. If your agent interacts with a buggy contract, funds can be lost. This is not specific to Milady — it's a general truth of on-chain anything.

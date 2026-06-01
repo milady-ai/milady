@@ -269,6 +269,7 @@ test("eliza CI patches align release source helpers", () => {
   );
   assert.match(patchScript, /COPY patches \.\/patches/);
   assert.match(patchScript, /COPY cloud-sdk \.\/eliza\/cloud\/packages\/sdk/);
+  assert.match(patchScript, /ensure-whisper-gguf\.sh base\.en/);
   assert.match(patchScript, /build-patched-electrobun-cli\.mjs/);
   assert.match(patchScript, /require\.resolve\("rcedit\/package\.json"\)/);
   assert.match(patchScript, /replace\(\/\\r\\n\/g, "\\n"\)/);
@@ -392,6 +393,10 @@ test("npm release builds generate gitignored eliza i18n data before bundling", (
     releaseContractSuite,
     /scripts\/run-tsdown\.mjs[\s\S]*?MILADY_ELIZA_SOURCE:\s*"local"/,
   );
+  assert.match(
+    releaseContractSuite,
+    /run\("node", \["scripts\/generate-static-asset-manifest\.mjs"\]\);/,
+  );
 });
 
 test("release workflows use the checked-in tsdown runner", () => {
@@ -433,10 +438,14 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
     electrobun,
     /name: Probe Electrobun bun entry build[\s\S]*?node "\$GITHUB_WORKSPACE\/scripts\/copy-runtime-node-modules\.ts" --link-only[\s\S]*?bun build src\/index\.ts --target=bun/,
   );
-  assert.match(electrobun, /--external "\*\.node"/);
-  assert.match(electrobun, /--external @node-llama-cpp\/mac-arm64-metal/);
-  assert.match(electrobun, /--external @node-llama-cpp\/linux-x64/);
-  assert.match(electrobun, /--external @node-llama-cpp\/win-x64/);
+  // Match upstream eliza's release-electrobun.yml: the probe externalizes
+  // EVERY npm package via --packages=external instead of hand-rolling
+  // per-arch @node-llama-cpp and *.node exclusions. This subsumes the prior
+  // narrower assertions (native modules, llama variants) and additionally
+  // covers react/react-dom, which the previous flag set silently bundled
+  // and which broke the probe under eliza f4991bc6+ via the
+  // jsx:"react-jsx" tsconfig + ambient-modules.d.ts `import type from "react"`.
+  assert.match(electrobun, /--packages=external/);
   assert.match(electrobun, /-name "\*\.app\.tar\.gz"/);
   assert.match(electrobun, /-name "\*\.tar\.zst"/);
   assert.match(electrobun, /-name "eliza-\*\.exe\.zip"/);
@@ -449,10 +458,12 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
     /find release-files -mindepth 1 -maxdepth 1 -type d -exec rm -rf \{\} \+/,
   );
   assert.match(electrobun, /No public release files collected/);
+  assert.match(electrobun, /sums_file="\$\(mktemp\)"/);
   assert.match(
     electrobun,
-    /find \. -maxdepth 1 -type f ! -name SHA256SUMS\.txt -print0 \| sort -z \| xargs -0 sha256sum > SHA256SUMS\.txt/,
+    /find \. -maxdepth 1 -type f ! -name SHA256SUMS\.txt -print0 \| sort -z \| xargs -0 sha256sum > "\$sums_file"/,
   );
+  assert.match(electrobun, /mv "\$sums_file" SHA256SUMS\.txt/);
   assert.match(copyRuntimeWrapper, /elizaElectrobunNodeModules/);
   assert.match(
     copyRuntimeWrapper,
@@ -694,6 +705,15 @@ test("Electrobun macOS release keeps one command path for both CPU architectures
     electrobun,
     /node eliza\/packages\/app-core\/scripts\/desktop-build\.mjs stage --variant=base --build-whisper/,
   );
+  assert.match(electrobun, /name: Prepare Whisper model artifact/);
+  assert.match(
+    electrobun,
+    /bash eliza\/packages\/app-core\/platforms\/electrobun\/scripts\/ensure-whisper-gguf\.sh base\.en/,
+  );
+  assert.match(electrobun, /name: Upload Whisper model artifact/);
+  assert.match(electrobun, /name: whisper-model-base-en/);
+  assert.match(electrobun, /name: Download Whisper model artifact/);
+  assert.match(electrobun, /name: Seed Whisper model cache/);
   assert.match(
     electrobun,
     /node eliza\/packages\/app-core\/scripts\/desktop-build\.mjs package --env=\$\{\{ needs\.prepare\.outputs\.env \}\}/,

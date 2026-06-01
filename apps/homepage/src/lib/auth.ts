@@ -71,22 +71,6 @@ export interface CloudAgent {
   updatedAt?: string;
 }
 
-export async function fetchWithAuth(
-  url: string,
-  opts: RequestInit = {},
-): Promise<Response> {
-  const token = getToken();
-  const headers = new Headers(opts.headers);
-  if (token) {
-    headers.set("X-Api-Key", token);
-  }
-  const res = await fetch(url, { ...opts, headers });
-  if (res.status === 401) {
-    clearToken();
-  }
-  return res;
-}
-
 /**
  * Extracts the API token from the URL (e.g. ?token=...) and stores it,
  * then strips it from the URL to prevent leaking in screenshots/sharing.

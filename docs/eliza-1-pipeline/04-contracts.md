@@ -448,7 +448,7 @@ have `childSteps[]` populated with normalized records:
 - Sub-agent capture runs through the privacy filter (C9, W1-T11) before
   merging into the parent trajectory. PARALLAX_SESSION_ID, workspace paths,
   and parent step IDs are stripped at this seam (resolves A7).
-- Raw session logs are kept in `~/.milady/workspaces/<sessionId>/.claude/...`
+- Raw session logs are kept in `~/.local/state/milady/workspaces/<sessionId>/.claude/...`
   (or equivalent) — same lifetime as the workspace itself, on user's machine.
 - Only the normalized + filtered `childSteps[]` lands in the trajectory DB
   and in any downstream training format.

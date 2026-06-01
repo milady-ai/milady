@@ -43,5 +43,7 @@ All human and machine identities that access Eliza-controlled systems: employees
 
 ## Open Items For Human Sign-Off
 
+Track identity and access decisions in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this policy.
+
 - Confirm IdP (Google vs Okta).
 - Name the two roles authorized to grant admin tier.

@@ -1,11 +1,12 @@
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
-import { Dashboard, Homepage } from "./App";
 import { DocsLanding } from "./components/docs/DocsLanding";
 import { DocsLayout } from "./components/docs/DocsLayout";
 import { DocsPage } from "./components/docs/DocsPage";
 import { TierLanding } from "./components/docs/TierLanding";
 import { GuidesLanding } from "./components/guides/GuidesLanding";
 import { Nav } from "./components/Nav";
+import { Dashboard } from "./pages/Dashboard";
+import { Homepage } from "./pages/Homepage";
 
 export function AppRoutes() {
   return (

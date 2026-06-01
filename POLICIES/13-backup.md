@@ -34,5 +34,7 @@ Eliza Cloud Postgres (or equivalent) datastore, object storage buckets containin
 
 ## Open Items For Human Sign-Off
 
+Track backup and datastore decisions in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this policy.
+
 - Confirm primary + backup region.
 - Confirm Postgres provider (managed RDS / Cloud SQL / Neon / self-host).

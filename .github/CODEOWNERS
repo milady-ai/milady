@@ -28,6 +28,11 @@
 /scripts/security/                      @elizaos/security-team
 /git-hooks/                             @elizaos/security-team
 
+# Cloud and secret-handling surfaces.
+/cloud-api/                             @elizaos/backend-leads @elizaos/security-team
+/packages/vault/                        @elizaos/security-team
+/vault/                                 @elizaos/security-team
+
 # Dependency patches — runtime behavior modifications of third-party code.
 /patches/                               @elizaos/backend-leads @elizaos/security-team
 

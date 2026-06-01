@@ -5,8 +5,8 @@ name: coverage-gate
 # var COVERAGE_GATE_ENFORCE=1 in this workflow once the baseline is stable.
 #
 # TODO(security): promote to required once the team agrees on a per-package
-# threshold floor. See docs/security/ai-pr-review-policy.md for the broader
-# review checklist.
+# threshold floor. Track the decision in docs/security/SOC2-OPERATOR-CHECKLIST.md;
+# see docs/security/ai-pr-review-policy.md for the broader review checklist.
 
 on:
   pull_request:
@@ -21,8 +21,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        # actions/checkout (SHA-pinned)
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        # actions/checkout pinned by SHA
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 0
 

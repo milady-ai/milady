@@ -146,7 +146,6 @@
     "apps/app": {
       "entry": [
         "src/main.tsx",
-        "src/stubs/*.ts",
         "vite.config.ts",
         "vitest.config.ts",
         "index.html",

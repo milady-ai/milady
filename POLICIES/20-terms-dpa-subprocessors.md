@@ -49,5 +49,7 @@ Maintained authoritatively at the public subprocessor URL. Each row links to the
 
 ## Open Items For Human Sign-Off
 
+Track vendor and public-URL decisions in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this policy.
+
 - Confirm hosting provider, payment processor, and observability-vendor identities.
 - Finalize subprocessor URL.

@@ -61,5 +61,7 @@ Define approved algorithms, key management, and rotation cadence across the Eliz
 
 ## Open Items For Human Sign-Off
 
+Track Steward/KMS decisions in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this policy.
+
 - Confirm Steward deployment topology in production.
 - Decide whether to expose customer-managed-key (CMK) for enterprise tier.

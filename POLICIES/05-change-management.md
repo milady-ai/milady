@@ -37,5 +37,7 @@ All production code (Cloud, agent runtime, mobile/desktop binaries shipped to cu
 
 ## Open Items For Human Sign-Off
 
+Track decisions in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this policy.
+
 - Confirm CODEOWNERS coverage.
 - Define "customer-impacting" change list with the Security Lead.

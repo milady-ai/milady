@@ -2,18 +2,8 @@ import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { colorizeDevSettingsStartupBanner } from "@elizaos/shared/dev-settings-banner-style";
-import { prependDevSubsystemFigletHeading } from "@elizaos/shared/dev-settings-figlet-heading";
-import {
-  type DevSettingsRow,
-  formatDevSettingsTable,
-} from "@elizaos/shared/dev-settings-table";
-import {
-  resolveDesktopApiPort,
-  resolveDesktopApiPortPreference,
-  resolveDesktopUiPort,
-  resolveDesktopUiPortPreference,
-} from "@elizaos/shared/runtime-env";
+// Type-only import is erased by esbuild's config bundler (no runtime resolution).
+import type { DevSettingsRow } from "@elizaos/shared/dev-settings-table";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react-swc";
 import {
@@ -29,6 +19,31 @@ import appConfig from "./app.config";
 import { resolveViteDevServerRuntime } from "./vite-dev-origin.ts";
 
 const _require = createRequire(import.meta.url);
+
+// Load the shared dev-settings + runtime-env helpers through the package `exports`
+// map (compiled dist JS) instead of reaching into the eliza/ clone source. Resolving
+// with `_require.resolve(...)` honors package exports and ignores tsconfig `paths`, so
+// it lands on dist/*.js in BOTH packages mode (CI; eliza/ absent) and local mode. This
+// avoids the relative-into-eliza break (CI Build) and the `@elizaos/shared/<subpath>`
+// -> src/*.ts self-import break that reverted commit b3060bf16; the computed specifier
+// also stops esbuild from statically rewriting it to source during config bundling.
+const { colorizeDevSettingsStartupBanner } = (await import(
+  _require.resolve("@elizaos/shared/dev-settings-banner-style")
+)) as typeof import("@elizaos/shared/dev-settings-banner-style");
+const { prependDevSubsystemFigletHeading } = (await import(
+  _require.resolve("@elizaos/shared/dev-settings-figlet-heading")
+)) as typeof import("@elizaos/shared/dev-settings-figlet-heading");
+const { formatDevSettingsTable } = (await import(
+  _require.resolve("@elizaos/shared/dev-settings-table")
+)) as typeof import("@elizaos/shared/dev-settings-table");
+const {
+  resolveDesktopApiPort,
+  resolveDesktopApiPortPreference,
+  resolveDesktopUiPort,
+  resolveDesktopUiPortPreference,
+} = (await import(
+  _require.resolve("@elizaos/shared/runtime-env")
+)) as typeof import("@elizaos/shared/runtime-env");
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const miladyRoot = path.resolve(here, "../..");
@@ -112,6 +127,9 @@ const appCoreNativePluginEntrypoints = (() => {
 })();
 const uiPkgRoot = hasLocalElizaWorkspace
   ? path.join(localElizaRoot, "packages/ui")
+  : null;
+const vaultPkgRoot = hasLocalElizaWorkspace
+  ? path.join(localElizaRoot, "packages/vault")
   : null;
 // Other Capacitor packages imported by eliza/packages/app-core sources.
 // Resolved here (apps/app scope) so Rollup can find them when bundling
@@ -242,12 +260,21 @@ function resolveLocalUiAliases(): Alias[] {
       replacement: path.join(uiPkgRoot, "src/index.ts"),
     },
     {
+      find: /^@elizaos\/ui\/browser$/,
+      replacement: path.join(uiPkgRoot, "src/browser.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/browser\.js$/,
+      replacement: path.join(uiPkgRoot, "src/browser.ts"),
+    },
+    {
       find: /^@elizaos\/ui\/api$/,
       replacement: path.join(uiPkgRoot, "src/api/index.ts"),
     },
     {
-      find: /^@elizaos\/ui\/browser$/,
-      replacement: path.join(uiPkgRoot, "src/browser.ts"),
+      find: /^@elizaos\/ui\/api\/(.+)$/,
+      replacement: `${uiPkgRoot}/src/api/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
     },
     {
       find: /^@elizaos\/ui\/components\/ui\/(.*)$/,
@@ -289,13 +316,47 @@ function resolveLocalUiAliases(): Alias[] {
       replacement: `${uiPkgRoot}/src/layouts/$1/$2.tsx`,
     },
     {
+      find: /^@elizaos\/ui\/platform$/,
+      replacement: path.join(uiPkgRoot, "src/platform/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/platform\/(.+)$/,
+      replacement: `${uiPkgRoot}/src/platform/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/state$/,
+      replacement: path.join(uiPkgRoot, "src/state/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/state\/(.+)$/,
+      replacement: `${uiPkgRoot}/src/state/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
       find: /^@elizaos\/ui\/lib\/(.*)$/,
       replacement: `${uiPkgRoot}/src/lib/$1.ts`,
     },
     {
       find: /^@elizaos\/ui\/(.+)$/,
-      replacement: `${uiPkgRoot}/src/$1`,
+      replacement: `${uiPkgRoot}/src/$1.ts`,
       customResolver: resolveExistingUiSourceModule,
+    },
+  ];
+}
+
+function resolveLocalVaultAliases(): Alias[] {
+  if (
+    !vaultPkgRoot ||
+    !fs.existsSync(path.join(vaultPkgRoot, "package.json"))
+  ) {
+    return [];
+  }
+
+  return [
+    {
+      find: /^@elizaos\/vault$/,
+      replacement: path.join(vaultPkgRoot, "src/index.ts"),
     },
   ];
 }
@@ -413,18 +474,51 @@ function resolveLocalSharedAliases(): Alias[] {
     exports?: Record<string, unknown>;
   };
   const aliases: Alias[] = [];
+
+  function resolveSharedExportTarget(value: unknown): string | null {
+    if (typeof value === "string") return value;
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      return null;
+    }
+    const record = value as Record<string, unknown>;
+    for (const condition of ["source", "import", "default", "types"]) {
+      const target = record[condition];
+      if (typeof target === "string") return target;
+    }
+    return null;
+  }
+
   for (const [key, value] of Object.entries(sharedPkg.exports || {})) {
-    if (typeof value !== "string") continue;
+    if (key.includes("*")) continue;
+    const exportTarget = resolveSharedExportTarget(value);
+    if (!exportTarget) continue;
     const aliasKey =
       key === "."
         ? "@elizaos/shared"
         : `@elizaos/shared/${key.replace(/^\.\//, "")}`;
     aliases.push({
       find: new RegExp(`^${escapeRegExp(aliasKey)}$`),
-      replacement: path.resolve(sharedPkgDir, value),
+      replacement: path.resolve(sharedPkgDir, exportTarget),
     });
   }
   return aliases;
+}
+
+function resolveLocalSharedCompatAliases(): Alias[] {
+  if (!hasLocalElizaWorkspace) return [];
+
+  const characterPresetsEntry = path.join(
+    localElizaRoot,
+    "packages/shared/src/character-presets.ts",
+  );
+  if (!fs.existsSync(characterPresetsEntry)) return [];
+
+  return [
+    {
+      find: /^@elizaos\/shared\/onboarding-presets$/,
+      replacement: characterPresetsEntry,
+    },
+  ];
 }
 
 function resolveBuiltLocalSharedAliases(): Alias[] {
@@ -441,7 +535,7 @@ function resolveBuiltLocalSharedAliases(): Alias[] {
     },
     {
       find: /^@elizaos\/shared\/(.+)$/,
-      replacement: `${sharedDistDir}/$1`,
+      replacement: `${sharedDistDir}/$1.js`,
     },
   ];
 }
@@ -479,7 +573,7 @@ function resolveLocalAppCoreAliases(): Alias[] {
   }
 
   const appCorePkgDir = path.dirname(appCorePkgPath);
-  const appCoreBrowserEntry = path.join(appCorePkgDir, "src/browser.ts");
+  const appCoreBrowserEntry = path.join(here, "src/app-core-browser-compat.js");
   const appCorePkg = JSON.parse(fs.readFileSync(appCorePkgPath, "utf8")) as {
     exports?: Record<string, unknown>;
   };
@@ -878,9 +972,30 @@ function elizaCoreAlphaPrerelease(dir: string): number {
 function resolveExistingUiSourceModule(id: string) {
   const candidates = [id];
   if (id.endsWith(".tsx")) {
-    candidates.push(`${id.slice(0, -4)}.ts`);
+    const base = id.slice(0, -4);
+    candidates.push(
+      `${base}.ts`,
+      base,
+      path.join(base, "index.ts"),
+      path.join(base, "index.tsx"),
+    );
   } else if (id.endsWith(".ts")) {
-    candidates.push(`${id.slice(0, -3)}.tsx`);
+    const base = id.slice(0, -3);
+    candidates.push(
+      `${base}.tsx`,
+      base,
+      path.join(base, "index.ts"),
+      path.join(base, "index.tsx"),
+    );
+  } else if (id.endsWith(".js")) {
+    const base = id.slice(0, -3);
+    candidates.push(
+      `${base}.ts`,
+      `${base}.tsx`,
+      base,
+      path.join(base, "index.ts"),
+      path.join(base, "index.tsx"),
+    );
   } else if (!path.extname(id)) {
     candidates.push(
       `${id}.ts`,
@@ -2020,6 +2135,15 @@ function generateEsbuildStub(): string {
   return generateNamedExportStub(ESBUILD_STUB_NAMES);
 }
 
+function generateDrizzleOrmStub(): string {
+  return [
+    "const noop = () => {};",
+    "const stubProxy = new Proxy(noop, { get: () => stubProxy, apply: () => stubProxy });",
+    "export default stubProxy;",
+    "export { stubProxy as boolean, stubProxy as integer, stubProxy as bigint, stubProxy as text, stubProxy as varchar, stubProxy as char, stubProxy as serial, stubProxy as bigserial, stubProxy as smallint, stubProxy as smallserial, stubProxy as decimal, stubProxy as numeric, stubProxy as real, stubProxy as doublePrecision, stubProxy as date, stubProxy as time, stubProxy as timestamp, stubProxy as interval, stubProxy as uuid, stubProxy as json, stubProxy as jsonb, stubProxy as pgTable, stubProxy as pgEnum, stubProxy as pgSchema, stubProxy as pgView, stubProxy as pgMaterializedView, stubProxy as pgSequence, stubProxy as foreignKey, stubProxy as primaryKey, stubProxy as uniqueIndex, stubProxy as unique, stubProxy as index, stubProxy as check, stubProxy as customType, stubProxy as relations, stubProxy as one, stubProxy as many, stubProxy as eq, stubProxy as ne, stubProxy as gt, stubProxy as gte, stubProxy as lt, stubProxy as lte, stubProxy as and, stubProxy as or, stubProxy as not, stubProxy as inArray, stubProxy as notInArray, stubProxy as isNull, stubProxy as isNotNull, stubProxy as like, stubProxy as ilike, stubProxy as notLike, stubProxy as between, stubProxy as exists, stubProxy as notExists, stubProxy as sql, stubProxy as desc, stubProxy as asc, stubProxy as count, stubProxy as sum, stubProxy as avg, stubProxy as min, stubProxy as max, stubProxy as drizzle, stubProxy as getTableConfig, stubProxy as getTableName, stubProxy as is, stubProxy as alias, stubProxy as except, stubProxy as union, stubProxy as unionAll, stubProxy as intersect, stubProxy as raw, stubProxy as placeholder, stubProxy as param, stubProxy as Column, stubProxy as Table, stubProxy as TableAliasProxy };",
+  ].join("\n");
+}
+
 const NATIVE_MODULE_STUB_GENERATORS = new Map<
   string,
   (strippedId: string) => string
@@ -2034,6 +2158,7 @@ const NATIVE_MODULE_STUB_GENERATORS = new Map<
   ["@elizaos/plugin-elizacloud", generatePluginElizacloudStub],
   ["@elizaos/plugin-local-inference", generatePluginLocalInferenceStub],
   ["esbuild", generateEsbuildStub],
+  ["drizzle-orm", generateDrizzleOrmStub],
   // @node-rs/argon2's server-side Rust binding is referenced by
   // app-core's password-hashing helpers. Renderer never executes them
   // (auth happens in the API child); stub the named exports.
@@ -2156,6 +2281,7 @@ function nativeModuleStubPlugin(): Plugin {
     // happens server-side in the API child anyway.
     "@node-rs/argon2-wasm32-wasi",
     "@node-rs/argon2",
+    "drizzle-orm",
     // esbuild is a build-time dep that drizzle-kit and friends pull in
     // transitively. Its `lib/main.js` does `process.versions.node.split(".")`
     // at module init, which throws in the renderer (process.versions.node
@@ -2683,6 +2809,8 @@ export default defineConfig({
       // Local source aliases are only installed when the eliza checkout exists.
       // Published-only builds should resolve normal @elizaos package exports.
       ...resolveLocalUiAliases(),
+      ...resolveLocalVaultAliases(),
+      ...resolveLocalSharedCompatAliases(),
       ...resolveLocalSharedAliases(),
       ...resolveLocalAppCoreAliases(),
     ],
@@ -2880,6 +3008,27 @@ export default defineConfig({
       },
       output: {
         manualChunks: resolveManualChunk,
+      },
+      // Suppress known-benign build noise so the log stays signal-rich.
+      // Anything not matched here still surfaces via the default handler.
+      onwarn(warning, defaultHandler) {
+        const message = warning.message ?? "";
+        const where = warning.id ?? warning.loc?.file ?? message;
+        // @electric-sql/pglite ships Emscripten/WASM glue that uses eval().
+        if (warning.code === "EVAL" && /pglite/i.test(where)) return;
+        // Modules imported both dynamically and statically: the dynamic imports
+        // are intentional (the @elizaos/ui DynamicViewLoader string-keyed module
+        // registry and plugin-browser lazy-loading), and the modules stay
+        // statically reachable in the main chunk. Informational — not a defect;
+        // converting either side would break the registry/lazy load.
+        if (
+          warning.plugin === "vite:reporter" &&
+          /dynamically imported by[\s\S]*but also statically imported by/.test(
+            message,
+          )
+        )
+          return;
+        defaultHandler(warning);
       },
     },
     commonjsOptions: {

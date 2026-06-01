@@ -72,8 +72,10 @@ Advisories on this repository.
 
 ## Human-in-loop checklist (must be completed before SOC2 audit)
 
-The following items are placeholders in this document and require an operator
-to provision real values:
+The canonical fill-in sheet is
+[`docs/security/SOC2-OPERATOR-CHECKLIST.md`](docs/security/SOC2-OPERATOR-CHECKLIST.md).
+Complete the people/contact and public-security rows there, then update this
+document with the final values:
 
 - [ ] Generate organization GPG key for `security@elizalabs.ai`, publish public
       key at `https://elizalabs.ai/.well-known/pgp-key.asc`, update fingerprint

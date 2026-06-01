@@ -1,0 +1,24 @@
+---
+description: Electrobun Agentic Desktop 2026 rules for Bun, TypeScript, typed RPC, sandboxing, updates, and release automation.
+globs:
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.html"
+  - "**/*.css"
+  - "package.json"
+  - "electrobun.config.ts"
+  - "AGENTS.md"
+alwaysApply: true
+---
+
+# Electrobun Agentic Desktop 2026
+
+- Inspect `package.json`, `electrobun.config.ts`, `src/bun`, `src/shared`, view code, tests, scripts, and CI before editing.
+- Prefer Electrobun APIs and Bun tooling over generic Electron/Node patterns.
+- Keep Bun ↔ view RPC typed with shared request/response types.
+- Sandbox untrusted BrowserViews/webview tags, disable RPC, use navigation allowlists, and isolate partitions.
+- Use `Bun.secrets` for credentials and avoid secrets in source/logs/prompts/tests.
+- Use `bun:sqlite` or Bun SQL for local structured data unless the project already chose an ORM.
+- Agent tools require typed schemas, permission gates, timeout, cancellation, tests, and privacy review.
+- Run or provide `bun test`, `bun run typecheck`, `bun run build:dev`, or focused validation scripts after changes.
+- Do not create fake App Intents/Foundation Models/widgets/App Clips. Port Apple concepts to Electrobun equivalents only.

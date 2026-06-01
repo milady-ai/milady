@@ -19,9 +19,9 @@ export interface MigrationResult {
 
 export async function migrateLegacyLocalStorage(
   store: SecureStore,
-  storage: Storage = typeof window !== "undefined"
+  storage: Storage | undefined = typeof window !== "undefined"
     ? window.localStorage
-    : (undefined as unknown as Storage),
+    : undefined,
 ): Promise<MigrationResult> {
   if (!storage) {
     return { moved: [], skipped: [...SENSITIVE_KEYS] };

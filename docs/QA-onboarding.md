@@ -12,7 +12,7 @@ This is the canonical guide for verifying any onboarding flow in Milady. Every s
 ## Common preconditions
 
 1. Repo on develop, deps installed: `bun install`.
-2. No leftover `~/.milady/` state from a previous run (or use the `?reset` query param documented in packages/app-core/src/api/onboarding-reset.ts).
+2. No leftover `~/.local/state/milady/` state from a previous run (or use the `?reset` query param documented in packages/app-core/src/api/onboarding-reset.ts).
 3. For mocked runs: no live API keys in env.
 4. For live runs: `ELIZA_LIVE_TEST=1` + provider API key (Cerebras recommended for cheapest spend).
 
@@ -26,7 +26,7 @@ Source of truth: `eliza/packages/ui/src/onboarding/flow.ts` for the abstract ste
 4. **Finish** — completion marker written:
    - `localStorage["eliza:onboarding-complete"] = "1"` (writer at `eliza/packages/ui/src/state/persistence.ts:398`; reader at `persistence.ts:382` checks `=== "1"`).
    - `localStorage["elizaos:active-server"] = JSON.stringify(<PersistedActiveServer>)` (writer in `useOnboardingState.ts`; key constant at `persistence.ts:853`).
-   - `meta.onboardingComplete = true` in `~/.eliza/eliza.json` (server-side, `eliza/packages/app-core/src/api/onboarding-compat-routes.ts:238`).
+   - `meta.onboardingComplete = true` in `~/.local/state/milady/milady.json` (server-side, `eliza/packages/app-core/src/api/onboarding-routes.ts:238`).
    - `firstRunPending` transitions to `false` via the lifeops first-run state store (`eliza/plugins/app-lifeops/src/providers/first-run.ts:94`).
 
 ### What does NOT appear in the shipping web onboarding
@@ -59,11 +59,11 @@ Surfaces tested via `eliza/packages/app/test/ui-smoke/onboarding-full-flow.spec.
 
 | # | Step | Manual action | Automation | Pass criteria |
 |---|---|---|---|---|
-| D1 | Cold launch | `bun run dev:desktop` from fresh `~/.milady/` | `bun run desktop:stack-status -- --json` must report `apiListening: true, uiListening: true` | All three ports up |
+| D1 | Cold launch | `bun run dev:desktop` from fresh `~/.local/state/milady/` | `bun run desktop:stack-status -- --json` must report `apiListening: true, uiListening: true` | All three ports up |
 | D2 | Window screenshot | n/a | `curl http://127.0.0.1:<apiPort>/api/dev/cursor-screenshot > screenshot.png` | PNG of BootstrapStep |
 | D3 | Driving the flow | Click through W2–W8 with mouse | Reuse Playwright spec via Electrobun's CDP (renderer URL from `/api/dev/stack`) | Same as W2–W8 |
 | D4 | Pairing token | Open `/api/auth/pair` UI | Manual click + verify token TTL (5 min per auth-pairing-compat-routes.ts) | Token expires after 5 min |
-| D5 | Reset | Quit, delete `~/.milady/`, relaunch | n/a | Returns to BootstrapStep |
+| D5 | Reset | Quit, delete `~/.local/state/milady/`, relaunch | n/a | Returns to BootstrapStep |
 | D6 | Permission prompts (lazy cascade D1-D7) | Reset granted permissions per the macOS pre-flight (`tccutil reset Notifications/Camera/Microphone/MediaLibrary/Accessibility/ScreenCapture ai.elizaos.app`), launch `bun run dev:desktop`, drive each prompt: D1 notifications, D2 camera, D3 microphone, D4 location, D5 photos, D6 accessibility, D7 screen recording. Grant or skip per prompt | `node scripts/qa/desktop-permission-walkthrough.mjs --init` scaffolds `reports/qa/<date>/desktop-permissions/` with a D1-D7 `CHECKLIST.md` (including the `tccutil reset` operator block); capture each OS dialog via `mcp__computer-use__screenshot` into that directory using the listed filenames; `--finalize` validates and writes `SUMMARY.md` with sizes + sha256s. Playwright cannot reach native OS dialogs — computer-use MCP is required. Windows + Linux variants are TODO comments in the script | Each prompt observed; outcome (granted/skipped) recorded in CHECKLIST.md; SUMMARY.md reports `PASS: 7/7 prompts captured` or itemizes the gaps |
 
 ### Mobile (Capacitor — local dev only)
