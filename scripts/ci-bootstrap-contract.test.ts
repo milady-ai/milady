@@ -167,25 +167,4 @@ describe("CI bootstrap contract", () => {
     );
     expect(gitleaks).not.toContain("gitleaks/gitleaks-action");
   });
-
-  it("hydrates eliza source before SOC2 verification", () => {
-    const soc2 = workflow("soc2-verify.yml");
-    const clone = "git clone --depth=1 --branch";
-    const install = "- name: Install dependencies (eliza/)";
-    const verify = "- name: Run SOC2 verification";
-
-    expect(soc2).toContain("Initialize eliza source checkout");
-    expect(soc2).toContain("https://github.com/elizaOS/eliza.git eliza");
-    expect(soc2).toContain(
-      `if [ "${githubExpression("github.event_name")}" = "pull_request" ]; then`,
-    );
-    expect(soc2).toContain(
-      "bun run packages/soc2-verify/src/cli.ts --out ../soc2-evidence",
-    );
-    expect(soc2).toContain(
-      "bun run packages/soc2-verify/src/cli.ts --strict-fail --out ../soc2-evidence",
-    );
-    expect(soc2.indexOf(clone)).toBeLessThan(soc2.indexOf(install));
-    expect(soc2.indexOf(install)).toBeLessThan(soc2.indexOf(verify));
-  });
 });

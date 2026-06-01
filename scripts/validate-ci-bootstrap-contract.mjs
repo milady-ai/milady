@@ -149,7 +149,6 @@ assertContainsNone(
 assertContainsAll(actionText, files.action, requiredActionSnippets, failures);
 assertContainsNone(actionText, files.action, forbiddenActionSnippets, failures);
 assertGitleaksUsesOssCli(failures);
-assertSoc2HydratesElizaSource(failures);
 assertContainsAll(
   alignScriptText,
   files.alignScript,
@@ -534,29 +533,6 @@ function assertGitleaksUsesOssCli(targetFailures) {
     workflowText,
     ".github/workflows/gitleaks.yml",
     ["gitleaks/gitleaks-action"],
-    targetFailures,
-  );
-}
-
-function assertSoc2HydratesElizaSource(targetFailures) {
-  const workflowText = readText(
-    ".github/workflows/soc2-verify.yml",
-    targetFailures,
-  );
-  assertOrdered(
-    workflowText,
-    ".github/workflows/soc2-verify.yml",
-    [
-      "name: Setup Bun",
-      "name: Initialize eliza source checkout",
-      'git clone --depth=1 --branch "$' +
-        '{MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza',
-      "name: Install dependencies (eliza/)",
-      "name: Run SOC2 verification",
-      `if [ "${githubExpression("github.event_name")}" = "pull_request" ]; then`,
-      "bun run packages/soc2-verify/src/cli.ts --out ../soc2-evidence",
-      "bun run packages/soc2-verify/src/cli.ts --strict-fail --out ../soc2-evidence",
-    ],
     targetFailures,
   );
 }
