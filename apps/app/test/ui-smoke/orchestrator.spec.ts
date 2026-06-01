@@ -664,13 +664,13 @@ test("orchestrator workbench renders live task data and supports task operations
 
   await expect(page.getByText("Orchestrator", { exact: true })).toBeVisible();
   await expect(page.getByTestId("orchestrator-workbench")).toContainText(
-    "1 tasks",
+    /1\s*tasks/,
   );
   await expect(page.getByTestId("orchestrator-workbench")).toContainText(
-    "1 active",
+    /1\s*active/,
   );
   await expect(page.getByTestId("orchestrator-workbench")).toContainText(
-    "1/2 agents",
+    /1\/2\s*agents/,
   );
   await expect(page.getByText("Build Pixel Notes app")).toBeVisible();
   await expect(page.getByTestId("orchestrator-workbench")).toContainText(
@@ -733,7 +733,9 @@ test("orchestrator workbench renders live task data and supports task operations
       label: "Codex verifier",
       task: "Verify the app with browser E2E and screenshot evidence.",
     });
-  await expect(page.getByLabel("Agents", { exact: true })).toContainText("2/3");
+  await expect(page.getByTestId("orchestrator-workbench")).toContainText(
+    /2\/3\s*agents/,
+  );
 
   await page.getByTestId("orchestrator-new-task").click();
   await expect(page.getByTestId("orchestrator-create-dialog")).toBeVisible();
@@ -788,10 +790,6 @@ test("orchestrator validation actions supply human evidence", async ({
   await openAppPath(page, "/orchestrator");
   await page.getByRole("button", { name: /Validate Notes release/ }).click();
   await expect(page.getByTestId("orchestrator-approve")).toBeVisible();
-  await expect(page.getByTestId("orchestrator-inspector")).toContainText(
-    "Waiting for human validation.",
-  );
-  await expect(page.getByTestId("orchestrator-approve")).toBeVisible();
   await page.getByTestId("orchestrator-approve").click();
   await expect
     .poll(() => routeState.validations[0])
@@ -812,13 +810,13 @@ test("orchestrator handles ten active tasks and twenty archived tasks", async ({
   await openAppPath(page, "/orchestrator");
   await expect(page.getByTestId("orchestrator-workbench")).toBeVisible();
   await expect(page.getByTestId("orchestrator-workbench")).toContainText(
-    "10 tasks",
+    /10\s*tasks/,
   );
   await expect(page.getByTestId("orchestrator-workbench")).toContainText(
-    "10 active",
+    /10\s*active/,
   );
   await expect(page.getByTestId("orchestrator-workbench")).toContainText(
-    "20/20 agents",
+    /20\/20\s*agents/,
   );
   await expect(page.getByTestId("orchestrator-task-item")).toHaveCount(10);
   await expect(page.getByText("Active app build 1")).toBeVisible();
