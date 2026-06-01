@@ -110,7 +110,7 @@ in Xcode once to let Xcode pick a development team for the project.
 
 **App launches but goes straight to the cloud picker**
 → The iOS runtime mode is resolved at build time via
-`VITE_MILADY_IOS_RUNTIME_MODE`. For the local-agent path the overlay
+`VITE_ELIZA_IOS_RUNTIME_MODE`. For the local-agent path the overlay
 step has to be invoked with mode `local`. See
 `scripts/ios-runtime-mode.mjs` for the dev-mode flow; the simulator
 script uses the `ios-overlay` target which does not pre-pin a mode.

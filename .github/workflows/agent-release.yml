@@ -1215,7 +1215,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag_name: tag,
-              name: tag,
+              name: `Milady ${tag}`,
               body: capReleaseBody([
                 `## ${tag}`,
                 '',
@@ -1236,7 +1236,7 @@ jobs:
                 fullChangelog,
                 '',
                 '### Publishing pipelines (called explicitly by this workflow)',
-                '- ✅ Electrobun artifacts (uploaded during build phase)',
+                '- ✅ Electrobun installers — built per-OS; attached to this release by release-electrobun.yml',
                 '- 🔄 Agent Docker image → post-publish push',
                 '- 🔄 Cloud app Docker image → post-publish push',
                 '- 🔄 Post-release distribution orchestrator → release-orchestrator.yml',

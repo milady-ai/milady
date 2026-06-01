@@ -89,9 +89,6 @@ function noteForAsset(name) {
   if (/\.dmg$/i.test(name)) {
     return "DMG installer";
   }
-  if (/\.msix$/i.test(name)) {
-    return "MSIX package";
-  }
   if (/\.exe$/i.test(name)) {
     return "Windows installer";
   }
@@ -209,7 +206,6 @@ function buildRelease(release, stableReleases = []) {
       asset: pickAssetFromReleases(prioritizedReleases, [
         (asset) => /setup/i.test(asset.name) && /\.exe$/i.test(asset.name),
         (asset) => /win/i.test(asset.name) && /\.exe$/i.test(asset.name),
-        (asset) => /win/i.test(asset.name) && /\.msix$/i.test(asset.name),
       ]),
     },
     {

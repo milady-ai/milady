@@ -631,7 +631,19 @@ function resolveLocalAppCoreAliases(): Alias[] {
   const uiComponentsSourceDir = uiPkgRoot ? path.join(uiPkgRoot, "src") : null;
 
   function resolveAppCoreWithUiFallback(id: string): string {
-    if (fs.existsSync(id)) return id;
+    if (fs.existsSync(id)) {
+      // A subpath like `@elizaos/app-core/api/auth` can map to a directory when
+      // eliza refactors a single file into a folder (api/auth.ts -> api/auth/index.ts).
+      // fs.existsSync() is true for directories, so resolve the directory's index
+      // instead of returning the dir itself (which vite tries to read -> EISDIR).
+      if (fs.statSync(id).isDirectory()) {
+        for (const idx of [`${id}/index.ts`, `${id}/index.tsx`]) {
+          if (fs.existsSync(idx)) return idx;
+        }
+      } else {
+        return id;
+      }
+    }
     const withTsx = id.endsWith(".tsx") ? id : `${id}.tsx`;
     if (fs.existsSync(withTsx)) return withTsx;
     const withTs = id.endsWith(".ts") ? id : `${id}.ts`;
@@ -2789,6 +2801,14 @@ export default defineConfig({
       "socks",
       // OS keychain binding is desktop/server-only and pulls native .node assets.
       "@napi-rs/keyring",
+      // Discord voice/gateway natives leak in via @discordjs/ws: @snazzah/davey
+      // re-exports @snazzah/davey-wasm32-wasi and zlib-sync is a compiled .node
+      // addon — neither resolves in the browser. nativeModuleStubPlugin covers
+      // the rollup build + dev-server module serving, but esbuild's optimizeDeps
+      // pre-bundle uses its own resolver; exclude them so the dev server's
+      // pre-bundle scan doesn't crash (white screen) trying to resolve them.
+      "@snazzah/davey",
+      "zlib-sync",
     ],
   },
   build: {

@@ -2,7 +2,7 @@
 
 This file tracks the state of the Milady iOS Capacitor app (`apps/app/ios/App/`) for App Store submission. It is intended for the engineer driving submission.
 
-The app ships as a thin HTTP client. The default runtime mode (`VITE_MILADY_IOS_RUNTIME_MODE=cloud`) talks to Eliza Cloud; `cloud-hybrid` and `remote-mac` are advanced modes for paired desktops. The bundle does not include Bun, JIT, or downloaded code, and `LlamaCppCapacitor` is excluded from the App Store binary by default (see `scripts/ios-runtime-mode.mjs` and `eliza/packages/app-core/scripts/run-mobile-build.mjs`).
+The app ships as a thin HTTP client. The default runtime mode (`VITE_ELIZA_IOS_RUNTIME_MODE=cloud`) talks to Eliza Cloud; `cloud-hybrid` and `remote-mac` are advanced modes for paired desktops. The bundle does not include Bun, JIT, or downloaded code, and `LlamaCppCapacitor` is excluded from the App Store binary by default (see `scripts/ios-runtime-mode.mjs` and `eliza/packages/app-core/scripts/run-mobile-build.mjs`).
 
 ## Privacy Manifest
 

@@ -14,14 +14,16 @@ You downloaded a build that wasn't notarized, or the download is corrupted. Dele
 
 Click "More info" → "Run anyway". The installer is signed, but Windows SmartScreen can be cautious with new publishers. If you're extra careful, verify the SHA256 of the downloaded file against the `SHA256SUMS.txt` that ships with every release.
 
-### Linux: AppImage won't execute
+### Linux: the installer won't run
 
-You need to mark it executable first:
+The Linux app ships as the `stable-linux-x64-Milady-Setup.tar.gz` installer tarball (x86_64). Extract it, then run the installer it unpacks:
 
 ```bash
-chmod +x Milady.AppImage
-./Milady.AppImage
+tar -xzf stable-linux-x64-Milady-Setup.tar.gz
+./installer
 ```
+
+If `./installer` is "Permission denied," mark it executable first: `chmod +x installer`.
 
 ## "It opens, but the first message hangs forever"
 

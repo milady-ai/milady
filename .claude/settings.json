@@ -5,14 +5,14 @@
     "vercel@claude-plugins-official": false,
     "vercel-plugin@vercel-vercel-plugin": false
   },
-  "// hooks.Stop": "End-of-turn typecheck + lint via `bun run verify`. asyncRewake means: runs in background (does NOT block the user), silent on success, and wakes the model with the tailed error output on failure (exit 2). Catches type errors before they compound across phases without the latency of a synchronous hook on this 953-file monorepo. PostToolUse on Edit/Write would be unworkable — it'd re-run verify after every single edit.",
+  "// hooks.Stop": "End-of-turn typecheck + lint via `bun run verify`. asyncRewake means: runs in background (does NOT block the user), silent on success, and wakes the model with the tailed error output on failure (exit 2). Catches type errors before they compound across phases without the latency of a synchronous hook on this 953-file monorepo. PostToolUse on Edit/Write would be unworkable — it'd re-run verify after every single edit. Pinned to MILADY_ELIZA_SOURCE=packages so the gate validates the committable/CI surface (apps + scripts) and does NOT fan out into the local eliza/ clone's capacitor packages — those need a native build toolchain that isn't present in every dev env (exit 127), and milady CI runs packages mode anyway.",
   "hooks": {
     "Stop": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "out=$(bun run verify 2>&1); rc=$?; if [ $rc -ne 0 ]; then echo \"$out\" | tail -40; exit 2; fi",
+            "command": "out=$(MILADY_ELIZA_SOURCE=packages bun run verify 2>&1); rc=$?; if [ $rc -ne 0 ]; then echo \"$out\" | tail -40; exit 2; fi",
             "asyncRewake": true,
             "timeout": 240,
             "statusMessage": "Running bun run verify (background)"

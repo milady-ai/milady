@@ -269,11 +269,17 @@ jobs:
     uses: ./.github/workflows/publish-packages.yml
     with:
       version: ${{ needs.prepare.outputs.version }}
-      pypi: true
-      snap: true
+      # Milady ships ONLY the Electrobun desktop installer (release-electrobun.yml,
+      # e.g. stable-linux-x64-Milady-Setup.tar.gz). The PyPI/Snap/APT/Flatpak recipes
+      # publish the elizaOS-branded headless CLI (elizaos-app / ai.elizaos.App) — a
+      # different product — so they are retired from the Milady release path. Re-enable
+      # a format only once its recipe is rebranded to Milady identities + given store
+      # credentials. (Milady-local override of this @generated workflow.)
+      pypi: false
+      snap: false
       snap_release: ${{ needs.prepare.outputs.snap_release }}
-      flatpak: ${{ needs.prepare.outputs.publish_flatpak == 'true' }}
-      apt: true
+      flatpak: false
+      apt: false
     secrets: inherit
 
   publish-android:

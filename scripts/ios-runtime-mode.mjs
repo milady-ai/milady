@@ -86,7 +86,7 @@ export function buildModeEnv(
   }
 
   const next = {
-    VITE_MILADY_IOS_RUNTIME_MODE: mode,
+    VITE_ELIZA_IOS_RUNTIME_MODE: mode,
     VITE_ELIZA_CLOUD_BASE: resolveCloudBase(env),
     // The iOS shell is a thin HTTP client in every mode; on-device
     // llama.cpp is never required. Default the build-time pod gate to "0"
@@ -98,10 +98,7 @@ export function buildModeEnv(
   };
 
   if (mode === "remote-mac") {
-    next.VITE_MILADY_IOS_API_BASE = resolveRemoteApiBase(
-      env,
-      networkInterfaces,
-    );
+    next.VITE_ELIZA_IOS_API_BASE = resolveRemoteApiBase(env, networkInterfaces);
     const token = readString(env, [
       "MILADY_IOS_REMOTE_API_TOKEN",
       "MILADY_IOS_API_TOKEN",
@@ -110,7 +107,7 @@ export function buildModeEnv(
       "VITE_MILADY_MOBILE_API_TOKEN",
       "VITE_ELIZA_IOS_API_TOKEN",
     ]);
-    if (token) next.VITE_MILADY_IOS_API_TOKEN = token;
+    if (token) next.VITE_ELIZA_IOS_API_TOKEN = token;
     return next;
   }
 
@@ -122,7 +119,7 @@ export function buildModeEnv(
     "VITE_MILADY_MOBILE_API_BASE",
     "VITE_ELIZA_IOS_API_BASE",
   ]);
-  if (apiBase) next.VITE_MILADY_IOS_API_BASE = stripTrailingSlash(apiBase);
+  if (apiBase) next.VITE_ELIZA_IOS_API_BASE = stripTrailingSlash(apiBase);
 
   const explicitBridgeUrl = readString(env, [
     "MILADY_IOS_DEVICE_BRIDGE_URL",
@@ -130,12 +127,12 @@ export function buildModeEnv(
     "VITE_ELIZA_DEVICE_BRIDGE_URL",
   ]);
   if (explicitBridgeUrl) {
-    next.VITE_MILADY_DEVICE_BRIDGE_URL = explicitBridgeUrl;
+    next.VITE_ELIZA_DEVICE_BRIDGE_URL = explicitBridgeUrl;
   } else {
     const bridgeApiBase =
       readString(env, ["MILADY_IOS_DEVICE_BRIDGE_API_BASE"]) ?? apiBase;
     if (bridgeApiBase) {
-      next.VITE_MILADY_DEVICE_BRIDGE_URL =
+      next.VITE_ELIZA_DEVICE_BRIDGE_URL =
         apiBaseToDeviceBridgeUrl(bridgeApiBase);
     }
   }
@@ -146,7 +143,7 @@ export function buildModeEnv(
     "VITE_MILADY_DEVICE_BRIDGE_TOKEN",
     "VITE_ELIZA_DEVICE_BRIDGE_TOKEN",
   ]);
-  if (pairingToken) next.VITE_MILADY_DEVICE_BRIDGE_TOKEN = pairingToken;
+  if (pairingToken) next.VITE_ELIZA_DEVICE_BRIDGE_TOKEN = pairingToken;
 
   return next;
 }
@@ -154,17 +151,17 @@ export function buildModeEnv(
 function printSummary(mode, envPatch) {
   console.log(`[ios-runtime] mode: ${mode}`);
   console.log(`[ios-runtime] cloud: ${envPatch.VITE_ELIZA_CLOUD_BASE}`);
-  if (envPatch.VITE_MILADY_IOS_API_BASE) {
-    console.log(`[ios-runtime] api: ${envPatch.VITE_MILADY_IOS_API_BASE}`);
+  if (envPatch.VITE_ELIZA_IOS_API_BASE) {
+    console.log(`[ios-runtime] api: ${envPatch.VITE_ELIZA_IOS_API_BASE}`);
   }
-  if (envPatch.VITE_MILADY_DEVICE_BRIDGE_URL) {
+  if (envPatch.VITE_ELIZA_DEVICE_BRIDGE_URL) {
     console.log(
-      `[ios-runtime] device bridge: ${envPatch.VITE_MILADY_DEVICE_BRIDGE_URL}`,
+      `[ios-runtime] device bridge: ${envPatch.VITE_ELIZA_DEVICE_BRIDGE_URL}`,
     );
   }
   if (
-    envPatch.VITE_MILADY_IOS_API_TOKEN ||
-    envPatch.VITE_MILADY_DEVICE_BRIDGE_TOKEN
+    envPatch.VITE_ELIZA_IOS_API_TOKEN ||
+    envPatch.VITE_ELIZA_DEVICE_BRIDGE_TOKEN
   ) {
     console.log("[ios-runtime] token: configured");
   }

@@ -42,6 +42,26 @@ if (!scriptName) {
   process.exit(1);
 }
 
+// Desktop and iOS builds compile @elizaos/app-core source directly out of the
+// repo-local eliza/ checkout, which only exists in local mode. In packages
+// mode the script file is absent and the build dies with a cryptic
+// missing-package error. Fail fast with an actionable message instead.
+const localModeActive =
+  fs.existsSync(localElizaRoot) ||
+  (process.env.MILADY_ELIZA_SOURCE ?? "").trim().toLowerCase() === "local";
+const isDesktopBuild =
+  scriptName === "desktop-build.mjs" || scriptName === "dev-platform.mjs";
+const isIosBuild =
+  scriptName === "run-mobile-build.mjs" &&
+  (scriptArgs[0] ?? "").startsWith("ios");
+if ((isDesktopBuild || isIosBuild) && !localModeActive) {
+  console.error(
+    `[milady] ${scriptName} requires local mode — the desktop/iOS build compiles @elizaos/app-core source from the repo-local eliza/ checkout, which is not present in packages mode.\n` +
+      "[milady] Run: bun run eliza:local",
+  );
+  process.exit(1);
+}
+
 const scriptPath = resolveElizaAppCoreScript(scriptName, { repoRoot });
 const localScriptPath = path.join(
   localElizaRoot,
