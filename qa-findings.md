@@ -52,8 +52,8 @@ Branch: `qa/2am-2026-06-01` off `develop` at commit `765e547d4` ("chore: remove 
   3. Many plain `.e2e.test.ts` files exist in plugin packages (e.g. `plugin-lifeops/test/booking-preferences.e2e.test.ts`, `plugin-computeruse/test/computeruse-cross-platform.e2e.test.ts`, `plugin-vision/test/vision-cross-platform.e2e.test.ts`, etc.), but they're outside the app-core config's reach.
 - **Patch attempt (reverted):** I wrote a `patchAppCoreE2eConfigInclude` function for [scripts/apply-eliza-ci-patches.mjs](scripts/apply-eliza-ci-patches.mjs) that expanded the include to `test/app/**` with absolute paths + Windows-safe forward-slash normalization, plus pattern-level exclude for `**/*.live.e2e.test.{ts,tsx}`. Confirmed via `bun run test:e2e`: result was still **0 tests run** (all test/app/ files filtered out by either explicit excludes or the new live-pattern). Reverted because adding ineffective patch noise to the install pipeline isn't worth it.
 - **Effect:** `bun run test:e2e` runs zero tests today and will continue to until someone (a) adds plain (non-heavy) `*.e2e.test.ts` files under `test/app/` or `src/`, OR (b) restructures the config to aggregate plugin-package e2e tests.
-- **Severity:** **high** but **not fixable purely via config changes** — needs new test files OR architectural decision to bring plugin e2e tests under the same runner.
-- **Recommended next step:** drop `--passWithNoTests` from the root [package.json](package.json) `test:e2e` script so a 0-file run fails loudly. This surfaces the gap on every PR until plain e2e tests are added.
+- **Severity revised: medium** (not high). The "silent CI gap" framing was wrong — `grep -rn "run test:e2e" .github/workflows/` shows **no CI workflow actually invokes `test:e2e`**; only `test:e2e:heavy` runs in `release-electrobun.yml`. So this isn't gating any merge — it's just a developer-facing command that silently does nothing on Windows.
+- **Recommended next step:** decide what `test:e2e` is for: either delete the command from [package.json](package.json) until plain e2e tests exist, OR drop `--passWithNoTests` so manual runs fail loudly when the include catches nothing.
 
 ### Finding #2 — apps/app typecheck: missing `@elizaos/plugin-task-coordinator/register`
 
@@ -244,7 +244,7 @@ All 8 messaging connector test suites passed on `develop` HEAD.
 | 3 | unit test | low | ✅ fixed | BUN_VERSION regex bumped 1.3.13 → 1.3.14 |
 | 4 | unit test | medium | ✅ fixed | Root tsconfig restored from packages-mode template |
 | 5 | unit test | medium | ✅ fixed | Same root cause as #4 |
-| 6 | e2e | **high** | 📋 documented | Test taxonomy needs maintainer judgment; upstream config (gitignored here) |
+| 6 | e2e | medium | 📋 documented | `test:e2e` runs 0 tests but isn't called by any CI workflow — unused command, not actual CI gap |
 | 7 | dev server | **high** | 📋 documented | Workspace build chain bug; upstream architectural fix needed |
 | 8 | audit | medium | ✅ fixed (local) | `audit:cloud` now runs `bunx playwright install chromium` first — works on first run |
 | 9 | cloud UI | medium | 📋 documented | Likely Vite dep-optimizer race during audit warmup; upstream fix path documented |
