@@ -462,7 +462,12 @@ function patchAppCoreReleaseCheck(raw) {
     .replace(
       "release-check: generated homepage release data still points at legacy /apps/*/public/. Regenerate it with node scripts/write-homepage-release-data.mjs.",
       "release-check: generated homepage release data still points at legacy /apps/web/public/. Regenerate it with node scripts/write-homepage-release-data.mjs.",
-    );
+    )
+    // Bump BUN_VERSION expectations in release-check from 1.3.13 → 1.3.14 to
+    // match the bumped .github/workflows/{release-electrobun,test-electrobun-release}.yml.
+    // Hits requiredWorkflowSnippets[] near line 90 (we rewrite requiredElectrobunPrWorkflowSnippets[]
+    // wholesale below, so that array doesn't need this replace).
+    .replaceAll('BUN_VERSION: "1.3.13"', 'BUN_VERSION: "1.3.14"');
 
   patched = patched.replace(
     /const requiredPaths = \[[\s\S]*?\];/,
@@ -485,7 +490,7 @@ function patchAppCoreReleaseCheck(raw) {
   "workflow_dispatch:",
   "permissions:",
   "contents: read",
-  'BUN_VERSION: "1.3.13"',
+  'BUN_VERSION: "1.3.14"',
   "name: Release Workflow Contract",
   "bun install --ignore-scripts",
   'run-postinstall: "true"',
