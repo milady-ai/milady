@@ -55,6 +55,10 @@ Full protocol + checklist template: [packages/cloud-frontend/AGENTS.md](packages
 - Before adding new capabilities, verify they align with the existing product model by reading docs/README first.
 - When unsure about product semantics (e.g., SOL-only vs SPL, community vs custom flows), ASK before implementing.
 
+## Native over Docker on Linux x64
+
+On Linux x86_64 development hosts, build and run the full toolchain locally — Verilator, Icarus, Yosys, SymbiYosys, OpenROAD, OpenLane, magic, klayout, netgen, QEMU, Renode, LLVM, Chipyard, AlphaChip CUDA, all of it. Native is faster and far easier to debug than Docker (no bind-mount latency, real stack traces, normal `gdb` / `perf`, no daemon lifecycle). Docker stays as a documented fallback for macOS hosts, reproducibility audits, and CI lanes that need a pinned image — but it should not be the default invocation path on Linux. If a script forces Docker on Linux when a native binary exists, fix the script.
+
 ## Quick Start (Dev)
 
 ```bash

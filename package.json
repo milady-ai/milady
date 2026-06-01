@@ -31,6 +31,8 @@
     "scripts/patch-coding-agent-adapters-codex-full-auto.mjs",
     "scripts/patch-coding-agent-adapters-tools-flag.mjs",
     "scripts/patch-eliza-electrobun-windows-smoke-startup.mjs",
+    "scripts/patch-llama-cpp-capacitor-utf8.mjs",
+    "scripts/patch-llama-cpp-capacitor-x86_64.mjs",
     "scripts/patch-elizaos-package-styles.mjs",
     "scripts/patch-elizaos-plugin-browser-bridge-package.mjs",
     "scripts/repair-elizaos-package-links.mjs",
@@ -67,7 +69,7 @@
   "scripts": {
     "audit:deps": "bun audit",
     "audit:deps:release": "bun audit --audit-level=moderate",
-    "build": "NODE_OPTIONS=--import=tsx node scripts/run-production-build.mjs",
+    "build": "NODE_OPTIONS='--max-old-space-size=8192 --import=tsx' node scripts/run-production-build.mjs",
     "build:android": "node scripts/run-eliza-app-core-script.mjs run-mobile-build.mjs android",
     "build:android:system": "node scripts/run-eliza-app-core-script.mjs run-mobile-build.mjs android-system",
     "build:android:icons": "node apps/app/scripts/generate-android-icons.mjs",

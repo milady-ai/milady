@@ -7,13 +7,17 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+const runtimeConfigMock = vi.hoisted(() => ({
+  rewriteAgentUiUrl: vi.fn((url: string) => url),
+}));
+
 vi.mock("../lib/runtime-config", () => ({
   CLOUD_BASE: "https://cloud.test",
   getCloudAgentApiPath: (agentId?: string, suffix?: string) =>
     `/api/v1/eliza/agents${agentId ? `/${agentId}` : ""}${
       suffix ? `/${suffix}` : ""
     }`,
-  rewriteAgentUiUrl: (url: string) => url,
+  rewriteAgentUiUrl: runtimeConfigMock.rewriteAgentUiUrl,
 }));
 
 import { redirectPopupToCloudAgent } from "../lib/open-web-ui";
@@ -72,6 +76,7 @@ function pendingResponse(
 describe("redirectPopupToCloudAgent", () => {
   beforeEach(() => {
     vi.useRealTimers();
+    runtimeConfigMock.rewriteAgentUiUrl.mockImplementation((url) => url);
   });
   afterEach(() => {
     vi.restoreAllMocks();
@@ -119,6 +124,62 @@ describe("redirectPopupToCloudAgent", () => {
     expect(popup.location.href).toBe("https://agent.test/pair?token=tok-2");
   });
 
+  it("uses response body retryAfterMs before retry-after header seconds", async () => {
+    vi.useFakeTimers();
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(pendingResponse(5, { retryAfterMs: 250 }))
+      .mockResolvedValueOnce(
+        readyResponse("https://agent.test/pair?token=tok-retry"),
+      );
+    const popup = makeFakePopup();
+
+    const pending = redirectPopupToCloudAgent(
+      popup as unknown as Window,
+      AGENT_ID,
+      "key",
+    );
+
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    await vi.advanceTimersByTimeAsync(249);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    await vi.advanceTimersByTimeAsync(1);
+    await pending;
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(popup.location.href).toBe("https://agent.test/pair?token=tok-retry");
+  });
+
+  it("uses Retry-After header seconds when the body omits retryAfterMs", async () => {
+    vi.useFakeTimers();
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(pendingResponse(2, { retryAfterMs: undefined }))
+      .mockResolvedValueOnce(
+        readyResponse("https://agent.test/pair?token=tok-header"),
+      );
+    const popup = makeFakePopup();
+
+    const pending = redirectPopupToCloudAgent(
+      popup as unknown as Window,
+      AGENT_ID,
+      "key",
+    );
+
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    await vi.advanceTimersByTimeAsync(1999);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    await vi.advanceTimersByTimeAsync(1);
+    await pending;
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(popup.location.href).toBe(
+      "https://agent.test/pair?token=tok-header",
+    );
+  });
+
   it("does not redirect when the popup closes during polling", async () => {
     const popup = makeFakePopup();
     vi.spyOn(globalThis, "fetch")
@@ -151,5 +212,43 @@ describe("redirectPopupToCloudAgent", () => {
     await expect(
       redirectPopupToCloudAgent(popup as unknown as Window, AGENT_ID, "key"),
     ).rejects.toThrow(/Pairing token 500/);
+  });
+
+  it("rejects a 200 response that is missing redirectUrl", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(JSON.stringify({ success: true, data: { token: "tok" } }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    const popup = makeFakePopup();
+
+    await expect(
+      redirectPopupToCloudAgent(popup as unknown as Window, AGENT_ID, "key"),
+    ).rejects.toThrow("No redirectUrl in pairing-token response");
+    expect(popup.location.href).toBe("");
+  });
+
+  it("rewrites the ready redirect URL before assigning the popup location", async () => {
+    runtimeConfigMock.rewriteAgentUiUrl.mockImplementation((url) =>
+      url.replace(".waifu.fun", ".milady.ai"),
+    );
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      readyResponse("https://agent-1.waifu.fun/pair?token=tok-4"),
+    );
+    const popup = makeFakePopup();
+
+    await redirectPopupToCloudAgent(
+      popup as unknown as Window,
+      AGENT_ID,
+      "key",
+    );
+
+    expect(runtimeConfigMock.rewriteAgentUiUrl).toHaveBeenCalledWith(
+      "https://agent-1.waifu.fun/pair?token=tok-4",
+    );
+    expect(popup.location.href).toBe(
+      "https://agent-1.milady.ai/pair?token=tok-4",
+    );
   });
 });

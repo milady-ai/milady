@@ -98,7 +98,7 @@ export function syncElizaEnvAliases(options = {}) {
     env.ELIZA_CLOUD_MANAGED_AGENTS_API_SEGMENT =
       options.cloudManagedAgentsApiSegment ?? "milady";
   }
-  if (!env.ELIZA_APP_ROUTE_PLUGIN_MODULES) {
+  if (env.ELIZA_APP_ROUTE_PLUGIN_MODULES === undefined) {
     env.ELIZA_APP_ROUTE_PLUGIN_MODULES = (
       options.appRoutePluginModules ?? DEFAULT_APP_ROUTE_PLUGIN_MODULES
     ).join(",");

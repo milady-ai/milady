@@ -1,0 +1,683 @@
+<!-- concept-D19-L4 | direction: Glass HUD Overlay | look: Clean System Light | targets: 420x760, 960x640 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D19 · Glass HUD Overlay · Clean System Light</title>
+<style>
+:root {
+  --bg:#F2F2F7;
+  --surface:#FFFFFF;
+  --surface-2:#FFFFFF;
+  --border:rgba(60,60,67,0.18);
+  --text:#1C1C1E;
+  --text-secondary:rgba(60,60,67,0.60);
+  --text-muted:#8E8E93;
+  --accent:#0A84FF;
+  --accent-2:#30D158;
+  --danger:#FF3B30;
+  --radius:13px;
+  --radius-sm:9px;
+  --font:"SF Pro Text",-apple-system,"Segoe UI Variable","Helvetica Neue",system-ui,sans-serif;
+  --shadow:0 8px 30px rgba(0,0,0,0.12);
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.10);
+  --ease:cubic-bezier(.32,.72,0,1);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+body {
+  font-family:var(--font);
+  background:var(--bg);
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* Device */
+.device {
+  position:relative;
+  width:420px;height:760px;
+  border-radius:44px;
+  background:var(--bg);
+  box-shadow:0 40px 100px rgba(0,0,0,0.18),0 0 0 1px rgba(0,0,0,0.06);
+  overflow:hidden;
+  display:flex;flex-direction:column;
+  z-index:2;
+}
+
+/* Simulated content behind */
+.sim-content {
+  position:absolute;inset:0;
+  background:var(--bg);
+  display:flex;flex-direction:column;
+  padding:80px 40px 40px;
+  gap:14px;pointer-events:none;z-index:0;
+  opacity:0.45;
+}
+.sim-line{height:8px;border-radius:4px;background:rgba(60,60,67,0.1)}
+.sim-card{height:100px;border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow-sm)}
+
+/* Glass scrim — unifies the HUD panel over the ambient OS background */
+.hud-scrim {
+  position:absolute;inset:0;z-index:3;pointer-events:none;
+  background:linear-gradient(180deg,rgba(242,242,247,0.86) 0%,rgba(242,242,247,0.78) 100%);
+  -webkit-backdrop-filter:saturate(1.4) blur(8px);
+  backdrop-filter:saturate(1.4) blur(8px);
+}
+
+/* Edge glow — system blue ring */
+.edge-glow {
+  position:absolute;inset:0;border-radius:44px;
+  pointer-events:none;z-index:100;
+  transition:box-shadow 0.3s var(--ease),opacity 0.3s var(--ease);
+  opacity:0;
+}
+.edge-glow.listening{opacity:1;box-shadow:inset 0 0 0 2px var(--accent),inset 0 0 24px rgba(10,132,255,0.12)}
+.edge-glow.speaking{opacity:1;box-shadow:inset 0 0 0 2px var(--accent-2),inset 0 0 24px rgba(48,209,88,0.1)}
+.edge-glow.muted{opacity:1;box-shadow:inset 0 0 0 2px var(--danger),inset 0 0 18px rgba(255,59,48,0.08)}
+@keyframes sys-pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.edge-glow.listening{animation:sys-pulse 1.4s ease-in-out infinite}
+
+/* HUD overlay */
+.hud-layer {
+  position:relative;z-index:5;
+  display:flex;flex-direction:column;
+  height:100%;padding:12px 16px 16px;gap:10px;
+}
+
+/* System status bar */
+.status-bar {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 104px 10px 0;
+  border-bottom:0.5px solid var(--border);
+}
+.status-left{display:flex;align-items:center;gap:8px;min-width:0}
+.status-right{display:flex;align-items:center;gap:8px;min-width:0}
+.status-brand{
+  font-size:13px;font-weight:600;color:var(--text-secondary);
+  display:flex;align-items:center;gap:4px;white-space:nowrap;letter-spacing:-0.01em;
+}
+.status-time{font-size:15px;font-weight:600;color:var(--text);letter-spacing:-0.02em}
+.live-badge {
+  display:flex;align-items:center;gap:4px;
+  background:rgba(10,132,255,0.1);
+  border-radius:100px;padding:3px 8px;
+  font-size:11px;font-weight:600;color:var(--accent);
+  opacity:0;transition:opacity 0.25s var(--ease);
+}
+.live-badge.visible{opacity:1}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+@keyframes sys-dot{0%,100%{opacity:1}50%{opacity:0.3}}
+.live-badge.visible .live-dot{animation:sys-dot 1s ease-in-out infinite}
+.session-timer{font-size:11px;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums}
+.muted-label{
+  font-size:12px;font-weight:600;color:var(--danger);
+  opacity:0;transition:opacity 0.25s;
+}
+.muted-label.visible{opacity:1}
+
+/* Chat log */
+.chat-log {
+  flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;
+  scrollbar-width:none;
+}
+.chat-log::-webkit-scrollbar{display:none}
+
+.turn{display:flex;flex-direction:column;gap:4px}
+.turn.enter{animation:sys-turn-in 0.28s var(--ease) both}
+@keyframes sys-turn-in{from{opacity:0;transform:translateY(6px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.turn-header{
+  font-size:11px;font-weight:600;color:var(--text-muted);
+  display:flex;align-items:center;gap:4px;padding:0 4px;
+}
+
+.bubble {
+  padding:10px 14px;
+  border-radius:var(--radius-sm);
+  font-size:15px;line-height:1.45;color:var(--text);
+  background:var(--surface);
+  box-shadow:var(--shadow-sm);
+  max-width:100%;
+}
+.bubble.user {
+  background:var(--accent);color:#fff;
+  border-radius:18px 18px 4px 18px;
+  margin-left:28px;
+  box-shadow:0 2px 8px rgba(10,132,255,0.3);
+}
+.bubble.assistant {
+  background:var(--surface);
+  border-radius:18px 18px 18px 4px;
+  margin-right:10px;
+  border:0.5px solid var(--border);
+}
+.bubble.partial{opacity:0.6}
+
+/* Attachment chip */
+.attachment-chip {
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,0.25);
+  border-radius:8px;padding:4px 8px;
+  font-size:12px;color:rgba(255,255,255,0.9);
+  margin-bottom:6px;
+}
+.attachment-chip.staged {
+  background:var(--surface);border:0.5px solid var(--border);
+  color:var(--text);border-radius:100px;padding:4px 10px 4px 6px;
+  font-size:12px;
+}
+.thumb{font-size:14px}
+.chip-remove{cursor:pointer;opacity:0.5;font-size:13px}
+.chip-remove:hover{opacity:1;color:var(--danger)}
+
+/* App card */
+.app-card {
+  background:var(--surface);
+  border-radius:var(--radius);
+  overflow:hidden;box-shadow:var(--shadow);
+  margin-right:10px;
+  border:0.5px solid var(--border);
+}
+.app-card-header {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px 8px;border-bottom:0.5px solid var(--border);
+}
+.app-card-title {
+  display:flex;align-items:center;gap:7px;
+  font-size:13px;font-weight:600;color:var(--text);
+}
+.app-icon{width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#0A84FF,#5E5CE6);display:flex;align-items:center;justify-content:center;font-size:12px}
+.app-expand{font-size:13px;cursor:pointer;color:var(--text-muted)}
+.app-card-body{padding:12px 14px}
+.weather-main{display:flex;align-items:flex-end;gap:8px}
+.weather-temp{font-size:36px;font-weight:200;color:var(--text);line-height:1;letter-spacing:-0.03em}
+.weather-detail{font-size:13px;color:var(--text-muted);line-height:1.5}
+.weather-forecast{display:flex;gap:6px;margin-top:10px}
+.forecast-item{
+  flex:1;text-align:center;padding:6px 4px;
+  border:0.5px solid var(--border);border-radius:var(--radius-sm);
+  font-size:11px;color:var(--text-muted);background:var(--bg);
+}
+.forecast-item span{display:block;font-size:15px;margin:2px 0}
+.forecast-item strong{color:var(--text);font-weight:600}
+.app-card-actions{display:flex;gap:8px;padding:0 14px 12px}
+.card-btn {
+  flex:1;padding:8px 12px;border-radius:var(--radius-sm);
+  font-family:var(--font);font-size:13px;font-weight:600;
+  border:none;cursor:pointer;transition:all 0.22s var(--ease);
+}
+.card-btn.primary{background:var(--accent);color:#fff}
+.card-btn.primary:active{transform:scale(0.97)}
+.card-btn.secondary{background:var(--bg);color:var(--accent);border:0.5px solid var(--border)}
+
+/* Orb — system Gemini-inspired */
+.pill-orb {
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  cursor:pointer;position:relative;overflow:hidden;
+  transition:transform 0.3s var(--ease),box-shadow 0.3s var(--ease);
+  background:conic-gradient(from 0deg, #0A84FF, #5E5CE6, #30D158, #FF9F0A, #0A84FF);
+}
+.pill-orb::after{
+  content:'';position:absolute;inset:4px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,rgba(255,255,255,0.9),rgba(255,255,255,0.3) 60%,transparent);
+}
+@keyframes orb-idle{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+@keyframes orb-listen{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+@keyframes orb-think{0%,100%{filter:brightness(1)}50%{filter:brightness(0.7) saturate(2)}}
+@keyframes orb-speak{0%,100%{transform:scale(1) rotate(0deg)}50%{transform:scale(1.06) rotate(180deg)}}
+
+.pill-orb.idle{animation:orb-idle 3s ease-in-out infinite}
+.pill-orb.listening{animation:orb-listen 0.5s ease-in-out infinite;box-shadow:0 0 0 4px rgba(10,132,255,0.25)}
+.pill-orb.thinking{animation:orb-think 1.5s ease-in-out infinite}
+.pill-orb.speaking{animation:orb-speak 1s ease-in-out infinite;box-shadow:0 0 0 4px rgba(48,209,88,0.25)}
+
+/* Listening indicator */
+.listening-indicator {
+  display:flex;align-items:center;gap:6px;
+  padding:5px 10px;
+  background:rgba(10,132,255,0.08);
+  border:1px solid rgba(10,132,255,0.15);
+  border-radius:100px;
+  font-size:12px;font-weight:600;color:var(--accent);
+  opacity:0;transition:opacity 0.25s var(--ease),transform 0.25s var(--ease);
+  transform:translateY(3px);pointer-events:none;
+}
+.listening-indicator.visible{opacity:1;transform:none}
+.listening-indicator.muted-indicator{background:rgba(255,59,48,0.08);border-color:rgba(255,59,48,0.2);color:var(--danger)}
+.mic-wave{display:flex;align-items:center;gap:2px;height:14px}
+.mic-wave span{width:2px;border-radius:2px;background:currentColor;height:4px;display:block;transition:height 0.1s}
+
+/* Suggestions */
+.suggestions{display:flex;min-height:30px}
+.suggestion-set{display:flex;gap:6px;flex-wrap:wrap;transition:opacity 0.18s var(--ease)}
+.suggestion-set.hidden{display:none}
+.suggestion-chip {
+  display:inline-flex;align-items:center;gap:4px;
+  background:var(--surface);border:0.5px solid var(--border);
+  border-radius:100px;padding:5px 12px;
+  font-size:12px;font-weight:500;color:var(--accent);
+  cursor:pointer;box-shadow:var(--shadow-sm);
+  transition:all 0.22s var(--ease);
+}
+.suggestion-chip:hover{background:rgba(10,132,255,0.07);transform:scale(1.02)}
+
+.staged-attachments{display:flex;gap:6px;flex-wrap:wrap}
+
+/* Pill */
+.pill-row {
+  display:flex;align-items:center;gap:8px;
+  background:var(--surface);
+  border-radius:22px;padding:6px 8px;
+  box-shadow:var(--shadow);
+  border:0.5px solid var(--border);
+}
+.pill-attach {
+  width:32px;height:32px;border-radius:50%;
+  background:var(--bg);border:0.5px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:16px;color:var(--text-muted);flex-shrink:0;
+  transition:all 0.22s var(--ease);
+}
+.pill-attach:hover{background:rgba(10,132,255,0.08);color:var(--accent)}
+.pill-input {
+  flex:1;border:none;background:transparent;
+  font-family:var(--font);font-size:15px;color:var(--text);outline:none;
+}
+.pill-input::placeholder{color:var(--text-muted)}
+.pill-action {
+  width:32px;height:32px;border-radius:50%;border:none;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:15px;flex-shrink:0;transition:all 0.22s var(--ease);
+}
+.pill-action.mic{background:rgba(10,132,255,0.1);color:var(--accent)}
+.pill-action.mic:hover{background:rgba(10,132,255,0.18);transform:scale(1.05)}
+.pill-action.send{background:var(--accent);color:#fff}
+.pill-action.send:active{transform:scale(0.94)}
+.pill-action.stop{background:var(--danger);color:#fff}
+
+/* Controls */
+.controls-row{display:flex;align-items:center;justify-content:center;gap:16px;padding-top:2px}
+.ctrl-btn{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;font-family:var(--font)}
+.ctrl-icon{width:36px;height:36px;border-radius:50%;background:var(--surface);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:var(--shadow-sm);transition:all 0.22s var(--ease)}
+.ctrl-icon:hover{transform:scale(1.05)}
+.ctrl-icon.danger{background:rgba(255,59,48,0.08);border-color:rgba(255,59,48,0.2)}
+.ctrl-icon.danger.active{background:rgba(255,59,48,0.15)}
+.ctrl-label{font-size:10px;color:var(--text-muted);font-weight:500}
+
+/* Detach bubble */
+.detach-bubble {
+  position:absolute;bottom:84px;right:16px;
+  width:54px;height:54px;border-radius:50%;
+  background:conic-gradient(from 0deg, #0A84FF, #5E5CE6, #30D158, #FF9F0A, #0A84FF);
+  box-shadow:var(--shadow),0 0 0 3px rgba(255,255,255,0.9);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;z-index:50;
+  opacity:0;pointer-events:none;transition:opacity 0.28s var(--ease),transform 0.28s var(--ease);
+  transform:scale(0.8);
+}
+.detach-bubble.visible{opacity:1;pointer-events:auto;transform:scale(1)}
+.detach-bubble::after{
+  content:'';position:absolute;inset:5px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,rgba(255,255,255,0.7),rgba(255,255,255,0.2));
+}
+.bubble-timer{font-size:9px;color:rgba(255,255,255,0.9);font-weight:700;position:relative;z-index:1;margin-top:2px}
+@keyframes sys-bubble{0%,100%{box-shadow:var(--shadow),0 0 0 3px rgba(255,255,255,0.9)}50%{box-shadow:0 12px 40px rgba(10,132,255,0.4),0 0 0 5px rgba(255,255,255,0.7)}}
+.detach-bubble.visible{animation:sys-bubble 2.2s ease-in-out infinite}
+
+/* Play demo */
+.play-demo {
+  position:absolute;top:10px;right:12px;z-index:200;
+  background:rgba(10,132,255,0.12);border:0.5px solid rgba(10,132,255,0.18);border-radius:100px;
+  padding:5px 12px;font-family:var(--font);font-size:11px;font-weight:600;
+  color:var(--accent);cursor:pointer;transition:background 0.22s var(--ease),opacity 0.22s var(--ease);
+  box-shadow:var(--shadow-sm);white-space:nowrap;
+}
+.play-demo:hover{background:rgba(10,132,255,0.2)}
+.play-demo:disabled{cursor:default;opacity:0.78}
+
+@media(min-width:760px){
+  .device{width:960px;height:640px;border-radius:30px}
+}
+</style>
+</head>
+<body>
+<div class="device" id="device">
+  <div class="sim-content" aria-hidden="true">
+    <div class="sim-line" style="width:70%"></div>
+    <div class="sim-line" style="width:50%"></div>
+    <div class="sim-card"></div>
+    <div class="sim-line" style="width:80%"></div>
+    <div class="sim-line" style="width:60%"></div>
+  </div>
+
+  <div class="hud-scrim" aria-hidden="true"></div>
+
+  <div class="edge-glow" id="edgeGlow"></div>
+
+  <div class="hud-layer">
+    <!-- Status bar -->
+    <div class="status-bar">
+      <div class="status-left">
+        <span class="status-time" id="clockDisplay">9:41</span>
+        <div class="live-badge" id="liveBadge">
+          <div class="live-dot"></div>
+          <span>Live</span>
+          <span class="session-timer" id="sessionTimer">0:00</span>
+        </div>
+      </div>
+      <div class="status-right">
+        <span class="muted-label" id="mutedLabel">Muted</span>
+        <span class="status-brand">✦ Eliza</span>
+      </div>
+    </div>
+
+    <!-- Chat log -->
+    <div class="chat-log" id="chatLog">
+      <div class="turn">
+        <div class="turn-header">🎙 Voice</div>
+        <div class="bubble user">What's the weather like in Tokyo right now?</div>
+      </div>
+      <div class="turn">
+        <div class="turn-header">✦ Eliza · Card</div>
+        <div class="app-card">
+          <div class="app-card-header">
+            <div class="app-card-title"><div class="app-icon">🌤</div>Tokyo Weather</div>
+            <span class="app-expand">⤢</span>
+          </div>
+          <div class="app-card-body">
+            <div class="weather-main">
+              <div class="weather-temp">18°C</div>
+              <div class="weather-detail">Partly Cloudy<br><span style="font-size:12px">Feels like 16° · Humidity 62%</span></div>
+            </div>
+            <div class="weather-forecast">
+              <div class="forecast-item"><div>Mon</div><span>🌤</span><strong>19°</strong></div>
+              <div class="forecast-item"><div>Tue</div><span>🌧</span><strong>14°</strong></div>
+              <div class="forecast-item"><div>Wed</div><span>☀️</span><strong>22°</strong></div>
+            </div>
+          </div>
+          <div class="app-card-actions">
+            <button class="card-btn primary">Full Forecast</button>
+            <button class="card-btn secondary">Hourly</button>
+          </div>
+        </div>
+      </div>
+      <div class="turn">
+        <div class="turn-header">⌨ Typed</div>
+        <div class="bubble user">
+          <div class="attachment-chip">
+            <div class="thumb">🖼</div>
+            <span>tokyo.jpg</span>
+          </div>
+          <div>What neighbourhood is this?</div>
+        </div>
+      </div>
+      <div class="turn">
+        <div class="turn-header">✦ Eliza</div>
+        <div class="bubble assistant">That's Shibuya Crossing — the world's busiest pedestrian intersection. Around 2,500 people cross with every light cycle at peak hours.</div>
+      </div>
+      <div class="turn" id="streamingTurn" style="display:none">
+        <div class="turn-header">✦ Eliza</div>
+        <div class="bubble assistant partial" id="streamingBubble"></div>
+      </div>
+    </div>
+
+    <!-- Listening indicator -->
+    <div class="listening-indicator" id="listeningIndicator">
+      <div class="mic-wave">
+        <span id="w1"></span><span id="w2"></span><span id="w3"></span><span id="w4"></span><span id="w5"></span>
+      </div>
+      🎙 <span id="listenLabel">Listening…</span>
+    </div>
+
+    <!-- Suggestions -->
+    <div class="suggestions" id="suggestions">
+      <div class="suggestion-set" id="idleSuggestions">
+        <div class="suggestion-chip" onclick="fillSuggestion('Ask about this screen')">🖥 Ask about screen</div>
+        <div class="suggestion-chip" onclick="fillSuggestion('What can you help with?')">✦ What can you do?</div>
+      </div>
+      <div class="suggestion-set hidden" id="typingSuggestions">
+        <div class="suggestion-chip" onclick="appendSuggestion('summarize this')">✎ summarize this</div>
+        <div class="suggestion-chip" onclick="appendSuggestion('in plain English')">↻ in plain English</div>
+        <div class="suggestion-chip" onclick="appendSuggestion('with examples')">＋ with examples</div>
+      </div>
+    </div>
+
+    <div class="staged-attachments" id="stagedAttachments"></div>
+
+    <!-- Pill -->
+    <div class="pill-row">
+      <button class="pill-attach" onclick="handleAttach()">+</button>
+      <div class="pill-orb idle" id="pillOrb" onclick="toggleVoice()"></div>
+      <input class="pill-input" id="pillInput" placeholder="Ask Eliza…" oninput="onInput()" onkeydown="onKeydown(event)">
+      <button class="pill-action mic" id="pillAction" onclick="handleAction()">🎙</button>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls-row">
+      <button class="ctrl-btn" onclick="toggleMute()">
+        <div class="ctrl-icon danger" id="muteIcon">🎙</div>
+        <span class="ctrl-label" id="muteLabel">Mute</span>
+      </button>
+      <button class="ctrl-btn" onclick="endSession()">
+        <div class="ctrl-icon danger" style="font-size:13px">End</div>
+        <span class="ctrl-label">Session</span>
+      </button>
+      <button class="ctrl-btn" onclick="toggleDetach()">
+        <div class="ctrl-icon">⤢</div>
+        <span class="ctrl-label">Detach</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="detach-bubble" id="detachBubble" onclick="toggleDetach()">
+    <div style="font-size:18px;position:relative;z-index:1">✦</div>
+    <div class="bubble-timer" id="bubbleTimer">0:00</div>
+  </div>
+
+  <button class="play-demo" id="playDemoBtn" onclick="playDemo()">▶ Play Demo</button>
+</div>
+
+<script>
+const STATE={mode:'idle',muted:false,sessionActive:false,sessionSeconds:0,hasAttachment:false,detached:false};
+const demoTimers=[];
+let ampRaf=null,sessionInterval=null;
+
+const edgeGlow=document.getElementById('edgeGlow');
+const pillOrb=document.getElementById('pillOrb');
+const pillAction=document.getElementById('pillAction');
+const pillInput=document.getElementById('pillInput');
+const listeningIndicator=document.getElementById('listeningIndicator');
+const listenLabel=document.getElementById('listenLabel');
+const liveBadge=document.getElementById('liveBadge');
+const sessionTimer=document.getElementById('sessionTimer');
+const mutedLabel=document.getElementById('mutedLabel');
+const muteIcon=document.getElementById('muteIcon');
+const muteLabel=document.getElementById('muteLabel');
+const idleSuggestions=document.getElementById('idleSuggestions');
+const typingSuggestions=document.getElementById('typingSuggestions');
+const stagedAttachments=document.getElementById('stagedAttachments');
+const chatLog=document.getElementById('chatLog');
+const detachBubble=document.getElementById('detachBubble');
+const bubbleTimer=document.getElementById('bubbleTimer');
+const streamingTurn=document.getElementById('streamingTurn');
+const streamingBubble=document.getElementById('streamingBubble');
+const playDemoBtn=document.getElementById('playDemoBtn');
+const waveEls=[document.getElementById('w1'),document.getElementById('w2'),document.getElementById('w3'),document.getElementById('w4'),document.getElementById('w5')];
+
+function updateClock(){
+  const now=new Date();
+  document.getElementById('clockDisplay').textContent=now.getHours()+':'+now.getMinutes().toString().padStart(2,'0');
+}
+updateClock();setInterval(updateClock,1000);
+
+function startSessionTimer(){
+  if(sessionInterval)return;STATE.sessionActive=true;liveBadge.classList.add('visible');
+  sessionInterval=setInterval(()=>{
+    STATE.sessionSeconds++;
+    const m=Math.floor(STATE.sessionSeconds/60),s=STATE.sessionSeconds%60;
+    const t=m+':'+s.toString().padStart(2,'0');
+    sessionTimer.textContent=t;bubbleTimer.textContent=t;
+  },1000);
+}
+function stopSessionTimer(){clearInterval(sessionInterval);sessionInterval=null;STATE.sessionActive=false;STATE.sessionSeconds=0;liveBadge.classList.remove('visible');}
+
+function setMode(mode){
+  STATE.mode=mode;
+  pillOrb.className='pill-orb '+mode;
+  edgeGlow.className='edge-glow';
+  listeningIndicator.className='listening-indicator';
+  listeningIndicator.style.cssText='';
+
+  if(mode==='listening'){
+    if(STATE.muted){
+      listeningIndicator.classList.add('visible','muted-indicator');
+      listenLabel.textContent='Muted';
+      edgeGlow.classList.add('muted');
+    } else {
+      listeningIndicator.classList.add('visible');
+      listenLabel.textContent='Listening…';
+      edgeGlow.classList.add('listening');
+      startAmp();
+    }
+    updateActionBtn('stop');
+  } else if(mode==='thinking'){
+    listeningIndicator.classList.add('visible');
+    listeningIndicator.style.background='rgba(94,92,230,0.08)';
+    listeningIndicator.style.borderColor='rgba(94,92,230,0.18)';
+    listeningIndicator.style.color='#5E5CE6';
+    listenLabel.textContent='Thinking…';
+    edgeGlow.classList.add('listening');
+    stopAmp();updateActionBtn('stop');
+  } else if(mode==='speaking'){
+    listeningIndicator.classList.add('visible');
+    listeningIndicator.style.background='rgba(48,209,88,0.08)';
+    listeningIndicator.style.borderColor='rgba(48,209,88,0.18)';
+    listeningIndicator.style.color='var(--accent-2)';
+    listenLabel.textContent='Speaking…';
+    edgeGlow.classList.add('speaking');
+    startAmp();updateActionBtn('stop');
+  } else {
+    stopAmp();updateActionBtn('mic');
+  }
+}
+
+function updateActionBtn(type){
+  pillAction.className='pill-action '+type;
+  if(type==='mic')pillAction.textContent=STATE.muted?'🔇':'🎙';
+  else if(type==='send')pillAction.textContent='↑';
+  else if(type==='stop')pillAction.textContent='■';
+}
+
+function startAmp(){
+  stopAmp();
+  function tick(){
+    waveEls.forEach(el=>{const h=3+Math.random()*11;el.style.height=h+'px';});
+    ampRaf=requestAnimationFrame(()=>setTimeout(tick,90));
+  }
+  tick();
+}
+function stopAmp(){if(ampRaf){cancelAnimationFrame(ampRaf);ampRaf=null;}waveEls.forEach(el=>el.style.height='4px');}
+
+function toggleVoice(){
+  if(STATE.mode==='idle'){startSessionTimer();setMode('listening');}
+  else{setMode('idle');stopSessionTimer();}
+}
+
+function onInput(){
+  const typing=pillInput.value.trim().length>0;
+  idleSuggestions.classList.toggle('hidden',typing);
+  typingSuggestions.classList.toggle('hidden',!typing);
+  if(typing)updateActionBtn('send');
+  else if(STATE.mode==='idle')updateActionBtn('mic');
+}
+function onKeydown(e){if(e.key==='Enter'&&pillInput.value.trim())handleSend();}
+
+function handleAction(){
+  if(STATE.mode!=='idle'){setMode('idle');stopSessionTimer();}
+  else if(pillInput.value.trim())handleSend();
+  else toggleVoice();
+}
+
+function handleSend(){
+  const text=pillInput.value.trim();if(!text)return;
+  addTurn('user','⌨ Typed',text,STATE.hasAttachment?'document.pdf':null);
+  pillInput.value='';STATE.hasAttachment=false;stagedAttachments.innerHTML='';
+  onInput();
+  setTimeout(()=>streamReply('Here\'s a summary: the document covers three areas. The methodology section explains the approach. Results show a 34% improvement. Conclusions point to next steps.'),500);
+}
+
+function handleAttach(){
+  if(STATE.hasAttachment)return;STATE.hasAttachment=true;
+  const chip=document.createElement('div');chip.className='attachment-chip staged';
+  chip.innerHTML=`<div class="thumb">📄</div><span>document.pdf</span><span class="chip-remove" onclick="removeAttachment()">✕</span>`;
+  stagedAttachments.appendChild(chip);
+}
+function removeAttachment(){STATE.hasAttachment=false;stagedAttachments.innerHTML='';}
+function fillSuggestion(text){pillInput.value=text;onInput();pillInput.focus();}
+function appendSuggestion(text){
+  const base=pillInput.value.trim();
+  pillInput.value=base?base+' '+text:text;
+  onInput();pillInput.focus();
+}
+
+function addTurn(who,header,text,attachment){
+  const div=document.createElement('div');div.className='turn enter';
+  const cls=who==='user'?'user':'assistant';
+  let inner='';
+  if(attachment&&who==='user'){
+    inner=`<div class="bubble ${cls}"><div class="attachment-chip" style="margin-bottom:6px"><div class="thumb">📄</div><span>${attachment}</span></div><div>${text}</div></div>`;
+  } else {
+    inner=`<div class="bubble ${cls}">${text}</div>`;
+  }
+  div.innerHTML=`<div class="turn-header">${header}</div>${inner}`;
+  chatLog.appendChild(div);chatLog.scrollTop=chatLog.scrollHeight;
+}
+
+function streamReply(text){
+  streamingTurn.style.display='';streamingBubble.classList.add('partial');streamingBubble.textContent='';
+  chatLog.scrollTop=chatLog.scrollHeight;let i=0;
+  const iv=setInterval(()=>{
+    if(i>=text.length){clearInterval(iv);streamingBubble.classList.remove('partial');
+      addTurn('assistant','✦ Eliza',text);
+      streamingTurn.style.display='none';streamingBubble.textContent='';return;}
+    streamingBubble.textContent+=text[i++];chatLog.scrollTop=chatLog.scrollHeight;
+  },20);
+}
+
+function toggleMute(){
+  STATE.muted=!STATE.muted;
+  mutedLabel.classList.toggle('visible',STATE.muted);
+  muteIcon.textContent=STATE.muted?'🔇':'🎙';
+  muteIcon.classList.toggle('active',STATE.muted);
+  muteLabel.textContent=STATE.muted?'Unmute':'Mute';
+  if(STATE.mode==='listening')setMode('listening');
+}
+
+function toggleDetach(){
+  STATE.detached=!STATE.detached;
+  detachBubble.classList.toggle('visible',STATE.detached&&STATE.sessionActive);
+}
+
+function endSession(){setMode('idle');stopSessionTimer();STATE.detached=false;detachBubble.classList.remove('visible');}
+
+function playDemo(){
+  demoTimers.forEach(clearTimeout);demoTimers.length=0;
+  setMode('idle');stopSessionTimer();
+  playDemoBtn.disabled=true;playDemoBtn.textContent='Running…';
+  const steps=[
+    ()=>{startSessionTimer();setMode('listening');},
+    ()=>{setMode('thinking');},
+    ()=>{setMode('speaking');},
+    ()=>{addTurn('user','🎙 Voice','What will the weather be like this weekend?');
+      streamReply('This weekend looks great! Saturday will be sunny with highs around 22°C. Sunday stays partly cloudy near 19°C. Both days are comfortable for being outside.');
+      setMode('idle');},
+    ()=>{setMode('listening');},
+    ()=>{setMode('idle');stopSessionTimer();playDemoBtn.disabled=false;playDemoBtn.textContent='↺ Replay';}
+  ];
+  const delays=[0,2200,1200,1800,3600,2000];
+  let el=0;steps.forEach((fn,i)=>{el+=delays[i];demoTimers.push(setTimeout(fn,el));});
+}
+</script>
+</body>
+</html>

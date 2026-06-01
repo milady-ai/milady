@@ -1,0 +1,903 @@
+<!-- concept-D14-L4 | direction: Voice-Memo / Audio-Waveform Style | look: Clean System Light | targets: 420x760, 960x640 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D14 · Voice-Memo / Audio-Waveform Style · Clean System Light</title>
+<style>
+:root{
+  --bg:#F2F2F7;
+  --surface:#FFFFFF;
+  --surface-2:#FFFFFF;
+  --border:rgba(60,60,67,0.18);
+  --text:#1C1C1E;
+  --text-secondary:rgba(60,60,67,0.60);
+  --text-muted:#8E8E93;
+  --accent:#0A84FF;
+  --accent-2:#30D158;
+  --danger:#FF3B30;
+  --radius:13px;
+  --radius-sm:9px;
+  --font:"SF Pro Text",-apple-system,"Segoe UI Variable","Helvetica Neue",system-ui,sans-serif;
+  --shadow:0 8px 30px rgba(0,0,0,0.12);
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.10);
+  --ease:cubic-bezier(.32,.72,0,1);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+body{
+  background:var(--bg);
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font);color:var(--text);
+}
+
+.app-window{
+  width:420px;height:760px;
+  background:var(--bg);
+  border-radius:48px;
+  box-shadow:var(--shadow),0 0 0 1px rgba(0,0,0,0.06);
+  display:flex;flex-direction:column;overflow:hidden;
+  position:relative;
+}
+
+/* Status bar mock */
+.status-bar{
+  height:44px;
+  padding:14px 22px 0;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+  background:var(--surface);
+}
+.status-time{font-size:15px;font-weight:600;letter-spacing:-0.3px;}
+.status-icons{font-size:12px;color:var(--text);display:flex;gap:6px;align-items:center;}
+
+/* Header / Nav bar */
+.header{
+  padding:10px 16px 12px;
+  background:var(--surface);
+  display:flex;align-items:center;gap:12px;
+  position:relative;
+}
+.header::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;
+  height:0.5px;background:var(--border);
+}
+
+/* Siri-style orb */
+.avatar-container{width:44px;height:44px;flex-shrink:0;position:relative;}
+.avatar-orb{
+  width:44px;height:44px;border-radius:50%;
+  background:conic-gradient(from 0deg,#0A84FF,#30D158,#FF9F0A,#FF3B30,#BF5AF2,#0A84FF);
+  animation:orb-idle 4s ease-in-out infinite;
+  position:relative;overflow:hidden;
+}
+.avatar-orb::before{
+  content:'';position:absolute;
+  inset:3px;border-radius:50%;
+  background:var(--surface);
+}
+.avatar-orb::after{
+  content:'';position:absolute;
+  inset:6px;border-radius:50%;
+  background:linear-gradient(135deg,#0A84FF,#BF5AF2);
+  animation:orb-core 3s ease-in-out infinite;
+}
+
+@keyframes orb-idle{
+  0%,100%{transform:scale(1);filter:blur(0px);}
+  50%{transform:scale(1.04);filter:blur(0px);}
+}
+@keyframes orb-core{
+  0%,100%{opacity:0.8;background:linear-gradient(135deg,#0A84FF,#BF5AF2);}
+  50%{opacity:0.9;}
+}
+@keyframes orb-listen{
+  0%,100%{transform:scale(1);}
+  50%{transform:scale(1.08);}
+}
+@keyframes orb-think{
+  0%{background:linear-gradient(135deg,#0A84FF,#BF5AF2);}
+  33%{background:linear-gradient(135deg,#BF5AF2,#FF9F0A);}
+  66%{background:linear-gradient(135deg,#FF9F0A,#30D158);}
+  100%{background:linear-gradient(135deg,#0A84FF,#BF5AF2);}
+}
+@keyframes orb-speak{
+  0%,100%{transform:scale(1);}
+  25%{transform:scale(1.06);}
+  75%{transform:scale(1.03);}
+}
+@keyframes ring-pulse{
+  0%{transform:scale(1);opacity:0.5;}
+  100%{transform:scale(1.5);opacity:0;}
+}
+
+.orb-ring{
+  position:absolute;inset:-4px;border-radius:50%;
+  border:1.5px solid var(--accent);
+  animation:ring-pulse 2s var(--ease) infinite;
+  opacity:0;pointer-events:none;
+}
+.orb-ring.listening{opacity:1;}
+
+.header-text{flex:1;}
+.header-title{font-size:17px;font-weight:600;letter-spacing:-0.3px;}
+.header-sub{font-size:13px;color:var(--text-muted);margin-top:1px;}
+
+/* Listening badge */
+.listen-pill{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(10,132,255,0.12);
+  border-radius:20px;padding:5px 12px;
+  font-size:13px;font-weight:500;color:var(--accent);
+  opacity:0;transition:opacity 0.25s var(--ease);
+}
+.listen-pill.visible{opacity:1;}
+.listen-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--accent);
+  animation:mic-blink 0.9s ease-in-out infinite;
+}
+@keyframes mic-blink{0%,100%{opacity:1;}50%{opacity:0.25;};}
+
+/* State bar */
+.state-bar{
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  font-size:13px;font-weight:500;
+  height:0;overflow:hidden;opacity:0;
+  transition:all 0.25s var(--ease);
+  background:rgba(10,132,255,0.06);
+}
+.state-bar.listening{height:32px;opacity:1;color:var(--accent);}
+.state-bar.muted-bar{height:32px;opacity:1;color:var(--danger);background:rgba(255,59,48,0.06);}
+.state-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:mic-blink 0.9s ease-in-out infinite;}
+
+/* Memo list */
+.memo-list{
+  flex:1;overflow-y:auto;
+  padding:12px 16px 8px;
+  display:flex;flex-direction:column;gap:8px;
+  scroll-behavior:smooth;
+  background:var(--bg);
+}
+.memo-list::-webkit-scrollbar{width:4px;}
+.memo-list::-webkit-scrollbar-thumb{background:rgba(60,60,67,0.18);border-radius:4px;}
+
+/* Memo */
+.memo{
+  background:var(--surface);
+  border-radius:var(--radius);
+  padding:12px 14px;
+  box-shadow:var(--shadow-sm);
+  animation:spring-in 0.32s var(--ease) both;
+  position:relative;
+}
+@keyframes spring-in{from{opacity:0;transform:scale(0.95) translateY(8px);}to{opacity:1;transform:scale(1) translateY(0);}}
+
+.memo.user{background:rgba(10,132,255,0.08);border:0.5px solid rgba(10,132,255,0.15);}
+.memo.assistant{background:var(--surface);border:0.5px solid var(--border);}
+.memo.interrupted{opacity:0.55;}
+
+.memo-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.memo-glyph{
+  width:20px;height:20px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;flex-shrink:0;
+}
+.memo.user .memo-glyph{background:rgba(10,132,255,0.15);color:var(--accent);}
+.memo.assistant .memo-glyph{background:rgba(48,209,88,0.15);color:var(--accent-2);}
+.memo-label{font-size:12px;font-weight:600;color:var(--text-secondary);}
+.memo-duration{margin-left:auto;font-size:12px;color:var(--text-muted);font-variant-numeric:tabular-nums;}
+
+/* Waveform */
+.waveform-container{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.play-btn{
+  width:30px;height:30px;border-radius:50%;
+  background:var(--accent);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:10px;flex-shrink:0;
+  box-shadow:0 2px 6px rgba(10,132,255,0.3);
+  transition:transform 0.2s var(--ease),opacity 0.2s;
+}
+.memo.assistant .play-btn{background:var(--accent-2);box-shadow:0 2px 6px rgba(48,209,88,0.3);}
+.play-btn:hover{transform:scale(1.06);}
+.play-btn:active{transform:scale(0.94);}
+
+.waveform{
+  flex:1;height:32px;display:flex;align-items:center;gap:1.5px;
+  cursor:pointer;position:relative;overflow:hidden;
+  border-radius:4px;
+}
+.wave-bar{flex:1;border-radius:1.5px;background:rgba(10,132,255,0.18);min-height:2px;}
+.memo.assistant .wave-bar{background:rgba(48,209,88,0.18);}
+.wave-bar.played{background:rgba(10,132,255,0.55);}
+.memo.assistant .wave-bar.played{background:rgba(48,209,88,0.55);}
+.scrub-cursor{
+  position:absolute;left:0;top:0;bottom:0;
+  width:1.5px;background:var(--accent);border-radius:1px;
+  pointer-events:none;
+}
+.memo.assistant .scrub-cursor{background:var(--accent-2);}
+
+/* Transcript */
+.transcript-toggle{
+  font-size:12px;color:var(--accent);cursor:pointer;
+  background:none;border:none;font-family:var(--font);font-weight:500;
+  padding:2px 0;display:flex;align-items:center;gap:4px;
+  transition:opacity 0.15s;
+}
+.transcript-toggle:active{opacity:0.7;}
+.memo.assistant .transcript-toggle{color:var(--accent-2);}
+.transcript-body{
+  font-size:13px;line-height:1.5;color:var(--text);
+  padding-top:8px;margin-top:4px;
+  border-top:0.5px solid var(--border);display:none;
+}
+.transcript-body.open{display:block;}
+.word.active{color:var(--accent);font-weight:500;}
+
+.interrupted-tag{
+  font-size:11px;color:var(--danger);font-weight:500;
+  margin-top:4px;display:inline-block;
+}
+
+.attach-row{display:flex;gap:6px;margin-top:6px;}
+.attach-thumb{
+  width:36px;height:36px;border-radius:8px;
+  background:var(--bg);border:0.5px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+}
+
+.partial-indicator{
+  display:inline-block;width:5px;height:5px;border-radius:50%;
+  background:var(--accent-2);margin-left:5px;vertical-align:middle;
+  animation:mic-blink 0.7s ease-in-out infinite;
+}
+
+/* App card */
+.app-card{
+  background:var(--bg);border-radius:var(--radius-sm);
+  padding:12px 14px;margin-top:8px;
+  border:0.5px solid var(--border);
+}
+.app-card-header{
+  display:flex;align-items:center;gap:10px;margin-bottom:10px;
+}
+.app-icon{
+  width:28px;height:28px;border-radius:7px;
+  background:linear-gradient(135deg,#5AC8FA,#0A84FF);
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+}
+.app-card-title{font-size:13px;font-weight:600;letter-spacing:-0.2px;}
+.app-card-sub{font-size:11px;color:var(--text-muted);margin-top:1px;}
+.app-card-temp{font-size:28px;font-weight:200;color:var(--text);letter-spacing:-1px;}
+.app-card-detail{font-size:12px;color:var(--text-muted);margin-top:4px;}
+.app-card-actions{display:flex;gap:8px;margin-top:10px;}
+.app-card-btn{
+  flex:1;padding:8px 12px;border-radius:var(--radius-sm);
+  font-size:13px;font-weight:500;cursor:pointer;
+  border:0.5px solid var(--border);
+  background:var(--surface);color:var(--accent);
+  font-family:var(--font);
+  transition:all 0.2s var(--ease);
+}
+.app-card-btn:active{opacity:0.7;}
+.app-card-btn.primary{background:var(--accent);color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(10,132,255,0.25);}
+
+/* Suggestions */
+.suggestions{
+  padding:8px 16px;
+  display:flex;gap:6px;flex-wrap:wrap;
+  background:var(--bg);
+  transition:opacity 0.2s;
+}
+.chip{
+  padding:7px 14px;background:var(--surface);
+  border:0.5px solid var(--border);
+  border-radius:20px;
+  font-size:13px;color:var(--text);
+  cursor:pointer;
+  box-shadow:var(--shadow-sm);
+  white-space:nowrap;
+  transition:all 0.2s var(--ease);
+}
+.chip:active{background:var(--bg);transform:scale(0.97);}
+
+/* Composer */
+.composer{
+  padding:10px 16px 30px;
+  background:var(--surface);
+  border-top:0.5px solid var(--border);
+  flex-shrink:0;
+}
+
+.attach-staged{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;}
+.staged-chip{
+  display:flex;align-items:center;gap:6px;
+  background:var(--bg);border:0.5px solid var(--border);
+  border-radius:10px;padding:5px 10px 5px 8px;
+  font-size:12px;
+  animation:spring-in 0.25s var(--ease) both;
+}
+.staged-chip-remove{cursor:pointer;color:var(--text-muted);font-size:12px;margin-left:2px;}
+
+.live-waveform{
+  display:flex;align-items:center;gap:1.5px;height:20px;
+  background:rgba(10,132,255,0.06);border-radius:10px;
+  padding:0 10px;flex:1;overflow:hidden;
+  opacity:0;transition:opacity 0.2s;
+}
+.live-waveform.active{opacity:1;}
+.live-bar{width:2px;border-radius:1px;background:var(--accent);height:3px;transition:height 0.08s ease;}
+
+.composer-row{display:flex;align-items:center;gap:8px;}
+.attach-btn{
+  width:34px;height:34px;border-radius:50%;
+  background:var(--bg);border:0.5px solid var(--border);
+  color:var(--accent);cursor:pointer;font-size:18px;font-weight:300;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s var(--ease);flex-shrink:0;
+}
+.attach-btn:active{transform:scale(0.94);}
+
+.text-input{
+  flex:1;background:var(--bg);
+  border:0.5px solid var(--border);
+  border-radius:20px;
+  padding:8px 14px;
+  font-size:15px;font-family:var(--font);color:var(--text);
+  resize:none;outline:none;display:none;
+  min-height:36px;max-height:80px;
+  transition:border-color 0.2s;
+}
+.text-input::placeholder{color:var(--text-muted);}
+.text-input:focus{border-color:rgba(10,132,255,0.4);}
+
+.primary-btn{
+  width:44px;height:44px;border-radius:50%;
+  border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;color:#fff;
+  transition:all 0.3s var(--ease);flex-shrink:0;
+  position:relative;overflow:hidden;
+}
+.primary-btn.mic{background:var(--accent);box-shadow:0 4px 14px rgba(10,132,255,0.35);}
+.primary-btn.send{background:var(--accent);box-shadow:0 4px 14px rgba(10,132,255,0.35);}
+.primary-btn.stop{background:var(--danger);box-shadow:0 4px 14px rgba(255,59,48,0.3);}
+.primary-btn.recording{background:var(--danger);animation:rec-pulse 0.9s ease-in-out infinite;}
+@keyframes rec-pulse{0%,100%{box-shadow:0 4px 14px rgba(255,59,48,0.3);}50%{box-shadow:0 4px 24px rgba(255,59,48,0.6),0 0 0 6px rgba(255,59,48,0.12);}}
+.primary-btn:active{transform:scale(0.92);}
+
+.btn-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transition:all 0.25s var(--ease);}
+.btn-icon.hidden{opacity:0;transform:scale(0.4) rotate(-45deg);}
+
+.mute-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--bg);border:0.5px solid var(--border);
+  cursor:pointer;font-size:14px;color:var(--text-muted);
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s var(--ease);flex-shrink:0;
+}
+.mute-btn.muted{background:rgba(255,59,48,0.1);border-color:rgba(255,59,48,0.25);color:var(--danger);}
+.muted-label{font-size:10px;color:var(--danger);font-weight:500;text-align:center;display:none;margin-top:2px;}
+.muted-label.visible{display:block;}
+
+.keyboard-toggle{
+  font-size:13px;color:var(--accent);text-align:center;
+  cursor:pointer;margin-top:8px;font-weight:500;
+  transition:opacity 0.2s;
+}
+.keyboard-toggle:active{opacity:0.6;}
+
+.demo-btn{
+  display:block;width:100%;margin-top:8px;padding:9px;
+  background:rgba(10,132,255,0.08);
+  border:0.5px solid rgba(10,132,255,0.2);
+  border-radius:var(--radius-sm);
+  font-size:13px;font-weight:500;color:var(--accent);
+  cursor:pointer;font-family:var(--font);
+  transition:all 0.2s var(--ease);text-align:center;
+}
+.demo-btn:active{background:rgba(10,132,255,0.14);}
+
+@media(min-width:640px){.app-window{width:420px;height:min(760px,100vh - 20px);}}
+</style>
+</head>
+<body>
+
+<div class="app-window">
+
+  <!-- Status bar -->
+  <div class="status-bar" style="background:var(--surface);">
+    <span class="status-time" id="statusTime">9:41</span>
+    <div class="status-icons">
+      <span>●●●</span>
+      <span>WiFi</span>
+      <span>🔋</span>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="header" style="background:var(--surface);">
+    <div class="avatar-container">
+      <div class="avatar-orb" id="avatarOrb">
+        <div class="orb-ring" id="orbRing"></div>
+      </div>
+    </div>
+    <div class="header-text">
+      <div class="header-title">Eliza</div>
+      <div class="header-sub" id="statusLabel">Voice Memos</div>
+    </div>
+    <div class="listen-pill" id="listenPill">
+      <div class="listen-dot"></div>
+      <span id="badgeText">Listening…</span>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;margin-left:4px;">
+      <button class="mute-btn" id="muteBtn" onclick="toggleMute()">🎙</button>
+      <div class="muted-label" id="mutedLabel">Muted</div>
+    </div>
+  </div>
+
+  <!-- State bar -->
+  <div class="state-bar" id="stateBar">
+    <div class="state-dot"></div>
+    <span id="stateBarText">Listening…</span>
+  </div>
+
+  <!-- Memo list -->
+  <div class="memo-list" id="memoList">
+
+    <!-- Typed turn -->
+    <div class="memo user">
+      <div class="memo-header">
+        <div class="memo-glyph">⌨</div>
+        <div class="memo-label">You · Typed</div>
+        <div class="memo-duration">0:08</div>
+      </div>
+      <div class="waveform-container">
+        <button class="play-btn">▶</button>
+        <div class="waveform" id="wf-t1"></div>
+      </div>
+      <button class="transcript-toggle" onclick="toggleTranscript('t1')">
+        <span id="t1-caret">▸</span> Show transcript
+      </button>
+      <div class="transcript-body" id="tr-t1">What's the weather like in San Francisco today?</div>
+    </div>
+
+    <!-- Assistant with app card -->
+    <div class="memo assistant">
+      <div class="memo-header">
+        <div class="memo-glyph">🎙</div>
+        <div class="memo-label" style="color:var(--accent-2);">Eliza · Voice</div>
+        <div class="memo-duration">0:12</div>
+      </div>
+      <div class="waveform-container">
+        <button class="play-btn">▶</button>
+        <div class="waveform" id="wf-a1"></div>
+      </div>
+      <button class="transcript-toggle" onclick="toggleTranscript('a1')">
+        <span id="a1-caret">▸</span> Show transcript
+      </button>
+      <div class="transcript-body" id="tr-a1">
+        <span class="word">San</span> <span class="word">Francisco</span> <span class="word">is</span> <span class="word">62°F</span> <span class="word">right</span> <span class="word">now</span> <span class="word">with</span> <span class="word">light</span> <span class="word">fog.</span> <span class="word">Expect</span> <span class="word">clearing</span> <span class="word">by</span> <span class="word">noon</span> <span class="word">and</span> <span class="word">a</span> <span class="word">high</span> <span class="word">of</span> <span class="word">67°F.</span>
+      </div>
+      <div class="app-card">
+        <div class="app-card-header">
+          <div class="app-icon">🌤</div>
+          <div>
+            <div class="app-card-title">San Francisco</div>
+            <div class="app-card-sub">Today · Partly Cloudy</div>
+          </div>
+        </div>
+        <div class="app-card-temp">62°F</div>
+        <div class="app-card-detail">Light fog · Humidity 78% · Wind SW 12 mph</div>
+        <div class="app-card-actions">
+          <button class="app-card-btn">Hourly</button>
+          <button class="app-card-btn primary">Add to Briefing</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Voice + attachment (partial) -->
+    <div class="memo user" style="opacity:0.62">
+      <div class="memo-header">
+        <div class="memo-glyph">🎙</div>
+        <div class="memo-label">You · Voice <span class="partial-indicator"></span></div>
+        <div class="memo-duration">0:04</div>
+      </div>
+      <div class="waveform-container">
+        <button class="play-btn">▶</button>
+        <div class="waveform" id="wf-v1"></div>
+      </div>
+      <div class="attach-row">
+        <div class="attach-thumb">📸</div>
+        <div class="attach-thumb">📄</div>
+      </div>
+    </div>
+
+    <!-- Interrupted assistant -->
+    <div class="memo assistant interrupted">
+      <div class="memo-header">
+        <div class="memo-glyph">🎙</div>
+        <div class="memo-label" style="color:var(--accent-2);">Eliza · Voice</div>
+        <div class="memo-duration">0:02</div>
+      </div>
+      <div class="waveform-container">
+        <button class="play-btn">▶</button>
+        <div class="waveform" id="wf-a2"></div>
+      </div>
+      <div class="interrupted-tag">↩ Interrupted</div>
+      <button class="transcript-toggle" style="margin-top:6px;" onclick="toggleTranscript('a2')">
+        <span id="a2-caret">▸</span> Show transcript
+      </button>
+      <div class="transcript-body" id="tr-a2">Let me check your upcoming calendar—</div>
+    </div>
+
+  </div>
+
+  <!-- Suggestions -->
+  <div class="suggestions" id="followSuggs">
+    <div class="chip" onclick="sendChip(this)">Summarize</div>
+    <div class="chip" onclick="sendChip(this)">Set reminder</div>
+    <div class="chip" onclick="sendChip(this)">Shorter</div>
+  </div>
+
+  <!-- Composer -->
+  <div class="composer">
+    <div class="attach-staged" id="attachStaged"></div>
+    <div class="live-waveform" id="liveWaveform"></div>
+
+    <div class="composer-row" style="margin-top:8px;">
+      <button class="attach-btn" onclick="stageAttachment()">+</button>
+      <textarea class="text-input" id="textInput" placeholder="Message" rows="1"></textarea>
+
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
+        <button class="primary-btn mic" id="primaryBtn" onclick="handlePrimaryBtn()">
+          <span class="btn-icon" id="iconMic">🎙</span>
+          <span class="btn-icon hidden" id="iconSend">↑</span>
+          <span class="btn-icon hidden" id="iconStop">◼</span>
+          <span class="btn-icon hidden" id="iconRec">⏹</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="keyboard-toggle" id="keyboardToggle" onclick="toggleKeyboard()">⌨ Type instead</div>
+    <button class="demo-btn" id="demoBtn" onclick="playDemo()">▶ Play voice demo</button>
+  </div>
+
+</div>
+
+<script>
+// Update clock
+function updateClock(){
+  const d=new Date();
+  document.getElementById('statusTime').textContent=d.getHours()+':'+(d.getMinutes()<10?'0':'')+d.getMinutes();
+}
+updateClock();setInterval(updateClock,30000);
+
+let appState='idle';
+let muted=false;
+let keyboardOpen=false;
+let demoTimer=null;
+let animRunning=false;
+let rafId=null;
+let ampPhase=0;
+let speakPhase=0;
+let attachCount=0;
+let stagedAttach=[];
+let mc=10;
+
+const orb=document.getElementById('avatarOrb');
+const orbRing=document.getElementById('orbRing');
+const listenPill=document.getElementById('listenPill');
+const badgeText=document.getElementById('badgeText');
+const stateBar=document.getElementById('stateBar');
+const stateBarText=document.getElementById('stateBarText');
+const statusLabel=document.getElementById('statusLabel');
+const primaryBtn=document.getElementById('primaryBtn');
+const iconMic=document.getElementById('iconMic');
+const iconSend=document.getElementById('iconSend');
+const iconStop=document.getElementById('iconStop');
+const iconRec=document.getElementById('iconRec');
+const muteBtn=document.getElementById('muteBtn');
+const mutedLabel=document.getElementById('mutedLabel');
+const liveWaveform=document.getElementById('liveWaveform');
+const textInput=document.getElementById('textInput');
+const memoList=document.getElementById('memoList');
+const followSuggs=document.getElementById('followSuggs');
+
+// Build live bars
+const LBC=22;const lbEls=[];
+for(let i=0;i<LBC;i++){const b=document.createElement('div');b.className='live-bar';liveWaveform.appendChild(b);lbEls.push(b);}
+
+// Build static waveforms
+function buildWaveform(id,assistant=false){
+  const el=document.getElementById('wf-'+id);if(!el)return;
+  const cur=document.createElement('div');cur.className='scrub-cursor';cur.id='cur-'+id;el.appendChild(cur);
+  for(let i=0;i<32;i++){
+    const b=document.createElement('div');b.className='wave-bar';
+    b.style.height=(3+Math.random()*24)+'px';
+    if(assistant)b.style.background='rgba(48,209,88,0.18)';
+    el.appendChild(b);
+  }
+  el.addEventListener('click',e=>{
+    const rect=el.getBoundingClientRect();const pct=(e.clientX-rect.left)/rect.width;
+    const bars=el.querySelectorAll('.wave-bar');
+    bars.forEach((b,i)=>{
+      if(i/bars.length<pct){b.classList.add('played');if(assistant)b.style.background='rgba(48,209,88,0.55)';}
+      else{b.classList.remove('played');if(assistant)b.style.background='rgba(48,209,88,0.18)';}
+    });
+    document.getElementById('cur-'+id).style.left=(pct*100)+'%';
+  });
+}
+['t1','a1','v1','a2'].forEach(id=>buildWaveform(id,id.startsWith('a')));
+
+function toggleTranscript(id){
+  const body=document.getElementById('tr-'+id);
+  if(!body)return;
+  const open=body.classList.toggle('open');
+  const btn=document.querySelector(`[onclick="toggleTranscript('${id}')"]`);
+  if(btn){
+    const c=btn.querySelector('span');
+    if(c) c.textContent=open?'▾':'▸';
+    const nodes=[...btn.childNodes].filter(n=>n.nodeType===3);
+    if(nodes[0]) nodes[0].textContent=open?' Hide transcript':' Show transcript';
+  }
+}
+
+function setOrbState(state){
+  const inner=orb.querySelector('div:last-child')||orb;
+  orb.style.animation='';void orb.offsetWidth;
+  orbRing.classList.remove('listening');
+  switch(state){
+    case 'idle':
+      orb.style.animation='orb-idle 4s ease-in-out infinite';
+      break;
+    case 'listening':
+      orb.style.animation='orb-listen 0.7s ease-in-out infinite';
+      orbRing.classList.add('listening');
+      break;
+    case 'thinking':
+      orb.style.animation='orb-idle 1s ease-in-out infinite';
+      break;
+    case 'speaking':
+      orb.style.animation='orb-speak 0.65s ease-in-out infinite';
+      break;
+  }
+  // Update inner core color
+  const coreEl=orb.querySelector('div');
+  if(coreEl){
+    coreEl.style.animation='';void coreEl.offsetWidth;
+    if(state==='thinking') coreEl.style.animation='orb-think 1.5s linear infinite';
+    else coreEl.style.animation='orb-core 3s ease-in-out infinite';
+  }
+}
+
+function setStateBar(st){
+  stateBar.className='state-bar';
+  listenPill.classList.remove('visible');
+  if(st==='listening'&&!muted){
+    stateBar.classList.add('listening');
+    stateBarText.textContent='Listening…';
+    listenPill.classList.add('visible');
+    badgeText.textContent='Listening…';
+    statusLabel.textContent='Recording';
+  } else if(st==='muted'){
+    stateBar.classList.add('muted-bar');
+    stateBarText.textContent='Muted';
+    statusLabel.textContent='Voice Memos';
+  } else {
+    statusLabel.textContent='Voice Memos';
+  }
+}
+
+function startAnim(){
+  if(animRunning) return;animRunning=true;
+  function frame(){
+    if(!animRunning) return;
+    ampPhase+=0.08;speakPhase+=0.12;
+    if((appState==='listening'||appState==='recording')&&!muted){
+      lbEls.forEach((b,i)=>{b.style.height=Math.max(2,Math.abs(Math.sin(ampPhase+i*0.33))*16+Math.random()*4)+'px';});
+    } else if(appState==='speaking'){
+      lbEls.forEach((b,i)=>{b.style.height=Math.max(2,Math.abs(Math.sin(speakPhase+i*0.28))*14+Math.random()*3)+'px';});
+    }
+    rafId=requestAnimationFrame(frame);
+  }
+  rafId=requestAnimationFrame(frame);
+}
+function stopAnim(){animRunning=false;if(rafId)cancelAnimationFrame(rafId);rafId=null;}
+
+function toggleMute(){
+  muted=!muted;
+  muteBtn.textContent=muted?'🔇':'🎙';
+  muteBtn.classList.toggle('muted',muted);
+  mutedLabel.classList.toggle('visible',muted);
+  if(muted){
+    liveWaveform.classList.remove('active');
+    lbEls.forEach(b=>b.style.height='2px');
+    if(appState==='listening'||appState==='recording') setStateBar('muted');
+  } else {
+    if(appState==='listening'||appState==='recording'){
+      liveWaveform.classList.add('active');setStateBar('listening');
+    }
+  }
+}
+
+function setBtn(mode){
+  [iconMic,iconSend,iconStop,iconRec].forEach(i=>i.classList.add('hidden'));
+  primaryBtn.className='primary-btn '+mode;
+  switch(mode){
+    case 'mic':iconMic.classList.remove('hidden');break;
+    case 'send':iconSend.classList.remove('hidden');break;
+    case 'stop':iconStop.classList.remove('hidden');break;
+    case 'recording':iconRec.classList.remove('hidden');break;
+  }
+}
+
+function handlePrimaryBtn(){
+  if(appState==='speaking'||appState==='thinking'){cancelDemo();return;}
+  if(keyboardOpen){const v=textInput.value.trim();if(v){sendTyped(v);textInput.value='';setBtn('mic');}return;}
+  if(appState==='recording') stopRecording();else startRecording();
+}
+
+function startRecording(){
+  appState='recording';setBtn('recording');setOrbState('listening');
+  liveWaveform.classList.add('active');
+  if(!muted) setStateBar('listening');
+  startAnim();
+}
+function stopRecording(){
+  appState='idle';setBtn('mic');setOrbState('idle');
+  liveWaveform.classList.remove('active');setStateBar('idle');
+  addVoiceMemo('Can you summarize my day?','user');
+}
+
+textInput.addEventListener('input',()=>{
+  const v=textInput.value.trim();
+  setBtn(v?'send':'mic');
+  followSuggs.style.opacity=v?'0':'1';
+});
+textInput.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();const v=textInput.value.trim();if(v){sendTyped(v);textInput.value='';setBtn('mic');}}
+});
+
+function toggleKeyboard(){
+  keyboardOpen=!keyboardOpen;
+  textInput.style.display=keyboardOpen?'block':'none';
+  document.getElementById('keyboardToggle').textContent=keyboardOpen?'🎙 Use voice':'⌨ Type instead';
+  if(keyboardOpen) textInput.focus();
+  else{textInput.value='';setBtn('mic');followSuggs.style.opacity='1';}
+}
+
+const attachTypes=[{icon:'📸',label:'photo.jpg'},{icon:'📄',label:'doc.pdf'},{icon:'🎵',label:'audio.m4a'}];
+function stageAttachment(){
+  const a=attachTypes[attachCount%attachTypes.length];attachCount++;stagedAttach.push(a);renderStaged();
+}
+function renderStaged(){
+  const el=document.getElementById('attachStaged');el.innerHTML='';
+  stagedAttach.forEach((a,i)=>{
+    const c=document.createElement('div');c.className='staged-chip';
+    c.innerHTML=`<span>${a.icon}</span><span style="font-size:12px;">${a.label}</span><span class="staged-chip-remove" onclick="removeAttach(${i})">✕</span>`;
+    el.appendChild(c);
+  });
+}
+function removeAttach(i){stagedAttach.splice(i,1);renderStaged();}
+
+function sendTyped(text){
+  const m=createMemo('user','typed',text,'0:0'+(2+Math.floor(Math.random()*7)));
+  memoList.appendChild(m);stagedAttach=[];renderStaged();
+  memoList.scrollTop=memoList.scrollHeight;
+  setTimeout(()=>triggerReply(),550);
+}
+function sendChip(el){el.style.opacity='0.4';el.style.pointerEvents='none';sendTyped(el.textContent);}
+
+function createMemo(role,modality,text,dur){
+  mc++;const id='m'+mc;
+  const div=document.createElement('div');div.className='memo '+role;
+  const glyph=modality==='typed'?'⌨':'🎙';
+  const glabel=modality==='typed'?'Typed':'Voice';
+  const labelStyle=role==='assistant'?'style="color:var(--accent-2);"':'';
+  div.innerHTML=`
+    <div class="memo-header">
+      <div class="memo-glyph">${glyph}</div>
+      <div class="memo-label" ${labelStyle}>${role==='user'?'You':'Eliza'} · ${glabel}</div>
+      <div class="memo-duration">${dur}</div>
+    </div>
+    <div class="waveform-container">
+      <button class="play-btn">▶</button>
+      <div class="waveform" id="wf-${id}"></div>
+    </div>
+    <button class="transcript-toggle" onclick="toggleTranscript('${id}')">
+      <span>▸</span> Show transcript
+    </button>
+    <div class="transcript-body" id="tr-${id}">${text}</div>
+  `;
+  buildWaveform(id,role==='assistant');
+  return div;
+}
+
+function triggerReply(text){
+  appState='thinking';setOrbState('thinking');
+  const replies=[
+    "Here's your daily summary: two meetings in the afternoon and three flagged emails.",
+    "Got it. I've added that to your briefing — anything else?",
+    "All done. Your reminder is set for 8am tomorrow.",
+    "Sure. Here's the condensed version of what I just said.",
+    "Based on your calendar, your next free block is 4–5pm today."
+  ];
+  const reply=text||replies[Math.floor(Math.random()*replies.length)];
+  setTimeout(()=>{
+    appState='speaking';setOrbState('speaking');startAnim();setBtn('stop');
+    const p=createMemo('assistant','voice',reply,'0:07');
+    p.style.opacity='0.65';
+    const pi=document.createElement('span');pi.className='partial-indicator';
+    p.querySelector('.memo-label').appendChild(pi);
+    memoList.appendChild(p);memoList.scrollTop=memoList.scrollHeight;
+    setTimeout(()=>{
+      p.style.opacity='1';
+      const pi2=p.querySelector('.partial-indicator');if(pi2)pi2.remove();
+      appState='idle';setOrbState('idle');setBtn('mic');setStateBar('idle');
+      memoList.scrollTop=memoList.scrollHeight;
+    },2500);
+  },1000);
+}
+
+function addVoiceMemo(text,role){
+  const m=createMemo(role,'voice',text,'0:0'+(3+Math.floor(Math.random()*5)));
+  memoList.appendChild(m);memoList.scrollTop=memoList.scrollHeight;
+}
+
+function cancelDemo(){
+  if(demoTimer) clearTimeout(demoTimer);demoTimer=null;
+  appState='idle';setOrbState('idle');setBtn('mic');
+  liveWaveform.classList.remove('active');setStateBar('idle');stopAnim();
+}
+
+function playDemo(){
+  cancelDemo();
+  document.getElementById('demoBtn').textContent='▶ Replay demo';
+
+  appState='listening';setOrbState('listening');setBtn('recording');
+  liveWaveform.classList.add('active');
+  if(!muted) setStateBar('listening');
+  startAnim();
+
+  demoTimer=setTimeout(()=>{
+    appState='thinking';setOrbState('thinking');setBtn('stop');
+    liveWaveform.classList.remove('active');setStateBar('idle');
+    addVoiceMemo("What's on my schedule for today?",'user');
+
+    demoTimer=setTimeout(()=>{
+      appState='speaking';setOrbState('speaking');setBtn('stop');
+      const p=createMemo('assistant','voice',"You have a 10am standup, a 2pm design review, and a 5pm sync. Two emails from your manager are flagged — one needs a reply before noon. Want me to draft that reply?",'0:11');
+      p.style.opacity='0.65';
+      const pi=document.createElement('span');pi.className='partial-indicator';p.querySelector('.memo-label').appendChild(pi);
+      memoList.appendChild(p);memoList.scrollTop=memoList.scrollHeight;
+
+      demoTimer=setTimeout(()=>{
+        p.style.opacity='1';const pi2=p.querySelector('.partial-indicator');if(pi2)pi2.remove();
+        // Barge-in
+        demoTimer=setTimeout(()=>{
+          appState='listening';setOrbState('listening');
+          liveWaveform.classList.add('active');
+          if(!muted) setStateBar('listening');
+          const ib=createMemo('assistant','voice','I can also pull up—','0:01');
+          ib.classList.add('interrupted');
+          const it=document.createElement('div');it.className='interrupted-tag';it.textContent='↩ Interrupted';
+          ib.appendChild(it);memoList.appendChild(ib);memoList.scrollTop=memoList.scrollHeight;
+          demoTimer=setTimeout(()=>{
+            appState='idle';setOrbState('idle');setBtn('mic');
+            liveWaveform.classList.remove('active');setStateBar('idle');stopAnim();
+            addVoiceMemo('Yes, draft the reply for me.','user');
+          },2000);
+        },2800);
+      },2500);
+    },1000);
+  },2500);
+}
+
+setOrbState('idle');setBtn('mic');startAnim();
+</script>
+</body>
+</html>

@@ -48,6 +48,16 @@ const {
 const here = path.dirname(fileURLToPath(import.meta.url));
 const miladyRoot = path.resolve(here, "../..");
 const capacitorCoreEntry = _require.resolve("@capacitor/core");
+const publishedSharedCharacterPresetsEntry = (() => {
+  try {
+    return _require.resolve("@elizaos/shared/character-presets");
+  } catch {
+    return path.resolve(
+      here,
+      "../../eliza/packages/shared/dist/character-presets.js",
+    );
+  }
+})();
 const patheEntry = _require.resolve("pathe");
 const optionalElizaAppStubEntry = path.join(
   here,
@@ -85,6 +95,7 @@ function shouldUseLocalElizaSource(): boolean {
   return (
     process.env.MILADY_FORCE_LOCAL_UPSTREAMS === "1" ||
     process.env.ELIZA_FORCE_LOCAL_UPSTREAMS === "1" ||
+    fs.existsSync(path.join(localElizaRoot, "package.json")) ||
     resolvesInsideLocalElizaWorkspace("@elizaos/app-core/package.json")
   );
 }
@@ -260,6 +271,10 @@ function resolveLocalUiAliases(): Alias[] {
       replacement: path.join(uiPkgRoot, "src/index.ts"),
     },
     {
+      find: /^@elizaos\/ui\/api$/,
+      replacement: path.join(uiPkgRoot, "src/api/index.ts"),
+    },
+    {
       find: /^@elizaos\/ui\/browser$/,
       replacement: path.join(uiPkgRoot, "src/browser.ts"),
     },
@@ -268,12 +283,26 @@ function resolveLocalUiAliases(): Alias[] {
       replacement: path.join(uiPkgRoot, "src/browser.ts"),
     },
     {
-      find: /^@elizaos\/ui\/api$/,
-      replacement: path.join(uiPkgRoot, "src/api/index.ts"),
-    },
-    {
       find: /^@elizaos\/ui\/api\/(.+)$/,
       replacement: `${uiPkgRoot}/src/api/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/platform$/,
+      replacement: path.join(uiPkgRoot, "src/platform/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/platform\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/platform/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/voice$/,
+      replacement: path.join(uiPkgRoot, "src/voice/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/voice\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/voice/$1.ts`,
       customResolver: resolveExistingUiSourceModule,
     },
     {
@@ -558,6 +587,10 @@ function resolveLocalAppCoreAliases(): Alias[] {
       find: /^@elizaos\/core$/,
       replacement: resolveElizaCoreBundlePath(),
     },
+    {
+      find: /^@elizaos\/shared\/character-presets$/,
+      replacement: publishedSharedCharacterPresetsEntry,
+    },
     // When a local eliza workspace is present and @elizaos/shared has been
     // built, prefer the local dist over the bun-store published copy which
     // may lag behind and miss exports added in the local workspace.
@@ -595,7 +628,6 @@ function resolveLocalAppCoreAliases(): Alias[] {
 
   for (const [key, value] of Object.entries(appCorePkg.exports || {})) {
     if (key === ".") continue; // handled by the explicit bare alias above
-    if (typeof value !== "string") continue;
     const aliasKey =
       key === "."
         ? "@elizaos/app-core"
@@ -2341,6 +2373,12 @@ function nativeModuleStubPlugin(): Plugin {
             )
           : VIRTUAL_PREFIX + id;
       }
+      // Some published/browser-side packages still deep-import this app-core
+      // compatibility module even though the local app-core export map does
+      // not list it. Intercept before commonjs--resolver validates exports.
+      if (id === "@elizaos/app-core/ui-compat" && appCoreSrcRoot) {
+        return path.join(appCoreSrcRoot, "ui-compat.ts");
+      }
       // Intercept ALL node: builtins before Vite externalizes them.
       // The @elizaos/core node entry uses many Node APIs (crypto, fs, module,
       // etc.) at the top level.  Rather than stubbing each one individually,
@@ -3099,7 +3137,15 @@ export default defineConfig({
       // Electrobun postBuild copies renderer HTML/assets into electrobun/build/.
       // Watching those paths triggers full reloads while deps are still optimizing,
       // which breaks with "chunk-*.js does not exist" in node_modules/.vite/deps.
-      ignored: ["**/electrobun/build/**", "**/electrobun/artifacts/**"],
+      ignored: [
+        "**/electrobun/build/**",
+        "**/electrobun/artifacts/**",
+        // Training data dirs and native C++ source trees cause EINVAL errors
+        // during watch (deep paths, large binary datasets, .cpp directory names).
+        "**/packages/training/data/raw/**",
+        "**/plugin-local-inference/native/omnivoice.cpp/**",
+        "**/plugin-local-inference/src/services/__tests__/**",
+      ],
     },
   },
 });

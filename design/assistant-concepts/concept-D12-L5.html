@@ -1,0 +1,941 @@
+<!-- concept-D12-L5 | direction: App-Launcher-First Home | look: Brutalist Mono | targets: 420x760, 960x640 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D12 · App-Launcher-First Home · Brutalist Mono</title>
+<style>
+:root {
+  --bg:#F4F2EC;
+  --surface:#FFFFFF;
+  --surface-2:#E8E5DC;
+  --border:#111111;
+  --text:#111111;
+  --text-muted:#555555;
+  --accent:#1A57FF;
+  --accent-2:#FF4A00;
+  --danger:#D90429;
+  --radius:0px;
+  --radius-sm:0px;
+  --font:"JetBrains Mono","IBM Plex Mono","SF Mono","Cascadia Mono","Courier New",monospace;
+  --shadow:4px 4px 0 #111111;
+  --shadow-sm:2px 2px 0 #111111;
+  --border-w:2px;
+  --ease:steps(1,end);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:var(--font);
+  background:#D0CEC6;
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+
+/* Grid background */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(17,17,17,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17,17,17,0.06) 1px, transparent 1px);
+  background-size:20px 20px;
+}
+
+.device{
+  position:relative;z-index:1;
+  width:420px;height:760px;
+  background:var(--bg);
+  border:var(--border-w) solid var(--border);
+  box-shadow:var(--shadow);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+
+/* Header strip */
+.header{
+  flex-shrink:0;
+  background:var(--text);
+  color:var(--bg);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 12px;
+  border-bottom:var(--border-w) solid var(--border);
+}
+.header-title{font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase}
+.header-right{display:flex;align-items:center;gap:10px;font-size:11px;letter-spacing:0.06em}
+.status-indicator{
+  display:flex;align-items:center;gap:5px;
+  font-size:10px;letter-spacing:0.12em;text-transform:uppercase;
+}
+.status-block{width:8px;height:8px;background:var(--accent-2);animation:blink-block 1s steps(1,end) infinite}
+@keyframes blink-block{0%,100%{opacity:1}50%{opacity:0}}
+
+/* Command bar */
+.cmd-bar{
+  flex-shrink:0;
+  background:var(--surface);
+  border-bottom:var(--border-w) solid var(--border);
+  padding:8px 10px 7px;
+  display:flex;flex-direction:column;gap:6px;
+  position:relative;z-index:10;
+}
+.cmd-row{display:flex;align-items:stretch;gap:0}
+
+/* Orb — bordered box with ASCII waveform */
+.orb{
+  width:48px;
+  flex-shrink:0;
+  border:var(--border-w) solid var(--border);
+  background:var(--surface-2);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;
+  font-size:10px;color:var(--text-muted);letter-spacing:0;
+  transition:background var(--ease),color var(--ease);
+  position:relative;
+  margin-right:-2px;
+}
+.orb-bars{
+  font-size:12px;letter-spacing:-1px;
+  white-space:nowrap;line-height:1;
+  font-weight:700;
+}
+.orb-label{
+  font-size:8px;letter-spacing:0.06em;text-transform:uppercase;
+  margin-top:2px;
+}
+.orb-spinner{
+  font-size:14px;line-height:1;
+  display:none;
+}
+.orb-cursor{
+  font-size:16px;line-height:1;
+  animation:cursor-blink 1s steps(1,end) infinite;
+  display:none;
+}
+@keyframes cursor-blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* Orb states */
+.orb.idle .orb-cursor{display:block}
+.orb.idle .orb-bars,.orb.idle .orb-spinner{display:none}
+.orb.idle{background:var(--surface-2)}
+
+.orb.listening{background:#EAEDFF}
+.orb.listening .orb-bars{display:block;color:var(--accent)}
+.orb.listening .orb-cursor,.orb.listening .orb-spinner{display:none}
+
+.orb.thinking{background:var(--surface-2)}
+.orb.thinking .orb-spinner{display:block;color:var(--text-muted);animation:spin-chars 0.25s steps(4,end) infinite}
+@keyframes spin-chars{0%{content:'|'}25%{content:'/'}50%{content:'—'}75%{content:'\\'}}
+.orb.thinking .orb-bars,.orb.thinking .orb-cursor{display:none}
+
+.orb.speaking{background:#FFF0E8}
+.orb.speaking .orb-bars{display:block;color:var(--accent-2)}
+.orb.speaking .orb-cursor,.orb.speaking .orb-spinner{display:none}
+
+.orb.muted{background:#FFE8E8}
+.orb.muted .orb-bars,.orb.muted .orb-spinner{display:none}
+.orb.muted .orb-cursor{display:block;color:var(--danger)}
+
+/* Input */
+.cmd-input-wrap{
+  flex:1;border:var(--border-w) solid var(--border);
+  display:flex;align-items:center;background:var(--surface);
+  padding:0 8px;gap:4px;
+}
+.cmd-input-wrap:focus-within{outline:2px solid var(--accent);outline-offset:-2px}
+.cmd-input{
+  flex:1;background:transparent;border:none;outline:none;
+  font-family:var(--font);font-size:13px;color:var(--text);
+  padding:9px 0;caret-color:var(--accent);
+}
+.cmd-input::placeholder{color:var(--text-muted)}
+.at-btn{
+  font-family:var(--font);font-size:13px;color:var(--accent);
+  background:none;border:none;cursor:pointer;padding:3px;font-weight:700;
+  transition:background var(--ease),color var(--ease);
+}
+.at-btn:hover{background:var(--accent);color:white}
+
+/* Action button */
+.action-btn{
+  width:40px;border:var(--border-w) solid var(--border);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  background:var(--surface);
+  transition:background var(--ease),color var(--ease);
+  margin-left:-2px;
+  font-family:var(--font);font-size:16px;
+  font-weight:700;
+}
+.action-btn.mic-mode{color:var(--accent);background:var(--surface)}
+.action-btn.send-mode{background:var(--accent);color:white}
+.action-btn.stop-mode{background:var(--danger);color:white}
+.action-btn:active{filter:invert(1)}
+
+.attach-btn{
+  width:32px;border:var(--border-w) solid var(--border);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  background:var(--surface);color:var(--text-muted);font-size:13px;
+  margin-left:-2px;
+  transition:background var(--ease),color var(--ease);
+}
+.attach-btn:hover{background:var(--text);color:var(--bg)}
+
+/* Listening indicator */
+.listening-bar{
+  display:none;align-items:center;gap:8px;
+  font-size:10px;color:var(--accent);letter-spacing:0.1em;text-transform:uppercase;
+  font-weight:700;
+  padding:3px 0;
+  border-top:1px solid var(--border);
+}
+.listening-bar.visible{display:flex}
+.mic-square{width:8px;height:8px;background:var(--accent);animation:blink-sq 0.5s steps(1,end) infinite}
+@keyframes blink-sq{0%,100%{opacity:1}50%{opacity:0}}
+
+/* Muted bar */
+.muted-bar{
+  display:none;align-items:center;gap:8px;
+  font-size:10px;color:var(--danger);letter-spacing:0.1em;text-transform:uppercase;
+  font-weight:700;border-top:1px solid var(--border);padding:3px 0;
+}
+.muted-bar.visible{display:flex}
+
+/* Wave bars in listening */
+.wave-bars{display:flex;align-items:center;gap:1px}
+.wave-bar{width:3px;background:var(--accent);height:3px;transition:height steps(1,end) 0.08s}
+
+/* Attach chips */
+.attach-chips{display:flex;gap:0;flex-wrap:wrap}
+.attach-chip{
+  display:flex;align-items:center;gap:5px;
+  background:var(--surface-2);border:1px solid var(--border);
+  padding:3px 8px;font-size:11px;color:var(--text);
+  margin-right:4px;margin-bottom:2px;
+}
+.attach-chip-remove{background:none;border:none;cursor:pointer;color:var(--danger);font-size:12px;font-weight:700}
+
+/* Suggestion chips */
+.suggestion-chips{
+  display:flex;gap:0;flex-wrap:wrap;
+  padding:5px 10px 6px;
+  border-bottom:1px solid rgba(17,17,17,0.2);
+  opacity:1;transition:opacity var(--ease);
+}
+.suggestion-chips.hidden{opacity:0;pointer-events:none}
+.chip{
+  background:var(--surface);border:1px solid var(--border);
+  padding:4px 10px;font-size:11px;color:var(--text);
+  cursor:pointer;white-space:nowrap;margin-right:4px;margin-bottom:2px;
+  font-family:var(--font);letter-spacing:0.04em;
+  transition:background var(--ease),color var(--ease);
+}
+.chip:hover{background:var(--text);color:var(--bg)}
+
+/* Main area */
+.main-area{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  padding:10px;display:flex;flex-direction:column;gap:10px;
+}
+.main-area::-webkit-scrollbar{width:4px}
+.main-area::-webkit-scrollbar-thumb{background:var(--text)}
+
+/* Section heading */
+.section-heading{
+  font-size:9px;letter-spacing:0.14em;text-transform:uppercase;
+  color:var(--text-muted);font-weight:700;
+  border-bottom:1px solid rgba(17,17,17,0.25);padding-bottom:4px;
+}
+
+/* App grid */
+.app-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:var(--border-w) solid var(--border)}
+.app-tile{
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  padding:10px 6px 8px;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  cursor:pointer;
+  transition:background var(--ease),color var(--ease);
+  position:relative;
+}
+.app-tile:nth-child(3n){border-right:none}
+.app-tile:hover,.app-tile:hover *{background:var(--text)!important;color:var(--bg)!important}
+.app-tile.active{background:#EAEDFF}
+.app-tile.active .tile-name{color:var(--accent)}
+.tile-icon{font-size:20px;line-height:1}
+.tile-name{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);text-align:center}
+.tile-chips{display:flex;flex-direction:column;gap:2px;width:100%}
+.tile-chip{
+  font-size:8px;color:var(--text-muted);cursor:pointer;
+  padding:1px 3px;border:1px solid rgba(17,17,17,0.2);
+  text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  transition:background var(--ease),color var(--ease);
+}
+.tile-chip:hover{background:var(--accent);color:white;border-color:var(--accent)}
+
+/* Chat thread */
+.chat-thread{display:flex;flex-direction:column;gap:6px}
+
+.turn{
+  display:flex;flex-direction:column;gap:2px;
+  animation:turn-in var(--ease) both;
+}
+.turn.user{align-items:flex-end}
+.turn.assistant{align-items:flex-start}
+@keyframes turn-in{from{opacity:0}to{opacity:1}}
+
+.turn-meta{
+  font-size:9px;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;
+  display:flex;align-items:center;gap:4px;padding:0 2px;
+}
+
+.bubble{
+  max-width:85%;padding:7px 10px;
+  font-size:12px;line-height:1.5;
+  border:var(--border-w) solid var(--border);
+}
+.turn.user .bubble{
+  background:var(--text);color:var(--bg);
+  border-color:var(--text);
+}
+.turn.assistant .bubble{
+  background:var(--surface);color:var(--text);
+  border-color:var(--border);
+  box-shadow:var(--shadow-sm);
+}
+.bubble.partial{
+  background:var(--surface-2);color:var(--text-muted);
+  border-style:dashed;
+}
+.interrupted-label{font-size:9px;color:var(--danger);display:block;margin-top:3px;letter-spacing:0.06em}
+.bubble-attach{
+  margin-top:4px;font-size:10px;color:rgba(244,242,236,0.75);
+  letter-spacing:0.04em;
+}
+
+/* App card */
+.app-card{
+  background:var(--surface);border:var(--border-w) solid var(--border);
+  box-shadow:var(--shadow);overflow:hidden;max-width:95%;
+}
+.app-card-header{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 10px;border-bottom:var(--border-w) solid var(--border);
+  background:var(--surface-2);
+}
+.app-card-icon{font-size:16px}
+.app-card-title{font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text)}
+.app-card-expand{
+  margin-left:auto;background:none;border:1px solid var(--border);
+  padding:2px 6px;font-family:var(--font);font-size:9px;color:var(--text-muted);cursor:pointer;
+  text-transform:uppercase;letter-spacing:0.06em;
+  transition:background var(--ease),color var(--ease);
+}
+.app-card-expand:hover{background:var(--text);color:var(--bg)}
+.app-card-body{padding:8px 10px}
+.app-card-actions{display:flex;gap:0;padding:0 10px 8px}
+.card-btn{
+  flex:1;padding:7px 10px;border:var(--border-w) solid var(--border);
+  cursor:pointer;font-family:var(--font);font-size:11px;font-weight:700;
+  text-transform:uppercase;letter-spacing:0.08em;
+  transition:background var(--ease),color var(--ease);background:var(--surface);color:var(--text);
+}
+.card-btn:first-child{margin-right:-2px}
+.card-btn.primary{background:var(--accent);color:white;border-color:var(--accent)}
+.card-btn:hover{background:var(--text);color:var(--bg);border-color:var(--text)}
+
+/* Track list */
+.track-list{display:flex;flex-direction:column;gap:0}
+.track{
+  display:flex;align-items:center;gap:8px;
+  padding:5px 0;border-bottom:1px solid rgba(17,17,17,0.15);
+  font-size:11px;
+}
+.track:last-child{border-bottom:none}
+.track-num{color:var(--text-muted);width:14px;text-align:right}
+.track-info{flex:1}
+.track-name{color:var(--text);font-weight:700}
+.track-artist{color:var(--text-muted);font-size:10px}
+.track-dur{color:var(--text-muted);font-size:10px}
+
+.followup-chips{display:flex;gap:0;flex-wrap:wrap;padding:2px 0;margin-top:2px}
+
+/* Demo controls */
+.demo-controls{
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:0;
+  background:var(--surface-2);border-top:var(--border-w) solid var(--border);
+  padding:8px 10px;
+}
+.demo-btn{
+  background:var(--accent);color:white;border:var(--border-w) solid var(--border);
+  padding:7px 16px;font-family:var(--font);font-size:11px;font-weight:700;
+  cursor:pointer;text-transform:uppercase;letter-spacing:0.1em;
+  margin-right:-2px;box-shadow:var(--shadow-sm);
+  transition:background var(--ease),color var(--ease);
+}
+.demo-btn:hover{background:var(--text);color:var(--bg)}
+.mute-btn{
+  background:var(--surface);border:var(--border-w) solid var(--border);
+  padding:7px 12px;font-family:var(--font);font-size:11px;font-weight:700;
+  cursor:pointer;text-transform:uppercase;letter-spacing:0.1em;color:var(--text);
+  margin-right:-2px;
+  transition:background var(--ease),color var(--ease);
+}
+.mute-btn.muted{background:var(--danger);color:white}
+.state-label{
+  font-size:10px;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;
+  border:1px solid rgba(17,17,17,0.3);padding:5px 10px;
+  font-weight:700;
+}
+
+@media(min-width:640px){
+  .device{width:420px;height:700px;box-shadow:6px 6px 0 #111}
+}
+</style>
+</head>
+<body>
+<div class="device" id="device">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-title">ELIZA OS</div>
+    <div class="header-right">
+      <div class="status-indicator">
+        <div class="status-block"></div>
+        <span id="sysStatus">READY</span>
+      </div>
+      <span id="clockDisp">12:47</span>
+    </div>
+  </div>
+
+  <!-- Command bar -->
+  <div class="cmd-bar">
+    <div class="cmd-row">
+      <!-- Orb: ASCII waveform box -->
+      <div class="orb idle" id="orb" title="[TAP TO SPEAK]">
+        <div class="orb-bars" id="orbBars">▁▂▁▂▁</div>
+        <div class="orb-spinner" id="orbSpinner">|</div>
+        <div class="orb-cursor" id="orbCursor">█</div>
+        <div class="orb-label" id="orbLabel">IDLE</div>
+      </div>
+
+      <div class="cmd-input-wrap">
+        <button class="at-btn" id="atBtn">@</button>
+        <input class="cmd-input" id="cmdInput" placeholder="ask or @mention..." autocomplete="off">
+      </div>
+
+      <button class="action-btn mic-mode" id="actionBtn" title="[MIC]">🎙</button>
+      <button class="attach-btn" id="attachBtn" title="[+]">+</button>
+    </div>
+
+    <div class="attach-chips" id="attachChips"></div>
+
+    <div class="listening-bar" id="listeningBar">
+      <div class="mic-square"></div>
+      <span>[MIC]</span>
+      <span style="letter-spacing:0.04em">LISTENING...</span>
+      <div class="wave-bars" id="waveBars">
+        <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+      </div>
+    </div>
+
+    <div class="muted-bar" id="mutedBar">
+      <span style="font-size:10px">[MIC/OFF]</span>
+      <span>MUTED — INPUT DISABLED</span>
+    </div>
+  </div>
+
+  <!-- Suggestion chips -->
+  <div class="suggestion-chips" id="globalChips">
+    <div class="chip" onclick="fillCmd(this)">&gt; party music</div>
+    <div class="chip" onclick="fillCmd(this)">&gt; weather</div>
+    <div class="chip" onclick="fillCmd(this)">&gt; schedule</div>
+  </div>
+
+  <!-- Main area -->
+  <div class="main-area" id="mainArea">
+    <div class="section-heading">// APPS — TAP OR INVOKE BY NAME</div>
+    <div class="app-grid" id="appGrid">
+      <div class="app-tile" data-app="Spotify" onclick="invokeApp('Spotify')">
+        <div class="tile-icon">🎵</div>
+        <div class="tile-name">SPOTIFY</div>
+        <div class="tile-chips">
+          <div class="tile-chip">party.playlist</div>
+          <div class="tile-chip">discover</div>
+        </div>
+      </div>
+      <div class="app-tile" data-app="Weather" onclick="invokeApp('Weather')">
+        <div class="tile-icon">🌤</div>
+        <div class="tile-name">WEATHER</div>
+        <div class="tile-chips">
+          <div class="tile-chip">today</div>
+          <div class="tile-chip">rain?</div>
+        </div>
+      </div>
+      <div class="app-tile" data-app="Calendar" onclick="invokeApp('Calendar')">
+        <div class="tile-icon">📅</div>
+        <div class="tile-name">CAL</div>
+        <div class="tile-chips">
+          <div class="tile-chip">next event</div>
+          <div class="tile-chip">free slots</div>
+        </div>
+      </div>
+      <div class="app-tile" data-app="Notes" onclick="invokeApp('Notes')">
+        <div class="tile-icon">📝</div>
+        <div class="tile-name">NOTES</div>
+        <div class="tile-chips">
+          <div class="tile-chip">new note</div>
+        </div>
+      </div>
+      <div class="app-tile" data-app="Timer" onclick="invokeApp('Timer')">
+        <div class="tile-icon">⏱</div>
+        <div class="tile-name">TIMER</div>
+        <div class="tile-chips">
+          <div class="tile-chip">25m focus</div>
+        </div>
+      </div>
+      <div class="app-tile" data-app="Maps" onclick="invokeApp('Maps')">
+        <div class="tile-icon">🗺</div>
+        <div class="tile-name">MAPS</div>
+        <div class="tile-chips">
+          <div class="tile-chip">home route</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-thread" id="chatThread"></div>
+  </div>
+
+  <!-- Demo controls -->
+  <div class="demo-controls">
+    <button class="demo-btn" onclick="runDemo()">[▶] DEMO</button>
+    <button class="mute-btn" id="muteBtn" onclick="toggleMute()">[MIC]</button>
+    <div class="state-label" id="stateLabel">IDLE</div>
+  </div>
+
+</div>
+
+<script>
+// ── ASCII waveform orb ─────────────────────────────────────────────────────
+const BARS_CHARS = ['▁','▂','▃','▄','▅','▆','▇','█'];
+const orbBars = document.getElementById('orbBars');
+const orbSpinner = document.getElementById('orbSpinner');
+const orbCursor = document.getElementById('orbCursor');
+const orbLabel = document.getElementById('orbLabel');
+
+let orbState = 'idle';
+let orbPhase = 0;
+let spinFrame = 0;
+const SPIN_CHARS = ['|','/','-','\\'];
+let micAmp = 0;
+let ttsAmp = 0;
+
+function updateOrbVisual() {
+  orbPhase += 0.3;
+
+  if (orbState === 'listening') {
+    const bars = Array.from({length:5}, (_,i) => {
+      const v = Math.abs(Math.sin(orbPhase + i * 0.8)) * micAmp;
+      return BARS_CHARS[Math.min(7, Math.floor(v * 7))];
+    });
+    orbBars.textContent = bars.join('');
+  } else if (orbState === 'speaking') {
+    const bars = Array.from({length:5}, (_,i) => {
+      const v = (Math.sin(orbPhase * 1.5 + i * 1.1) * 0.5 + 0.5) * ttsAmp;
+      return BARS_CHARS[Math.min(7, Math.floor(v * 7))];
+    });
+    orbBars.textContent = bars.join('');
+  } else if (orbState === 'thinking') {
+    spinFrame = (spinFrame + 1) % 4;
+    orbSpinner.textContent = SPIN_CHARS[spinFrame];
+  }
+}
+
+setInterval(updateOrbVisual, 80);
+
+let ampPhase = 0;
+setInterval(() => {
+  ampPhase += 0.2;
+  micAmp = orbState === 'listening' ? 0.3 + Math.abs(Math.sin(ampPhase*1.4)*Math.sin(ampPhase*0.6))*0.7 : 0;
+  ttsAmp = orbState === 'speaking' ? 0.4 + Math.abs(Math.sin(ampPhase*2)*Math.sin(ampPhase*1.1))*0.6 : 0;
+}, 50);
+
+// ── State ──────────────────────────────────────────────────────────────────
+let state = 'idle';
+let muted = false;
+let demoTimers = [];
+let typed = false;
+let attachments = [];
+let generating = false;
+let waveAF = null;
+let wavePhase = 0;
+
+const orb = document.getElementById('orb');
+const actionBtn = document.getElementById('actionBtn');
+const cmdInput = document.getElementById('cmdInput');
+const listeningBar = document.getElementById('listeningBar');
+const mutedBar = document.getElementById('mutedBar');
+const stateLabel = document.getElementById('stateLabel');
+const chatThread = document.getElementById('chatThread');
+const globalChips = document.getElementById('globalChips');
+const waveBars = document.getElementById('waveBars');
+const attachChips = document.getElementById('attachChips');
+const muteBtn = document.getElementById('muteBtn');
+const sysStatus = document.getElementById('sysStatus');
+
+function setOrbState(s) {
+  state = s;
+  orbState = muted ? 'muted' : s;
+  orb.className = 'orb ' + (muted ? 'muted' : s);
+  orbLabel.textContent = muted ? 'MUTED' : s.toUpperCase();
+  stateLabel.textContent = muted ? 'MUTED' : s.toUpperCase();
+  sysStatus.textContent = muted ? 'MUTED' : s.toUpperCase();
+
+  listeningBar.className = 'listening-bar' + (s === 'listening' && !muted ? ' visible' : '');
+  mutedBar.className = 'muted-bar' + (muted ? ' visible' : '');
+
+  if (s === 'listening' && !muted) startWave(); else stopWave();
+}
+
+function startWave() {
+  if (waveAF) return;
+  const bars = waveBars.querySelectorAll('.wave-bar');
+  function tick() {
+    wavePhase += 0.25;
+    bars.forEach((b, i) => {
+      const h = Math.floor((Math.sin(wavePhase + i * 0.9) * 0.5 + 0.5) * 12 + 3);
+      b.style.height = h + 'px';
+    });
+    waveAF = requestAnimationFrame(tick);
+  }
+  waveAF = requestAnimationFrame(tick);
+}
+function stopWave() {
+  if (waveAF) { cancelAnimationFrame(waveAF); waveAF = null; }
+  waveBars.querySelectorAll('.wave-bar').forEach(b => b.style.height = '3px');
+}
+
+function updateActionBtn() {
+  if (generating) { actionBtn.className='action-btn stop-mode'; actionBtn.textContent='■'; actionBtn.title='[STOP]'; }
+  else if (typed) { actionBtn.className='action-btn send-mode'; actionBtn.textContent='↑'; actionBtn.title='[SEND]'; }
+  else { actionBtn.className='action-btn mic-mode'; actionBtn.textContent='🎙'; actionBtn.title='[MIC]'; }
+}
+
+cmdInput.addEventListener('input', () => {
+  typed = cmdInput.value.length > 0;
+  updateActionBtn();
+  globalChips.className = 'suggestion-chips' + (typed ? ' hidden' : '');
+});
+
+actionBtn.addEventListener('click', () => {
+  if (generating) { stopGeneration(); return; }
+  if (typed) { sendTyped(); return; }
+  startVoiceCycle();
+});
+
+function invokeApp(name) {
+  document.querySelectorAll('.app-tile').forEach(t => t.classList.remove('active'));
+  document.querySelector(`[data-app="${name}"]`)?.classList.add('active');
+  if (name === 'Spotify') addSpotifyCard();
+  else if (name === 'Weather') addWeatherCard();
+  else if (name === 'Calendar') addCalendarCard();
+  scrollThread();
+}
+
+function addUserTurn(text, modality, attach) {
+  const turn = document.createElement('div');
+  turn.className = 'turn user';
+  const meta = document.createElement('div');
+  meta.className = 'turn-meta';
+  meta.innerHTML = modality === 'voice'
+    ? '<span>[🎙]</span><span>YOU::VOICE</span>'
+    : '<span>[⌨]</span><span>YOU::TYPED</span>';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.textContent = text;
+  if (attach) {
+    const ac = document.createElement('div');
+    ac.className = 'bubble-attach';
+    ac.textContent = '[+' + attach + ']';
+    bubble.appendChild(ac);
+  }
+  turn.appendChild(meta);
+  turn.appendChild(bubble);
+  chatThread.appendChild(turn);
+}
+
+function addPartialTurn(text) {
+  const turn = document.createElement('div');
+  turn.className = 'turn user';
+  turn.id = 'partialTurn';
+  const meta = document.createElement('div');
+  meta.className = 'turn-meta';
+  meta.innerHTML = '<span>[🎙]</span><span>YOU::PARTIAL</span>';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble partial';
+  bubble.id = 'partialBubble';
+  bubble.textContent = text;
+  turn.appendChild(meta);
+  turn.appendChild(bubble);
+  chatThread.appendChild(turn);
+}
+
+function finalizePartialTurn(finalText, interrupted) {
+  const b = document.getElementById('partialBubble');
+  const t = document.getElementById('partialTurn');
+  if (b) {
+    b.className = 'bubble';
+    b.style.background = 'var(--text)';
+    b.style.color = 'var(--bg)';
+    b.textContent = finalText;
+    if (interrupted) {
+      const lbl = document.createElement('span');
+      lbl.className = 'interrupted-label';
+      lbl.textContent = '// INTERRUPTED -- barge-in detected';
+      b.appendChild(lbl);
+    }
+    if (t) { const m = t.querySelector('.turn-meta'); if (m) m.innerHTML = '<span>[🎙]</span><span>YOU::VOICE</span>'; }
+  }
+}
+
+function addAssistantTurn(text) {
+  const turn = document.createElement('div');
+  turn.className = 'turn assistant';
+  const meta = document.createElement('div');
+  meta.className = 'turn-meta';
+  meta.innerHTML = '<span>[◆]</span><span>ELIZA::REPLY</span>';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.textContent = text;
+  const fc = document.createElement('div');
+  fc.className = 'followup-chips';
+  fc.innerHTML = '<div class="chip" onclick="fillCmd(this)">&gt; more upbeat</div><div class="chip" onclick="fillCmd(this)">&gt; add to queue</div>';
+  turn.appendChild(meta);
+  turn.appendChild(bubble);
+  turn.appendChild(fc);
+  chatThread.appendChild(turn);
+}
+
+function addSpotifyCard() {
+  const turn = document.createElement('div');
+  turn.className = 'turn assistant';
+  const meta = document.createElement('div');
+  meta.className = 'turn-meta';
+  meta.innerHTML = '<span>[◆]</span><span>ELIZA::SPOTIFY</span>';
+  const card = document.createElement('div');
+  card.className = 'app-card';
+  card.innerHTML = `
+    <div class="app-card-header">
+      <div class="app-card-icon">🎵</div>
+      <div class="app-card-title">PARTY PLAYLIST — 8 TRACKS</div>
+      <button class="app-card-expand">[⤢ FULL]</button>
+    </div>
+    <div class="app-card-body">
+      <div class="track-list">
+        <div class="track"><div class="track-num">01</div><div class="track-info"><div class="track-name">Blinding Lights</div><div class="track-artist">The Weeknd</div></div><div class="track-dur">3:20</div></div>
+        <div class="track"><div class="track-num">02</div><div class="track-info"><div class="track-name">Levitating</div><div class="track-artist">Dua Lipa</div></div><div class="track-dur">3:23</div></div>
+        <div class="track"><div class="track-num">03</div><div class="track-info"><div class="track-name">As It Was</div><div class="track-artist">Harry Styles</div></div><div class="track-dur">2:47</div></div>
+      </div>
+    </div>
+    <div class="app-card-actions">
+      <button class="card-btn primary">[▶] PLAY</button>
+      <button class="card-btn secondary">[↓] SAVE</button>
+    </div>`;
+  turn.appendChild(meta);
+  turn.appendChild(card);
+  const fc = document.createElement('div');
+  fc.className = 'followup-chips';
+  fc.innerHTML = '<div class="chip" onclick="fillCmd(this)">&gt; more upbeat</div><div class="chip" onclick="fillCmd(this)">&gt; add Drake</div>';
+  turn.appendChild(fc);
+  chatThread.appendChild(turn);
+}
+
+function addWeatherCard() {
+  const turn = document.createElement('div');
+  turn.className = 'turn assistant';
+  const card = document.createElement('div');
+  card.className = 'app-card';
+  card.innerHTML = `
+    <div class="app-card-header">
+      <div class="app-card-icon">🌤</div>
+      <div class="app-card-title">SFO — TODAY</div>
+      <button class="app-card-expand">[⤢ FULL]</button>
+    </div>
+    <div class="app-card-body">
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px">
+        <span style="font-size:28px">🌤</span>
+        <div><div style="font-size:24px;font-weight:700;color:var(--accent);font-family:var(--font)">68°F</div><div style="font-size:10px;color:var(--text-muted);letter-spacing:0.06em">PARTLY CLOUDY | LOW 54°</div></div>
+      </div>
+      <div style="font-size:10px;color:var(--text-muted);letter-spacing:0.06em">
+        HUM: 72% | WND: 8MPH | UV: 4
+      </div>
+    </div>
+    <div class="app-card-actions">
+      <button class="card-btn primary">[5-DAY]</button>
+      <button class="card-btn secondary">[ALERT]</button>
+    </div>`;
+  turn.appendChild(card);
+  chatThread.appendChild(turn);
+}
+
+function addCalendarCard() {
+  const turn = document.createElement('div');
+  turn.className = 'turn assistant';
+  const card = document.createElement('div');
+  card.className = 'app-card';
+  card.innerHTML = `
+    <div class="app-card-header">
+      <div class="app-card-icon">📅</div>
+      <div class="app-card-title">TODAY — 3 EVENTS</div>
+      <button class="app-card-expand">[⤢ FULL]</button>
+    </div>
+    <div class="app-card-body" style="font-size:11px">
+      <div style="display:flex;flex-direction:column;gap:0">
+        <div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid rgba(17,17,17,0.2)">
+          <span style="color:var(--accent);font-weight:700;width:38px">10:00</span>
+          <span>Design Review — 45m</span>
+        </div>
+        <div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid rgba(17,17,17,0.2)">
+          <span style="color:var(--text-muted);width:38px">12:30</span>
+          <span style="color:var(--text-muted)">Lunch [FREE]</span>
+        </div>
+        <div style="display:flex;gap:8px;padding:5px 0">
+          <span style="color:var(--accent-2);font-weight:700;width:38px">14:00</span>
+          <span>1:1 Sarah — 30m</span>
+        </div>
+      </div>
+    </div>
+    <div class="app-card-actions">
+      <button class="card-btn primary">[+EVENT]</button>
+      <button class="card-btn secondary">[VIEW ALL]</button>
+    </div>`;
+  turn.appendChild(card);
+  chatThread.appendChild(turn);
+}
+
+document.getElementById('attachBtn').addEventListener('click', () => {
+  const names = ['photo.jpg','report.pdf','screenshot.png'];
+  const name = names[Math.floor(Math.random()*names.length)];
+  if (!attachments.includes(name)) { attachments.push(name); renderAttachChips(); }
+});
+function renderAttachChips() {
+  attachChips.innerHTML = '';
+  attachments.forEach(a => {
+    const c = document.createElement('div');
+    c.className = 'attach-chip';
+    c.innerHTML = `[+${a}] <button class="attach-chip-remove" onclick="removeAttach('${a}')">X</button>`;
+    attachChips.appendChild(c);
+  });
+}
+function removeAttach(name) { attachments = attachments.filter(a=>a!==name); renderAttachChips(); }
+
+function sendTyped() {
+  const text = cmdInput.value.trim();
+  if (!text) return;
+  const attach = attachments[0]||null;
+  addUserTurn(text,'typed',attach);
+  cmdInput.value=''; typed=false; attachments=[]; renderAttachChips(); updateActionBtn();
+  globalChips.className='suggestion-chips';
+  generating=true; updateActionBtn(); setOrbState('thinking');
+  setTimeout(() => {
+    generating=false; setOrbState('speaking');
+    addAssistantTurn('PROCESSED: "' + text + '" — result logged. Further commands?');
+    updateActionBtn(); scrollThread();
+    setTimeout(() => setOrbState('idle'), 2000);
+  }, 1200);
+  scrollThread();
+}
+function stopGeneration() { generating=false; updateActionBtn(); setOrbState('idle'); }
+function fillCmd(el) {
+  cmdInput.value = el.textContent.replace(/^>\s*/,'').trim();
+  cmdInput.focus(); typed=true; updateActionBtn();
+  globalChips.className='suggestion-chips hidden';
+}
+
+function startVoiceCycle() {
+  if (muted) return;
+  clearDemoTimers();
+  setOrbState('listening');
+  cmdInput.placeholder = 'listening...';
+  demoTimers.push(setTimeout(() => { addPartialTurn('Spotify, make a party playlist…'); scrollThread(); }, 1200));
+  demoTimers.push(setTimeout(() => { setOrbState('thinking'); cmdInput.placeholder='ask or @mention...'; }, 2200));
+  demoTimers.push(setTimeout(() => {
+    setOrbState('speaking');
+    finalizePartialTurn('Spotify, make a party playlist.', false);
+    const t=document.getElementById('partialTurn');
+    if(t) t.className='turn user';
+    document.querySelector('[data-app="Spotify"]')?.classList.add('active');
+    addSpotifyCard(); scrollThread();
+  }, 3400));
+  demoTimers.push(setTimeout(() => setOrbState('idle'), 5500));
+}
+
+function runDemo() {
+  clearDemoTimers();
+  chatThread.innerHTML='';
+  document.querySelectorAll('.app-tile').forEach(t=>t.classList.remove('active'));
+  cmdInput.value=''; typed=false; generating=false; attachments=[]; renderAttachChips(); updateActionBtn();
+  globalChips.className='suggestion-chips';
+  cmdInput.placeholder='ask or @mention...';
+  setOrbState('idle');
+
+  demoTimers.push(setTimeout(() => { addUserTurn("weather today?", 'typed', null); scrollThread(); }, 600));
+  demoTimers.push(setTimeout(() => setOrbState('thinking'), 900));
+  demoTimers.push(setTimeout(() => { setOrbState('speaking'); addWeatherCard(); setOrbState('idle'); scrollThread(); }, 1800));
+
+  demoTimers.push(setTimeout(() => { attachments=['photo.jpg']; renderAttachChips(); }, 2600));
+  demoTimers.push(setTimeout(() => { attachments=[]; renderAttachChips(); setOrbState('listening'); cmdInput.placeholder='listening...'; }, 3400));
+  demoTimers.push(setTimeout(() => { addPartialTurn('Spotify, make a party playlist…'); scrollThread(); }, 4600));
+  demoTimers.push(setTimeout(() => { setOrbState('thinking'); cmdInput.placeholder='ask or @mention...'; }, 5600));
+  demoTimers.push(setTimeout(() => {
+    setOrbState('speaking');
+    finalizePartialTurn('Spotify, make a party playlist.', false);
+    const t=document.getElementById('partialTurn');
+    if(t) t.className='turn user';
+    document.querySelector('[data-app="Spotify"]')?.classList.add('active');
+    addSpotifyCard(); scrollThread();
+  }, 6800));
+  // Barge-in
+  demoTimers.push(setTimeout(() => { setOrbState('listening'); cmdInput.placeholder='listening...'; }, 8500));
+  demoTimers.push(setTimeout(() => { addPartialTurn('make it more upbeat…'); scrollThread(); }, 9300));
+  demoTimers.push(setTimeout(() => { setOrbState('thinking'); cmdInput.placeholder='ask or @mention...'; }, 10100));
+  demoTimers.push(setTimeout(() => {
+    setOrbState('speaking');
+    finalizePartialTurn('make it more upbeat.', false);
+    const t=document.getElementById('partialTurn');
+    if(t) t.className='turn user';
+    addAssistantTurn('UPDATED: playlist reordered -> Doja Cat / Calvin Harris / Charli XCX lead. PLAYING NOW.');
+    scrollThread();
+  }, 11200));
+  demoTimers.push(setTimeout(() => setOrbState('idle'), 13000));
+}
+
+function clearDemoTimers() { demoTimers.forEach(t=>clearTimeout(t)); demoTimers=[]; }
+function scrollThread() { const a=document.getElementById('mainArea'); setTimeout(()=>a.scrollTo({top:a.scrollHeight,behavior:'smooth'}),50); }
+
+function toggleMute() {
+  muted=!muted;
+  muteBtn.className='mute-btn'+(muted?' muted':'');
+  muteBtn.textContent=muted?'[🔇 OFF]':'[MIC]';
+  setOrbState(state);
+}
+
+document.getElementById('atBtn').addEventListener('click',()=>{ cmdInput.value='@'; cmdInput.focus(); typed=true; updateActionBtn(); });
+
+// Clock
+function updateClock() {
+  const now=new Date();
+  const h=now.getHours().toString().padStart(2,'0');
+  const m=now.getMinutes().toString().padStart(2,'0');
+  document.getElementById('clockDisp').textContent=h+':'+m;
+}
+updateClock(); setInterval(updateClock, 30000);
+
+updateActionBtn();
+setOrbState('idle');
+setTimeout(runDemo, 800);
+</script>
+</body>
+</html>

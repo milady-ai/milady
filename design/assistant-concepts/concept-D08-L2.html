@@ -1,0 +1,945 @@
+<!-- concept-D08-L2 | direction: Radial Menu Around Avatar | look: OLED Neon Cyber | targets: 420x760, 960x640 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D08 · Radial Menu Around Avatar · OLED Neon Cyber</title>
+<style>
+:root {
+  --bg:#000000;
+  --surface:#0B0E14;
+  --surface-2:#131826;
+  --border:rgba(0,229,255,0.28);
+  --text:#E8FBFF;
+  --text-muted:#6B7A90;
+  --accent:#00E5FF;
+  --accent-2:#FF3DCB;
+  --accent-3:#B6FF3D;
+  --danger:#FF2E4D;
+  --radius:8px;
+  --radius-sm:5px;
+  --font:"SF Pro Text","Inter","Segoe UI",system-ui,sans-serif;
+  --font-mono:"SF Mono","JetBrains Mono","Cascadia Mono",ui-monospace,monospace;
+  --shadow:0 0 0 1px rgba(0,229,255,0.25),0 0 24px rgba(0,229,255,0.35);
+  --shadow-sm:0 0 12px rgba(0,229,255,0.25);
+  --glow-cyan:0 0 16px rgba(0,229,255,0.6);
+  --glow-magenta:0 0 16px rgba(255,61,203,0.6);
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+body {
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  background:#000;
+  font-family:var(--font);
+  color:var(--text);
+  overflow:hidden;
+}
+
+/* Scanline overlay */
+body::after {
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,229,255,0.015) 2px,rgba(0,229,255,0.015) 4px);
+  pointer-events:none;z-index:9999;
+}
+
+.app-window {
+  position:relative;
+  width:420px;height:760px;
+  background:var(--bg);
+  border:1px solid rgba(0,229,255,0.3);
+  box-shadow:0 0 0 1px rgba(0,229,255,0.1), 0 0 60px rgba(0,229,255,0.08), inset 0 0 60px rgba(0,0,0,0.8);
+  display:flex;flex-direction:column;overflow:hidden;
+  border-radius:var(--radius);
+}
+
+/* Header */
+.header {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px;
+  border-bottom:1px solid var(--border);
+  background:rgba(11,14,20,0.9);
+  flex-shrink:0;
+}
+.header-title {
+  font-family:var(--font-mono);
+  font-size:13px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--accent);text-shadow:var(--glow-cyan);
+}
+.header-status {
+  font-family:var(--font-mono);font-size:10px;color:var(--text-muted);
+  letter-spacing:0.1em;text-transform:uppercase;
+  display:flex;align-items:center;gap:6px;
+}
+.status-dot {
+  width:6px;height:6px;border-radius:50%;background:var(--accent-3);
+  box-shadow:0 0 6px var(--accent-3);
+  animation:statusBlink 2s ease-in-out infinite;
+}
+@keyframes statusBlink{0%,100%{opacity:1}50%{opacity:0.4}}
+
+.header-btn {
+  width:30px;height:30px;border-radius:var(--radius-sm);
+  background:var(--surface);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text-muted);font-size:14px;
+  transition:all 0.15s;font-family:var(--font-mono);
+}
+.header-btn:hover{border-color:var(--accent);color:var(--accent);box-shadow:var(--glow-cyan);}
+
+/* Chat log */
+.chat-log {
+  flex:1;overflow-y:auto;padding:12px 12px 20px;
+  display:flex;flex-direction:column;gap:8px;
+  scrollbar-width:thin;scrollbar-color:rgba(0,229,255,0.2) transparent;
+  border-bottom:1px solid var(--border);
+  -webkit-mask-image:linear-gradient(to bottom,#000 0,#000 calc(100% - 26px),transparent 100%);
+  mask-image:linear-gradient(to bottom,#000 0,#000 calc(100% - 26px),transparent 100%);
+}
+@keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.turn{display:flex;align-items:flex-start;gap:8px;animation:slideIn 0.15s var(--ease) both;}
+.turn.user{flex-direction:row-reverse;}
+
+.turn-glyph {
+  width:24px;height:24px;border-radius:var(--radius-sm);
+  background:var(--surface-2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-family:var(--font-mono);
+  color:var(--accent);flex-shrink:0;margin-top:1px;
+}
+
+.bubble {
+  max-width:80%;padding:8px 12px;
+  border-radius:var(--radius-sm);
+  font-size:13px;line-height:1.5;
+  border:1px solid;
+}
+.bubble.assistant {
+  background:var(--surface);
+  border-color:rgba(0,229,255,0.2);
+  color:var(--text);
+  border-radius:0 var(--radius-sm) var(--radius-sm) var(--radius-sm);
+}
+.bubble.user {
+  background:rgba(0,229,255,0.08);
+  border-color:rgba(0,229,255,0.4);
+  color:var(--text);
+  border-radius:var(--radius-sm) 0 var(--radius-sm) var(--radius-sm);
+  box-shadow:inset 0 0 20px rgba(0,229,255,0.05);
+}
+.bubble.partial {
+  border-style:dashed;opacity:0.6;
+}
+.modality-tag {
+  font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;
+  text-transform:uppercase;color:var(--text-muted);margin-bottom:3px;
+  display:flex;align-items:center;gap:4px;
+}
+.modality-tag.user-tag{justify-content:flex-end;}
+.interrupted-tag {
+  font-family:var(--font-mono);font-size:9px;color:var(--danger);
+  margin-top:3px;display:flex;align-items:center;gap:3px;
+  text-shadow:0 0 8px var(--danger);
+}
+
+/* App card */
+.app-card {
+  max-width:96%;margin-top:6px;
+  background:var(--surface-2);
+  border:1px solid rgba(0,229,255,0.35);
+  border-radius:var(--radius);
+  box-shadow:0 0 20px rgba(0,229,255,0.1);
+  overflow:hidden;
+  animation:slideIn 0.15s var(--ease) both;
+}
+.app-card-header {
+  display:flex;align-items:center;gap:8px;
+  padding:10px 12px 8px;
+  border-bottom:1px solid rgba(0,229,255,0.2);
+  background:rgba(0,229,255,0.04);
+}
+.app-icon {
+  width:28px;height:28px;border-radius:var(--radius-sm);
+  background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.3);
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+}
+.app-card-title{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--accent);letter-spacing:0.08em;text-transform:uppercase;}
+.app-card-sub{font-family:var(--font-mono);font-size:9px;color:var(--text-muted);}
+.expand-link{margin-left:auto;font-family:var(--font-mono);font-size:9px;color:var(--accent-2);cursor:pointer;text-transform:uppercase;}
+.app-card-body{padding:12px;}
+.weather-big{font-family:var(--font-mono);font-size:32px;font-weight:700;color:var(--accent);text-shadow:var(--glow-cyan);}
+.weather-desc{font-family:var(--font-mono);font-size:10px;color:var(--text-muted);margin-top:2px;letter-spacing:0.08em;text-transform:uppercase;}
+.weather-row{display:flex;gap:14px;margin-top:8px;}
+.weather-item{font-family:var(--font-mono);font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;}
+.weather-item span{display:block;font-size:12px;font-weight:700;color:var(--text);margin-top:2px;}
+.app-card-actions{display:flex;gap:6px;padding:0 12px 12px;}
+.app-btn {
+  flex:1;height:28px;border-radius:var(--radius-sm);
+  border:1px solid rgba(0,229,255,0.3);
+  background:transparent;font-family:var(--font-mono);font-size:10px;
+  color:var(--accent);cursor:pointer;text-transform:uppercase;letter-spacing:0.08em;
+  transition:all 0.12s;
+}
+.app-btn:hover{background:rgba(0,229,255,0.1);box-shadow:var(--glow-cyan);}
+.app-btn.primary{background:rgba(0,229,255,0.12);border-color:var(--accent);box-shadow:0 0 10px rgba(0,229,255,0.2);}
+
+/* Attach */
+.attach-chip {
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 8px;background:rgba(0,229,255,0.06);
+  border:1px solid rgba(0,229,255,0.3);border-radius:var(--radius-sm);
+  font-family:var(--font-mono);font-size:10px;color:var(--accent);margin-top:4px;
+}
+
+/* Radial hub */
+.radial-hub-area {
+  flex-shrink:0;display:flex;flex-direction:column;align-items:center;
+  padding:0 0 18px;position:relative;
+}
+
+/* Suggestions */
+.suggestions {
+  display:flex;flex-wrap:wrap;gap:5px;justify-content:center;
+  padding:8px 14px 4px;max-height:70px;overflow:hidden;
+  transition:opacity 0.15s;
+}
+.suggestion-chip {
+  padding:5px 12px;
+  background:var(--surface-2);
+  border:1px solid rgba(0,229,255,0.25);
+  border-radius:var(--radius-sm);
+  font-family:var(--font-mono);font-size:10px;color:var(--text-muted);
+  cursor:pointer;transition:all 0.12s;text-transform:uppercase;letter-spacing:0.06em;
+}
+.suggestion-chip:hover{border-color:var(--accent);color:var(--accent);box-shadow:var(--glow-cyan);}
+
+/* Listening label */
+.listening-label {
+  display:flex;align-items:center;gap:6px;
+  font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--accent);padding:5px 12px;
+  background:rgba(0,229,255,0.06);border:1px solid rgba(0,229,255,0.3);
+  border-radius:var(--radius-sm);
+  opacity:0;transition:opacity 0.15s;margin-bottom:4px;
+  box-shadow:var(--glow-cyan);
+}
+.listening-label.show{opacity:1;}
+.listening-label.muted{color:var(--danger);border-color:rgba(255,46,77,0.4);box-shadow:0 0 16px rgba(255,46,77,0.3);}
+.mic-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:blink 0.8s ease-in-out infinite;box-shadow:var(--glow-cyan);}
+.muted .mic-dot{background:var(--danger);animation:none;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* Radial container */
+.radial-container {
+  position:relative;width:300px;height:290px;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* Orb — neon waveform/particle style */
+.orb {
+  width:100px;height:100px;border-radius:50%;
+  position:relative;z-index:10;cursor:pointer;
+  background:radial-gradient(circle at 40% 35%, rgba(0,229,255,0.15) 0%, #000 60%);
+  border:1.5px solid rgba(0,229,255,0.6);
+  box-shadow:0 0 20px rgba(0,229,255,0.5),0 0 50px rgba(0,229,255,0.2),inset 0 0 30px rgba(0,229,255,0.08);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;transition:border-color 0.2s;
+}
+.orb.muted{border-color:rgba(255,46,77,0.8);box-shadow:0 0 20px rgba(255,46,77,0.5),inset 0 0 30px rgba(255,46,77,0.08);}
+
+/* Canvas for waveform inside orb */
+#orbCanvas{width:100px;height:100px;border-radius:50%;}
+
+/* Outer rings */
+.orb-ring-1,.orb-ring-2,.orb-ring-3{
+  position:absolute;border-radius:50%;border:1px solid;
+  top:50%;left:50%;pointer-events:none;
+}
+.orb-ring-1{
+  width:120px;height:120px;
+  border-color:rgba(0,229,255,0.3);
+  transform:translate(-50%,-50%);
+  box-shadow:0 0 10px rgba(0,229,255,0.15);
+}
+.orb-ring-2{
+  width:145px;height:145px;
+  border-color:rgba(0,229,255,0.12);
+  transform:translate(-50%,-50%);
+}
+.orb-ring-3{
+  width:170px;height:170px;
+  border-color:rgba(255,61,203,0.08);
+  transform:translate(-50%,-50%);
+}
+
+@keyframes ringListen{
+  0%,100%{transform:translate(-50%,-50%) scale(1);opacity:0.8}
+  50%{transform:translate(-50%,-50%) scale(1.25);opacity:0.1}
+}
+.orb-ring-1.listening{animation:ringListen 0.6s ease-in-out infinite;}
+
+/* Radial nodes */
+.radial-node {
+  position:absolute;
+  width:52px;height:52px;
+  background:var(--surface);
+  border:1px solid rgba(0,229,255,0.3);
+  border-radius:var(--radius-sm);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:16px;cursor:pointer;
+  transition:all 0.18s var(--ease);
+  transform:translate(-50%,-50%) scale(0);opacity:0;
+  top:50%;left:50%;
+  box-shadow:none;
+}
+.radial-node.show{transform:translate(-50%,-50%) scale(1);opacity:1;}
+.radial-node:hover{
+  background:rgba(0,229,255,0.1);
+  border-color:var(--accent);
+  box-shadow:var(--glow-cyan);
+  transform:translate(-50%,-50%) scale(1.1);
+}
+.node-label{font-family:var(--font-mono);font-size:8px;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;margin-top:1px;}
+.radial-node.muted-node{border-color:rgba(255,46,77,0.6);background:rgba(255,46,77,0.06);}
+.radial-node.muted-node .node-icon{color:var(--danger);}
+.radial-node.active{border-color:var(--accent);background:rgba(0,229,255,0.1);box-shadow:var(--glow-cyan);}
+
+/* State label */
+.state-label {
+  font-family:var(--font-mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--text-muted);margin-top:4px;text-align:center;min-height:14px;
+}
+
+/* Text expander */
+.text-expander {
+  width:330px;
+  background:var(--surface);
+  border:1px solid rgba(0,229,255,0.3);
+  border-radius:var(--radius);
+  padding:10px;display:none;gap:8px;align-items:flex-end;
+  box-shadow:0 0 20px rgba(0,229,255,0.1);margin-top:8px;
+}
+.text-expander.show{display:flex;}
+.text-input {
+  flex:1;background:var(--surface-2);
+  border:1px solid rgba(0,229,255,0.2);border-radius:var(--radius-sm);
+  padding:8px 10px;font-family:var(--font-mono);font-size:12px;
+  color:var(--text);resize:none;outline:none;min-height:36px;max-height:100px;
+  letter-spacing:0.03em;transition:border-color 0.15s;
+}
+.text-input:focus{border-color:var(--accent);box-shadow:0 0 8px rgba(0,229,255,0.2);}
+.send-btn {
+  width:36px;height:36px;border-radius:var(--radius-sm);
+  background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.5);
+  color:var(--accent);font-size:16px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all 0.15s;flex-shrink:0;box-shadow:var(--glow-cyan);
+  font-family:var(--font-mono);
+}
+.send-btn:hover{background:rgba(0,229,255,0.2);box-shadow:0 0 20px rgba(0,229,255,0.5);}
+
+/* Attach staging */
+.attach-staging{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;}
+.staged-chip {
+  display:flex;align-items:center;gap:4px;
+  padding:3px 7px;background:rgba(0,229,255,0.06);
+  border:1px solid rgba(0,229,255,0.25);border-radius:var(--radius-sm);
+  font-family:var(--font-mono);font-size:9px;color:var(--accent);
+}
+.remove-chip{cursor:pointer;color:var(--text-muted);font-size:9px;}
+.remove-chip:hover{color:var(--danger);}
+
+/* Demo button — inline in header, never overlaps content */
+.demo-btn {
+  height:30px;padding:0 11px;border-radius:var(--radius-sm);
+  background:rgba(0,229,255,0.08);
+  border:1px solid rgba(0,229,255,0.4);
+  color:var(--accent);font-family:var(--font-mono);font-size:10px;font-weight:700;
+  text-transform:uppercase;letter-spacing:0.08em;cursor:pointer;
+  display:flex;align-items:center;
+  box-shadow:0 0 10px rgba(0,229,255,0.25);transition:all 0.15s;
+}
+.demo-btn:hover{background:rgba(0,229,255,0.16);border-color:var(--accent);box-shadow:0 0 18px rgba(0,229,255,0.45);}
+
+@media(min-width:700px){
+  .app-window{width:min(460px,46vw);height:min(760px,94vh);}
+}
+</style>
+</head>
+<body>
+<!-- concept-D08-L2 | direction: Radial Menu Around Avatar | look: OLED Neon Cyber | targets: 420x760, 960x640 -->
+<div class="app-window">
+  <div class="header">
+    <div>
+      <div class="header-title">ELIZA_AI</div>
+      <div class="header-status"><div class="status-dot"></div>ONLINE · v2.4.1</div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button class="demo-btn" id="demoBtn" onclick="runDemo()">▶ DEMO</button>
+      <button class="header-btn">◳</button>
+      <button class="header-btn">⚙</button>
+    </div>
+  </div>
+
+  <div class="chat-log" id="chatLog">
+    <div class="turn">
+      <div class="turn-glyph">AI</div>
+      <div>
+        <div class="modality-tag">SYS · ASSISTANT</div>
+        <div class="bubble assistant">ELIZA online. Neural interface active. How can I assist?</div>
+      </div>
+    </div>
+    <div class="turn user">
+      <div class="turn-glyph" style="color:var(--accent-2);border-color:rgba(255,61,203,0.4);">🎤</div>
+      <div>
+        <div class="modality-tag user-tag">VOICE · INPUT</div>
+        <div class="bubble user">Run a network diagnostics scan</div>
+      </div>
+    </div>
+    <div class="turn">
+      <div class="turn-glyph">AI</div>
+      <div>
+        <div class="modality-tag">SYS · ASSISTANT</div>
+        <div class="bubble assistant">Network scan complete. All systems nominal:</div>
+        <div class="app-card">
+          <div class="app-card-header">
+            <div class="app-icon">📡</div>
+            <div>
+              <div class="app-card-title">NET · DIAGNOSTICS</div>
+              <div class="app-card-sub">SCAN_TIME: 0.24s</div>
+            </div>
+            <div class="expand-link">EXPAND ↗</div>
+          </div>
+          <div class="app-card-body">
+            <div class="weather-big" style="font-size:22px;color:var(--accent-3);">ALL CLEAR</div>
+            <div class="weather-desc">LATENCY: 12ms · PACKET LOSS: 0%</div>
+            <div class="weather-row">
+              <div class="weather-item">UPTIME<span style="color:var(--accent-3);">99.9%</span></div>
+              <div class="weather-item">NODES<span>14/14</span></div>
+              <div class="weather-item">SPEED<span>940 Mb</span></div>
+            </div>
+          </div>
+          <div class="app-card-actions">
+            <button class="app-btn">DETAIL LOG</button>
+            <button class="app-btn primary">EXPORT</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="turn user">
+      <div class="turn-glyph" style="color:var(--accent-3);border-color:rgba(182,255,61,0.3);">KB</div>
+      <div>
+        <div class="modality-tag user-tag">TYPED · INPUT</div>
+        <div class="bubble user">
+          <div class="attach-chip">📎 config_backup.tar.gz</div>
+          <div style="margin-top:4px;">Analyze this config file</div>
+        </div>
+      </div>
+    </div>
+    <div class="turn">
+      <div class="turn-glyph">AI</div>
+      <div>
+        <div class="modality-tag">SYS · PARTIAL</div>
+        <div class="bubble assistant partial" id="initPartial">Parsing config structure… found 847 directives, 3 deprecated key—</div>
+        <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);margin-top:2px;">[ STREAMING… ]</div>
+      </div>
+    </div>
+    <div class="turn">
+      <div class="turn-glyph">AI</div>
+      <div>
+        <div class="modality-tag">SYS · INTERRUPTED</div>
+        <div class="bubble assistant" style="opacity:0.6;border-color:rgba(255,46,77,0.3);">Config parse complete. I also notice you have an outdated TLS—</div>
+        <div class="interrupted-tag">⚡ BARGE-IN DETECTED</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="radial-hub-area">
+    <div class="listening-label" id="listeningLabel">
+      <div class="mic-dot"></div>
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+      LISTENING
+    </div>
+
+    <div class="suggestions" id="suggestionsArea">
+      <div class="suggestion-chip" onclick="sendSuggestion(this)">CHECK LOGS</div>
+      <div class="suggestion-chip" onclick="sendSuggestion(this)">RUN TASK</div>
+      <div class="suggestion-chip" onclick="sendSuggestion(this)">QUERY DB</div>
+    </div>
+
+    <div class="radial-container" id="radialContainer">
+      <div class="orb-ring-1" id="ring1"></div>
+      <div class="orb-ring-2"></div>
+      <div class="orb-ring-3"></div>
+
+      <div class="orb idle" id="orb" onclick="handleOrbClick()">
+        <canvas id="orbCanvas" width="100" height="100"></canvas>
+      </div>
+
+      <div class="radial-node" id="nodeMic" onclick="toggleVoice()">
+        <span class="node-icon" id="micNodeIcon">🎤</span>
+        <span class="node-label">TALK</span>
+      </div>
+      <div class="radial-node" id="nodeMute" onclick="toggleMute()">
+        <span class="node-icon" id="muteIcon">🔇</span>
+        <span class="node-label">MUTE</span>
+      </div>
+      <div class="radial-node" id="nodeAttach" onclick="handleAttach()">
+        <span class="node-icon">📎</span>
+        <span class="node-label">FILE</span>
+      </div>
+      <div class="radial-node" id="nodeText" onclick="handleTextNode()">
+        <span class="node-icon">⌨️</span>
+        <span class="node-label">TYPE</span>
+      </div>
+      <div class="radial-node" id="nodeApps" onclick="handleApps()">
+        <span class="node-icon">⚡</span>
+        <span class="node-label">TOOLS</span>
+      </div>
+      <div class="radial-node" id="nodeEnd" onclick="handleEnd()">
+        <span class="node-icon" style="font-size:14px;color:var(--danger);">✕</span>
+        <span class="node-label" style="color:var(--danger);">END</span>
+      </div>
+    </div>
+
+    <div class="state-label" id="stateLabel">[ IDLE · PRESS ORB TO BEGIN ]</div>
+
+    <div class="text-expander" id="textExpander">
+      <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
+        <div class="attach-staging" id="attachStaging"></div>
+        <div style="display:flex;gap:6px;align-items:flex-end;">
+          <textarea class="text-input" id="textInput" placeholder="> INPUT COMMAND…" rows="1" oninput="handleTyping()" onkeydown="handleKeydown(event)"></textarea>
+          <button class="send-btn" id="sendBtn" onclick="handleSend()">
+            <span id="sendIcon">🎤</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──
+let appState = 'idle';
+let ringOpen = false;
+let textMode = false;
+let isMuted = false;
+let demoTimer = null;
+let demoWordTimer = null;
+let demoReplyTimer = null;
+let ampFrame = null;
+let ampPhase = 0;
+let currentOrbAnim = null;
+
+const orb = document.getElementById('orb');
+const ring1 = document.getElementById('ring1');
+const stateLabel = document.getElementById('stateLabel');
+const listeningLabel = document.getElementById('listeningLabel');
+const textExpander = document.getElementById('textExpander');
+const textInput = document.getElementById('textInput');
+const sendIcon = document.getElementById('sendIcon');
+const chatLog = document.getElementById('chatLog');
+const suggestionsArea = document.getElementById('suggestionsArea');
+const attachStaging = document.getElementById('attachStaging');
+const canvas = document.getElementById('orbCanvas');
+const ctx = canvas.getContext('2d');
+
+// ── Node positions ──
+const nodeAngles = [270, 330, 30, 90, 150, 210];
+const nodeIds = ['nodeMic','nodeEnd','nodeApps','nodeText','nodeAttach','nodeMute'];
+const R = 108;
+
+function positionNodes() {
+  nodeIds.forEach((id, i) => {
+    const el = document.getElementById(id);
+    const angle = (nodeAngles[i] - 90) * Math.PI / 180;
+    const cx = 150 + R * Math.cos(angle);
+    const cy = 145 + R * Math.sin(angle);
+    el.style.left = cx + 'px';
+    el.style.top = cy + 'px';
+  });
+}
+positionNodes();
+
+// ── Canvas orb render ──
+let canvasPhase = 0;
+let canvasAmp = 0;
+let targetAmp = 0;
+let canvasMode = 'idle';
+
+function renderOrb() {
+  const w = 100, h = 100, cx = 50, cy = 50;
+  ctx.clearRect(0, 0, w, h);
+  canvasPhase += 0.04;
+  canvasAmp += (targetAmp - canvasAmp) * 0.1;
+
+  if (canvasMode === 'idle') {
+    // Slow rotating sparse particles
+    const pCount = 12;
+    for (let i = 0; i < pCount; i++) {
+      const a = (i / pCount) * Math.PI * 2 + canvasPhase * 0.3;
+      const r = 20 + 8 * Math.sin(canvasPhase + i);
+      const px = cx + r * Math.cos(a);
+      const py = cy + r * Math.sin(a);
+      const alpha = 0.3 + 0.4 * Math.sin(canvasPhase * 1.2 + i);
+      ctx.beginPath();
+      ctx.arc(px, py, 1.5, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(0,229,255,${alpha})`;
+      ctx.fill();
+    }
+    // Center glow
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, 30);
+    g.addColorStop(0, 'rgba(0,229,255,0.12)');
+    g.addColorStop(1, 'rgba(0,229,255,0)');
+    ctx.beginPath(); ctx.arc(cx, cy, 30, 0, Math.PI * 2);
+    ctx.fillStyle = g; ctx.fill();
+
+  } else if (canvasMode === 'listening') {
+    // Bars react to amp
+    const bars = 16;
+    const amp = canvasAmp;
+    for (let i = 0; i < bars; i++) {
+      const a = (i / bars) * Math.PI * 2;
+      const noise = 0.5 + 0.5 * Math.sin(canvasPhase * 3 + i * 1.2);
+      const barH = 10 + amp * 28 * noise;
+      const x1 = cx + 16 * Math.cos(a);
+      const y1 = cy + 16 * Math.sin(a);
+      const x2 = cx + (16 + barH) * Math.cos(a);
+      const y2 = cy + (16 + barH) * Math.sin(a);
+      const alpha = 0.5 + amp * 0.5;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.strokeStyle = `rgba(0,229,255,${alpha})`;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+    // Glow center
+    const g2 = ctx.createRadialGradient(cx, cy, 0, cx, cy, 20);
+    g2.addColorStop(0, `rgba(0,229,255,${0.1 + canvasAmp * 0.3})`);
+    g2.addColorStop(1, 'rgba(0,229,255,0)');
+    ctx.beginPath(); ctx.arc(cx, cy, 20, 0, Math.PI * 2);
+    ctx.fillStyle = g2; ctx.fill();
+
+  } else if (canvasMode === 'thinking') {
+    // Magenta inner churn
+    const innerBars = 8;
+    for (let i = 0; i < innerBars; i++) {
+      const a = (i / innerBars) * Math.PI * 2 + canvasPhase * 1.5;
+      const r1 = 8, r2 = 18 + 6 * Math.sin(canvasPhase * 2 + i);
+      ctx.beginPath();
+      ctx.moveTo(cx + r1 * Math.cos(a), cy + r1 * Math.sin(a));
+      ctx.lineTo(cx + r2 * Math.cos(a), cy + r2 * Math.sin(a));
+      ctx.strokeStyle = `rgba(255,61,203,${0.3 + 0.4 * Math.sin(canvasPhase + i)})`;
+      ctx.lineWidth = 2; ctx.stroke();
+    }
+    // Outer cyan shimmer
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2 - canvasPhase * 0.8;
+      const r = 28 + 5 * Math.cos(canvasPhase * 2 + i);
+      ctx.beginPath(); ctx.arc(cx + r * Math.cos(a), cy + r * Math.sin(a), 2, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(0,229,255,${0.2 + 0.3 * Math.sin(canvasPhase + i)})`;
+      ctx.fill();
+    }
+
+  } else if (canvasMode === 'speaking') {
+    // Bars react to TTS envelope (distinct from listening: outward bloom)
+    const speakBars = 24;
+    for (let i = 0; i < speakBars; i++) {
+      const a = (i / speakBars) * Math.PI * 2;
+      const env = Math.abs(Math.sin(canvasPhase * 4 + i * 0.5)) * (0.6 + 0.4 * Math.sin(canvasPhase * 2.1));
+      const barH = 8 + env * 22;
+      const r1 = 20;
+      const r2 = r1 + barH;
+      ctx.beginPath();
+      ctx.moveTo(cx + r1 * Math.cos(a), cy + r1 * Math.sin(a));
+      ctx.lineTo(cx + r2 * Math.cos(a), cy + r2 * Math.sin(a));
+      const hue = 180 + env * 40;
+      ctx.strokeStyle = `hsla(${hue},100%,60%,${0.4 + env * 0.6})`;
+      ctx.lineWidth = 1.5; ctx.stroke();
+    }
+
+  } else if (canvasMode === 'muted') {
+    // Red static bars, frozen
+    const muteBars = 16;
+    for (let i = 0; i < muteBars; i++) {
+      const a = (i / muteBars) * Math.PI * 2;
+      const barH = 4;
+      ctx.beginPath();
+      ctx.moveTo(cx + 16 * Math.cos(a), cy + 16 * Math.sin(a));
+      ctx.lineTo(cx + (16 + barH) * Math.cos(a), cy + (16 + barH) * Math.sin(a));
+      ctx.strokeStyle = 'rgba(255,46,77,0.4)';
+      ctx.lineWidth = 2; ctx.stroke();
+    }
+    // Slash
+    ctx.beginPath();
+    ctx.moveTo(35, 35); ctx.lineTo(65, 65);
+    ctx.strokeStyle = 'rgba(255,46,77,0.7)';
+    ctx.lineWidth = 2.5; ctx.stroke();
+  }
+  requestAnimationFrame(renderOrb);
+}
+renderOrb();
+
+function setCanvasMode(m) { canvasMode = m; }
+function setCanvasAmp(a) { targetAmp = a; }
+
+// ── Amp simulation ──
+function startAmp() {
+  function drive() {
+    if (appState !== 'listening') return;
+    ampPhase += 0.06;
+    const a = 0.4 + 0.6 * Math.abs(Math.sin(ampPhase)) + 0.2 * Math.random();
+    setCanvasAmp(Math.min(a, 1));
+    ampFrame = requestAnimationFrame(drive);
+  }
+  ampFrame = requestAnimationFrame(drive);
+}
+function stopAmp() {
+  if (ampFrame) { cancelAnimationFrame(ampFrame); ampFrame = null; }
+  setCanvasAmp(0);
+}
+
+// ── Ring ──
+function openRing() {
+  ringOpen = true;
+  nodeIds.forEach(id => document.getElementById(id).classList.add('show'));
+}
+function closeRing() {
+  ringOpen = false;
+  nodeIds.forEach(id => { document.getElementById(id).classList.remove('show','active'); });
+}
+function handleOrbClick() { ringOpen ? closeRing() : openRing(); }
+
+// ── State ──
+function setState(s) {
+  appState = s;
+  const orbEl = document.getElementById('orb');
+  orbEl.className = 'orb ' + (isMuted ? 'muted' : s);
+  ring1.className = 'orb-ring-1 ' + (s === 'listening' && !isMuted ? 'listening' : '');
+  setCanvasMode(isMuted ? 'muted' : s);
+
+  const labels = {
+    idle:'[ IDLE · PRESS ORB TO BEGIN ]',
+    listening:'[ LISTENING · SPEAK NOW ]',
+    thinking:'[ PROCESSING… ]',
+    speaking:'[ SPEAKING… ]'
+  };
+  stateLabel.textContent = isMuted ? '[ MUTED · TAP ORB TO UNMUTE ]' : (labels[s] || labels.idle);
+
+  if (s === 'listening' && !isMuted) {
+    listeningLabel.className = 'listening-label show';
+    listeningLabel.innerHTML = '<div class="mic-dot"></div><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>LISTENING';
+    startAmp();
+  } else if (isMuted) {
+    listeningLabel.className = 'listening-label show muted';
+    listeningLabel.innerHTML = '<div class="mic-dot"></div>🔇 MUTED';
+    stopAmp();
+  } else {
+    listeningLabel.className = 'listening-label';
+    stopAmp();
+  }
+}
+
+function toggleVoice() {
+  if (appState === 'listening') { setState('idle'); closeRing(); }
+  else {
+    setState('listening');
+    document.getElementById('nodeMic').classList.add('active');
+    suggestionsArea.style.opacity = '0.2';
+    setTimeout(() => { if (appState === 'listening') setState('thinking'); }, 2500);
+  }
+}
+
+function toggleMute() {
+  isMuted = !isMuted;
+  const mutNode = document.getElementById('nodeMute');
+  if (isMuted) { mutNode.classList.add('muted-node'); setState(appState); }
+  else { mutNode.classList.remove('muted-node'); setState('idle'); }
+}
+
+function handleTextNode() {
+  textMode = !textMode;
+  textExpander.className = textMode ? 'text-expander show' : 'text-expander';
+  if (textMode) { textInput.focus(); closeRing(); }
+}
+
+function handleTyping() {
+  const v = textInput.value.trim();
+  sendIcon.textContent = v ? '↑' : '🎤';
+  suggestionsArea.style.opacity = v ? '0.3' : '1';
+  textInput.style.height = 'auto';
+  textInput.style.height = Math.min(textInput.scrollHeight, 100) + 'px';
+}
+function handleKeydown(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }
+
+function handleSend() {
+  if (appState === 'thinking' || appState === 'speaking') { setState('idle'); return; }
+  const v = textInput.value.trim();
+  const hasAttach = attachStaging.children.length > 0;
+  if (!v && !hasAttach) return;
+  addUserTurn(v, 'typed', hasAttach);
+  textInput.value = ''; handleTyping();
+  attachStaging.innerHTML = '';
+  textMode = false; textExpander.className = 'text-expander';
+  triggerAssistantReply(v);
+}
+
+function handleAttach() {
+  closeRing();
+  const chip = document.createElement('div');
+  chip.className = 'staged-chip';
+  chip.innerHTML = '📎 data.log <span class="remove-chip" onclick="this.parentElement.remove()">✕</span>';
+  attachStaging.appendChild(chip);
+  textMode = true; textExpander.className = 'text-expander show';
+  textInput.focus();
+}
+function handleApps() { closeRing(); addAssistantTurn('TOOL_SELECTOR: Choose an integrated system.', false); }
+function handleEnd() { closeRing(); setState('idle'); textMode = false; textExpander.className = 'text-expander'; isMuted = false; document.getElementById('nodeMute').classList.remove('muted-node'); listeningLabel.className = 'listening-label'; }
+
+// ── Chat ──
+function addUserTurn(text, mod, hasAttach) {
+  const g = mod === 'voice' ? '🎤' : 'KB';
+  const label = mod === 'voice' ? 'VOICE · INPUT' : 'TYPED · INPUT';
+  const col = mod === 'voice' ? 'color:var(--accent-2);border-color:rgba(255,61,203,0.4);' : 'color:var(--accent-3);border-color:rgba(182,255,61,0.3);';
+  const attach = hasAttach ? '<div class="attach-chip">📎 file.dat</div>' : '';
+  const div = document.createElement('div');
+  div.className = 'turn user';
+  div.innerHTML = `<div class="turn-glyph" style="${col}">${g}</div><div><div class="modality-tag user-tag">${label}</div><div class="bubble user">${attach}${text ? `<div style="margin-top:${hasAttach?'4':'0'}px;">${escHtml(text)}</div>` : ''}</div></div>`;
+  chatLog.appendChild(div); chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+function addAssistantTurn(text, withCard) {
+  const div = document.createElement('div');
+  div.className = 'turn';
+  div.innerHTML = `<div class="turn-glyph">AI</div><div><div class="modality-tag">SYS · ASSISTANT</div><div class="bubble assistant">${escHtml(text)}</div>${withCard ? netCardHTML() : ''}</div>`;
+  chatLog.appendChild(div); chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+function netCardHTML() {
+  return `<div class="app-card">
+    <div class="app-card-header">
+      <div class="app-icon">📊</div>
+      <div><div class="app-card-title">SYS · MONITOR</div><div class="app-card-sub">LIVE</div></div>
+      <div class="expand-link">EXPAND ↗</div>
+    </div>
+    <div class="app-card-body">
+      <div class="weather-big" style="font-size:22px;color:var(--accent-3);">NOMINAL</div>
+      <div class="weather-desc">CPU: 23% · MEM: 41% · TEMP: 47°C</div>
+      <div class="weather-row">
+        <div class="weather-item">PROCS<span>247</span></div>
+        <div class="weather-item">THRDS<span>1,024</span></div>
+      </div>
+    </div>
+    <div class="app-card-actions">
+      <button class="app-btn">KILL</button>
+      <button class="app-btn primary">GRAPH</button>
+    </div>
+  </div>`;
+}
+
+function triggerAssistantReply(t) {
+  setState('thinking');
+  const replies = ['PROCESSING COMPLETE. Here is my analysis.','QUERY RESOLVED. Output ready.','TASK EXECUTED SUCCESSFULLY.'];
+  const r = replies[Math.floor(Math.random() * replies.length)];
+  setTimeout(() => {
+    setState('speaking');
+    setTimeout(() => {
+      addAssistantTurn(r, Math.random() > 0.5);
+      setState('idle');
+      suggestionsArea.innerHTML = '<div class="suggestion-chip" onclick="sendSuggestion(this)">DRILL DOWN</div><div class="suggestion-chip" onclick="sendSuggestion(this)">EXPORT</div>';
+      suggestionsArea.style.opacity = '1';
+    }, 1600);
+  }, 1100);
+}
+
+function sendSuggestion(el) {
+  el.style.opacity = '0';
+  addUserTurn(el.textContent, 'typed', false);
+  triggerAssistantReply(el.textContent);
+}
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── Demo ──
+const DEMO_TEXT = 'Show me system performance metrics';
+const DEMO_REPLY = 'Initiating telemetry sweep. CPU nominal at 23%, memory allocation 41%, all critical services green. No anomalies detected in the last 24 hours.';
+
+function stopDemoTimers() {
+  if (demoTimer) { clearTimeout(demoTimer); demoTimer = null; }
+  if (demoWordTimer) { clearInterval(demoWordTimer); demoWordTimer = null; }
+  if (demoReplyTimer) { clearInterval(demoReplyTimer); demoReplyTimer = null; }
+}
+
+function clearDemoTurns() {
+  // Remove any leftover demo turns from a previous (possibly overlapping) run so
+  // duplicate ids can never coexist and stale streaming targets are gone.
+  chatLog.querySelectorAll('.turn[data-demo="1"]').forEach(t => t.remove());
+}
+
+function runDemo() {
+  stopDemoTimers();
+  clearDemoTurns();
+  setState('idle'); closeRing(); isMuted = false;
+  document.getElementById('nodeMute').classList.remove('muted-node');
+  listeningLabel.className = 'listening-label';
+  suggestionsArea.innerHTML = '<div class="suggestion-chip" onclick="sendSuggestion(this)">CHECK LOGS</div><div class="suggestion-chip" onclick="sendSuggestion(this)">RUN TASK</div><div class="suggestion-chip" onclick="sendSuggestion(this)">QUERY DB</div>';
+  suggestionsArea.style.opacity = '1';
+  textMode = false; textExpander.className = 'text-expander';
+
+  demoTimer = setTimeout(() => {
+    openRing();
+    demoTimer = setTimeout(() => {
+      document.getElementById('nodeMic').classList.add('active');
+      setState('listening');
+      suggestionsArea.style.opacity = '0.1';
+      const liveTurn = document.createElement('div');
+      liveTurn.className = 'turn';
+      liveTurn.dataset.demo = '1';
+      liveTurn.innerHTML = `<div class="turn-glyph" style="color:var(--accent-2);border-color:rgba(255,61,203,0.4);">🎤</div><div><div class="modality-tag user-tag">VOICE · PARTIAL</div><div class="bubble user partial"></div></div>`;
+      chatLog.appendChild(liveTurn); chatLog.scrollTop = chatLog.scrollHeight;
+      const lb = liveTurn.querySelector('.bubble');
+      let wi = 0;
+      const words = DEMO_TEXT.split(' ');
+      demoWordTimer = setInterval(() => {
+        if (wi < words.length) { lb.textContent += (wi > 0 ? ' ' : '') + words[wi++]; chatLog.scrollTop = chatLog.scrollHeight; }
+        else { clearInterval(demoWordTimer); demoWordTimer = null; }
+      }, 200);
+
+      demoTimer = setTimeout(() => {
+        setState('thinking'); closeRing();
+        lb.classList.remove('partial');
+        liveTurn.querySelector('.modality-tag').textContent = 'VOICE · FINALIZED';
+        demoTimer = setTimeout(() => {
+          setState('speaking');
+          const rDiv = document.createElement('div');
+          rDiv.className = 'turn';
+          rDiv.dataset.demo = '1';
+          rDiv.innerHTML = `<div class="turn-glyph">AI</div><div><div class="modality-tag">SYS · SPEAKING</div><div class="bubble assistant" style="border-color:rgba(255,61,203,0.4);"></div></div>`;
+          chatLog.appendChild(rDiv); chatLog.scrollTop = chatLog.scrollHeight;
+          const rb = rDiv.querySelector('.bubble');
+          let ri = 0;
+          const rWords = DEMO_REPLY.split(' ');
+          demoReplyTimer = setInterval(() => {
+            if (ri < rWords.length) { rb.textContent += (ri > 0 ? ' ' : '') + rWords[ri++]; chatLog.scrollTop = chatLog.scrollHeight; }
+            else {
+              clearInterval(demoReplyTimer); demoReplyTimer = null;
+              demoTimer = setTimeout(() => {
+                setState('idle');
+                suggestionsArea.innerHTML = '<div class="suggestion-chip" onclick="sendSuggestion(this)">HISTORY</div><div class="suggestion-chip" onclick="sendSuggestion(this)">ALERT ME</div>';
+                suggestionsArea.style.opacity = '1';
+              }, 500);
+            }
+          }, 55);
+        }, 900);
+      }, 2600);
+    }, 500);
+  }, 400);
+}
+
+window.addEventListener('load', () => { demoTimer = setTimeout(runDemo, 800); });
+</script>
+</body>
+</html>

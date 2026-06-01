@@ -1,0 +1,1101 @@
+<!-- concept-D13-L1 | direction: Split Avatar + Work Canvas (Artifacts) | look: Soft Aurora Glass | targets: 420x760, 960x640 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D13 · Split Avatar + Work Canvas (Artifacts) · Soft Aurora Glass</title>
+<style>
+:root{
+  --bg:#EAF0FB;
+  --bg-aurora:radial-gradient(120% 90% at 18% 12%,#F3E9FB 0%,transparent 55%),radial-gradient(120% 90% at 82% 88%,#E6F7F4 0%,transparent 55%),linear-gradient(160deg,#EAF0FB,#EFEAFB);
+  --surface:rgba(255,255,255,0.55);
+  --surface-2:rgba(255,255,255,0.72);
+  --border:rgba(255,255,255,0.65);
+  --text:#1B2233;
+  --text-muted:#5A6582;
+  --accent:#6E8BFF;
+  --accent-2:#9C6CF0;
+  --accent-3:#5FE3C0;
+  --danger:#FF6B8B;
+  --radius:22px;
+  --radius-sm:14px;
+  --font:"SF Pro Display","Segoe UI Variable","Helvetica Neue",system-ui,sans-serif;
+  --shadow:0 12px 40px rgba(80,90,160,0.18);
+  --shadow-sm:0 4px 16px rgba(80,90,160,0.12);
+  --blur:saturate(1.4) blur(24px);
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  min-height:100vh;
+  background:var(--bg-aurora);
+  background-color:var(--bg);
+  font-family:var(--font);
+  color:var(--text);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+
+/* Aurora animation */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 15% 20%,rgba(110,139,255,0.15) 0%,transparent 60%),
+    radial-gradient(ellipse 70% 50% at 85% 75%,rgba(95,227,192,0.15) 0%,transparent 55%),
+    radial-gradient(ellipse 60% 70% at 50% 50%,rgba(156,108,240,0.1) 0%,transparent 50%);
+  animation:aurora 30s ease-in-out infinite alternate;
+  pointer-events:none;
+  z-index:0;
+}
+@keyframes aurora{
+  0%{opacity:0.8;transform:scale(1) rotate(0deg)}
+  50%{opacity:1;transform:scale(1.05) rotate(1deg)}
+  100%{opacity:0.9;transform:scale(1.02) rotate(-1deg)}
+}
+
+.app-window{
+  position:relative;
+  z-index:1;
+  width:min(960px,98vw);
+  height:min(640px,96vh);
+  background:var(--surface);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+/* Title bar */
+.titlebar{
+  display:flex;align-items:center;gap:8px;
+  padding:12px 18px;
+  border-bottom:1px solid var(--border);
+  background:var(--surface-2);
+  flex-shrink:0;
+}
+.titlebar-dots{display:flex;gap:6px}
+.dot{width:12px;height:12px;border-radius:50%}
+.dot-r{background:#FF6B8B}
+.dot-y{background:#FFD166}
+.dot-g{background:#5FE3C0}
+.titlebar-title{
+  flex:1;text-align:center;
+  font-size:13px;font-weight:600;
+  color:var(--text-muted);letter-spacing:0.02em;
+}
+
+/* Split layout */
+.split{
+  display:flex;
+  flex:1;
+  overflow:hidden;
+}
+
+/* LEFT: Conversation column */
+.conv-col{
+  width:42%;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  border-right:1px solid var(--border);
+  position:relative;
+}
+
+.conv-header{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 18px 10px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.conv-title{font-size:14px;font-weight:600;letter-spacing:0.01em}
+
+/* Avatar orb */
+.orb-wrap{position:relative;width:36px;height:36px;flex-shrink:0}
+.orb{
+  width:36px;height:36px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#A8BFFF 0%,#6E8BFF 35%,#9C6CF0 65%,#5FE3C0 100%);
+  box-shadow:0 0 18px rgba(110,139,255,0.45),0 0 8px rgba(156,108,240,0.3);
+  position:relative;overflow:hidden;
+  transition:transform 0.4s var(--ease);
+}
+.orb::before{
+  content:'';position:absolute;
+  width:14px;height:9px;
+  background:rgba(255,255,255,0.65);
+  border-radius:50%;
+  top:7px;left:7px;
+  filter:blur(3px);
+  transform:rotate(-30deg);
+}
+.orb-halo{
+  position:absolute;inset:-6px;
+  border-radius:50%;
+  border:2px solid rgba(110,139,255,0.3);
+  animation:halo-idle 3s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes halo-idle{
+  0%,100%{transform:scale(1);opacity:0.5}
+  50%{transform:scale(1.08);opacity:0.9}
+}
+
+/* Orb states */
+.orb-wrap.listening .orb{animation:orb-listen 0.4s ease-in-out infinite alternate}
+.orb-wrap.listening .orb-halo{animation:halo-listen 0.6s ease-in-out infinite alternate}
+@keyframes orb-listen{
+  from{transform:scale(1)}
+  to{transform:scale(1.12)}
+}
+@keyframes halo-listen{
+  from{transform:scale(1);opacity:0.4;border-color:rgba(110,139,255,0.4)}
+  to{transform:scale(1.18);opacity:1;border-color:rgba(110,139,255,0.8)}
+}
+.orb-wrap.thinking .orb{animation:orb-think 2s linear infinite}
+@keyframes orb-think{
+  from{filter:hue-rotate(0deg)}
+  to{filter:hue-rotate(360deg)}
+}
+.orb-wrap.speaking .orb{animation:orb-speak 0.7s ease-in-out infinite alternate}
+.orb-wrap.speaking .orb-halo{animation:halo-speak 0.7s ease-in-out infinite}
+@keyframes orb-speak{
+  from{transform:scale(1);box-shadow:0 0 18px rgba(110,139,255,0.45)}
+  to{transform:scale(1.08);box-shadow:0 0 28px rgba(110,139,255,0.8),0 0 14px rgba(156,108,240,0.5)}
+}
+@keyframes halo-speak{
+  0%,100%{transform:scale(1);opacity:0.6}
+  50%{transform:scale(1.2);opacity:1}
+}
+.orb-wrap.muted .orb{
+  background:radial-gradient(circle at 35% 30%,#ccc 0%,#aaa 60%,#888 100%);
+  box-shadow:0 0 8px rgba(0,0,0,0.15);
+  animation:none!important;
+}
+.orb-wrap.muted .orb-halo{animation:none!important;opacity:0}
+
+/* Voice status badge */
+.voice-badge{
+  display:none;align-items:center;gap:5px;
+  padding:3px 10px;border-radius:99px;
+  background:rgba(110,139,255,0.15);
+  border:1px solid rgba(110,139,255,0.3);
+  font-size:11px;font-weight:600;color:var(--accent);
+  letter-spacing:0.04em;
+}
+.voice-badge.visible{display:flex}
+.voice-badge.muted{
+  background:rgba(255,107,139,0.12);
+  border-color:rgba(255,107,139,0.3);
+  color:var(--danger);
+}
+.badge-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--accent);
+  animation:badge-pulse 1s ease-in-out infinite;
+}
+.voice-badge.muted .badge-dot{background:var(--danger);animation:none}
+@keyframes badge-pulse{0%,100%{opacity:0.4}50%{opacity:1}}
+
+/* Chat log */
+.chat-log{
+  flex:1;overflow-y:auto;
+  padding:14px 16px;
+  display:flex;flex-direction:column;gap:12px;
+  scroll-behavior:smooth;
+}
+.chat-log::-webkit-scrollbar{width:4px}
+.chat-log::-webkit-scrollbar-track{background:transparent}
+.chat-log::-webkit-scrollbar-thumb{background:rgba(110,139,255,0.25);border-radius:4px}
+
+/* Messages */
+.msg{display:flex;flex-direction:column;gap:4px;animation:msg-in 0.35s var(--ease)}
+@keyframes msg-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.msg-meta{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text-muted);font-weight:500}
+.msg-glyph{font-size:11px}
+.msg-time{font-size:10px;color:var(--text-muted)}
+
+.msg.user .msg-bubble{
+  background:linear-gradient(135deg,var(--accent) 0%,var(--accent-2) 100%);
+  color:#fff;
+  padding:10px 14px;
+  border-radius:18px 18px 4px 18px;
+  font-size:14px;line-height:1.5;
+  align-self:flex-end;
+  max-width:90%;
+  box-shadow:0 4px 16px rgba(110,139,255,0.35);
+}
+.msg.user{align-items:flex-end}
+
+.msg.assistant .msg-body{
+  font-size:14px;line-height:1.6;
+  color:var(--text);
+  padding:2px 0;
+}
+.msg.assistant.partial .msg-body{color:var(--text-muted);font-style:italic}
+
+/* Artifact card in chat */
+.artifact-card{
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:12px 14px;
+  cursor:pointer;
+  transition:all 0.25s var(--ease);
+  position:relative;
+  overflow:hidden;
+}
+.artifact-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(to bottom,var(--accent),var(--accent-2));
+  border-radius:3px 0 0 3px;
+}
+.artifact-card:hover{
+  transform:translateY(-1px);
+  box-shadow:var(--shadow-sm);
+  border-color:rgba(110,139,255,0.4);
+}
+.artifact-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.artifact-card-title{font-size:13px;font-weight:600;color:var(--text)}
+.artifact-card-label{font-size:10px;color:var(--text-muted);letter-spacing:0.04em;font-weight:500;text-transform:uppercase}
+.artifact-card-meta{font-size:12px;color:var(--text-muted)}
+.artifact-card-action{
+  font-size:11px;color:var(--accent);font-weight:600;
+  display:flex;align-items:center;gap:4px;
+}
+
+/* Attachment chip */
+.attach-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:99px;
+  padding:4px 10px 4px 8px;
+  font-size:12px;color:var(--text-muted);
+}
+.attach-chip-icon{font-size:14px}
+.attach-chip-remove{
+  cursor:pointer;color:var(--text-muted);font-size:12px;
+  transition:color 0.2s;
+}
+.attach-chip-remove:hover{color:var(--danger)}
+
+/* Suggestions */
+.suggestions{
+  padding:8px 16px 10px;
+  display:flex;flex-wrap:wrap;gap:6px;
+  transition:opacity 0.25s;
+}
+.chip{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:6px 14px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:99px;
+  font-size:12px;color:var(--text-muted);
+  cursor:pointer;
+  transition:all 0.2s var(--ease);
+  font-family:var(--font);
+  white-space:nowrap;
+}
+.chip:hover{
+  background:rgba(110,139,255,0.1);
+  border-color:rgba(110,139,255,0.4);
+  color:var(--accent);
+  transform:translateY(-1px);
+}
+.chip-dismiss{
+  font-size:10px;color:var(--text-muted);
+  cursor:pointer;
+  opacity:0.6;
+}
+
+/* Composer */
+.composer{
+  padding:10px 14px 14px;
+  border-top:1px solid var(--border);
+  flex-shrink:0;
+}
+.composer-attach-row{
+  display:flex;gap:6px;flex-wrap:wrap;
+  margin-bottom:6px;
+}
+.composer-row{
+  display:flex;align-items:center;gap:8px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:99px;
+  padding:8px 8px 8px 14px;
+  backdrop-filter:blur(12px);
+  transition:border-color 0.2s;
+}
+.composer-row:focus-within{border-color:rgba(110,139,255,0.5)}
+.composer-input{
+  flex:1;border:none;background:transparent;
+  font-size:14px;font-family:var(--font);
+  color:var(--text);outline:none;
+}
+.composer-input::placeholder{color:var(--text-muted)}
+.composer-btn{
+  width:36px;height:36px;border-radius:50%;border:none;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all 0.25s var(--ease);flex-shrink:0;
+  font-size:16px;
+}
+.btn-attach{
+  background:transparent;color:var(--text-muted);font-size:18px;
+}
+.btn-attach:hover{color:var(--accent)}
+.btn-action{
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  color:#fff;box-shadow:0 4px 12px rgba(110,139,255,0.35);
+}
+.btn-action:hover{transform:scale(1.08);box-shadow:0 6px 18px rgba(110,139,255,0.5)}
+.btn-action.stop{background:linear-gradient(135deg,var(--danger),#FF9B6B)}
+.btn-mute{
+  width:28px;height:28px;
+  background:transparent;color:var(--text-muted);font-size:14px;
+  flex-shrink:0;
+}
+.btn-mute:hover{color:var(--danger)}
+.btn-mute.muted{color:var(--danger)}
+
+/* RIGHT: Artifact workspace */
+.artifact-col{
+  flex:1;
+  display:flex;flex-direction:column;
+  min-width:0;
+  background:rgba(255,255,255,0.3);
+}
+.artifact-empty{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:14px;
+  color:var(--text-muted);padding:32px;
+  text-align:center;
+}
+.artifact-empty-icon{
+  font-size:40px;
+  opacity:0.4;
+}
+.artifact-empty-text{font-size:14px;line-height:1.5}
+
+.artifact-panel{
+  display:flex;flex-direction:column;height:100%;
+}
+.artifact-panel-header{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 18px;
+  border-bottom:1px solid var(--border);
+  background:var(--surface-2);
+  flex-shrink:0;
+}
+.artifact-panel-title{font-size:13px;font-weight:600;flex:1}
+.artifact-version-sel{
+  font-size:12px;color:var(--text-muted);
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:99px;padding:3px 10px;
+  cursor:pointer;font-family:var(--font);
+}
+.artifact-tabs{
+  display:flex;gap:2px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:99px;padding:2px;
+}
+.artifact-tab{
+  padding:4px 12px;border-radius:99px;
+  font-size:12px;font-weight:600;cursor:pointer;
+  color:var(--text-muted);border:none;background:transparent;
+  font-family:var(--font);transition:all 0.2s;
+}
+.artifact-tab.active{
+  background:var(--accent);color:#fff;
+}
+
+.artifact-toolbar{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 18px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.toolbar-btn{
+  display:flex;align-items:center;gap:5px;
+  padding:5px 12px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:99px;
+  font-size:12px;color:var(--text-muted);
+  cursor:pointer;font-family:var(--font);
+  transition:all 0.2s;
+}
+.toolbar-btn:hover{color:var(--accent);border-color:rgba(110,139,255,0.4)}
+.toolbar-btn.primary{
+  background:linear-gradient(135deg,rgba(110,139,255,0.15),rgba(156,108,240,0.15));
+  color:var(--accent);
+  border-color:rgba(110,139,255,0.35);
+}
+.toolbar-spacer{flex:1}
+.refine-chips{display:flex;gap:6px;flex-wrap:wrap}
+.refine-chip{
+  padding:4px 12px;
+  background:rgba(95,227,192,0.12);
+  border:1px solid rgba(95,227,192,0.3);
+  border-radius:99px;font-size:11px;
+  color:#3BA88C;cursor:pointer;font-family:var(--font);
+  transition:all 0.2s;
+}
+.refine-chip:hover{background:rgba(95,227,192,0.25)}
+
+.artifact-content{
+  flex:1;overflow-y:auto;padding:18px;
+  font-size:13px;line-height:1.7;
+  color:var(--text);
+}
+.artifact-content::-webkit-scrollbar{width:4px}
+.artifact-content::-webkit-scrollbar-thumb{background:rgba(110,139,255,0.2);border-radius:4px}
+.artifact-content pre{
+  background:rgba(0,0,0,0.04);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:14px;overflow-x:auto;
+  font-size:12px;font-family:monospace;
+  margin-top:10px;
+}
+.artifact-content code{
+  background:rgba(110,139,255,0.1);
+  padding:1px 5px;border-radius:4px;
+  font-family:monospace;font-size:12px;
+}
+
+/* Interrupted badge */
+.msg-interrupted{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:10px;color:var(--danger);
+  background:rgba(255,107,139,0.1);
+  border:1px solid rgba(255,107,139,0.25);
+  border-radius:99px;padding:2px 8px;margin-top:4px;
+}
+
+/* Inline widget card */
+.widget-card{
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  overflow:hidden;
+  margin-top:4px;
+}
+.widget-header{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 14px;
+  border-bottom:1px solid var(--border);
+  background:rgba(255,255,255,0.4);
+}
+.widget-icon{
+  width:24px;height:24px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;flex-shrink:0;
+}
+.widget-name{font-size:12px;font-weight:600}
+.widget-expand{
+  margin-left:auto;font-size:10px;
+  color:var(--accent);cursor:pointer;
+  display:flex;align-items:center;gap:3px;
+}
+.widget-body{padding:12px 14px}
+.widget-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.widget-label{font-size:11px;color:var(--text-muted)}
+.widget-value{font-size:20px;font-weight:600;color:var(--text)}
+.widget-sub{font-size:12px;color:var(--text-muted)}
+.widget-actions{display:flex;gap:8px;padding:0 14px 12px}
+.widget-btn{
+  flex:1;padding:7px;border-radius:99px;
+  font-size:12px;font-weight:600;cursor:pointer;border:none;
+  font-family:var(--font);transition:all 0.2s;
+}
+.widget-btn.secondary{
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--text-muted);
+}
+.widget-btn.primary{
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  color:#fff;box-shadow:0 4px 12px rgba(110,139,255,0.3);
+}
+
+/* Demo play button */
+.demo-btn{
+  position:fixed;bottom:18px;right:18px;
+  padding:10px 18px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  color:#fff;border:none;border-radius:99px;
+  font-size:13px;font-weight:600;font-family:var(--font);
+  cursor:pointer;
+  box-shadow:0 8px 24px rgba(110,139,255,0.4);
+  z-index:100;
+  transition:all 0.25s var(--ease);
+}
+.demo-btn:hover{transform:scale(1.05);box-shadow:0 12px 32px rgba(110,139,255,0.5)}
+
+/* Responsive: portrait */
+@media(max-width:700px){
+  .app-window{
+    width:100vw;height:100vh;border-radius:0;
+    flex-direction:column;
+  }
+  .split{flex-direction:column}
+  .conv-col{width:100%;height:60%;border-right:none;border-bottom:1px solid var(--border)}
+  .artifact-col{height:40%}
+  .artifact-panel{height:100%}
+}
+</style>
+</head>
+<body>
+
+<div class="app-window">
+  <div class="titlebar">
+    <div class="titlebar-dots">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+    </div>
+    <div class="titlebar-title">Eliza — Assistant</div>
+  </div>
+
+  <div class="split">
+    <!-- LEFT: Conversation -->
+    <div class="conv-col">
+      <div class="conv-header">
+        <div class="orb-wrap idle" id="orb">
+          <div class="orb"></div>
+          <div class="orb-halo"></div>
+        </div>
+        <div class="conv-title">Chat</div>
+        <div class="voice-badge" id="voiceBadge">
+          <div class="badge-dot"></div>
+          <span id="voiceLabel">Listening…</span>
+        </div>
+      </div>
+
+      <div class="chat-log" id="chatLog">
+        <!-- Starter messages -->
+        <div class="msg assistant" id="msg-intro">
+          <div class="msg-meta"><span class="msg-glyph">✦</span> Eliza <span class="msg-time">just now</span></div>
+          <div class="msg-body">Good morning! I'm ready to help you create, edit, or explore. Ask me anything, or try one of the starters below.</div>
+        </div>
+
+        <div class="msg user" id="msg-u1">
+          <div class="msg-meta"><span class="msg-glyph">⌨</span> You <span class="msg-time">10:41</span></div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+            <div class="attach-chip"><span class="attach-chip-icon">📎</span> design-brief.pdf</div>
+            <div class="msg-bubble">Can you write a React component that shows a weather card based on this brief?</div>
+          </div>
+        </div>
+
+        <div class="msg assistant" id="msg-a1">
+          <div class="msg-meta"><span class="msg-glyph">✦</span> Eliza <span class="msg-time">10:41</span></div>
+          <div class="msg-body">I've written a <code>WeatherCard</code> component matching the brief — clean props interface, responsive layout, and a nice gradient background tied to conditions.</div>
+          <div class="artifact-card" onclick="openArtifact()">
+            <div class="artifact-card-header">
+              <div>
+                <div class="artifact-card-label">Artifact · React Component</div>
+                <div class="artifact-card-title">WeatherCard.tsx — v1</div>
+              </div>
+              <div class="artifact-card-action">Open ↗</div>
+            </div>
+            <div class="artifact-card-meta">47 lines · TypeScript · last edited just now</div>
+          </div>
+        </div>
+
+        <div class="msg user" id="msg-u2">
+          <div class="msg-meta"><span class="msg-glyph">🎙</span> You (voice) <span class="msg-time">10:42</span></div>
+          <div class="msg-bubble">Turn that into a dark-mode version with an animated rain effect.</div>
+        </div>
+
+        <div class="msg assistant" id="msg-a2">
+          <div class="msg-meta"><span class="msg-glyph">✦</span> Eliza <span class="msg-time">10:42</span></div>
+          <div class="msg-body">Done — v2 adds a dark palette and a CSS keyframe rain animation. The preview shows live rain particles.</div>
+          <div class="artifact-card" onclick="openArtifact()">
+            <div class="artifact-card-header">
+              <div>
+                <div class="artifact-card-label">Artifact · React Component</div>
+                <div class="artifact-card-title">WeatherCard.tsx — v2</div>
+              </div>
+              <div class="artifact-card-action">Open ↗</div>
+            </div>
+            <div class="artifact-card-meta">63 lines · TypeScript · dark mode + rain</div>
+          </div>
+          <div class="msg-interrupted">⚡ interrupted</div>
+        </div>
+
+        <div class="msg assistant" id="msg-widget">
+          <div class="msg-meta"><span class="msg-glyph">✦</span> Eliza <span class="msg-time">10:43</span></div>
+          <div class="msg-body">Here's the current weather in San Francisco to use as sample data:</div>
+          <div class="widget-card">
+            <div class="widget-header">
+              <div class="widget-icon" style="background:linear-gradient(135deg,#6E8BFF,#5FE3C0)">🌦</div>
+              <div class="widget-name">Weather · San Francisco</div>
+              <div class="widget-expand">Expand ↗</div>
+            </div>
+            <div class="widget-body">
+              <div class="widget-row">
+                <div>
+                  <div class="widget-value">62°F</div>
+                  <div class="widget-sub">Partly Cloudy · Feels like 58°</div>
+                </div>
+                <div style="font-size:32px;margin-left:auto">⛅</div>
+              </div>
+              <div style="display:flex;gap:16px;margin-top:4px">
+                <div><div class="widget-label">Humidity</div><div style="font-size:13px;font-weight:600">74%</div></div>
+                <div><div class="widget-label">Wind</div><div style="font-size:13px;font-weight:600">12 mph</div></div>
+                <div><div class="widget-label">UV Index</div><div style="font-size:13px;font-weight:600">3</div></div>
+              </div>
+            </div>
+            <div class="widget-actions">
+              <button class="widget-btn secondary">5-day forecast</button>
+              <button class="widget-btn primary">Use as props</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic messages inserted here -->
+      </div>
+
+      <div class="suggestions" id="suggestions">
+        <div class="chip" onclick="insertChip(this,'Make it concise')">✏️ Make it concise</div>
+        <div class="chip" onclick="insertChip(this,'Add tests')">🧪 Add tests</div>
+        <div class="chip" onclick="insertChip(this,'Explain the code')">💡 Explain the code</div>
+      </div>
+
+      <div class="composer">
+        <div class="composer-attach-row" id="attachRow"></div>
+        <div class="composer-row">
+          <button class="composer-btn btn-attach" title="Attach" onclick="addAttachment()">＋</button>
+          <input class="composer-input" id="compInput" placeholder="Message Eliza…" oninput="onInput()" onkeydown="onKey(event)">
+          <button class="composer-btn btn-action" id="actionBtn" title="Voice" onclick="onAction()">🎙</button>
+          <button class="composer-btn btn-mute" id="muteBtn" title="Mute" onclick="toggleMute()">🔈</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Artifact workspace -->
+    <div class="artifact-col" id="artifactCol">
+      <div class="artifact-empty" id="artifactEmpty">
+        <div class="artifact-empty-icon">✦</div>
+        <div>
+          <div style="font-size:15px;font-weight:600;margin-bottom:6px">Artifact workspace</div>
+          <div class="artifact-empty-text">Substantial answers auto-open here as versioned artifacts. Ask Eliza to create something.</div>
+        </div>
+      </div>
+
+      <div class="artifact-panel" id="artifactPanel" style="display:none">
+        <div class="artifact-panel-header">
+          <div class="artifact-panel-title" id="panelTitle">WeatherCard.tsx</div>
+          <select class="artifact-version-sel" id="versionSel" onchange="switchVersion(this.value)">
+            <option value="2">v2 — dark + rain</option>
+            <option value="1">v1 — original</option>
+          </select>
+          <div class="artifact-tabs">
+            <button class="artifact-tab active" onclick="switchTab('code',this)">Code</button>
+            <button class="artifact-tab" onclick="switchTab('preview',this)">Preview</button>
+          </div>
+        </div>
+        <div class="artifact-toolbar">
+          <div class="refine-chips">
+            <div class="refine-chip" onclick="refineArtifact('Make it concise')">Make it concise</div>
+            <div class="refine-chip" onclick="refineArtifact('Add tests')">Add tests</div>
+            <div class="refine-chip" onclick="refineArtifact('Add prop types')">Add prop types</div>
+          </div>
+          <div class="toolbar-spacer"></div>
+          <button class="toolbar-btn" onclick="copyArtifact()">📋 Copy</button>
+          <button class="toolbar-btn" onclick="downloadArtifact()">⬇ Download</button>
+          <button class="toolbar-btn primary" onclick="publishArtifact()">↑ Publish</button>
+        </div>
+        <div class="artifact-content" id="artifactContent">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="demo-btn" id="demoBtn" onclick="runDemo()">▶ Play demo</button>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let state = 'idle'; // idle | listening | thinking | speaking
+let muted = false;
+let typing = false;
+let generating = false;
+let demoTimers = [];
+let ampInterval = null;
+let artifactOpen = false;
+
+const orbEl = document.getElementById('orb');
+const voiceBadge = document.getElementById('voiceBadge');
+const voiceLabel = document.getElementById('voiceLabel');
+const actionBtn = document.getElementById('actionBtn');
+const muteBtn = document.getElementById('muteBtn');
+const compInput = document.getElementById('compInput');
+const chatLog = document.getElementById('chatLog');
+const suggEl = document.getElementById('suggestions');
+const attachRow = document.getElementById('attachRow');
+const artifactEmpty = document.getElementById('artifactEmpty');
+const artifactPanel = document.getElementById('artifactPanel');
+const artifactContent = document.getElementById('artifactContent');
+
+// ── Avatar state ───────────────────────────────────────────────────────────
+function setOrbState(s) {
+  state = s;
+  orbEl.className = 'orb-wrap ' + s + (muted ? ' muted' : '');
+
+  // Voice badge
+  if (s === 'listening' && !muted) {
+    voiceBadge.className = 'voice-badge visible';
+    voiceLabel.textContent = 'Listening…';
+  } else if (muted) {
+    voiceBadge.className = 'voice-badge visible muted';
+    voiceLabel.textContent = 'Muted';
+  } else {
+    voiceBadge.className = 'voice-badge';
+  }
+
+  // Listening amplitude simulation
+  if (s === 'listening' && !muted) {
+    startAmpSim();
+  } else {
+    stopAmpSim();
+  }
+}
+
+let ampPhase = 0;
+function startAmpSim() {
+  stopAmpSim();
+  ampInterval = setInterval(() => {
+    ampPhase += 0.18;
+    const amp = 0.5 + 0.5 * (Math.sin(ampPhase) * 0.6 + Math.random() * 0.4);
+    const scale = 1 + amp * 0.14;
+    orbEl.querySelector('.orb').style.transform = 'scale(' + scale + ')';
+  }, 40);
+}
+function stopAmpSim() {
+  if (ampInterval) { clearInterval(ampInterval); ampInterval = null; }
+  const o = orbEl.querySelector('.orb');
+  if (o) o.style.transform = '';
+}
+
+// ── Mute ──────────────────────────────────────────────────────────────────
+function toggleMute() {
+  muted = !muted;
+  muteBtn.textContent = muted ? '🔇' : '🔈';
+  muteBtn.className = 'composer-btn btn-mute' + (muted ? ' muted' : '');
+  setOrbState(state);
+  if (muted) stopAmpSim();
+}
+
+// ── Composer input ─────────────────────────────────────────────────────────
+function onInput() {
+  const val = compInput.value.trim();
+  if (val.length > 0) {
+    if (!typing) {
+      typing = true;
+      suggEl.style.opacity = '0.3';
+      suggEl.style.pointerEvents = 'none';
+    }
+    actionBtn.textContent = generating ? '⬛' : '↑';
+    actionBtn.title = generating ? 'Stop' : 'Send';
+    actionBtn.className = 'composer-btn btn-action' + (generating ? ' stop' : '');
+  } else {
+    typing = false;
+    suggEl.style.opacity = '';
+    suggEl.style.pointerEvents = '';
+    actionBtn.textContent = generating ? '⬛' : '🎙';
+    actionBtn.title = generating ? 'Stop' : 'Voice';
+    actionBtn.className = 'composer-btn btn-action' + (generating ? ' stop' : '');
+  }
+}
+
+function onKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onAction(); }
+}
+
+function onAction() {
+  if (generating) { stopGeneration(); return; }
+  const val = compInput.value.trim();
+  if (val) { sendTyped(val); return; }
+  // Voice action
+  if (state === 'idle') runDemo();
+}
+
+// ── Attachment ─────────────────────────────────────────────────────────────
+let pendingAttach = [];
+function addAttachment() {
+  const files = ['budget-2024.xlsx','design-spec.pdf','screenshot.png'];
+  const f = files[pendingAttach.length % files.length];
+  pendingAttach.push(f);
+  renderAttachChips();
+}
+function renderAttachChips() {
+  attachRow.innerHTML = pendingAttach.map((f,i) =>
+    `<div class="attach-chip">
+      <span class="attach-chip-icon">📄</span>${f}
+      <span class="attach-chip-remove" onclick="removeAttach(${i})">✕</span>
+    </div>`
+  ).join('');
+}
+function removeAttach(i) {
+  pendingAttach.splice(i,1);
+  renderAttachChips();
+}
+
+// ── Send typed ─────────────────────────────────────────────────────────────
+function sendTyped(val) {
+  compInput.value = '';
+  typing = false;
+  onInput();
+
+  const attachHtml = pendingAttach.length ?
+    `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
+      ${pendingAttach.map(f=>`<div class="attach-chip"><span class="attach-chip-icon">📎</span>${f}</div>`).join('')}
+    </div>` : '';
+  pendingAttach = [];
+  attachRow.innerHTML = '';
+
+  addMsg('user', `${attachHtml}<div class="msg-bubble">${val}</div>`, '⌨');
+  scheduleReply();
+}
+
+function insertChip(el, text) {
+  compInput.value = text;
+  onInput();
+  compInput.focus();
+}
+
+// ── Message helpers ────────────────────────────────────────────────────────
+function addMsg(role, html, glyph, partial) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + role + (partial ? ' partial' : '');
+  const glyphStr = glyph || (role === 'user' ? '⌨' : '✦');
+  const name = role === 'user' ? 'You' : 'Eliza';
+  div.innerHTML = `<div class="msg-meta"><span class="msg-glyph">${glyphStr}</span> ${name} <span class="msg-time">now</span></div>${html}`;
+  chatLog.appendChild(div);
+  chatLog.scrollTop = chatLog.scrollHeight;
+  return div;
+}
+
+// ── Scripted reply ─────────────────────────────────────────────────────────
+function scheduleReply() {
+  generating = true;
+  onInput();
+  setOrbState('thinking');
+
+  const t1 = setTimeout(() => {
+    setOrbState('speaking');
+    const replies = [
+      "Here's an updated version with the changes you requested. I've kept the component lean and added proper TypeScript generics.",
+      "I've added a comprehensive test suite using Jest and React Testing Library — 12 tests covering render, props, and user interactions.",
+      "The component now supports both light and dark modes via a <code>theme</code> prop. The gradient adapts automatically."
+    ];
+    const r = replies[Math.floor(Math.random() * replies.length)];
+    addMsg('assistant', `<div class="msg-body">${r}</div>
+      <div class="artifact-card" onclick="openArtifact()">
+        <div class="artifact-card-header">
+          <div>
+            <div class="artifact-card-label">Artifact · React Component</div>
+            <div class="artifact-card-title">WeatherCard.tsx — v3</div>
+          </div>
+          <div class="artifact-card-action">Open ↗</div>
+        </div>
+        <div class="artifact-card-meta">81 lines · TypeScript</div>
+      </div>`);
+
+    const t2 = setTimeout(() => {
+      generating = false;
+      setOrbState('idle');
+      onInput();
+    }, 1800);
+    demoTimers.push(t2);
+  }, 1200);
+  demoTimers.push(t1);
+}
+
+function stopGeneration() {
+  demoTimers.forEach(clearTimeout);
+  demoTimers = [];
+  generating = false;
+  setOrbState('idle');
+  onInput();
+}
+
+// ── Artifact panel ─────────────────────────────────────────────────────────
+const ARTIFACTS = {
+  2: `<pre><code>// WeatherCard.tsx — v2 (dark + rain)
+import React, { useEffect, useRef } from 'react';
+
+interface WeatherCardProps {
+  temp: number;
+  condition: 'sunny' | 'rainy' | 'cloudy' | 'stormy';
+  location: string;
+  humidity: number;
+}
+
+const RAIN_CSS = \`
+  @keyframes rain {
+    from { transform: translateY(-10px); opacity: 0 }
+    to   { transform: translateY(60px);  opacity: 0.6 }
+  }
+\`;
+
+export const WeatherCard: React.FC&lt;WeatherCardProps&gt; = ({
+  temp, condition, location, humidity
+}) => {
+  return (
+    &lt;div className="weather-card dark"&gt;
+      &lt;style&gt;{RAIN_CSS}&lt;/style&gt;
+      {condition === 'rainy' &amp;&amp; &lt;RainLayer /&gt;}
+      &lt;div className="card-body"&gt;
+        &lt;h2&gt;{location}&lt;/h2&gt;
+        &lt;span className="temp"&gt;{temp}°F&lt;/span&gt;
+        &lt;p&gt;{condition} · Humidity {humidity}%&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>`,
+  1: `<pre><code>// WeatherCard.tsx — v1 (original)
+import React from 'react';
+
+interface WeatherCardProps {
+  temp: number;
+  condition: string;
+  location: string;
+}
+
+export const WeatherCard: React.FC&lt;WeatherCardProps&gt; = ({
+  temp, condition, location
+}) => {
+  return (
+    &lt;div className="weather-card"&gt;
+      &lt;h2&gt;{location}&lt;/h2&gt;
+      &lt;span className="temp"&gt;{temp}°&lt;/span&gt;
+      &lt;p&gt;{condition}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>`
+};
+
+function openArtifact() {
+  artifactEmpty.style.display = 'none';
+  artifactPanel.style.display = 'flex';
+  artifactContent.innerHTML = ARTIFACTS[2];
+}
+
+function switchVersion(v) {
+  artifactContent.innerHTML = ARTIFACTS[parseInt(v)] || ARTIFACTS[2];
+}
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.artifact-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (tab === 'preview') {
+    artifactContent.innerHTML = `<div style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:16px;padding:24px;color:#fff;font-family:system-ui">
+      <div style="font-size:13px;opacity:0.7;margin-bottom:8px">📍 San Francisco</div>
+      <div style="font-size:48px;font-weight:300">62°</div>
+      <div style="font-size:14px;opacity:0.8;margin-top:4px">🌧 Rainy · Humidity 74%</div>
+      <div style="margin-top:16px;display:flex;gap:8px">
+        ${[...Array(5)].map((_,i) => `<div style="text-align:center;opacity:0.7"><div style="font-size:11px">+${i+1}d</div><div>🌦</div><div style="font-size:12px">${58+i}°</div></div>`).join('')}
+      </div>
+    </div>`;
+  } else {
+    artifactContent.innerHTML = ARTIFACTS[2];
+  }
+}
+
+function copyArtifact() { /* visual feedback */ actionBtn.textContent = '✓'; setTimeout(() => onInput(), 1500); }
+function downloadArtifact() {}
+function publishArtifact() {}
+function refineArtifact(text) { compInput.value = text; onInput(); compInput.focus(); }
+
+// ── Demo cycle ─────────────────────────────────────────────────────────────
+function clearDemoTimers() {
+  demoTimers.forEach(clearTimeout);
+  demoTimers = [];
+  stopAmpSim();
+}
+
+function runDemo() {
+  clearDemoTimers();
+  generating = false;
+  onInput();
+
+  // IDLE (already)
+  setOrbState('idle');
+
+  // → LISTENING
+  const t1 = setTimeout(() => {
+    setOrbState('listening');
+    actionBtn.textContent = '⏹';
+
+    // partial transcript
+    const partialMsg = addMsg('user',
+      `<div class="msg-bubble" style="opacity:0.55;font-style:italic">Add a loading skeleton state…</div>`,
+      '🎙');
+    partialMsg.classList.add('partial');
+
+    // → THINKING
+    const t2 = setTimeout(() => {
+      setOrbState('thinking');
+      partialMsg.classList.remove('partial');
+      partialMsg.querySelector('.msg-bubble').style.opacity = '';
+      partialMsg.querySelector('.msg-bubble').style.fontStyle = '';
+
+      // → SPEAKING
+      const t3 = setTimeout(() => {
+        setOrbState('speaking');
+        addMsg('assistant',
+          `<div class="msg-body">Added a skeleton loader — it pulses while data fetches, then fades into the real card. Bump to v3.</div>
+          <div class="artifact-card" onclick="openArtifact()">
+            <div class="artifact-card-header">
+              <div>
+                <div class="artifact-card-label">Artifact · React Component</div>
+                <div class="artifact-card-title">WeatherCard.tsx — v3</div>
+              </div>
+              <div class="artifact-card-action">Open ↗</div>
+            </div>
+            <div class="artifact-card-meta">78 lines · skeleton + animation</div>
+          </div>`);
+        openArtifact();
+        // add v3 to selector
+        const sel = document.getElementById('versionSel');
+        if (!sel.querySelector('[value="3"]')) {
+          const o = document.createElement('option');
+          o.value='3'; o.textContent='v3 — skeleton loader'; o.selected=true;
+          sel.insertBefore(o, sel.firstChild);
+        }
+
+        // → IDLE
+        const t4 = setTimeout(() => {
+          setOrbState('idle');
+          actionBtn.textContent = '🎙';
+          onInput();
+        }, 2200);
+        demoTimers.push(t4);
+      }, 1200);
+      demoTimers.push(t3);
+    }, 1800);
+    demoTimers.push(t2);
+  }, 600);
+  demoTimers.push(t1);
+}
+
+// Autostart once
+setTimeout(runDemo, 1200);
+</script>
+</body>
+</html>

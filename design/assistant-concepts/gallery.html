@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assistant Concept Gallery</title>
+<style>
+  /* ── Reset & Base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0d0f;
+    --surface: #18181b;
+    --surface2: #1f1f24;
+    --border: #2e2e35;
+    --text: #e4e4e7;
+    --muted: #71717a;
+    --accent: #6366f1;
+    --accent-dim: #4338ca;
+    --chip-bg: #27272a;
+    --chip-active: #6366f1;
+    --chip-active-text: #fff;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --card-w: 280px;
+    --preview-h: 180px;
+  }
+
+  html { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    min-height: 100%;
+    overflow-x: hidden;
+  }
+
+  /* ── Header ── */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13,13,15,0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .header-top h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: #fff;
+  }
+  .badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 11px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .header-legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* ── Filter Bar ── */
+  .filter-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+  }
+  .filter-section {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .filter-section:last-child { margin-bottom: 0; }
+  .filter-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    padding-top: 4px;
+    min-width: 68px;
+    flex-shrink: 0;
+  }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+  .chip {
+    background: var(--chip-bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px 11px;
+    font-size: 11px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .chip:hover { background: var(--surface2); color: var(--text); }
+  .chip.active {
+    background: var(--chip-active);
+    border-color: var(--chip-active);
+    color: var(--chip-active-text);
+  }
+  .chip.look-1.active { background: #7c3aed; border-color: #7c3aed; }
+  .chip.look-2.active { background: #0e7490; border-color: #0e7490; }
+  .chip.look-3.active { background: #92400e; border-color: #92400e; }
+  .chip.look-4.active { background: #1d4ed8; border-color: #1d4ed8; }
+  .chip.look-5.active { background: #3f3f46; border-color: #71717a; }
+
+  .filter-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .btn-reset {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--muted);
+    font-size: 11px;
+    padding: 4px 12px;
+    cursor: pointer;
+    transition: color 0.12s, border-color 0.12s;
+  }
+  .btn-reset:hover { color: var(--text); border-color: var(--text); }
+  .view-toggle {
+    display: flex;
+    background: var(--chip-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin-left: auto;
+  }
+  .view-btn {
+    padding: 4px 14px;
+    font-size: 11px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+    border: none;
+    background: none;
+    user-select: none;
+  }
+  .view-btn.active { background: var(--accent); color: #fff; }
+  .result-count {
+    font-size: 11px;
+    color: var(--muted);
+    margin-left: 8px;
+  }
+
+  /* ── Main Grid ── */
+  .main { padding: 24px; }
+
+  #grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--card-w), 1fr));
+    gap: 20px;
+  }
+
+  /* ── Concept Card ── */
+  .concept-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+    display: flex;
+    flex-direction: column;
+  }
+  .concept-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent), 0 8px 32px rgba(99,102,241,0.15);
+    transform: translateY(-2px);
+  }
+  .concept-card.hidden { display: none; }
+
+  .card-preview {
+    width: 100%;
+    height: var(--preview-h);
+    background: #111;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .card-preview iframe {
+    width: 420px;
+    height: 760px;
+    border: none;
+    transform: scale(0.237) translate(-50%, -50%);
+    transform-origin: 0 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    pointer-events: none;
+  }
+  .card-preview .preview-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 11px;
+    background: var(--surface2);
+  }
+  .card-preview .preview-placeholder svg {
+    opacity: 0.4;
+  }
+  .preview-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+  }
+  .card-preview .loading-pulse {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 10px;
+  }
+
+  .card-body {
+    padding: 12px 14px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .card-code {
+    font-size: 10px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    font-family: "SF Mono", "Fira Code", monospace;
+    letter-spacing: 0.03em;
+  }
+  .card-direction {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .card-look {
+    display: inline-block;
+    font-size: 10px;
+    border-radius: 999px;
+    padding: 1px 8px;
+    margin-bottom: 2px;
+  }
+  .look-pill-1 { background: rgba(124,58,237,0.2); color: #a78bfa; border: 1px solid rgba(124,58,237,0.35); }
+  .look-pill-2 { background: rgba(14,116,144,0.2); color: #22d3ee; border: 1px solid rgba(14,116,144,0.35); }
+  .look-pill-3 { background: rgba(146,64,14,0.2); color: #fbbf24; border: 1px solid rgba(146,64,14,0.35); }
+  .look-pill-4 { background: rgba(29,78,216,0.2); color: #60a5fa; border: 1px solid rgba(29,78,216,0.35); }
+  .look-pill-5 { background: rgba(63,63,70,0.4); color: #a1a1aa; border: 1px solid rgba(113,113,122,0.35); }
+
+  .card-blurb {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.55;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* ── Matrix View ── */
+  #grid-container.matrix-view {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    --card-w: 0px;
+  }
+  .matrix-view .concept-card {
+    border-radius: 6px;
+  }
+  .matrix-view .card-preview {
+    height: 110px;
+  }
+  .matrix-view .card-preview iframe {
+    transform: scale(0.145) translate(-50%, -50%);
+  }
+  .matrix-view .card-body {
+    padding: 6px 8px;
+    gap: 2px;
+  }
+  .matrix-view .card-direction {
+    font-size: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .matrix-view .card-blurb { display: none; }
+  .matrix-view .card-code { display: none; }
+  .matrix-view .card-look { display: none; }
+
+  /* Matrix axis headers */
+  .matrix-header-row {
+    display: none;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+  .matrix-view ~ .matrix-header-row,
+  #grid-container.matrix-view .matrix-header-row { display: grid; }
+  .matrix-col-header {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--muted);
+    padding: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Fullscreen Overlay ── */
+  #overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0,0,0,0.88);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+  #overlay.open { display: flex; }
+
+  .overlay-topbar {
+    width: 100%;
+    max-width: 1060px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 16px;
+    flex-wrap: wrap;
+  }
+  .overlay-title {
+    flex: 1;
+    min-width: 0;
+  }
+  .overlay-title h2 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .overlay-title p {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+  .overlay-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .frame-size-toggle {
+    display: flex;
+    background: var(--chip-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+  .frame-btn {
+    padding: 4px 12px;
+    font-size: 11px;
+    color: var(--muted);
+    cursor: pointer;
+    border: none;
+    background: none;
+    transition: background 0.12s, color 0.12s;
+    user-select: none;
+  }
+  .frame-btn.active { background: var(--accent); color: #fff; }
+
+  .overlay-link {
+    font-size: 11px;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 4px 10px;
+    border: 1px solid rgba(99,102,241,0.4);
+    border-radius: var(--radius-sm);
+    transition: background 0.12s;
+  }
+  .overlay-link:hover { background: rgba(99,102,241,0.15); }
+
+  .btn-close {
+    width: 30px; height: 30px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 16px;
+    transition: background 0.12s, color 0.12s;
+    flex-shrink: 0;
+  }
+  .btn-close:hover { background: var(--border); color: var(--text); }
+
+  .overlay-stage {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 1060px;
+    padding: 0 16px;
+  }
+  .nav-btn {
+    width: 40px; height: 40px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 18px;
+    transition: background 0.12s, border-color 0.12s;
+    flex-shrink: 0;
+    user-select: none;
+  }
+  .nav-btn:hover { background: var(--border); border-color: var(--accent); }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+  .overlay-frame-wrap {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: #000;
+    position: relative;
+    flex-shrink: 0;
+    transition: width 0.25s cubic-bezier(.32,.72,0,1), height 0.25s cubic-bezier(.32,.72,0,1);
+  }
+  #overlay-iframe {
+    display: block;
+    border: none;
+    width: 100%;
+    height: 100%;
+  }
+  .overlay-missing {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 13px;
+    background: var(--surface2);
+  }
+
+  .overlay-footer {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* ── Empty State ── */
+  .empty-state {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 24px;
+    gap: 10px;
+    color: var(--muted);
+  }
+  .empty-state svg { opacity: 0.3; }
+  .empty-state p { font-size: 14px; }
+  .empty-state small { font-size: 11px; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  @media (max-width: 700px) {
+    .header, .filter-bar { padding: 12px 14px; }
+    .main { padding: 14px; }
+    #grid-container.matrix-view { grid-template-columns: repeat(3, 1fr); }
+    .matrix-view .matrix-header-row { grid-template-columns: repeat(3, 1fr); }
+    .filter-label { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="header">
+  <div class="header-top">
+    <h1>Assistant Concept Gallery</h1>
+    <span class="badge" id="total-badge">100 concepts</span>
+  </div>
+  <div class="header-legend">
+    <span class="legend-item"><span class="legend-dot" style="background:#a78bfa"></span>Soft Aurora Glass</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#22d3ee"></span>OLED Neon Cyber</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#fbbf24"></span>Warm Editorial Paper</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#60a5fa"></span>Clean System Light</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#a1a1aa"></span>Brutalist Mono</span>
+    <span style="color:var(--muted);font-size:11px;margin-left:auto">20 directions × 5 looks · Click any card to preview fullscreen · ← → to navigate</span>
+  </div>
+</header>
+
+<!-- ── FILTER BAR ── -->
+<div class="filter-bar">
+  <div class="filter-section">
+    <span class="filter-label">Look</span>
+    <div class="chips" id="look-chips">
+      <div class="chip active" data-look="all">All Looks</div>
+      <div class="chip look-1" data-look="1">Soft Aurora Glass</div>
+      <div class="chip look-2" data-look="2">OLED Neon Cyber</div>
+      <div class="chip look-3" data-look="3">Warm Editorial Paper</div>
+      <div class="chip look-4" data-look="4">Clean System Light</div>
+      <div class="chip look-5" data-look="5">Brutalist Mono</div>
+    </div>
+  </div>
+  <div class="filter-section">
+    <span class="filter-label">Direction</span>
+    <div class="chips" id="dir-chips">
+      <div class="chip active" data-dir="all">All Directions</div>
+      <div class="chip" data-dir="1">D01 · Giant Orb</div>
+      <div class="chip" data-dir="2">D02 · Full-Screen Avatar</div>
+      <div class="chip" data-dir="3">D03 · Classic Chat</div>
+      <div class="chip" data-dir="4">D04 · Ambient Peripheral</div>
+      <div class="chip" data-dir="5">D05 · Card Canvas</div>
+      <div class="chip" data-dir="6">D06 · Terminal / CLI</div>
+      <div class="chip" data-dir="7">D07 · Spatial 3D</div>
+      <div class="chip" data-dir="8">D08 · Radial Menu</div>
+      <div class="chip" data-dir="9">D09 · Timeline</div>
+      <div class="chip" data-dir="10">D10 · Push-to-Talk</div>
+      <div class="chip" data-dir="11">D11 · Zen Minimal</div>
+      <div class="chip" data-dir="12">D12 · App Launcher</div>
+      <div class="chip" data-dir="13">D13 · Split + Artifacts</div>
+      <div class="chip" data-dir="14">D14 · Voice Memo</div>
+      <div class="chip" data-dir="15">D15 · Companion</div>
+      <div class="chip" data-dir="16">D16 · Dashboard</div>
+      <div class="chip" data-dir="17">D17 · Media Player</div>
+      <div class="chip" data-dir="18">D18 · Gesture / Swipe</div>
+      <div class="chip" data-dir="19">D19 · Glass HUD</div>
+      <div class="chip" data-dir="20">D20 · Sidebar + Stage</div>
+    </div>
+  </div>
+  <div class="filter-actions">
+    <button class="btn-reset" id="btn-reset">Reset filters</button>
+    <span class="result-count" id="result-count">Showing 100 of 100</span>
+    <div class="view-toggle">
+      <button class="view-btn active" data-view="grid">Grid</button>
+      <button class="view-btn" data-view="matrix">Matrix 20×5</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MAIN CONTENT ── -->
+<main class="main">
+  <div id="grid-container">
+    <!-- Cards injected by JS -->
+  </div>
+</main>
+
+<!-- ── FULLSCREEN OVERLAY ── -->
+<div id="overlay">
+  <div class="overlay-topbar">
+    <div class="overlay-title">
+      <h2 id="overlay-title-text">—</h2>
+      <p id="overlay-sub-text">—</p>
+    </div>
+    <div class="overlay-controls">
+      <div class="frame-size-toggle">
+        <button class="frame-btn active" data-frame="portrait">Portrait 420×760</button>
+        <button class="frame-btn" data-frame="desktop">Desktop 960×640</button>
+      </div>
+      <a id="overlay-open-link" href="#" target="_blank" rel="noopener" class="overlay-link">Open ↗</a>
+      <div class="btn-close" id="btn-close" title="Close (Esc)">✕</div>
+    </div>
+  </div>
+  <div class="overlay-stage">
+    <div class="nav-btn" id="btn-prev" title="Previous (←)">‹</div>
+    <div class="overlay-frame-wrap" id="frame-wrap">
+      <iframe id="overlay-iframe" sandbox="allow-scripts allow-same-origin" loading="lazy"></iframe>
+      <div class="overlay-missing" id="overlay-missing" style="display:none">
+        <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/>
+        </svg>
+        <span>File not found</span>
+      </div>
+    </div>
+    <div class="nav-btn" id="btn-next" title="Next (→)">›</div>
+  </div>
+  <div class="overlay-footer" id="overlay-footer">— / —</div>
+</div>
+
+<script>
+// ── DATA ──
+const LOOKS = [
+  { id: 1, name: "Soft Aurora Glass" },
+  { id: 2, name: "OLED Neon Cyber" },
+  { id: 3, name: "Warm Editorial Paper" },
+  { id: 4, name: "Clean System Light" },
+  { id: 5, name: "Brutalist Mono" },
+];
+
+const DIRECTIONS = [
+  { id: 1,  name: "Giant Centered Orb (Voice-First)" },
+  { id: 2,  name: "Full-Screen Avatar + Floating Captions" },
+  { id: 3,  name: "Classic Chat + Voice Dock" },
+  { id: 4,  name: "Ambient Peripheral Home" },
+  { id: 5,  name: "Card Canvas (Answers Are Cards)" },
+  { id: 6,  name: "Terminal / CLI Hybrid" },
+  { id: 7,  name: "Spatial 3D Depth" },
+  { id: 8,  name: "Radial Menu Around Avatar" },
+  { id: 9,  name: "Conversation-as-Vertical-Timeline" },
+  { id: 10, name: "Push-to-Talk Walkie-Talkie" },
+  { id: 11, name: "Zen Single-Line Minimal" },
+  { id: 12, name: "App-Launcher-First Home" },
+  { id: 13, name: "Split Avatar + Work Canvas (Artifacts)" },
+  { id: 14, name: "Voice-Memo / Audio-Waveform Style" },
+  { id: 15, name: "Character / Companion with Personality" },
+  { id: 16, name: "Dashboard Home with Widgets" },
+  { id: 17, name: "Now-Playing / Media-Player Style" },
+  { id: 18, name: "Gesture / Swipe-Driven" },
+  { id: 19, name: "Glass HUD Overlay" },
+  { id: 20, name: "Sidebar + Stage (Two-Pane Console)" },
+];
+
+const BLURBS = {
+  "D01-L1": "Frosted glass panels float over a slow-drifting pastel aurora (periwinkle/lavender/mint). The orb is a 3-stop radial gradient sphere with a specular highlight and feathered bloom halo; idle breathes at 4s ease, listening ripples outward in mint, thinking hue-rotates, speaking pulses rhythmically.",
+  "D01-L2": "True-black (#000) OLED canvas with electric cyan and magenta accents. The orb is a canvas-rendered particle/bar-field — idle shows sparse rotating particles, listening renders a 32-bar spectrum reacting to a synthetic mic level in cyan, thinking shows magenta+cyan particle churn, speaking switches bars to acid-lime.",
+  "D01-L3": "Cream (#F6F1E7) background with serif display type, thin hairline rules, and a warm clay accent. The canvas orb renders as an organic blob — idle breathes with a slow scale, listening stretches with voice amplitude, thinking hue-cycles with an ink-bleed shimmer, speaking adds a flowing stroke.",
+  "D01-L4": "Apple-style system UI: #F2F2F7 grouped background, white card surfaces, 0.5px separators, SF Pro type. The canvas orb is a Siri-style multi-hue gradient sphere — idle is blue-dominant, listening shifts to cyan+blue with amplitude rings, thinking hue-cycles, speaking turns green-dominant.",
+  "D01-L5": "Bone background, 2px solid black borders everywhere, zero border-radius, hard 4px offset box-shadows. The orb is a bordered square containing a canvas-rendered monospace waveform: idle shows block-character bars with a blinking cursor, listening/speaking render discrete bars, thinking renders a spinning ASCII glyph.",
+  "D02-L1": "Frosted glass panels float over a slow-drifting pastel aurora. Avatar is a blurred radial orb with double halo ring. All four states driven by CSS keyframes and JS amplitude. Caption box slides to the top when screen-share is toggled.",
+  "D02-L2": "True-black OLED cockpit with 24 rotating spectrum bars around a cyan point-cloud orb. Listening drives both the bars and a core glow bloom; thinking switches to magenta churn with hue drift; speaking fires a fast speakBloom keyframe.",
+  "D02-L3": "Cream serif layout with an animated SVG ink-stroke behind a clay/terracotta CSS blob that morphs its border-radius between states. Feels like a literary companion, not a tech product.",
+  "D02-L4": "iOS-native system UI: white surfaces, 0.5px hairline separators, SF Pro Text. Avatar is a clean blue gradient orb with a ripple ring that animates on listening. Transcript renders iMessage-style bubbles.",
+  "D02-L5": "Hard-edge monospace terminal UI with zero border-radius. Avatar is a bordered box containing animated Unicode block characters that step through states without easing.",
+  "D03-L1": "Frosted glass panels over a slow-drifting pastel aurora background. Periwinkle-to-lavender gradient orb breathes with CSS keyframe animation. Waveform bars in the dock animate with JS timers.",
+  "D03-L2": "True-black OLED cockpit with electric cyan and magenta neon. Orb, header avatar, and empty-state avatar all rendered on Canvas. Scanline shimmer overlay via CSS repeating-gradient.",
+  "D03-L3": "Cream serif editorial look inspired by Pi/Claude document threads. Avatar is a hand-drawn-feeling ink stroke on Canvas. Serif body type throughout with small-caps UI labels.",
+  "D03-L4": "Crisp Apple-native system UI: white surfaces, 0.5px hairline separators, single blue accent. Canvas orb is a multi-hue Gemini/Siri-inspired sphere.",
+  "D03-L5": "Terminal-aesthetic, zero-radius, 2px solid black borders everywhere. Avatar is block-character ASCII waveform inside a bordered box, frame-swapping between discrete ASCII states via setInterval.",
+  "D04-L1": "Frosted glass panels over animated pastel aurora. Edge glow is a feathered bloom that breathes at idle, chases the perimeter while listening, hue-rotates while thinking, amplitude-shimmers while speaking.",
+  "D04-L2": "True-black OLED surface with electric cyan and magenta neon accents. Edge glow is a 1px neon hairline that steps through hard-snap perimeter-chase.",
+  "D04-L3": "Cream warm-paper background with serif type. Edge glow is a soft clay-terracotta and sage wash that breathes slowly. Waveform renders as a single organic ink-stroke SVG path.",
+  "D04-L4": "Native iOS/macOS system UI: white surfaces, 0.5px separators, SF Pro Text, system blue accent, grouped inset list rows. Edge glow transitions through blue to teal to indigo shimmer.",
+  "D04-L5": "Bone-white background, 2px solid black borders on everything, hard 4px offset block-shadows, zero border-radius. Edge glow is a thick inset colored border that hard-steps between states.",
+  "D05-L1": "Frosted glass cards float over a slow-drifting aurora gradient. Orb is a radial periwinkle-to-mint sphere with a specular highlight and feathered bloom halo that ripples on mic input.",
+  "D05-L2": "True-black canvas with a scanline overlay and cyan grid. Orb renders as cyan spectrum bars during listening and acid-lime bars during speaking, with magenta churn for thinking.",
+  "D05-L3": "Cream-toned canvas with light rule lines. Orb is an organic ink-blob that undulates slowly at idle, stretches laterally on mic input, bleeds sage-green during thinking, and pulses clay-terracotta during speaking.",
+  "D05-L4": "Apple system UI aesthetic with white card surfaces, 0.5px separators, and a single blue accent. Orb is a Siri-inspired soft gradient sphere that shifts hue during thinking and turns green during speaking.",
+  "D05-L5": "Bone-white canvas with a 2px black grid and hard-offset block shadows. Orb replaced by ASCII block-character waveform box that swaps frames via setInterval with step() timing.",
+  "D06-L1": "Frosted glass terminal floating over a slow-drifting pastel aurora. CLI prompt and monospace log inside a backdrop-blur surface with periwinkle/lavender/mint token colors.",
+  "D06-L2": "True-black OLED cockpit with cyan/magenta/acid-lime neon palette. Avatar is a canvas particle-field orb — rotating sparse cyan dots that expand with mic amplitude during listening.",
+  "D06-L3": "Cream, literary terminal in Palatino/Georgia serif with a clay accent and sage secondary. Avatar is an SVG animated ink stroke — a hand-drawn-feeling sinusoidal path.",
+  "D06-L4": "Native Apple-style system UI: white surfaces, 0.5px hairline separators, system blue accent, SF Pro stack. Avatar is a Siri/Gemini-inspired conic-gradient ring that spins at different speeds per state.",
+  "D06-L5": "Zero-radius, 2px solid black borders, hard 4px offset block shadows, full JetBrains Mono throughout. Avatar IS the waveform — a 10-character field of Unicode block glyphs.",
+  "D07-L1": "Frosted glass panels with a slow-drifting pastel aurora. Orb is a radial periwinkle-to-mint gradient sphere. Cards animate in from depth with blur-to-crisp.",
+  "D07-L2": "True-black OLED cockpit with a canvas-rendered particle-field orb. Cyan particles orbit in z-layers, shifting to magenta on thinking and acid-lime on speaking.",
+  "D07-L3": "Cream, literary paper aesthetic with a seriffed font and an SVG organic-blob avatar that continuously morphs via catmull-rom curve interpolation.",
+  "D07-L4": "Apple-native system UI with a Siri-inspired multi-ring orb. Core sphere shifts from blue to teal to green with CSS gradient transitions and animated outer rings.",
+  "D07-L5": "Hard-edged terminal UI with a 2px solid-border avatar box containing a monospaced block-character waveform that frame-swaps. Zero border-radius, hard-offset box-shadows.",
+  "D08-L1": "Frosted glass panels float over a slow-drifting pastel aurora. Orb is a soft 3-stop radial sphere. Radial nodes are translucent glass pills with backdrop-blur. Ring opens with a springy scale-in animation.",
+  "D08-L2": "True-black OLED canvas with cyan and magenta neon accents and a scanline overlay. Orb hosts a canvas-rendered audio-waveform creature: radial spectrum bars in cyan for listening, magenta for thinking.",
+  "D08-L3": "Cream and terracotta editorial look with Palatino/Georgia serif. Orb renders a canvas-drawn organic ink-blob outline that undulates gently at idle, stretches with voice amplitude while listening.",
+  "D08-L4": "Apple-native system light with SF Pro Text, 0.5px hairline separators, and grouped white surfaces. Orb is a conic-gradient multi-color sphere. Nodes are circular floating cards with subtle elevation shadows.",
+  "D08-L5": "Bone-white surface, 2px solid black borders, hard 4px offset drop shadows — zero border radius. Orb contains a canvas-rendered block-character interface with stepwise transitions only.",
+  "D09-L1": "Frosted glass panels float over a slow-drifting pastel aurora. Time rail uses translucent periwinkle nodes and backdrop-blur surfaces. Orb is a radial gradient sphere.",
+  "D09-L2": "True-black cockpit with electric cyan hairlines. Avatar is a canvas waveform creature: 8 spectrum bars rendered in cyan, magenta, or mixed. Rail is a dotted neon line; events use 1px glowing borders.",
+  "D09-L3": "Cream paper with a serif display font and clay-terracotta accent. Avatar is an organic canvas ink-stroke — a single undulating sine wave. Rail is a 1px rule with hairline time labels.",
+  "D09-L4": "Apple-native system UI: #F2F2F7 grouped background, 0.5px hairline separators, and a Siri-inspired blue radial orb. Suggestion chips are system-pill style.",
+  "D09-L5": "Bone-white with 2px solid black borders, hard 4px offset drop-shadows, and zero border-radius. Avatar is a bordered box containing 8 block bars that animate in discrete steps.",
+  "D10-L1": "Frosted glass app window floating over a slow-drifting pastel aurora. PTT orb is a radial periwinkle-to-mint gradient sphere; listening turns it teal with rippling state ring.",
+  "D10-L2": "True-black OLED cockpit with electric cyan/magenta neon accents. PTT button is a dark circle with a 1px neon hairline border; avatar renders as a grid of neon frequency bars.",
+  "D10-L3": "Cream-and-clay literary interface with serif body text. PTT button is a solid clay-terracotta circle; avatar renders as a single undulating organic wave inside the orb.",
+  "D10-L4": "Native Apple system-light feel: white surfaces, 0.5px hairline separators, SF Pro font stack. PTT button is a clean white circle with a conic-gradient Siri-ring.",
+  "D10-L5": "High-contrast bone-white terminal aesthetic: 2px solid black borders on everything, zero border-radius, hard 4px offset drop-shadows, JetBrains Mono throughout.",
+  "D11-L1": "Frosted glass device floats over a slow-drifting pastel aurora. Avatar is a radial gradient orb with a feathered bloom halo. Single zen line fades upward between turns.",
+  "D11-L2": "True-black OLED surface with cyan neon hairline borders and a scanline overlay. Avatar is a canvas-drawn ring of 36 spectrum bars. All labels ALL-CAPS monospace.",
+  "D11-L3": "Cream paper surface with a clay accent rule at the top and a single serif typeface. Avatar is a canvas-drawn ink stroke — a Bezier wave that breathes slowly at idle.",
+  "D11-L4": "iOS-native grouped backgrounds, white cards with 0.5px hairline separators, and SF-style spring easing. Avatar is a canvas-drawn Siri-style sphere with amplitude-reactive rings.",
+  "D11-L5": "Bone-white background on a visible 20px grid with 2px solid black borders. Avatar is a bordered box containing 20 monospace block-character bars. State printed as literal uppercase labels.",
+  "D12-L1": "Frosted glass tiles float over a slow-drifting pastel aurora. Orb is a blurred radial gradient sphere. App tiles lift and scale on activation. Chat bubbles use translucent accent gradients.",
+  "D12-L2": "True-black OLED cockpit with cyan neon hairline borders and a scanline body overlay. Orb is a live canvas element with RMS-reactive bar graphs.",
+  "D12-L3": "Cream paper with serif body type and a clay accent. Orb is an SVG organic ink-blob whose outline morphs in four distinct shapes per state.",
+  "D12-L4": "Native iOS/macOS feel: white grouped surfaces, 0.5px separators, SF-style spring physics. Orb is a conic-gradient sphere cycling blue→teal→green. App tiles are white cards with subtle elevation.",
+  "D12-L5": "Bone-white with 2px black borders, hard drop-shadows, and zero radius on everything. Orb is a bordered ASCII box with block-character bars and spinning glyphs.",
+  "D13-L1": "Frosted glass panels float over a slow-drifting pastel aurora. Orb is a radial periwinkle-to-mint sphere. WeatherCard React artifact populates the right workspace with Code/Preview tabs.",
+  "D13-L2": "True-black cockpit with cyan and magenta neon borders, scanline overlay, and monospace labels. Avatar is a 6-bar spectrum waveform. SDK TypeScript artifact lives in the workspace.",
+  "D13-L3": "Cream paper background with serif body text and a single clay accent. Avatar is an SVG ink stroke. Long-form prose drafts populate the artifact workspace.",
+  "D13-L4": "Native iOS/macOS feel — white surfaces, 0.5px hairline separators, system blue accent. Avatar is a conic-gradient Siri-style orb. Python async pipeline populates the workspace.",
+  "D13-L5": "Bone-white background, 2px solid black borders everywhere, drop-shadow as hard 4px offsets, zero border-radius, all-caps monospace labels. Avatar is a 6-bar ASCII block waveform.",
+  "D14-L1": "Frosted glass panels over slow-drifting pastel aurora gradients. Avatar is a radial-gradient orb with a breathing halo ring. Memo rows float on translucent glass with soft inner shadows.",
+  "D14-L2": "True-black OLED surface with electric cyan/magenta neon hairline borders that glow. Avatar is a bordered neon ring containing a spectrum bar chart. Memo rows have 1px neon accent trails.",
+  "D14-L3": "Cream background with a subtle ruled-paper grid. Avatar is an abstract ink-stroke oval that breathes, stretches to mic input, and shifts hue when thinking. Memos separated by thin hairline rules.",
+  "D14-L4": "iOS-native system palette: grouped gray background, pure white cards, 0.5px hairline separators, SF Pro typeface. Avatar is a conic-gradient Siri-style ring.",
+  "D14-L5": "Bone-white surface, 2px solid black borders on every element, hard 4px offset box-shadows, zero border-radius, full JetBrains Mono monospace. Live waveform uses ASCII block characters.",
+  "D15-L1": "Frosted glass app window over a slow-drifting pastel aurora. Companion Luna is a radial-gradient orb with specular highlight and feathered bloom halo. Four avatar states visually distinct.",
+  "D15-L2": "True-black OLED surface with cyan/magenta neon accents and a scanline overlay. Companion NEXUS renders as a bordered particle field: 12 neon spectrum bars inside two counter-rotating ring frames.",
+  "D15-L3": "Warm cream editorial surface with serif prose, terracotta accent, and a Pi-style undulating ink stroke below the avatar. Companion Wren is an abstract ink clay blob with organic border-radius morph.",
+  "D15-L4": "iOS-native system-light aesthetic: white surfaces, 0.5px hairline separators, SF Pro fonts, blue-dominant multi-ring orb. Companion Aria uses a conic-gradient background ring.",
+  "D15-L5": "Bone-white surface, 2px solid black borders everywhere, hard drop-shadow offsets, zero border-radius, full monospace grid. Companion UNIT-7 renders inside a bordered avatar-box with ASCII face expressions.",
+  "D16-L1": "Frosted glass panels float over a slow 30s aurora gradient. Orb is a 3-stop radial sphere; idle breathes, listening ripples, thinking hue-rotates, speaking pulses. Living-room slider animates in place.",
+  "D16-L2": "True-black OLED with scanline overlay. Avatar is a canvas-drawn bar-spectrum. State labels uppercase monospace. Neon hairline borders glow on every surface.",
+  "D16-L3": "Cream editorial layout with serif body text and hairline rules instead of boxes. Avatar is a canvas ink-stroke that undulates slowly at idle, organic, never jittery.",
+  "D16-L4": "Native Apple-style grouped lists, 0.5px separators, and a large iOS toggle. Orb is a canvas sphere with Gemini-style multi-hue gradient.",
+  "D16-L5": "Zero-radius, 2px black borders, hard block drop-shadows, everything uppercase monospace. Avatar is a bordered box displaying animated block-character waveform frames.",
+  "D17-L1": "Frosted glass panels float over drifting pastel aurora gradients. Avatar is a radial gradient orb with animated bloom halo. Transport controls use pill buttons with backdrop-blur surfaces.",
+  "D17-L2": "True-black OLED cockpit with electric cyan and magenta neon accents. Avatar is a row of 7 spectrum bars rendered in CSS that react in real-time via requestAnimationFrame.",
+  "D17-L3": "Cream literary aesthetic with serif headlines and generous whitespace. Avatar is an organic clay/ink blob rendered with CSS border-radius morphing.",
+  "D17-L4": "Crisp iOS/macOS-native system UI: white surfaces, 0.5px hairline separators, system blue accent. Avatar is a Siri-inspired soft glow orb with a blue-dominant gradient.",
+  "D17-L5": "Zero-radius, 2px solid black borders, hard offset block-shadow, all-caps monospace throughout. Avatar is a bordered box with ASCII block-character waveform frames.",
+  "D18-L1": "Frosted glass panels float over a slow-drifting pastel aurora. Orb is a radial periwinkle-lavender-mint sphere. Transcript sheet slides up from below with backdrop-blur.",
+  "D18-L2": "True-black OLED canvas with cyan and magenta neon accents. Orb is a canvas-rendered particle/bar field. Scanline shimmer overlays the entire device.",
+  "D18-L3": "Cream, literary, serif-first. Avatar is an ink-stroke canvas mark — a single undulating line. Suggestion chips are underlined italics; the transcript sheet turns like a page.",
+  "D18-L4": "Native iOS/macOS feel: system-grouped grey background, white card surfaces, 0.5px hairline separators, SF Pro type. Orb is a Siri-style multi-hue gradient sphere.",
+  "D18-L5": "Bone-white, 2px black borders, zero radii, hard block-shadow offsets. Avatar is a bordered box containing a live ASCII block-character waveform driven by stepwise JS timers.",
+  "D19-L1": "Frosted glass panels over a slow-drifting pastel aurora. Orb is a blurred radial sphere with a specular highlight and bloom halo. Edge glow is a translucent periwinkle hairline ring.",
+  "D19-L2": "True-black OLED with electric cyan/magenta neon accents. Avatar is a four-bar spectrum waveform. Edge glow blinks at 0.8s steps(1,end). Scanline overlay adds CRT shimmer.",
+  "D19-L3": "Cream warm-paper background with clay/terracotta accent. Avatar is a soft ink-blob that morphs between warm orange and sage green with slow ease-in-out transitions.",
+  "D19-L4": "Apple-system-light native look. Orb is a conic-gradient sphere that rotates on speaking and shimmers on thinking. User bubbles are blue pill-shaped iMessage-style.",
+  "D19-L5": "High-contrast bone-white with 2px solid black borders and 4px hard drop-shadows everywhere. Avatar is a bordered box containing four block-character bars that step between heights.",
+  "D20-L1": "Frosted glass panels float over a slow-drifting pastel aurora. Orb is a blurred 3-stop radial gradient sphere with a halo bloom. Idle breathing, amplitude-reactive scale, hue-rotate churn, mint-toned pulse.",
+  "D20-L2": "True-black OLED cockpit with cyan neon glow on every border. Avatar is a 16-bar spectrum analyzer. Monospace font throughout, tight 8px radii, scanline overlay, hard-snap state transitions.",
+  "D20-L3": "Cream and warm-ink palette with serif prose font. Avatar is a single hand-drawn-feeling ink stroke rendered via SVG path. Hairline rules instead of boxes, pill buttons in terracotta clay.",
+  "D20-L4": "Native Apple-style system UI: white surfaces, 0.5px hairline separators, a single system-blue accent. Orb is a conic-gradient multi-hue sphere with a frosted white inner cap.",
+  "D20-L5": "Bone-white background, 2px solid black borders on every element, hard offset block shadows. Avatar is a bordered waveform box of 20 mono bars that snap between discrete frame heights.",
+};
+
+// Build the full concepts list
+const concepts = [];
+for (let d = 1; d <= 20; d++) {
+  for (let l = 1; l <= 5; l++) {
+    const nn = String(d).padStart(2, '0');
+    const file = `concept-D${nn}-L${l}.html`;
+    const key = `D${nn}-L${l}`;
+    concepts.push({
+      id: concepts.length,
+      dirId: d,
+      lookId: l,
+      file,
+      key,
+      dirName: DIRECTIONS[d - 1].name,
+      lookName: LOOKS[l - 1].name,
+      blurb: BLURBS[key] || "",
+    });
+  }
+}
+
+// ── STATE ──
+let activeLook = 'all';
+let activeDir = 'all';
+let currentView = 'grid';
+let overlayOpen = false;
+let overlayIndex = 0; // index into filteredConcepts
+let frameMode = 'portrait';
+const MAX_CONCURRENT_IFRAMES = 12;
+
+// ── CARD ELEMENTS MAP ──
+const cardElements = new Map(); // concept.id -> {card, iframeEl, previewEl}
+
+// ── FILTER ──
+function filteredConcepts() {
+  return concepts.filter(c => {
+    const lookOk = activeLook === 'all' || c.lookId === parseInt(activeLook);
+    const dirOk  = activeDir  === 'all' || c.dirId  === parseInt(activeDir);
+    return lookOk && dirOk;
+  });
+}
+
+// ── RENDER CARDS ──
+function buildCards() {
+  const container = document.getElementById('grid-container');
+  container.innerHTML = '';
+
+  concepts.forEach(concept => {
+    const card = document.createElement('div');
+    card.className = 'concept-card';
+    card.dataset.id = concept.id;
+    card.dataset.look = concept.lookId;
+    card.dataset.dir = concept.dirId;
+
+    const nn = String(concept.dirId).padStart(2, '0');
+    const previewId = `preview-${concept.id}`;
+
+    card.innerHTML = `
+      <div class="card-preview" id="${previewId}">
+        <div class="loading-pulse">loading…</div>
+        <div class="preview-overlay"></div>
+      </div>
+      <div class="card-body">
+        <div class="card-code">D${nn} · L${concept.lookId}</div>
+        <span class="card-look look-pill-${concept.lookId}">${concept.lookName}</span>
+        <div class="card-direction">${concept.dirName}</div>
+        <div class="card-blurb">${concept.blurb}</div>
+      </div>
+    `;
+
+    card.addEventListener('click', () => {
+      const fc = filteredConcepts();
+      const idx = fc.findIndex(c => c.id === concept.id);
+      if (idx !== -1) openOverlay(idx);
+    });
+
+    container.appendChild(card);
+    cardElements.set(concept.id, { card, previewEl: card.querySelector(`#${previewId}`) });
+  });
+}
+
+// ── LAZY LOAD IFRAMES ──
+const iframeLoadedSet = new Set();
+let iframeCount = 0;
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    const previewEl = entry.target;
+    const conceptId = parseInt(previewEl.closest('.concept-card')?.dataset.id);
+    if (isNaN(conceptId) || iframeLoadedSet.has(conceptId)) return;
+    if (iframeCount >= MAX_CONCURRENT_IFRAMES) return;
+
+    const concept = concepts[conceptId];
+    iframeLoadedSet.add(conceptId);
+    iframeCount++;
+
+    const loadingEl = previewEl.querySelector('.loading-pulse');
+    const iframe = document.createElement('iframe');
+    iframe.src = concept.file;
+    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+    iframe.setAttribute('loading', 'lazy');
+    iframe.setAttribute('scrolling', 'no');
+    iframe.title = concept.key;
+    iframe.addEventListener('load', () => {
+      if (loadingEl) loadingEl.style.display = 'none';
+    });
+    iframe.addEventListener('error', () => {
+      if (loadingEl) {
+        loadingEl.innerHTML = `
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/>
+          </svg> Missing`;
+      }
+    });
+    previewEl.insertBefore(iframe, previewEl.querySelector('.preview-overlay'));
+  });
+}, { rootMargin: '200px 0px' });
+
+function observeCards() {
+  cardElements.forEach(({ previewEl }) => {
+    observer.observe(previewEl);
+  });
+}
+
+// ── APPLY FILTERS ──
+function applyFilters() {
+  const fc = filteredConcepts();
+  const fcIds = new Set(fc.map(c => c.id));
+
+  cardElements.forEach(({ card }, id) => {
+    if (fcIds.has(id)) {
+      card.classList.remove('hidden');
+    } else {
+      card.classList.add('hidden');
+    }
+  });
+
+  const resultCount = document.getElementById('result-count');
+  resultCount.textContent = `Showing ${fc.length} of ${concepts.length}`;
+
+  // Re-observe newly visible cards
+  setTimeout(() => {
+    cardElements.forEach(({ previewEl, card }, id) => {
+      if (fcIds.has(id) && !iframeLoadedSet.has(id)) {
+        observer.observe(previewEl);
+      }
+    });
+  }, 50);
+}
+
+// ── LOOK CHIPS ──
+document.getElementById('look-chips').addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  const look = chip.dataset.look;
+  activeLook = look;
+  document.querySelectorAll('#look-chips .chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  applyFilters();
+});
+
+// ── DIR CHIPS ──
+document.getElementById('dir-chips').addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  const dir = chip.dataset.dir;
+  activeDir = dir;
+  document.querySelectorAll('#dir-chips .chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  applyFilters();
+});
+
+// ── RESET ──
+document.getElementById('btn-reset').addEventListener('click', () => {
+  activeLook = 'all';
+  activeDir = 'all';
+  document.querySelectorAll('#look-chips .chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('#dir-chips .chip').forEach(c => c.classList.remove('active'));
+  document.querySelector('#look-chips .chip[data-look="all"]').classList.add('active');
+  document.querySelector('#dir-chips .chip[data-dir="all"]').classList.add('active');
+  applyFilters();
+});
+
+// ── VIEW TOGGLE ──
+document.querySelectorAll('.view-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentView = btn.dataset.view;
+    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const container = document.getElementById('grid-container');
+    if (currentView === 'matrix') {
+      container.classList.add('matrix-view');
+    } else {
+      container.classList.remove('matrix-view');
+    }
+  });
+});
+
+// ── OVERLAY ──
+const overlay = document.getElementById('overlay');
+const overlayIframe = document.getElementById('overlay-iframe');
+const overlayMissing = document.getElementById('overlay-missing');
+const frameWrap = document.getElementById('frame-wrap');
+const overlayLink = document.getElementById('overlay-open-link');
+
+const FRAME_SIZES = {
+  portrait: { w: 420, h: 760 },
+  desktop:  { w: 960, h: 580 },
+};
+
+function setFrameSize(mode) {
+  frameMode = mode;
+  const { w, h } = FRAME_SIZES[mode];
+
+  // Clamp to viewport
+  const maxW = window.innerWidth - 120;
+  const maxH = window.innerHeight - 180;
+  const scale = Math.min(1, maxW / w, maxH / h);
+  const displayW = Math.round(w * scale);
+  const displayH = Math.round(h * scale);
+
+  frameWrap.style.width  = displayW + 'px';
+  frameWrap.style.height = displayH + 'px';
+  overlayIframe.style.width  = w + 'px';
+  overlayIframe.style.height = h + 'px';
+
+  if (scale < 1) {
+    overlayIframe.style.transform = `scale(${scale})`;
+    overlayIframe.style.transformOrigin = '0 0';
+    overlayIframe.style.position = 'absolute';
+  } else {
+    overlayIframe.style.transform = '';
+    overlayIframe.style.position = '';
+  }
+
+  document.querySelectorAll('.frame-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.frame === mode);
+  });
+}
+
+function openOverlay(indexInFiltered) {
+  const fc = filteredConcepts();
+  if (fc.length === 0) return;
+  overlayIndex = Math.max(0, Math.min(indexInFiltered, fc.length - 1));
+  const concept = fc[overlayIndex];
+
+  document.getElementById('overlay-title-text').textContent =
+    `D${String(concept.dirId).padStart(2,'0')} · ${concept.dirName}`;
+  document.getElementById('overlay-sub-text').textContent =
+    `L${concept.lookId} — ${concept.lookName}`;
+  document.getElementById('overlay-footer').textContent =
+    `${overlayIndex + 1} / ${fc.length} in current filter`;
+
+  overlayLink.href = concept.file;
+  overlayLink.textContent = `Open ${concept.file} ↗`;
+
+  overlayMissing.style.display = 'none';
+  overlayIframe.style.display = 'block';
+  overlayIframe.src = '';
+  // slight delay to allow display to set
+  setTimeout(() => { overlayIframe.src = concept.file; }, 30);
+
+  overlayIframe.onerror = () => {
+    overlayMissing.style.display = 'flex';
+    overlayIframe.style.display = 'none';
+  };
+
+  document.getElementById('btn-prev').disabled = overlayIndex <= 0;
+  document.getElementById('btn-next').disabled = overlayIndex >= fc.length - 1;
+
+  setFrameSize(frameMode);
+  overlay.classList.add('open');
+  overlayOpen = true;
+  document.body.style.overflow = 'hidden';
+}
+
+function closeOverlay() {
+  overlay.classList.remove('open');
+  overlayOpen = false;
+  document.body.style.overflow = '';
+  // stop the iframe
+  setTimeout(() => { overlayIframe.src = ''; }, 200);
+}
+
+document.getElementById('btn-close').addEventListener('click', closeOverlay);
+overlay.addEventListener('click', e => {
+  if (e.target === overlay) closeOverlay();
+});
+
+document.getElementById('btn-prev').addEventListener('click', () => {
+  if (overlayIndex > 0) openOverlay(overlayIndex - 1);
+});
+document.getElementById('btn-next').addEventListener('click', () => {
+  const fc = filteredConcepts();
+  if (overlayIndex < fc.length - 1) openOverlay(overlayIndex + 1);
+});
+
+document.querySelectorAll('.frame-btn').forEach(btn => {
+  btn.addEventListener('click', () => setFrameSize(btn.dataset.frame));
+});
+
+// ── KEYBOARD NAV ──
+document.addEventListener('keydown', e => {
+  if (!overlayOpen) return;
+  if (e.key === 'Escape') { closeOverlay(); return; }
+  if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    if (overlayIndex > 0) openOverlay(overlayIndex - 1);
+  }
+  if (e.key === 'ArrowRight') {
+    e.preventDefault();
+    const fc = filteredConcepts();
+    if (overlayIndex < fc.length - 1) openOverlay(overlayIndex + 1);
+  }
+});
+
+// ── RESIZE: update frame size if overlay open ──
+window.addEventListener('resize', () => {
+  if (overlayOpen) setFrameSize(frameMode);
+});
+
+// ── INIT ──
+buildCards();
+applyFilters();
+observeCards();
+</script>
+</body>
+</html>

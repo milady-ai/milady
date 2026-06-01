@@ -1,0 +1,816 @@
+<!-- concept-D10-L5 | direction: Push-to-Talk Walkie-Talkie | look: Brutalist Mono | targets: 420x760, 960x640 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D10 · Push-to-Talk Walkie-Talkie · Brutalist Mono</title>
+<style>
+:root{
+  --bg:#F4F2EC;
+  --surface:#FFFFFF;
+  --surface-2:#E8E5DC;
+  --border:#111111;
+  --text:#111111;
+  --text-muted:#555555;
+  --accent:#1A57FF;
+  --accent-2:#FF4A00;
+  --danger:#D90429;
+  --radius:0px;
+  --radius-sm:0px;
+  --font:"JetBrains Mono","IBM Plex Mono","SF Mono","Cascadia Mono","Courier New",monospace;
+  --shadow:4px 4px 0 #111111;
+  --shadow-sm:2px 2px 0 #111111;
+  --border-w:2px;
+  --ease:steps(1,end);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+
+body{
+  background:var(--bg);
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 20px, rgba(17,17,17,0.025) 20px, rgba(17,17,17,0.025) 21px),
+    repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(17,17,17,0.025) 20px, rgba(17,17,17,0.025) 21px);
+  font-family:var(--font);
+  color:var(--text);
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;
+}
+
+.app-window{
+  width:420px;
+  height:760px;
+  background:var(--surface);
+  border:var(--border-w) solid var(--border);
+  box-shadow:var(--shadow);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  position:relative;
+}
+
+/* Header */
+.header{
+  padding:12px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:var(--border-w) solid var(--border);
+  background:var(--surface);
+  flex-shrink:0;
+}
+.header-left{display:flex;align-items:center;gap:10px}
+.header-logo{
+  width:28px;height:28px;
+  border:var(--border-w) solid var(--border);
+  background:var(--text);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:var(--surface);
+  letter-spacing:0;
+}
+.header-title{
+  font-size:14px;font-weight:700;
+  letter-spacing:0.06em;text-transform:uppercase;
+  color:var(--text);
+}
+.header-sub{font-size:9px;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;margin-top:1px}
+.header-status{
+  display:flex;align-items:center;gap:6px;
+  padding:4px 8px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  font-size:10px;letter-spacing:0.08em;text-transform:uppercase;
+}
+.status-mark{width:8px;height:8px;background:var(--accent);animation:blinkBlock 1s steps(1) infinite}
+@keyframes blinkBlock{0%,49%{opacity:1}50%,100%{opacity:0}}
+.status-mark.closed{background:var(--danger);animation:none}
+
+/* Chat log */
+.chat-log{
+  flex:1;overflow-y:auto;
+  padding:10px 12px;
+  display:flex;flex-direction:column;gap:8px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--border) var(--surface-2);
+}
+.chat-log::-webkit-scrollbar{width:4px}
+.chat-log::-webkit-scrollbar-thumb{background:var(--border)}
+
+.turn{display:flex;flex-direction:column;gap:2px;animation:none}
+.turn.user{align-items:flex-end}
+.turn.assistant{align-items:flex-start}
+
+.turn-label{
+  font-size:9px;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--text-muted);display:flex;align-items:center;gap:4px;
+  padding:0 2px;
+}
+.turn-label svg{width:10px;height:10px}
+
+.bubble{
+  max-width:85%;
+  padding:8px 12px;
+  font-size:12px;line-height:1.55;
+  border:var(--border-w) solid var(--border);
+  box-shadow:var(--shadow-sm);
+}
+.turn.user .bubble{
+  background:var(--text);
+  color:var(--surface);
+  box-shadow:var(--shadow-sm);
+}
+.turn.assistant .bubble{
+  background:var(--surface);
+  color:var(--text);
+}
+.bubble.partial{background:repeating-linear-gradient(45deg,var(--surface),var(--surface) 4px,var(--surface-2) 4px,var(--surface-2) 8px);opacity:0.7}
+.bubble.interrupted::after{
+  content:" [INTERRUPTED]";
+  color:var(--danger);font-size:9px;letter-spacing:0.08em;
+}
+
+.modality-glyph{
+  font-size:9px;color:var(--text-muted);letter-spacing:0.08em;
+  display:flex;align-items:center;gap:3px;padding:0 2px;
+}
+
+/* App card */
+.app-card{
+  max-width:90%;
+  background:var(--surface);
+  border:var(--border-w) solid var(--border);
+  box-shadow:var(--shadow);
+}
+.card-header{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 10px;
+  border-bottom:var(--border-w) solid var(--border);
+  background:var(--surface-2);
+}
+.card-icon{font-size:14px}
+.card-title{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase}
+.card-body{padding:10px;font-size:11px;line-height:1.6;color:var(--text)}
+.card-actions{display:flex;gap:0;border-top:var(--border-w) solid var(--border)}
+.card-btn{
+  flex:1;padding:8px;border:none;cursor:pointer;
+  font-family:var(--font);font-size:10px;
+  font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+  transition:all var(--ease);
+}
+.card-btn:first-child{border-right:1px solid var(--border)}
+.card-btn.primary{background:var(--accent);color:var(--surface)}
+.card-btn.secondary{background:var(--surface);color:var(--text)}
+.card-btn:hover{filter:invert(1)}
+.card-expand{font-size:9px;color:var(--accent);cursor:pointer;padding:0 10px 7px;display:block;text-align:right;letter-spacing:0.06em}
+
+/* Chips */
+.chips-area{padding:0 12px 8px;display:flex;flex-wrap:wrap;gap:5px;flex-shrink:0}
+.chip{
+  padding:5px 10px;
+  background:var(--surface);border:1px solid var(--border);
+  font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
+  color:var(--text);cursor:pointer;
+  transition:all var(--ease);white-space:nowrap;
+  box-shadow:1px 1px 0 var(--border);
+}
+.chip:hover{background:var(--text);color:var(--surface)}
+.chip.dismissing{opacity:0;pointer-events:none}
+
+.attachment-area{padding:0 12px 6px;display:flex;gap:5px;flex-wrap:wrap;flex-shrink:0}
+.attach-chip{
+  display:flex;align-items:center;gap:4px;padding:4px 8px;
+  background:rgba(26,87,255,0.07);
+  border:1px solid var(--accent);
+  font-size:10px;color:var(--accent);font-weight:700;letter-spacing:0.06em;
+}
+.attach-chip-remove{cursor:pointer;background:none;border:none;color:var(--accent);font-size:13px;padding:0;margin-left:2px}
+
+/* PTT zone */
+.ptt-zone{
+  padding:10px 14px 14px;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  flex-shrink:0;
+  border-top:var(--border-w) solid var(--border);
+  background:var(--surface-2);
+}
+
+/* Avatar: bordered box with ASCII waveform */
+.ptt-orb-wrap{
+  position:relative;
+  width:136px;height:136px;
+  display:flex;align-items:center;justify-content:center;
+}
+
+.ptt-btn{
+  width:128px;height:128px;
+  border:var(--border-w) solid var(--border);
+  cursor:pointer;outline:none;
+  transition:all var(--ease);
+  background:var(--surface);
+  box-shadow:var(--shadow);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;
+  position:relative;
+  overflow:hidden;
+}
+.ptt-btn:hover{filter:invert(1)}
+.ptt-btn.active{filter:invert(1);box-shadow:2px 2px 0 var(--surface)}
+.ptt-btn.active .state-label{color:var(--surface)}
+
+/* ASCII waveform display */
+.waveform-display{
+  font-size:14px;letter-spacing:0.05em;
+  color:var(--text);
+  height:20px;display:flex;align-items:center;
+  font-weight:700;
+  transition:color var(--ease);
+}
+.state-label{
+  font-size:9px;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--text-muted);font-weight:700;
+}
+.orb-icon-box{font-size:20px;line-height:1}
+.cursor-blink{animation:blinkBlock 1s steps(1) infinite}
+
+/* State ring: hard offset border */
+.state-ring-outer{
+  position:absolute;inset:-5px;
+  border:2px solid transparent;
+  transition:all var(--ease);
+  pointer-events:none;
+}
+.state-ring-outer.listening{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.state-ring-outer.thinking{border-color:var(--accent-2);border-style:dashed}
+.state-ring-outer.speaking{border-color:var(--text);box-shadow:4px 4px 0 var(--text)}
+
+.live-indicator{
+  display:flex;align-items:center;gap:6px;
+  padding:3px 10px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+  opacity:0;pointer-events:none;
+  transition:opacity var(--ease);
+}
+.live-indicator.visible{opacity:1}
+.live-mic-glyph{color:var(--accent);font-size:11px}
+.live-text{color:var(--accent)}
+.live-text.thinking-text{color:var(--accent-2)}
+.live-text.speaking-text{color:var(--text)}
+
+.muted-label{
+  display:none;align-items:center;gap:5px;
+  font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--danger);
+  padding:3px 10px;
+  border:1px solid var(--danger);
+  background:rgba(217,4,41,0.06);
+}
+.muted-label.visible{display:flex}
+
+.ptt-hint{
+  font-size:9px;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--text-muted);text-align:center;font-weight:700;
+}
+
+.controls-row{display:flex;align-items:center;width:100%;gap:6px}
+.ctrl-btn{
+  width:34px;height:34px;border:1px solid var(--border);
+  background:var(--surface);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:var(--text-muted);
+  font-family:var(--font);
+  transition:all var(--ease);
+  box-shadow:1px 1px 0 var(--border);
+}
+.ctrl-btn:hover{filter:invert(1)}
+.ctrl-btn.muted{background:var(--danger);color:var(--surface);border-color:var(--danger)}
+
+.composer-row{display:flex;align-items:center;gap:5px;flex:1}
+.attach-btn{
+  width:28px;height:28px;border:1px solid var(--border);
+  background:var(--surface);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;color:var(--text-muted);flex-shrink:0;
+  transition:all var(--ease);
+}
+.attach-btn:hover{filter:invert(1)}
+
+.text-input{
+  flex:1;background:var(--surface);
+  border:1px solid var(--border);
+  padding:6px 9px;font-family:var(--font);font-size:11px;
+  color:var(--text);outline:none;letter-spacing:0.03em;
+}
+.text-input::placeholder{color:var(--text-muted)}
+.text-input:focus{outline:2px solid var(--accent);outline-offset:-2px}
+
+.send-btn{
+  width:28px;height:28px;border:1px solid var(--border);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:11px;flex-shrink:0;
+  font-family:var(--font);
+  transition:all var(--ease);
+  background:var(--text);color:var(--surface);
+}
+.send-btn.mic{background:var(--surface);color:var(--text-muted)}
+.send-btn.stop{background:var(--danger);color:var(--surface);border-color:var(--danger)}
+.send-btn:hover{filter:invert(1)}
+
+.interrupt-btn{
+  font-family:var(--font);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--danger);font-weight:700;
+  padding:4px 10px;background:var(--surface);
+  border:1px solid var(--danger);
+  cursor:pointer;display:none;
+  transition:all var(--ease);
+}
+.interrupt-btn.visible{display:block}
+.interrupt-btn:hover{background:var(--danger);color:var(--surface)}
+
+.demo-btn{
+  position:absolute;top:12px;right:14px;
+  padding:4px 10px;
+  background:var(--surface);border:1px solid var(--border);
+  font-family:var(--font);font-size:9px;font-weight:700;
+  color:var(--accent);letter-spacing:0.1em;text-transform:uppercase;
+  cursor:pointer;box-shadow:1px 1px 0 var(--border);
+  transition:all var(--ease);
+}
+.demo-btn:hover{filter:invert(1)}
+
+/* Weather grid */
+.weather-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border)}
+.weather-cell{
+  padding:6px 8px;
+  border-right:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+}
+.weather-cell:nth-child(even){border-right:none}
+.weather-cell:nth-child(n+3){border-bottom:none}
+.weather-k{font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);font-weight:700}
+.weather-v{font-size:16px;font-weight:700;color:var(--text);letter-spacing:-0.02em}
+
+@media(min-width:600px){
+  body{padding:24px}
+  .app-window{width:420px;height:min(760px,calc(100vh - 48px))}
+}
+</style>
+</head>
+<body>
+<div class="app-window" id="app">
+  <div class="header">
+    <div class="header-left">
+      <div class="header-logo">E</div>
+      <div>
+        <div class="header-title">ELIZA PTT</div>
+        <div class="header-sub">Voice Channel v2.1</div>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="status-mark" id="statusMark"></div>
+      <span id="statusText">OPEN</span>
+    </div>
+  </div>
+
+  <div class="chat-log" id="chatLog">
+    <div class="turn assistant">
+      <div class="turn-label">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M6 7h4M6 10h2"/></svg>
+        ELIZA
+      </div>
+      <div class="bubble interrupted">READY. Hold button to transmit. Release to send.</div>
+    </div>
+
+    <div class="turn user">
+      <div class="turn-label">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2a3 3 0 0 1 3 3v4a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M4 9a4 4 0 0 0 8 0M8 15v-2"/></svg>
+        YOU [VOICE]
+      </div>
+      <div class="bubble">WEATHER CHECK: SAN FRANCISCO.</div>
+      <div class="modality-glyph">
+        <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2a3 3 0 0 1 3 3v4a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/></svg>
+        [VOICE TX]
+      </div>
+    </div>
+
+    <div class="turn assistant">
+      <div class="turn-label">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/></svg>
+        ELIZA [RX]
+      </div>
+      <div class="app-card">
+        <div class="card-header">
+          <div class="card-icon">🌤</div>
+          <div class="card-title">WX // SAN FRANCISCO CA</div>
+        </div>
+        <div class="card-body">
+          <div class="weather-grid">
+            <div class="weather-cell"><div class="weather-k">TEMP</div><div class="weather-v">64°F</div></div>
+            <div class="weather-cell"><div class="weather-k">FEELS</div><div class="weather-v">61°F</div></div>
+            <div class="weather-cell"><div class="weather-k">WIND</div><div class="weather-v">12mph</div></div>
+            <div class="weather-cell"><div class="weather-k">HUMID</div><div class="weather-v">78%</div></div>
+          </div>
+          <div style="margin-top:8px;font-size:10px;color:var(--text-muted);letter-spacing:0.05em">COND: PARTLY CLOUDY // HI:69 LO:55</div>
+        </div>
+        <div class="card-actions">
+          <button class="card-btn secondary">7-DAY</button>
+          <button class="card-btn primary">RAIN ALERT</button>
+        </div>
+        <span class="card-expand">[ EXPAND FORECAST ]</span>
+      </div>
+    </div>
+
+    <div class="turn user">
+      <div class="turn-label">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="1"/><path d="M2 7h12"/></svg>
+        YOU [TEXT]
+      </div>
+      <div class="bubble">
+        <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;padding:3px 6px;background:rgba(26,87,255,0.08);border-left:2px solid var(--accent);font-size:9px;letter-spacing:0.08em;color:var(--accent)">
+          [ATTACH] ROUTE_DATA.CSV
+        </div>
+        FIND FASTEST ROUTE - AVOID HIGHWAY.
+      </div>
+      <div class="modality-glyph">
+        <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="1"/></svg>
+        [TEXT TX]
+      </div>
+    </div>
+  </div>
+
+  <div class="chips-area" id="chipsArea">
+    <div class="chip" onclick="dismissChip(this)">NAV_HOME</div>
+    <div class="chip" onclick="dismissChip(this)">SYS_STATUS</div>
+    <div class="chip" onclick="dismissChip(this)">SET_TIMER</div>
+  </div>
+
+  <div class="attachment-area" id="attachArea" style="display:none"></div>
+
+  <div class="ptt-zone">
+    <div class="live-indicator" id="liveIndicator">
+      <span class="live-mic-glyph">[MIC]</span>
+      <span class="live-text" id="liveText">[LISTENING]</span>
+    </div>
+
+    <div class="ptt-orb-wrap">
+      <div class="state-ring-outer" id="stateRing"></div>
+      <button class="ptt-btn" id="pttBtn" aria-label="Push to talk">
+        <div class="waveform-display" id="waveDisplay">▁▂▁▁▂▁▁</div>
+        <div class="orb-icon-box" id="orbIcon">
+          <svg width="22" height="22" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M16 6a5 5 0 0 1 5 5v7a5 5 0 0 1-10 0v-7a5 5 0 0 1 5-5z"/>
+            <path d="M8 15a8 8 0 0 0 16 0M16 27v-4"/>
+          </svg>
+        </div>
+        <div class="state-label" id="stateLabelInner">[ PUSH TO TALK ]</div>
+      </button>
+    </div>
+
+    <div class="muted-label" id="mutedLabel">
+      [X] MUTED
+    </div>
+    <button class="interrupt-btn" id="interruptBtn">[ INTERRUPT ]</button>
+    <div class="ptt-hint" id="pttHint">HOLD = TX // RELEASE = SEND</div>
+
+    <div class="controls-row">
+      <button class="ctrl-btn" id="muteBtn" onclick="toggleMute()" title="Mute">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="muteIcon">
+          <path d="M12 3a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V7a4 4 0 0 1 4-4z"/>
+          <path d="M6 11a6 6 0 0 0 12 0M12 21v-4"/>
+        </svg>
+      </button>
+
+      <div class="composer-row">
+        <button class="attach-btn" onclick="addAttachment()" title="Attach">+</button>
+        <input class="text-input" id="textInput" type="text" placeholder="TYPE MSG > " oninput="onInputChange()" onkeydown="onKeyDown(event)">
+        <button class="send-btn mic" id="sendBtn" onclick="onSendBtnClick()" id="sendBtnEl">
+          <span id="sendIcon">MIC</span>
+        </button>
+      </div>
+
+      <button class="ctrl-btn" onclick="endChannel()" title="End" style="color:var(--danger);border-color:var(--danger)">✕</button>
+    </div>
+
+    <button class="demo-btn" onclick="startDemo()">▶ DEMO</button>
+  </div>
+</div>
+
+<script>
+const STATE = {IDLE:'idle',LISTENING:'listening',THINKING:'thinking',SPEAKING:'speaking'};
+let appState = STATE.IDLE;
+let isMuted = false;
+let demoTimer = null;
+let waveFrame = null;
+let isGenerating = false;
+let currentAmp = 0, targetAmp = 0;
+
+const pttBtn = document.getElementById('pttBtn');
+const waveDisplay = document.getElementById('waveDisplay');
+const stateRing = document.getElementById('stateRing');
+const orbIcon = document.getElementById('orbIcon');
+const stateLabelInner = document.getElementById('stateLabelInner');
+const liveIndicator = document.getElementById('liveIndicator');
+const liveText = document.getElementById('liveText');
+const mutedLabel = document.getElementById('mutedLabel');
+const muteBtn = document.getElementById('muteBtn');
+const pttHint = document.getElementById('pttHint');
+const chatLog = document.getElementById('chatLog');
+const chipsArea = document.getElementById('chipsArea');
+const attachArea = document.getElementById('attachArea');
+const textInput = document.getElementById('textInput');
+const sendBtn = document.getElementById('sendBtn');
+const sendIcon = document.getElementById('sendIcon');
+const interruptBtn = document.getElementById('interruptBtn');
+const statusMark = document.getElementById('statusMark');
+const statusText = document.getElementById('statusText');
+
+// ASCII waveform blocks
+const BLOCKS = ['▁','▂','▃','▅','▇','▅','▃','▂','▁'];
+let waveStep = 0;
+let thinkGlyph = 0;
+const THINK_GLYPHS = ['|','/','-','\\'];
+
+function buildWave(amp, state) {
+  const len = 7;
+  let chars = '';
+  if (state === STATE.IDLE) {
+    // Very low static
+    for (let i = 0; i < len; i++) {
+      const idx = Math.random() < 0.15 ? 1 : 0;
+      chars += BLOCKS[idx];
+    }
+  } else if (state === STATE.LISTENING) {
+    for (let i = 0; i < len; i++) {
+      const v = amp * (0.2 + 0.8 * Math.abs(Math.sin(waveStep + i)));
+      const idx = Math.min(8, Math.floor(v * 8));
+      chars += BLOCKS[idx] || BLOCKS[0];
+    }
+  } else if (state === STATE.THINKING) {
+    chars = ' ' + THINK_GLYPHS[thinkGlyph % 4] + ' PROC ' + THINK_GLYPHS[(thinkGlyph+2) % 4];
+  } else if (state === STATE.SPEAKING) {
+    for (let i = 0; i < len; i++) {
+      const v = amp * (0.3 + 0.7 * Math.abs(Math.sin(waveStep * 1.3 + i * 0.7)));
+      const idx = Math.min(8, Math.floor(v * 8));
+      chars += BLOCKS[idx] || BLOCKS[0];
+    }
+  }
+  return chars;
+}
+
+let frameCount = 0;
+function animLoop() {
+  frameCount++;
+  waveStep += 0.18;
+  if (frameCount % 6 === 0) thinkGlyph++;
+
+  const diff = targetAmp - currentAmp;
+  currentAmp += diff * 0.15;
+
+  if (appState === STATE.LISTENING) {
+    targetAmp = 0.25 + 0.65 * Math.abs(Math.sin(Date.now() * 0.003)) * (0.4 + 0.6 * Math.random());
+  } else if (appState === STATE.SPEAKING) {
+    targetAmp = 0.3 + 0.6 * Math.abs(Math.sin(Date.now() * 0.004 + 0.5));
+  } else {
+    targetAmp = 0.04;
+  }
+
+  waveDisplay.textContent = buildWave(currentAmp, appState);
+  waveFrame = requestAnimationFrame(animLoop);
+}
+
+function setState(s) {
+  appState = s;
+  stateRing.className = 'state-ring-outer';
+  liveIndicator.className = 'live-indicator';
+  interruptBtn.className = 'interrupt-btn';
+
+  if (s === STATE.IDLE) {
+    pttHint.textContent = 'HOLD = TX // RELEASE = SEND';
+    orbIcon.style.display = 'block';
+    stateLabelInner.textContent = '[ PUSH TO TALK ]';
+    waveDisplay.style.color = 'var(--text)';
+  } else if (s === STATE.LISTENING) {
+    if (isMuted) return;
+    stateRing.classList.add('listening');
+    liveIndicator.classList.add('visible');
+    liveText.textContent = '[LISTENING]';
+    liveText.className = 'live-text';
+    pttHint.textContent = 'RELEASE WHEN DONE SPEAKING';
+    orbIcon.style.display = 'none';
+    stateLabelInner.textContent = '[ TX ACTIVE ]';
+    waveDisplay.style.color = 'var(--accent)';
+  } else if (s === STATE.THINKING) {
+    stateRing.classList.add('thinking');
+    liveIndicator.classList.add('visible');
+    liveText.textContent = '[PROCESSING]';
+    liveText.className = 'live-text thinking-text';
+    pttHint.textContent = 'PROCESSING TX...';
+    orbIcon.style.display = 'none';
+    stateLabelInner.textContent = '[ WAIT ]';
+    waveDisplay.style.color = 'var(--accent-2)';
+  } else if (s === STATE.SPEAKING) {
+    stateRing.classList.add('speaking');
+    liveIndicator.classList.add('visible');
+    liveText.textContent = '[INCOMING RX]';
+    liveText.className = 'live-text speaking-text';
+    interruptBtn.classList.add('visible');
+    pttHint.textContent = 'RX ACTIVE // [INTERRUPT] TO STOP';
+    orbIcon.style.display = 'none';
+    stateLabelInner.textContent = '[ RX ]';
+    waveDisplay.style.color = 'var(--text)';
+  }
+}
+
+let partialTurn = null;
+pttBtn.addEventListener('mousedown', startTransmit);
+pttBtn.addEventListener('touchstart', e=>{e.preventDefault();startTransmit();},{passive:false});
+pttBtn.addEventListener('mouseup', endTransmit);
+pttBtn.addEventListener('mouseleave', ()=>{if(appState===STATE.LISTENING)endTransmit();});
+pttBtn.addEventListener('touchend', e=>{e.preventDefault();endTransmit();},{passive:false});
+
+function startTransmit() {
+  if (isMuted) return;
+  if (appState === STATE.SPEAKING) { doBargein(); return; }
+  if (appState !== STATE.IDLE) return;
+  pttBtn.classList.add('active');
+  setState(STATE.LISTENING);
+  partialTurn = addTurn('user','█ TRANSMITTING...', true, true);
+  hideChips();
+}
+
+function endTransmit() {
+  if (appState !== STATE.LISTENING) return;
+  pttBtn.classList.remove('active');
+  const phrases = [
+    "SYSTEM STATUS — ALL NODES.",
+    "RUN DIAGNOSTICS ON SUBSYSTEM B.",
+    "EXECUTE BACKUP SEQUENCE ALPHA."
+  ];
+  const phrase = phrases[Math.floor(Math.random()*phrases.length)];
+  if (partialTurn) {
+    const b = partialTurn.querySelector('.bubble');
+    b.textContent = phrase;
+    b.classList.remove('partial');
+    partialTurn = null;
+  }
+  setState(STATE.THINKING);
+  setTimeout(()=>{
+    setState(STATE.SPEAKING);
+    const replies = [
+      "ALL NODES NOMINAL. CPU: 24%. MEM: 61%. NET: OK. NO ACTIVE ALERTS.",
+      "SUBSYSTEM B: OK. LATENCY 8MS. UPTIME 99.97%. LAST RESTART 4D AGO.",
+      "BACKUP SEQ ALPHA INITIATED. ETA 3MIN. DEST: VAULT-03. CHECKSUM VERIFIED."
+    ];
+    addTurn('assistant', replies[Math.floor(Math.random()*replies.length)]);
+    setTimeout(()=>{
+      setState(STATE.IDLE);
+      showChips(['ACK','REPEAT','DETAILS']);
+    }, 3200);
+  }, 1100);
+}
+
+interruptBtn.addEventListener('click', doBargein);
+function doBargein() {
+  setState(STATE.IDLE);
+  const bubbles = chatLog.querySelectorAll('.turn.assistant .bubble');
+  if (bubbles.length) bubbles[bubbles.length-1].classList.add('interrupted');
+}
+
+function toggleMute() {
+  isMuted = !isMuted;
+  if (isMuted) {
+    muteBtn.classList.add('muted');
+    muteBtn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v4a3 3 0 0 0 5.12 2.12M15 9.34V7a3 3 0 0 0-5.94-.6"/></svg>`;
+    mutedLabel.classList.add('visible');
+    if (appState === STATE.LISTENING) setState(STATE.IDLE);
+  } else {
+    muteBtn.classList.remove('muted');
+    muteBtn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V7a4 4 0 0 1 4-4z"/><path d="M6 11a6 6 0 0 0 12 0M12 21v-4"/></svg>`;
+    mutedLabel.classList.remove('visible');
+  }
+}
+
+function onInputChange() {
+  const val = textInput.value.trim();
+  if (isGenerating) {
+    sendBtn.className = 'send-btn stop';
+    sendIcon.textContent = 'STP';
+  } else if (val.length > 0) {
+    sendBtn.className = 'send-btn';
+    sendIcon.textContent = 'SND';
+  } else {
+    sendBtn.className = 'send-btn mic';
+    sendIcon.textContent = 'MIC';
+  }
+  if (val.length > 0) hideChips();
+}
+
+function onKeyDown(e) {
+  if (e.key==='Enter'&&!e.shiftKey){e.preventDefault();onSendBtnClick();}
+}
+
+function onSendBtnClick() {
+  if (isGenerating) { isGenerating=false; setState(STATE.IDLE); onInputChange(); return; }
+  const val = textInput.value.trim();
+  if (!val) return;
+  addTurn('user', val.toUpperCase(), false, false);
+  textInput.value = ''; onInputChange();
+  clearAttachments();
+  isGenerating = true; onInputChange();
+  setState(STATE.THINKING);
+  setTimeout(()=>{
+    setState(STATE.SPEAKING);
+    addTurn('assistant', "ACKNOWLEDGED. RESPONSE QUEUED. STANDBY.");
+    isGenerating = false; onInputChange();
+    setTimeout(()=>setState(STATE.IDLE), 2000);
+  }, 1200);
+}
+
+function addTurn(role, text, partial=false, isVoice=true) {
+  const turn = document.createElement('div');
+  turn.className = `turn ${role}`;
+  const voiceSvg = `<svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2a3 3 0 0 1 3 3v4a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M4 9a4 4 0 0 0 8 0M8 15v-2"/></svg>`;
+  const textSvg = `<svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="1"/><path d="M2 7h12"/></svg>`;
+  const assistSvg = `<svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M6 7h4M6 10h2"/></svg>`;
+  const label = role === 'assistant' ? `${assistSvg} ELIZA [RX]` : (isVoice ? `${voiceSvg} YOU [VOICE]` : `${textSvg} YOU [TEXT]`);
+  const modalLabel = role === 'user' ? `${isVoice ? voiceSvg + ' [VOICE TX]' : textSvg + ' [TEXT TX]'}` : '';
+  turn.innerHTML = `
+    <div class="turn-label">${label}</div>
+    <div class="bubble${partial?' partial':''}">${text}</div>
+    ${role==='user'?`<div class="modality-glyph">${modalLabel}</div>`:''}
+  `;
+  chatLog.appendChild(turn);
+  chatLog.scrollTop = chatLog.scrollHeight;
+  return turn;
+}
+
+function hideChips(){ chipsArea.querySelectorAll('.chip').forEach(c=>c.classList.add('dismissing')); }
+function showChips(arr) {
+  chipsArea.innerHTML = '';
+  arr.forEach(label=>{
+    const c = document.createElement('div');
+    c.className = 'chip'; c.textContent = label;
+    c.onclick = ()=>dismissChip(c);
+    chipsArea.appendChild(c);
+  });
+}
+function dismissChip(el){ el.classList.add('dismissing'); }
+
+const fileNames = ['LOG_2024.TXT','DATA.CSV','CAPTURE.PNG'];
+let attachCount = 0;
+function addAttachment() {
+  attachArea.style.display = 'flex';
+  const name = fileNames[attachCount%fileNames.length];
+  attachCount++;
+  const chip = document.createElement('div');
+  chip.className = 'attach-chip';
+  chip.innerHTML = `[+] ${name} <button class="attach-chip-remove" onclick="this.parentElement.remove();checkAttachArea()">×</button>`;
+  attachArea.appendChild(chip);
+}
+function checkAttachArea(){ if(!attachArea.children.length) attachArea.style.display='none'; }
+function clearAttachments(){ attachArea.innerHTML=''; attachArea.style.display='none'; }
+
+function endChannel() {
+  setState(STATE.IDLE);
+  statusMark.className = 'status-mark closed';
+  statusText.textContent = 'CLOSED';
+  pttHint.textContent = '[CHANNEL CLOSED]';
+}
+
+function startDemo() {
+  if (demoTimer) { clearTimeout(demoTimer); demoTimer=null; }
+  setState(STATE.IDLE);
+  statusMark.className = 'status-mark';
+  statusText.textContent = 'OPEN';
+
+  demoTimer = setTimeout(()=>{
+    startTransmit();
+    const phrase = "DEPLOY PROD BUILD — CONFIRM STATUS.";
+    const pBubble = partialTurn?.querySelector('.bubble');
+    let i = 0;
+    const typ = setInterval(()=>{
+      if (pBubble && i <= phrase.length) pBubble.textContent = phrase.slice(0,i++) + (i<phrase.length?'█':'');
+      else clearInterval(typ);
+    }, 55);
+    demoTimer = setTimeout(()=>{
+      clearInterval(typ);
+      if (partialTurn) {
+        partialTurn.querySelector('.bubble').textContent = phrase;
+        partialTurn.querySelector('.bubble').classList.remove('partial');
+        partialTurn = null;
+      }
+      setState(STATE.THINKING);
+      demoTimer = setTimeout(()=>{
+        setState(STATE.SPEAKING);
+        addTurn('assistant',"PROD DEPLOY: COMPLETE. BUILD v4.2.1. ZERO ERRORS. UPTIME 100%. API READY. OVER.");
+        showChips(['CONFIRM','ROLLBACK','VIEW_LOG']);
+        demoTimer = setTimeout(()=>setState(STATE.IDLE), 3500);
+      }, 1100);
+    }, 2200);
+  }, 400);
+}
+
+animLoop();
+setTimeout(startDemo, 700);
+</script>
+</body>
+</html>

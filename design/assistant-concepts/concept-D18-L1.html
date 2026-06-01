@@ -1,0 +1,1014 @@
+<!-- concept-D18-L1 | direction: Gesture / Swipe-Driven | look: Soft Aurora Glass | targets: 420x760, 960x640 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D18 · Gesture / Swipe-Driven · Soft Aurora Glass</title>
+<style>
+:root{
+  --bg:#EAF0FB;
+  --bg-aurora:radial-gradient(120% 90% at 18% 12%,#F3E9FB 0%,transparent 55%),radial-gradient(120% 90% at 82% 88%,#E6F7F4 0%,transparent 55%),linear-gradient(160deg,#EAF0FB,#EFEAFB);
+  --surface:rgba(255,255,255,0.55);
+  --surface-2:rgba(255,255,255,0.72);
+  --border:rgba(255,255,255,0.65);
+  --text:#1B2233;
+  --text-muted:#5A6582;
+  --accent:#6E8BFF;
+  --accent-2:#9C6CF0;
+  --accent-3:#5FE3C0;
+  --danger:#FF6B8B;
+  --radius:22px;
+  --radius-sm:14px;
+  --font:"SF Pro Display","Segoe UI Variable","Helvetica Neue",system-ui,sans-serif;
+  --shadow:0 12px 40px rgba(80,90,160,0.18);
+  --shadow-sm:0 4px 16px rgba(80,90,160,0.12);
+  --blur:saturate(1.4) blur(24px);
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:var(--font);
+  background:var(--bg);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  position:relative;
+}
+
+/* Aurora background */
+.aurora-bg{
+  position:fixed;inset:0;
+  background:var(--bg-aurora);
+  animation:auroraShift 30s ease-in-out infinite alternate;
+  z-index:0;
+}
+@keyframes auroraShift{
+  0%{filter:hue-rotate(0deg) brightness(1);}
+  50%{filter:hue-rotate(15deg) brightness(1.05);}
+  100%{filter:hue-rotate(-10deg) brightness(0.98);}
+}
+
+/* Device frame */
+.device{
+  position:relative;z-index:1;
+  width:420px;height:760px;
+  background:rgba(234,240,251,0.7);
+  backdrop-filter:var(--blur);
+  border-radius:40px;
+  border:1.5px solid var(--border);
+  box-shadow:var(--shadow),0 0 0 1px rgba(255,255,255,0.4) inset;
+  overflow:hidden;
+  display:flex;flex-direction:column;
+  user-select:none;
+}
+
+/* Orb area */
+.orb-zone{
+  flex:1;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  position:relative;
+  overflow:hidden;
+}
+
+.hint-text{
+  position:absolute;bottom:24px;
+  font-size:11px;letter-spacing:0.08em;
+  color:var(--text-muted);
+  text-transform:uppercase;
+  opacity:0.6;
+  text-align:center;
+}
+
+/* Orb */
+.orb-wrap{
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+}
+.orb{
+  width:140px;height:140px;
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #A8BFFF 0%, #9C6CF0 45%, #5FE3C0 100%);
+  box-shadow:
+    0 0 0 0 rgba(110,139,255,0.0),
+    0 20px 60px rgba(110,139,255,0.35),
+    0 0 40px rgba(156,108,240,0.25),
+    inset 0 -20px 40px rgba(95,227,192,0.2);
+  position:relative;
+  cursor:pointer;
+  transition:transform 0.3s var(--ease);
+}
+.orb::before{
+  content:'';
+  position:absolute;
+  top:18%;left:22%;
+  width:28%;height:22%;
+  background:rgba(255,255,255,0.55);
+  border-radius:50%;
+  filter:blur(4px);
+}
+.orb-halo{
+  position:absolute;
+  border-radius:50%;
+  border:1.5px solid rgba(110,139,255,0.25);
+  pointer-events:none;
+}
+
+/* State animations */
+.orb.idle{animation:orbIdle 3s ease-in-out infinite;}
+@keyframes orbIdle{
+  0%,100%{transform:scale(1);}
+  50%{transform:scale(1.04);}
+}
+.orb.listening{animation:orbListen 0.15s ease-in-out infinite;}
+@keyframes orbListen{
+  0%,100%{transform:scale(1);}
+  50%{transform:scale(var(--amp,1.06));}
+}
+.orb.thinking{animation:orbThink 2s linear infinite;}
+@keyframes orbThink{
+  0%{filter:hue-rotate(0deg) brightness(1);}
+  100%{filter:hue-rotate(360deg) brightness(1.1);}
+}
+.orb.speaking{animation:orbSpeak 0.4s ease-in-out infinite alternate;}
+@keyframes orbSpeak{
+  0%{box-shadow:0 0 0 0 rgba(110,139,255,0),0 20px 60px rgba(110,139,255,0.35),0 0 40px rgba(156,108,240,0.25),inset 0 -20px 40px rgba(95,227,192,0.2);}
+  100%{box-shadow:0 0 0 18px rgba(110,139,255,0.12),0 20px 60px rgba(110,139,255,0.45),0 0 60px rgba(156,108,240,0.4),inset 0 -20px 40px rgba(95,227,192,0.3);}
+}
+.orb.muted{
+  filter:grayscale(0.7) brightness(0.8);
+  animation:orbMuted 2s ease-in-out infinite;
+}
+@keyframes orbMuted{
+  0%,100%{transform:scale(1);}
+  50%{transform:scale(1.01);}
+}
+
+/* Halo rings */
+.halo-1,.halo-2,.halo-3{
+  position:absolute;border-radius:50%;border:1px solid rgba(110,139,255,0.15);
+  pointer-events:none;
+}
+.halo-1{width:180px;height:180px;opacity:0;}
+.halo-2{width:220px;height:220px;opacity:0;}
+.halo-3{width:260px;height:260px;opacity:0;}
+
+.orb-wrap.listening .halo-1{animation:haloRipple 1.2s ease-out infinite;}
+.orb-wrap.listening .halo-2{animation:haloRipple 1.2s ease-out 0.3s infinite;}
+.orb-wrap.listening .halo-3{animation:haloRipple 1.2s ease-out 0.6s infinite;}
+.orb-wrap.speaking .halo-1{animation:haloSpeak 0.8s ease-out infinite;}
+.orb-wrap.speaking .halo-2{animation:haloSpeak 0.8s ease-out 0.2s infinite;}
+@keyframes haloRipple{
+  0%{opacity:0.7;transform:scale(0.7);}
+  100%{opacity:0;transform:scale(1.3);}
+}
+@keyframes haloSpeak{
+  0%{opacity:0.5;transform:scale(0.85);}
+  100%{opacity:0;transform:scale(1.15);}
+}
+
+/* State label */
+.state-label{
+  position:absolute;top:calc(50% + 85px);
+  display:flex;align-items:center;gap:6px;
+  font-size:12px;letter-spacing:0.06em;text-transform:uppercase;
+  color:var(--accent);font-weight:600;
+  opacity:0;transition:opacity 0.3s var(--ease);
+}
+.state-label.visible{opacity:1;}
+.state-label .mic-icon{font-size:14px;}
+.state-label.muted-label{color:var(--danger);}
+
+/* Mute button */
+.mute-btn{
+  position:absolute;top:20px;right:20px;
+  width:36px;height:36px;border-radius:50%;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;cursor:pointer;
+  backdrop-filter:var(--blur);
+  box-shadow:var(--shadow-sm);
+  transition:all 0.25s var(--ease);
+}
+.mute-btn.muted{background:rgba(255,107,139,0.15);border-color:rgba(255,107,139,0.4);}
+
+/* Gesture hint arrows */
+.gesture-hints{
+  position:absolute;
+  bottom:80px;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  pointer-events:none;opacity:0.5;
+}
+.g-arrow{font-size:18px;color:var(--accent);animation:arrowBounce 2s ease-in-out infinite;}
+@keyframes arrowBounce{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-4px);}
+}
+
+/* Suggestion chips */
+.suggestion-fan{
+  position:absolute;bottom:110px;
+  display:flex;gap:8px;
+  flex-wrap:wrap;justify-content:center;
+  padding:0 20px;
+  transition:all 0.4s var(--ease);
+}
+.chip{
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:7px 14px;
+  font-size:12px;color:var(--text);
+  cursor:pointer;
+  backdrop-filter:var(--blur);
+  box-shadow:var(--shadow-sm);
+  transition:all 0.3s var(--ease);
+  white-space:nowrap;
+}
+.chip:hover{background:rgba(110,139,255,0.12);border-color:rgba(110,139,255,0.35);}
+.chip.follow-up{background:rgba(110,139,255,0.1);border-color:rgba(110,139,255,0.3);color:var(--accent);}
+.chip.dismissing{opacity:0;transform:translateY(8px);}
+
+/* Transcript sheet */
+.transcript-sheet{
+  position:absolute;inset:0;
+  background:rgba(234,240,251,0.92);
+  backdrop-filter:var(--blur);
+  border-radius:40px;
+  transform:translateY(100%);
+  transition:transform 0.45s var(--ease);
+  display:flex;flex-direction:column;
+  z-index:10;
+  overflow:hidden;
+}
+.transcript-sheet.open{transform:translateY(0);}
+
+.sheet-handle{
+  width:36px;height:4px;border-radius:2px;
+  background:rgba(110,139,255,0.3);
+  margin:14px auto 0;
+  flex-shrink:0;
+}
+.sheet-title{
+  font-size:13px;font-weight:600;
+  color:var(--text-muted);letter-spacing:0.04em;
+  text-transform:uppercase;
+  text-align:center;padding:10px 0 6px;
+}
+.transcript-scroll{
+  flex:1;overflow-y:auto;
+  padding:12px 20px 20px;
+  display:flex;flex-direction:column;gap:14px;
+}
+.transcript-scroll::-webkit-scrollbar{display:none;}
+
+/* Turns */
+.turn{
+  display:flex;flex-direction:column;gap:4px;
+}
+.turn-meta{
+  display:flex;align-items:center;gap:5px;
+  font-size:10px;letter-spacing:0.05em;text-transform:uppercase;
+  color:var(--text-muted);
+}
+.turn-meta .glyph{font-size:11px;}
+.bubble{
+  padding:11px 15px;
+  border-radius:var(--radius-sm);
+  font-size:14px;line-height:1.5;
+  max-width:85%;
+}
+.user-turn{align-items:flex-end;}
+.user-turn .bubble{
+  background:var(--accent);
+  color:#fff;
+  border-radius:var(--radius-sm) var(--radius-sm) 4px var(--radius-sm);
+  box-shadow:0 4px 16px rgba(110,139,255,0.35);
+}
+.user-turn.typed .bubble{
+  background:rgba(110,139,255,0.85);
+}
+.assistant-turn{align-items:flex-start;}
+.assistant-turn .bubble{
+  background:var(--surface-2);
+  color:var(--text);
+  border:1px solid var(--border);
+  backdrop-filter:var(--blur);
+  border-radius:var(--radius-sm) var(--radius-sm) var(--radius-sm) 4px;
+  box-shadow:var(--shadow-sm);
+}
+.partial .bubble{opacity:0.55;font-style:italic;}
+
+/* Interrupted badge */
+.interrupted-badge{
+  font-size:10px;color:var(--danger);
+  background:rgba(255,107,139,0.1);
+  border:1px solid rgba(255,107,139,0.25);
+  border-radius:6px;padding:2px 7px;
+  align-self:flex-start;margin-top:2px;
+}
+
+/* App card */
+.app-card{
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:var(--shadow-sm);
+  max-width:280px;
+}
+.app-card-header{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 14px;
+  border-bottom:1px solid var(--border);
+  background:rgba(255,255,255,0.4);
+}
+.app-icon{
+  width:24px;height:24px;border-radius:6px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;
+}
+.app-card-title{font-size:12px;font-weight:600;color:var(--text);}
+.app-card-body{padding:14px;}
+.weather-main{
+  display:flex;align-items:center;gap:10px;
+}
+.weather-temp{font-size:36px;font-weight:300;color:var(--text);}
+.weather-desc{font-size:13px;color:var(--text-muted);}
+.weather-detail{
+  display:flex;gap:12px;margin-top:10px;
+}
+.weather-item{font-size:11px;color:var(--text-muted);}
+.weather-item span{color:var(--text);font-weight:600;}
+.app-card-actions{
+  display:flex;gap:8px;padding:0 14px 14px;
+}
+.card-btn{
+  flex:1;padding:8px;border-radius:var(--radius-sm);
+  border:1px solid var(--accent);
+  background:transparent;color:var(--accent);
+  font-size:12px;font-family:var(--font);cursor:pointer;
+  transition:all 0.2s;
+}
+.card-btn:hover{background:rgba(110,139,255,0.1);}
+.card-btn.primary{background:var(--accent);color:#fff;border-color:transparent;}
+.expand-hint{
+  font-size:10px;color:var(--text-muted);
+  text-align:right;padding:0 14px 8px;letter-spacing:0.04em;
+  text-transform:uppercase;cursor:pointer;
+}
+.expand-hint:hover{color:var(--accent);}
+
+/* Bottom composer area */
+.composer-area{
+  padding:12px 20px 24px;
+  background:rgba(255,255,255,0.45);
+  backdrop-filter:var(--blur);
+  border-top:1px solid var(--border);
+  display:flex;flex-direction:column;gap:10px;
+}
+
+/* Attachment staging */
+.attachment-staging{
+  display:flex;gap:8px;flex-wrap:wrap;
+  min-height:0;
+}
+.attachment-chip{
+  display:flex;align-items:center;gap:5px;
+  background:var(--surface-2);border:1px solid var(--border);
+  border-radius:10px;padding:5px 10px;
+  font-size:11px;color:var(--text);
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.attachment-chip:hover{background:rgba(255,107,139,0.1);border-color:rgba(255,107,139,0.3);}
+.att-thumb{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#A8BFFF,#9C6CF0);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.att-remove{font-size:12px;color:var(--text-muted);margin-left:2px;}
+
+.composer-row{
+  display:flex;align-items:center;gap:10px;
+}
+.attach-btn{
+  width:38px;height:38px;border-radius:50%;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;cursor:pointer;
+  backdrop-filter:var(--blur);
+  box-shadow:var(--shadow-sm);
+  transition:all 0.2s var(--ease);
+  flex-shrink:0;
+}
+.attach-btn:hover{background:rgba(110,139,255,0.1);}
+
+.text-input{
+  flex:1;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:9px 14px;
+  font-size:14px;font-family:var(--font);
+  color:var(--text);
+  outline:none;
+  backdrop-filter:var(--blur);
+  transition:all 0.25s var(--ease);
+}
+.text-input::placeholder{color:var(--text-muted);}
+.text-input:focus{border-color:rgba(110,139,255,0.45);box-shadow:0 0 0 3px rgba(110,139,255,0.12);}
+
+/* Mic/Send/Cancel morphing button */
+.action-btn{
+  width:40px;height:40px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;cursor:pointer;
+  border:none;
+  transition:all 0.28s var(--ease);
+  flex-shrink:0;
+  position:relative;overflow:hidden;
+}
+.action-btn.mic-mode{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;box-shadow:0 4px 16px rgba(110,139,255,0.4);}
+.action-btn.send-mode{background:var(--accent);color:#fff;transform:scale(1.05);box-shadow:0 4px 16px rgba(110,139,255,0.4);}
+.action-btn.stop-mode{background:var(--danger);color:#fff;box-shadow:0 4px 16px rgba(255,107,139,0.4);}
+.action-btn:active{transform:scale(0.93);}
+
+/* Play demo btn */
+.demo-btn{
+  position:absolute;top:20px;left:20px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:6px 12px;
+  font-size:11px;font-family:var(--font);
+  color:var(--text-muted);cursor:pointer;
+  backdrop-filter:var(--blur);
+  box-shadow:var(--shadow-sm);
+  transition:all 0.2s;
+  letter-spacing:0.03em;
+}
+.demo-btn:hover{color:var(--accent);border-color:rgba(110,139,255,0.4);}
+
+/* Swipe gesture hint */
+.swipe-hint{
+  position:absolute;
+  left:50%;transform:translateX(-50%);
+  bottom:200px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  pointer-events:none;
+  opacity:0.45;
+  font-size:10px;color:var(--text-muted);
+  letter-spacing:0.06em;text-transform:uppercase;
+}
+.swipe-arrow{font-size:20px;color:var(--accent-2);animation:swipeHint 2.5s ease-in-out infinite;}
+@keyframes swipeHint{
+  0%,100%{transform:translateY(0) opacity 1;}
+  50%{transform:translateY(5px);}
+}
+
+/* Attach radial menu */
+.radial-menu{
+  position:absolute;
+  bottom:100px;left:50%;transform:translateX(-50%) scale(0.7);
+  display:flex;gap:12px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:30px;
+  padding:10px 16px;
+  box-shadow:var(--shadow);
+  backdrop-filter:var(--blur);
+  opacity:0;pointer-events:none;
+  transition:all 0.3s var(--ease);
+}
+.radial-menu.open{opacity:1;pointer-events:all;transform:translateX(-50%) scale(1);}
+.radial-item{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  cursor:pointer;padding:4px 6px;border-radius:12px;
+  transition:background 0.2s;
+}
+.radial-item:hover{background:rgba(110,139,255,0.1);}
+.radial-item .ri-icon{font-size:22px;}
+.radial-item .ri-label{font-size:10px;color:var(--text-muted);letter-spacing:0.04em;}
+
+@media(min-width:600px){
+  body{background:radial-gradient(ellipse at 30% 40%,#F3E9FB,transparent 60%),radial-gradient(ellipse at 70% 60%,#E6F7F4,transparent 60%),#EAF0FB;}
+  .device{box-shadow:var(--shadow),0 40px 80px rgba(80,90,160,0.12),0 0 0 1px rgba(255,255,255,0.4) inset;}
+}
+@media(max-width:440px){
+  .device{width:100vw;height:100dvh;border-radius:0;}
+}
+</style>
+</head>
+<body>
+<div class="aurora-bg"></div>
+
+<div class="device" id="device">
+  <!-- Orb zone -->
+  <div class="orb-zone" id="orbZone">
+    <button class="demo-btn" id="demoBtn">▶ Play demo</button>
+    <button class="mute-btn" id="muteBtn" title="Two-finger tap to mute">🎙️</button>
+
+    <div class="orb-wrap" id="orbWrap">
+      <div class="halo-1"></div>
+      <div class="halo-2"></div>
+      <div class="halo-3"></div>
+      <div class="orb idle" id="orb"></div>
+    </div>
+
+    <!-- Listening indicator -->
+    <div class="state-label" id="stateLabel">
+      <span class="mic-icon">🎙</span>
+      <span id="stateLabelText">Listening…</span>
+    </div>
+
+    <!-- Suggestions fan (idle) -->
+    <div class="suggestion-fan" id="suggestionFan">
+      <div class="chip" onclick="useSuggestion(this,'What\'s the weather today?')">☁️ Weather today</div>
+      <div class="chip" onclick="useSuggestion(this,'Set a 10-min timer')">⏱ 10-min timer</div>
+      <div class="chip" onclick="useSuggestion(this,'Play something upbeat')">🎵 Upbeat playlist</div>
+      <div class="chip" onclick="useSuggestion(this,'Remind me at 3 PM')">🔔 Remind me</div>
+    </div>
+
+    <div class="hint-text">Hold anywhere to speak · Swipe up to send · Pull down for transcript</div>
+    <div class="swipe-hint">
+      <div class="swipe-arrow">↓</div>
+      <div>pull for transcript</div>
+    </div>
+  </div>
+
+  <!-- Composer area -->
+  <div class="composer-area">
+    <div class="attachment-staging" id="attachStaging"></div>
+    <div class="composer-row">
+      <button class="attach-btn" id="attachBtn" title="Long press to attach">＋</button>
+      <input class="text-input" id="textInput" placeholder="Type quietly…" autocomplete="off">
+      <button class="action-btn mic-mode" id="actionBtn">🎙</button>
+    </div>
+    <!-- Follow-up chips (shown after reply) -->
+    <div id="followUpChips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+  </div>
+
+  <!-- Radial attach menu -->
+  <div class="radial-menu" id="radialMenu">
+    <div class="radial-item" onclick="attachFile('📷','Photo')"><span class="ri-icon">📷</span><span class="ri-label">Camera</span></div>
+    <div class="radial-item" onclick="attachFile('🖼️','Image')"><span class="ri-icon">🖼️</span><span class="ri-label">Photos</span></div>
+    <div class="radial-item" onclick="attachFile('📄','Doc')"><span class="ri-icon">📄</span><span class="ri-label">File</span></div>
+    <div class="radial-item" onclick="attachFile('📍','Location')"><span class="ri-icon">📍</span><span class="ri-label">Location</span></div>
+  </div>
+
+  <!-- Transcript sheet -->
+  <div class="transcript-sheet" id="transcriptSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Transcript</div>
+    <div class="transcript-scroll" id="transcriptScroll">
+      <!-- Pre-populated turns -->
+      <div class="turn user-turn" style="align-items:flex-end">
+        <div class="turn-meta" style="justify-content:flex-end">
+          <span>You</span><span class="glyph">⌨️</span>
+        </div>
+        <div class="bubble" style="background:rgba(110,139,255,0.85);color:#fff;border-radius:14px 14px 4px 14px;">
+          <div style="display:flex;align-items:center;gap:5px;font-size:11px;opacity:0.8;margin-bottom:4px;"><span>📎</span>morning-plan.pdf</div>
+          Can you summarize this document for me?
+        </div>
+      </div>
+
+      <div class="turn assistant-turn">
+        <div class="turn-meta"><span>Eliza</span></div>
+        <div class="bubble">
+          Sure! Your morning plan covers three meetings and a 30-min focus block at 9 AM. The standout item is the design review at 11 — you've flagged two open decisions there.
+        </div>
+        <div class="interrupted-badge">⚡ Interrupted</div>
+      </div>
+
+      <div class="turn user-turn" style="align-items:flex-end">
+        <div class="turn-meta" style="justify-content:flex-end">
+          <span>You</span><span class="glyph">🎙</span>
+        </div>
+        <div class="bubble partial" style="background:rgba(110,139,255,0.6);color:#fff;border-radius:14px 14px 4px 14px;">
+          What are the open…
+        </div>
+      </div>
+
+      <div class="turn user-turn" style="align-items:flex-end">
+        <div class="turn-meta" style="justify-content:flex-end">
+          <span>You</span><span class="glyph">🎙</span>
+        </div>
+        <div class="bubble" style="background:var(--accent);color:#fff;border-radius:14px 14px 4px 14px;">
+          What are the open design decisions I need to resolve?
+        </div>
+      </div>
+
+      <div class="turn assistant-turn">
+        <div class="turn-meta"><span>Eliza</span></div>
+        <div class="bubble">
+          The two open decisions are: <strong>1.</strong> Navigation pattern for the new onboarding — tab bar vs drawer. <strong>2.</strong> Whether to ship dark mode in v1 or defer to v1.1.
+        </div>
+        <!-- App card inside assistant turn -->
+        <div class="app-card" style="margin-top:10px;">
+          <div class="app-card-header">
+            <div class="app-icon">🌤</div>
+            <span class="app-card-title">Current Weather · San Francisco</span>
+          </div>
+          <div class="app-card-body">
+            <div class="weather-main">
+              <div class="weather-temp">62°</div>
+              <div>
+                <div style="font-size:15px;font-weight:500;color:var(--text);">Partly Cloudy</div>
+                <div class="weather-desc">Feels like 59°F</div>
+              </div>
+            </div>
+            <div class="weather-detail">
+              <div class="weather-item">Wind <span>8 mph</span></div>
+              <div class="weather-item">Humidity <span>72%</span></div>
+              <div class="weather-item">UV <span>3</span></div>
+            </div>
+          </div>
+          <div class="app-card-actions">
+            <button class="card-btn">5-Day</button>
+            <button class="card-btn primary">Open Maps</button>
+          </div>
+          <div class="expand-hint" onclick="alert('Full screen card')">↑ Expand</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// State machine
+const STATES = {IDLE:'idle',LISTENING:'listening',THINKING:'thinking',SPEAKING:'speaking',MUTED:'muted'};
+let state = STATES.IDLE;
+let muted = false;
+let demoTimer = null;
+let ampInterval = null;
+let isTyping = false;
+let hasAttachment = false;
+let isGenerating = false;
+let transcriptOpen = false;
+
+const orb = document.getElementById('orb');
+const orbWrap = document.getElementById('orbWrap');
+const stateLabel = document.getElementById('stateLabel');
+const stateLabelText = document.getElementById('stateLabelText');
+const muteBtn = document.getElementById('muteBtn');
+const demoBtn = document.getElementById('demoBtn');
+const textInput = document.getElementById('textInput');
+const actionBtn = document.getElementById('actionBtn');
+const attachBtn = document.getElementById('attachBtn');
+const attachStaging = document.getElementById('attachStaging');
+const radialMenu = document.getElementById('radialMenu');
+const suggestionFan = document.getElementById('suggestionFan');
+const followUpChips = document.getElementById('followUpChips');
+const transcriptSheet = document.getElementById('transcriptSheet');
+const transcriptScroll = document.getElementById('transcriptScroll');
+
+function setState(s) {
+  state = s;
+  orb.className = 'orb ' + s;
+  orbWrap.className = 'orb-wrap ' + s;
+
+  // State label
+  stateLabel.className = 'state-label';
+  if (s === STATES.LISTENING && !muted) {
+    stateLabel.classList.add('visible');
+    stateLabelText.textContent = 'Listening…';
+    stateLabel.classList.remove('muted-label');
+  } else if (s === STATES.THINKING) {
+    stateLabel.classList.add('visible');
+    stateLabel.classList.remove('muted-label');
+    stateLabelText.textContent = 'Thinking…';
+  } else if (s === STATES.SPEAKING) {
+    stateLabel.classList.add('visible');
+    stateLabel.classList.remove('muted-label');
+    stateLabelText.textContent = 'Speaking…';
+  } else if (muted) {
+    stateLabel.classList.add('visible','muted-label');
+    stateLabelText.textContent = 'Muted';
+  } else {
+    stateLabel.classList.remove('visible');
+  }
+  updateMuteBtn();
+}
+
+function updateMuteBtn() {
+  if (muted) {
+    muteBtn.textContent = '🔇';
+    muteBtn.classList.add('muted');
+    muteBtn.title = 'Muted — tap to unmute';
+  } else {
+    muteBtn.textContent = '🎙️';
+    muteBtn.classList.remove('muted');
+    muteBtn.title = 'Two-finger tap to mute';
+  }
+}
+
+// Amplitude simulation
+function startAmplitude() {
+  let t = 0;
+  ampInterval = setInterval(() => {
+    t += 0.1;
+    const amp = 1 + (Math.sin(t * 2.3) * 0.05 + Math.random() * 0.07);
+    orb.style.setProperty('--amp', amp.toFixed(3));
+  }, 80);
+}
+function stopAmplitude() {
+  clearInterval(ampInterval);
+  ampInterval = null;
+  orb.style.removeProperty('--amp');
+}
+
+// Action button logic
+function updateActionBtn() {
+  if (isGenerating) {
+    actionBtn.className = 'action-btn stop-mode';
+    actionBtn.textContent = '⏹';
+    actionBtn.title = 'Stop generation';
+  } else if (isTyping) {
+    actionBtn.className = 'action-btn send-mode';
+    actionBtn.textContent = '↑';
+    actionBtn.title = 'Send message';
+  } else {
+    actionBtn.className = 'action-btn mic-mode';
+    actionBtn.textContent = '🎙';
+    actionBtn.title = 'Hold to talk';
+  }
+}
+
+textInput.addEventListener('input', () => {
+  isTyping = textInput.value.trim().length > 0;
+  updateActionBtn();
+  if (isTyping) {
+    suggestionFan.style.opacity = '0';
+    suggestionFan.style.pointerEvents = 'none';
+  } else {
+    suggestionFan.style.opacity = '1';
+    suggestionFan.style.pointerEvents = 'all';
+  }
+});
+
+actionBtn.addEventListener('click', () => {
+  if (isGenerating) {
+    stopGeneration();
+  } else if (isTyping) {
+    sendTyped();
+  } else {
+    runVoiceCycle();
+  }
+});
+
+function sendTyped() {
+  const text = textInput.value.trim();
+  if (!text) return;
+  addTurn('user', text, 'typed', attachStaging.children.length > 0 ? '📄 morning-plan.pdf' : null);
+  textInput.value = '';
+  isTyping = false;
+  attachStaging.innerHTML = '';
+  hasAttachment = false;
+  updateActionBtn();
+  triggerReply(false);
+}
+
+function addTurn(role, text, modality, attachment) {
+  const turn = document.createElement('div');
+  turn.className = `turn ${role}-turn`;
+  if (modality === 'typed') turn.classList.add('typed');
+  const isUser = role === 'user';
+  turn.style.alignItems = isUser ? 'flex-end' : 'flex-start';
+
+  const glyph = modality === 'voice' ? '🎙' : '⌨️';
+  let attachHTML = attachment ? `<div style="display:flex;align-items:center;gap:5px;font-size:11px;opacity:0.8;margin-bottom:4px;"><span>📎</span>${attachment}</div>` : '';
+
+  const bubbleBg = isUser ? (modality === 'voice' ? 'var(--accent)' : 'rgba(110,139,255,0.85)') : 'var(--surface-2)';
+  const bubbleColor = isUser ? '#fff' : 'var(--text)';
+  const bubbleBorder = isUser ? 'none' : '1px solid var(--border)';
+  const bubbleRadius = isUser ? '14px 14px 4px 14px' : '14px 14px 14px 4px';
+
+  turn.innerHTML = `
+    <div class="turn-meta" style="${isUser ? 'justify-content:flex-end' : ''}">
+      ${isUser ? '<span>You</span><span class="glyph">'+glyph+'</span>' : '<span>Eliza</span>'}
+    </div>
+    <div class="bubble" style="background:${bubbleBg};color:${bubbleColor};border:${bubbleBorder};border-radius:${bubbleRadius};">
+      ${attachHTML}${text}
+    </div>
+  `;
+  transcriptScroll.appendChild(turn);
+  transcriptScroll.scrollTop = transcriptScroll.scrollHeight;
+  return turn;
+}
+
+function addPartialVoiceTurn(text) {
+  const turn = document.createElement('div');
+  turn.className = 'turn user-turn partial';
+  turn.style.alignItems = 'flex-end';
+  turn.innerHTML = `
+    <div class="turn-meta" style="justify-content:flex-end">
+      <span>You</span><span class="glyph">🎙</span>
+    </div>
+    <div class="bubble" style="background:rgba(110,139,255,0.6);color:#fff;border-radius:14px 14px 4px 14px;">${text}</div>
+  `;
+  transcriptScroll.appendChild(turn);
+  transcriptScroll.scrollTop = transcriptScroll.scrollHeight;
+  return turn;
+}
+
+function finalizePartialTurn(partialEl, text) {
+  partialEl.classList.remove('partial');
+  const bubble = partialEl.querySelector('.bubble');
+  bubble.style.background = 'var(--accent)';
+  bubble.style.opacity = '1';
+  bubble.style.fontStyle = 'normal';
+  bubble.textContent = text;
+}
+
+let genInterval = null;
+function triggerReply(isVoice) {
+  isGenerating = true;
+  updateActionBtn();
+  setState(STATES.THINKING);
+
+  setTimeout(() => {
+    setState(STATES.SPEAKING);
+    const replies = [
+      "I'll help with that right away. Give me just a moment to pull that together for you.",
+      "Great question! The key thing to understand here is context — and you've given me exactly the right info.",
+      "Done! I've noted that for you. Anything else on your mind?"
+    ];
+    const reply = replies[Math.floor(Math.random() * replies.length)];
+    const assistantTurn = addTurn('assistant', '', 'voice', null);
+    const bubble = assistantTurn.querySelector('.bubble');
+    bubble.textContent = '';
+
+    let i = 0;
+    genInterval = setInterval(() => {
+      if (i >= reply.length) {
+        clearInterval(genInterval);
+        isGenerating = false;
+        updateActionBtn();
+        setState(STATES.IDLE);
+        showFollowUpChips();
+        return;
+      }
+      bubble.textContent += reply[i];
+      i++;
+      transcriptScroll.scrollTop = transcriptScroll.scrollHeight;
+    }, 35);
+  }, 900);
+}
+
+function stopGeneration() {
+  clearInterval(genInterval);
+  isGenerating = false;
+  setState(STATES.IDLE);
+  updateActionBtn();
+}
+
+function showFollowUpChips() {
+  followUpChips.innerHTML = '';
+  const chips = ['Tell me more', 'How do I do that?', 'Got it, thanks'];
+  chips.forEach(c => {
+    const el = document.createElement('div');
+    el.className = 'chip follow-up';
+    el.textContent = c;
+    el.onclick = () => { textInput.value = c; isTyping = true; updateActionBtn(); followUpChips.innerHTML = ''; };
+    followUpChips.appendChild(el);
+  });
+}
+
+function useSuggestion(el, text) {
+  el.classList.add('dismissing');
+  setTimeout(() => { textInput.value = text; isTyping = true; updateActionBtn(); }, 250);
+}
+
+// Attach
+attachBtn.addEventListener('click', () => {
+  radialMenu.classList.toggle('open');
+});
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#attachBtn') && !e.target.closest('#radialMenu')) {
+    radialMenu.classList.remove('open');
+  }
+});
+
+function attachFile(icon, name) {
+  radialMenu.classList.remove('open');
+  const chip = document.createElement('div');
+  chip.className = 'attachment-chip';
+  chip.innerHTML = `<div class="att-thumb">${icon}</div><span>${name}</span><span class="att-remove">✕</span>`;
+  chip.querySelector('.att-remove').onclick = () => chip.remove();
+  attachStaging.appendChild(chip);
+  hasAttachment = true;
+}
+
+// Mute
+muteBtn.addEventListener('click', toggleMute);
+function toggleMute() {
+  muted = !muted;
+  if (muted) {
+    setState(STATES.MUTED);
+    stopAmplitude();
+  } else {
+    setState(STATES.IDLE);
+  }
+}
+
+// Transcript sheet — swipe simulation via button
+const orbZone = document.getElementById('orbZone');
+let touchStartY = 0;
+orbZone.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, {passive:true});
+orbZone.addEventListener('touchend', e => {
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if (dy > 60) openTranscript();
+  else if (dy < -60) closeTranscript();
+}, {passive:true});
+
+// Click on swipe hint area opens transcript
+document.querySelector('.swipe-hint').addEventListener('click', openTranscript);
+document.querySelector('.hint-text').addEventListener('click', openTranscript);
+
+function openTranscript() {
+  transcriptSheet.classList.add('open');
+  transcriptOpen = true;
+}
+function closeTranscript() {
+  transcriptSheet.classList.remove('open');
+  transcriptOpen = false;
+}
+transcriptSheet.addEventListener('click', e => {
+  if (e.target === transcriptSheet || e.target.classList.contains('sheet-handle') || e.target.classList.contains('sheet-title')) {
+    closeTranscript();
+  }
+});
+
+// Voice demo cycle
+function runVoiceCycle() {
+  clearAllTimers();
+
+  setState(STATES.LISTENING);
+  startAmplitude();
+
+  demoTimer = setTimeout(() => {
+    const partial = addPartialVoiceTurn('What\'s the weather like…');
+    openTranscript();
+
+    demoTimer = setTimeout(() => {
+      finalizePartialTurn(partial, 'What\'s the weather like today in San Francisco?');
+      stopAmplitude();
+      setState(STATES.THINKING);
+
+      demoTimer = setTimeout(() => {
+        setState(STATES.SPEAKING);
+        isGenerating = true;
+        updateActionBtn();
+
+        const reply = "It's 62°F and partly cloudy in San Francisco right now. Feels like 59°. A light jacket should do the trick!";
+        const assistantTurn = addTurn('assistant', '', 'voice', null);
+        const bubble = assistantTurn.querySelector('.bubble');
+        bubble.textContent = '';
+        transcriptScroll.scrollTop = transcriptScroll.scrollHeight;
+
+        let i = 0;
+        const typeInterval = setInterval(() => {
+          if (i >= reply.length) {
+            clearInterval(typeInterval);
+            isGenerating = false;
+            updateActionBtn();
+            setState(STATES.IDLE);
+            showFollowUpChips();
+            return;
+          }
+          bubble.textContent += reply[i++];
+          transcriptScroll.scrollTop = transcriptScroll.scrollHeight;
+        }, 28);
+      }, 900);
+    }, 2200);
+  }, 2000);
+}
+
+function clearAllTimers() {
+  clearTimeout(demoTimer);
+  clearInterval(ampInterval);
+  clearInterval(genInterval);
+  stopAmplitude();
+  isGenerating = false;
+  updateActionBtn();
+}
+
+demoBtn.addEventListener('click', () => {
+  clearAllTimers();
+  runVoiceCycle();
+});
+
+// Keyboard send
+textInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (isTyping) sendTyped(); }
+});
+
+// Auto-start demo
+setTimeout(runVoiceCycle, 800);
+</script>
+</body>
+</html>

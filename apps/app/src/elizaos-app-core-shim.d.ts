@@ -254,6 +254,44 @@ declare module "@elizaos/shared/dist/index.js" {
   export const ELIZA_DEFAULT_THEME: unknown;
 }
 
+declare module "@elizaos/ui/voice" {
+  export interface VoiceCaptureTranscriptSegment {
+    text: string;
+    final: boolean;
+    backend: string;
+  }
+  export type VoiceCaptureState =
+    | "idle"
+    | "starting"
+    | "listening"
+    | "stopped"
+    | "error";
+  export interface VoiceCaptureHandle {
+    start(): Promise<void>;
+    stop(): Promise<void>;
+    dispose(): void;
+    isActive(): boolean;
+    getAnalyser(): AnalyserNode | null;
+  }
+  export function createVoiceCapture(args: {
+    onTranscript: (segment: VoiceCaptureTranscriptSegment) => void;
+    onStateChange?: (state: VoiceCaptureState, error?: Error) => void;
+    [key: string]: unknown;
+  }): VoiceCaptureHandle;
+  export interface VoicePillMessage {
+    id: string;
+    role: "user" | "agent";
+    text: string;
+  }
+  export interface VoicePillProps {
+    messages?: VoicePillMessage[];
+    onSubmit?: (text: string) => void;
+    onRecordingChange?: (recording: boolean) => void;
+    ariaLabel?: string;
+  }
+  export const VoicePill: import("react").ComponentType<VoicePillProps>;
+}
+
 declare module "@elizaos/contracts" {
   // Wallet / chain type primitives. The @elizaos/shared contracts/wallet.ts
   // re-exports these from @elizaos/contracts; the package is not yet in the

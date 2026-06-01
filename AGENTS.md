@@ -64,6 +64,10 @@ Full protocol: `eliza/packages/cloud-frontend/AGENTS.md`.
 - Say **Eliza agents** (not "elizaOS agents") in plain language.
 - The **Eliza Classic** plugin name is the one exception (Eliza = the 1966 chatbot).
 
+## Native over Docker on Linux x64
+
+Linux x86_64 dev boxes should build and run every toolchain locally — RTL sims, synthesis, formal, PD (OpenLane/OpenROAD/magic/klayout/netgen), LLVM, Chipyard, AlphaChip CUDA, QEMU, Renode. Native is faster and far easier to troubleshoot than Docker: no bind-mount syscall overhead, real stack traces, normal `gdb`/`perf`, no daemon lifecycle to babysit. Keep Docker recipes around as a documented fallback for macOS, reproducibility audits, and pinned-image CI lanes only. If a script forces Docker on Linux even when a working native binary is on `$PATH`, that's a bug — fix the script.
+
 ## Quick start (dev)
 
 ```bash
@@ -232,7 +236,7 @@ Port env vars (never hardcoded — the dev orchestrator auto-shifts to the next 
 - Trajectory persistence is on by default. Every turn lands in the `trajectories` table unless `ELIZA_DISABLE_TRAJECTORY_LOGGING=1`.
 - Native optimization (`--backend native`) is the default training backend (MIPRO / GEPA / bootstrap-fewshot). Outputs land under `~/.local/state/milady/optimized-prompts/<task>/` and `OptimizedPromptService` auto-loads at boot.
 - Auto-training defaults: 100 trajectories per task, 12h cooldown. Adjust via `/api/training/auto/config` or Settings → Auto-Training.
-- The privacy filter at `eliza/apps/app-training/src/core/privacy-filter.ts` is mandatory on every write path that touches real user trajectories — both the nightly export cron and the on-demand training orchestrator run it before any JSONL is written.
+- The privacy filter at `eliza/plugins/app-training/src/core/privacy-filter.ts` is mandatory on every write path that touches real user trajectories — both the nightly export cron and the on-demand training orchestrator run it before any JSONL is written.
 
 ## App and plugin primitives
 

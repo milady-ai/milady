@@ -1,0 +1,713 @@
+<!-- concept-D09-L3 | direction: Conversation-as-Vertical-Timeline | look: Warm Editorial Paper | targets: 420x760, 960x640 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D09 · Conversation-as-Vertical-Timeline · Warm Editorial Paper</title>
+<style>
+:root {
+  --bg:#F6F1E7;
+  --surface:#FFFDF8;
+  --surface-2:#F0E8D9;
+  --border:#E2D8C6;
+  --text:#23201A;
+  --text-muted:#7A7163;
+  --accent:#C8643C;
+  --accent-2:#4F6B57;
+  --danger:#B23A48;
+  --radius:14px;
+  --radius-sm:10px;
+  --font:"Iowan Old Style","Palatino Linotype","Georgia","Times New Roman",serif;
+  --font-ui:"Avenir Next","Segoe UI",system-ui,sans-serif;
+  --shadow:0 6px 24px rgba(60,45,25,0.10);
+  --shadow-sm:0 2px 8px rgba(60,45,25,0.07);
+  --ease:cubic-bezier(.4,.0,.2,1);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--font);background:var(--bg);overflow:hidden}
+
+body{
+  display:flex;align-items:center;justify-content:center;
+  background:var(--bg);
+}
+
+.app-window{
+  width:420px;height:760px;
+  display:flex;flex-direction:column;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  position:relative;
+}
+
+/* Header */
+.header{
+  padding:16px 20px 12px;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:14px;
+  flex-shrink:0;
+}
+
+/* Avatar: undulating ink stroke */
+.avatar-wrap{
+  position:relative;width:44px;height:44px;flex-shrink:0;
+}
+.avatar-stroke{
+  width:44px;height:44px;
+  border-radius:50%;
+  background:radial-gradient(circle at 40% 40%,#e8d5bc,#dbc4a6);
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  position:relative;
+}
+.avatar-canvas{
+  width:44px;height:44px;
+}
+
+.header-info{flex:1}
+.header-title{
+  font-family:var(--font);
+  font-size:17px;font-weight:600;
+  color:var(--text);
+  letter-spacing:-0.01em;
+  font-style:italic;
+}
+.header-sub{
+  font-family:var(--font-ui);
+  font-size:11px;color:var(--text-muted);
+  margin-top:2px;letter-spacing:0.04em;
+  text-transform:uppercase;font-weight:400;
+}
+
+.header-actions{display:flex;gap:8px;align-items:center}
+.mute-btn{
+  font-family:var(--font-ui);
+  font-size:11px;color:var(--text-muted);
+  background:none;border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:4px 8px;
+  cursor:pointer;transition:all 0.4s var(--ease);letter-spacing:0.04em;
+  text-transform:uppercase;
+}
+.mute-btn.muted{color:var(--danger);border-color:rgba(178,58,72,0.3)}
+.icon-btn{
+  width:30px;height:30px;border-radius:50%;border:1px solid var(--border);
+  background:none;color:var(--text-muted);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;transition:all 0.3s;
+}
+.icon-btn:hover{color:var(--accent);border-color:rgba(200,100,60,0.3)}
+
+/* Status bar */
+.status-bar{
+  display:flex;align-items:center;
+  padding:5px 20px;min-height:28px;
+  border-bottom:1px solid var(--border);
+  background:var(--surface-2);
+  flex-shrink:0;
+}
+.listening-indicator{
+  display:none;align-items:center;gap:7px;
+  font-family:var(--font-ui);font-size:11px;
+  color:var(--accent-2);letter-spacing:0.05em;text-transform:uppercase;
+}
+.listening-indicator.active{display:flex}
+.listen-orb{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--accent-2);
+  animation:breathe-orb 1.2s ease-in-out infinite;
+}
+@keyframes breathe-orb{0%,100%{transform:scale(1);opacity:0.8}50%{transform:scale(1.5);opacity:1}}
+
+.muted-indicator{
+  display:none;align-items:center;gap:7px;
+  font-family:var(--font-ui);font-size:11px;
+  color:var(--danger);letter-spacing:0.05em;text-transform:uppercase;
+}
+.muted-indicator.active{display:flex}
+
+/* Timeline area */
+.timeline-area{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  display:flex;padding:20px 0 12px;
+  position:relative;
+}
+.timeline-area::-webkit-scrollbar{width:3px}
+.timeline-area::-webkit-scrollbar-track{background:transparent}
+.timeline-area::-webkit-scrollbar-thumb{background:var(--border);border-radius:6px}
+
+/* Rail */
+.time-rail{
+  width:60px;flex-shrink:0;position:relative;padding-top:4px;
+}
+.rail-line{
+  position:absolute;top:0;bottom:0;left:50%;
+  transform:translateX(-50%);
+  width:1px;background:var(--border);
+}
+.rail-time{
+  font-family:var(--font-ui);font-size:9px;color:var(--text-muted);
+  letter-spacing:0.06em;text-transform:uppercase;
+  position:absolute;left:4px;line-height:1;
+}
+
+/* Events */
+.events-col{
+  flex:1;padding-right:20px;
+  display:flex;flex-direction:column;
+}
+
+.event-row{display:flex;align-items:flex-start;position:relative;margin-bottom:2px}
+
+.event-node{
+  width:9px;height:9px;border-radius:50%;
+  background:var(--accent);border:2px solid var(--surface);
+  flex-shrink:0;margin-top:14px;margin-left:-4.5px;margin-right:12px;
+  box-shadow:0 0 0 2px rgba(200,100,60,0.12);
+  position:relative;z-index:2;
+}
+.event-node.user-node{background:var(--accent-2);box-shadow:0 0 0 2px rgba(79,107,87,0.15)}
+.event-node.voice-node{background:#7a5c38;box-shadow:0 0 0 2px rgba(120,90,56,0.15)}
+
+.event-bubble{
+  flex:1;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:11px 14px;
+  box-shadow:var(--shadow-sm);
+  margin-bottom:10px;
+  position:relative;
+}
+.event-bubble.user-bubble{
+  background:var(--surface-2);
+  border-color:rgba(200,100,60,0.15);
+}
+.event-bubble.partial{opacity:0.55;border-style:dashed}
+
+.bubble-header{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.modality-glyph{
+  font-family:var(--font-ui);font-size:9px;color:var(--text-muted);
+  letter-spacing:0.06em;text-transform:uppercase;
+  display:flex;align-items:center;gap:3px;
+}
+.bubble-role{
+  font-family:var(--font-ui);font-size:10px;font-weight:600;
+  color:var(--text-muted);letter-spacing:0.07em;text-transform:uppercase;
+}
+.bubble-ts{
+  font-family:var(--font-ui);font-size:9px;color:var(--text-muted);
+  margin-left:auto;letter-spacing:0.04em;
+}
+.bubble-text{
+  font-family:var(--font);font-size:13.5px;line-height:1.65;color:var(--text);
+}
+.interrupted-badge{
+  font-family:var(--font-ui);font-size:9px;color:var(--danger);
+  border:1px solid rgba(178,58,72,0.25);border-radius:6px;
+  padding:1px 5px;letter-spacing:0.05em;text-transform:uppercase;
+}
+
+/* App card */
+.app-card{
+  margin-top:10px;border:1px solid var(--border);border-radius:var(--radius-sm);
+  overflow:hidden;background:var(--surface);
+}
+.app-card-header{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 12px;border-bottom:1px solid var(--border);
+  background:var(--surface-2);
+}
+.app-icon{
+  width:20px;height:20px;border-radius:6px;
+  background:linear-gradient(135deg,var(--accent),#a04e2e);
+  display:flex;align-items:center;justify-content:center;font-size:11px;
+}
+.app-name{font-family:var(--font-ui);font-size:11px;font-weight:600;color:var(--text);letter-spacing:0.04em;text-transform:uppercase}
+.app-expand-btn{margin-left:auto;font-family:var(--font-ui);font-size:10px;color:var(--accent);cursor:pointer;background:none;border:none;letter-spacing:0.04em}
+.app-card-body{padding:12px}
+.weather-display{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.weather-temp{font-family:var(--font);font-size:30px;font-weight:300;color:var(--text)}
+.weather-icon{font-size:24px}
+.weather-desc{font-family:var(--font-ui);font-size:12px;color:var(--text)}
+.weather-detail{font-family:var(--font-ui);font-size:11px;color:var(--text-muted);margin-top:2px;letter-spacing:0.02em}
+.card-actions{display:flex;gap:8px;margin-top:10px}
+.card-btn{
+  flex:1;padding:7px 12px;border-radius:var(--radius-sm);
+  border:1px solid var(--border);background:var(--surface);
+  color:var(--text);font-family:var(--font-ui);font-size:11px;
+  cursor:pointer;letter-spacing:0.04em;text-transform:uppercase;
+  transition:all 0.35s var(--ease);
+}
+.card-btn:hover{background:var(--surface-2);border-color:rgba(200,100,60,0.3)}
+.card-btn.primary{
+  background:var(--accent);color:#fff;border-color:var(--accent);
+}
+.card-btn.primary:hover{background:#b0562e}
+
+.attach-sub{
+  display:flex;align-items:center;gap:5px;margin-top:6px;
+  padding:4px 8px;background:rgba(79,107,87,0.07);
+  border:1px solid rgba(79,107,87,0.15);border-radius:8px;
+  font-family:var(--font-ui);font-size:10px;color:var(--accent-2);
+  width:fit-content;letter-spacing:0.03em;
+}
+
+/* Suggestions */
+.ghost-chip{
+  background:rgba(200,100,60,0.05);border:1px dashed rgba(200,100,60,0.3);
+  border-radius:20px;padding:4px 12px;font-family:var(--font-ui);font-size:11px;
+  color:var(--accent);cursor:pointer;letter-spacing:0.04em;transition:all 0.35s var(--ease);
+}
+.ghost-chip:hover{background:rgba(200,100,60,0.1)}
+
+/* Composer */
+.composer-area{
+  flex-shrink:0;padding:8px 20px 18px;
+  background:var(--surface);border-top:1px solid var(--border);
+}
+.suggestions-row{
+  display:flex;gap:6px;margin-bottom:8px;overflow-x:auto;
+  padding-bottom:2px;transition:opacity 0.4s var(--ease);
+}
+.suggestions-row::-webkit-scrollbar{display:none}
+.suggestion-chip{
+  white-space:nowrap;padding:5px 13px;border-radius:20px;
+  background:var(--surface-2);border:1px solid var(--border);
+  font-family:var(--font-ui);font-size:11px;color:var(--text-muted);
+  cursor:pointer;flex-shrink:0;transition:all 0.35s var(--ease);
+}
+.suggestion-chip:hover{background:rgba(200,100,60,0.08);color:var(--accent);border-color:rgba(200,100,60,0.25)}
+
+.staged-attachments{display:none;gap:6px;margin-bottom:6px;flex-wrap:wrap}
+.staged-attachments.has-items{display:flex}
+.attach-chip{
+  display:flex;align-items:center;gap:4px;
+  background:rgba(79,107,87,0.08);border:1px solid rgba(79,107,87,0.2);
+  border-radius:var(--radius-sm);padding:4px 9px;
+  font-family:var(--font-ui);font-size:10px;color:var(--accent-2);
+}
+.attach-chip-remove{cursor:pointer;opacity:0.6;margin-left:3px;font-size:13px;line-height:1}
+.attach-chip-remove:hover{opacity:1;color:var(--danger)}
+
+.composer-row{
+  display:flex;align-items:flex-end;gap:8px;
+  border:1px solid var(--border);border-radius:var(--radius);
+  padding:8px 8px 8px 14px;background:var(--surface);
+  box-shadow:var(--shadow-sm);
+}
+.composer-input{
+  flex:1;border:none;background:transparent;
+  font-family:var(--font);font-size:14px;color:var(--text);
+  outline:none;resize:none;max-height:96px;line-height:1.55;min-height:24px;
+}
+.composer-input::placeholder{color:var(--text-muted);font-style:italic}
+
+.attach-btn{
+  width:32px;height:32px;border-radius:50%;
+  border:1px solid var(--border);background:none;
+  color:var(--text-muted);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:15px;
+  transition:all 0.3s var(--ease);flex-shrink:0;
+}
+.attach-btn:hover{color:var(--accent);border-color:rgba(200,100,60,0.3)}
+
+.morph-btn{
+  width:38px;height:38px;border-radius:50%;border:none;
+  background:var(--accent);color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+  transition:all 0.4s var(--ease);flex-shrink:0;
+  box-shadow:0 3px 12px rgba(200,100,60,0.3);
+  position:relative;overflow:hidden;
+}
+.morph-btn:hover{transform:scale(1.05);box-shadow:0 5px 18px rgba(200,100,60,0.4)}
+.morph-btn.send-mode{background:var(--accent)}
+.morph-btn.stop-mode{background:var(--danger)}
+.morph-btn svg{position:absolute;transition:all 0.4s var(--ease)}
+.morph-btn .icon-mic{opacity:1;transform:scale(1)}
+.morph-btn .icon-send{opacity:0;transform:scale(0.3)}
+.morph-btn .icon-stop{opacity:0;transform:scale(0.3)}
+.morph-btn.send-mode .icon-mic{opacity:0;transform:scale(0.3)}
+.morph-btn.send-mode .icon-send{opacity:1;transform:scale(1)}
+.morph-btn.stop-mode .icon-mic{opacity:0;transform:scale(0.3)}
+.morph-btn.stop-mode .icon-send{opacity:0;transform:scale(0.3)}
+.morph-btn.stop-mode .icon-stop{opacity:1;transform:scale(1)}
+
+.demo-btn{
+  position:absolute;top:14px;right:14px;padding:5px 13px;
+  border-radius:20px;border:1px solid var(--border);background:var(--surface);
+  color:var(--accent);font-family:var(--font-ui);font-size:11px;
+  cursor:pointer;z-index:20;box-shadow:var(--shadow-sm);
+  transition:all 0.35s var(--ease);letter-spacing:0.04em;
+}
+.demo-btn:hover{background:rgba(200,100,60,0.07)}
+
+.partial-cursor{
+  display:inline-block;width:2px;height:14px;
+  background:var(--accent);border-radius:1px;
+  margin-left:2px;vertical-align:middle;
+  animation:blink-c 1.1s ease-in-out infinite;
+}
+@keyframes blink-c{0%,100%{opacity:1}50%{opacity:0.1}}
+
+@media (min-width:700px){
+  body{background:linear-gradient(160deg,#f0e8d9,#fffdf8,#ece8e0)}
+  .app-window{width:440px;height:720px;box-shadow:0 20px 60px rgba(60,45,25,0.15)}
+}
+</style>
+</head>
+<body>
+<div class="app-window" id="appWindow">
+  <button class="demo-btn" onclick="runDemo()">▶ Play demo</button>
+
+  <div class="header">
+    <div class="avatar-wrap">
+      <div class="avatar-stroke">
+        <canvas class="avatar-canvas" id="avatarCanvas" width="44" height="44"></canvas>
+      </div>
+    </div>
+    <div class="header-info">
+      <div class="header-title">Eliza</div>
+      <div class="header-sub" id="statusLabel">Present · ready</div>
+    </div>
+    <div class="header-actions">
+      <button class="mute-btn" id="muteBtn" onclick="toggleMute()">🎙 Mute</button>
+      <button class="icon-btn">⚙</button>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="listening-indicator" id="listenIndicator">
+      <div class="listen-orb"></div>
+      <span>Listening…</span>
+    </div>
+    <div class="muted-indicator" id="mutedIndicator">
+      🚫 Muted
+    </div>
+  </div>
+
+  <div class="timeline-area" id="timelineArea">
+    <div class="time-rail" id="timeRail">
+      <div class="rail-line"></div>
+    </div>
+    <div class="events-col" id="eventsCol"></div>
+  </div>
+
+  <div class="composer-area">
+    <div class="suggestions-row" id="suggestionsRow"></div>
+    <div class="staged-attachments" id="stagedAttachments"></div>
+    <div class="composer-row">
+      <button class="attach-btn" onclick="stageAttachment()">📎</button>
+      <textarea class="composer-input" id="composerInput" placeholder="Write to Eliza…" rows="1"></textarea>
+      <button class="morph-btn" id="morphBtn" onclick="handleMorph()">
+        <svg class="icon-mic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0014 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/></svg>
+        <svg class="icon-send" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        <svg class="icon-stop" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="3"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Avatar canvas: organic ink-stroke ─────────────────────────────────────
+const canvas = document.getElementById('avatarCanvas');
+const ctx = canvas.getContext('2d');
+let avState = 'idle', avAmp = 0, avPhase = 0, thinkRot = 0;
+
+function drawAvatar() {
+  const W=44,H=44,cx=22,cy=22;
+  ctx.clearRect(0,0,W,H);
+  avPhase += 0.025;
+  thinkRot += 0.018;
+
+  ctx.lineCap='round';ctx.lineJoin='round';
+
+  if (avState==='thinking') {
+    // Slow ink-bleed shimmer: rotating arc segments
+    for(let i=0;i<5;i++){
+      const a1=thinkRot+i*Math.PI*2/5;
+      const a2=a1+Math.PI*0.3+0.1*Math.sin(thinkRot*2+i);
+      ctx.beginPath();
+      ctx.arc(cx,cy,10+i*1.2,a1,a2);
+      ctx.strokeStyle=`rgba(200,100,60,${0.15+i*0.05})`;
+      ctx.lineWidth=1.5-i*0.15;
+      ctx.stroke();
+    }
+    return requestAnimationFrame(drawAvatar);
+  }
+
+  // Base undulating stroke — a sine wave across the center
+  const points=16;
+  ctx.beginPath();
+  for(let i=0;i<=points;i++){
+    const x=4+i*(36/points);
+    let yOff;
+    if(avState==='idle'){
+      yOff=4*Math.sin(avPhase+i*0.7);
+    } else if(avState==='listening'){
+      yOff=(4+10*avAmp)*Math.sin(avPhase*2.2+i*0.6)*Math.random()*0.4+4*Math.sin(avPhase+i*0.7);
+    } else { // speaking
+      yOff=(3+8*avAmp)*Math.sin(avPhase*1.6+i*0.55);
+    }
+    const y=cy+yOff;
+    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  }
+  const color=avState==='listening'?'#4F6B57':avState==='speaking'?'#C8643C':'#7a5c38';
+  ctx.strokeStyle=color;
+  ctx.lineWidth=avState==='idle'?1.5:2.2;
+  ctx.globalAlpha=0.85;
+  ctx.stroke();
+  ctx.globalAlpha=1;
+
+  requestAnimationFrame(drawAvatar);
+}
+drawAvatar();
+
+// ── State ──────────────────────────────────────────────────────────────────
+let appState='idle',isMuted=false,hasText=false,demoTimer=null,msgCounter=100;
+let avAmpT=0,avAmpPhase=0;
+
+const statusLabel=document.getElementById('statusLabel');
+const morphBtn=document.getElementById('morphBtn');
+const muteBtn=document.getElementById('muteBtn');
+const listenIndicator=document.getElementById('listenIndicator');
+const mutedIndicator=document.getElementById('mutedIndicator');
+const eventsCol=document.getElementById('eventsCol');
+const timeRail=document.getElementById('timeRail');
+const composerInput=document.getElementById('composerInput');
+const suggestionsRow=document.getElementById('suggestionsRow');
+const stagedAttachments=document.getElementById('stagedAttachments');
+
+// Amp tick
+function tickAmp(){
+  avAmpPhase+=0.07;
+  if((appState==='listening'||appState==='speaking')&&!isMuted){
+    avAmpT=0.35+0.6*Math.abs(Math.sin(avAmpPhase*1.7))*Math.random();
+  } else{avAmpT=0}
+  avAmp+=(avAmpT-avAmp)*0.15;
+  avState=appState;
+  requestAnimationFrame(tickAmp);
+}
+tickAmp();
+
+// ── Initial events ─────────────────────────────────────────────────────────
+const initialEvents=[
+  {id:'e1',type:'assistant',time:'3:02 pm',text:'Good afternoon. What would you like to explore today?'},
+  {id:'e2',type:'user',time:'3:04 pm',text:'Could you check the weather this weekend?',modality:'typed'},
+  {id:'e3',type:'assistant',time:'3:04 pm',text:"Of course — here's what the forecast looks like.",card:{icon:'🌤',name:'Weather',temp:'72°',desc:'Partly Cloudy',detail:'Saturday 72° · Sunday 68° · light rain possible Sunday evening'}},
+  {id:'e4',type:'user',time:'3:07 pm',text:"That's wonderful. I've been thinking about a hike, perhaps—",modality:'voice',interrupted:true},
+  {id:'e5',type:'assistant',time:'3:07 pm',text:'A hike sounds lovely. How far are you willing to travel — within an hour, or further afield?'},
+  {id:'e6',type:'user',time:'3:09 pm',text:'Within an hour would be ideal. Good views are a must.',modality:'typed',attachment:{name:'inspiration.jpg',emoji:'🌄'}},
+  {id:'e7',type:'assistant',time:'3:10 pm',text:'I know just the place — let me find the details for you',partial:true},
+];
+
+function renderEvent(ev){
+  const row=document.createElement('div');
+  row.className='event-row';row.id='row-'+ev.id;
+
+  const nodeClass=ev.type==='user'
+    ?(ev.modality==='voice'?'event-node voice-node':'event-node user-node')
+    :'event-node';
+
+  let mg='';
+  if(ev.modality==='voice')mg='<span class="modality-glyph">🎙 Voice</span>';
+  else if(ev.modality==='typed')mg='<span class="modality-glyph">⌨ Written</span>';
+
+  let card='';
+  if(ev.card){
+    card=`<div class="app-card">
+      <div class="app-card-header">
+        <div class="app-icon">${ev.card.icon}</div>
+        <span class="app-name">${ev.card.name}</span>
+        <button class="app-expand-btn" onclick="this.textContent=this.textContent==='Expand ↗'?'Collapse':'Expand ↗'">Expand ↗</button>
+      </div>
+      <div class="app-card-body">
+        <div class="weather-display">
+          <span class="weather-icon">${ev.card.icon}</span>
+          <span class="weather-temp">${ev.card.temp}</span>
+          <div><div class="weather-desc">${ev.card.desc}</div></div>
+        </div>
+        <div class="weather-detail">${ev.card.detail}</div>
+        <div class="card-actions">
+          <button class="card-btn">5-day forecast</button>
+          <button class="card-btn primary">Hourly detail</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  const intBadge=ev.interrupted?'<span class="interrupted-badge">interrupted</span>':'';
+  const attHtml=ev.attachment?`<div class="attach-sub">${ev.attachment.emoji} ${ev.attachment.name}</div>`:'';
+  const cursor=ev.partial?'<span class="partial-cursor"></span>':'';
+
+  row.innerHTML=`
+    <div class="event-node ${nodeClass}" style="margin-top:15px"></div>
+    <div class="event-bubble ${ev.type==='user'?'user-bubble':''} ${ev.partial?'partial':''}">
+      <div class="bubble-header">
+        ${mg}
+        <span class="bubble-role">${ev.type==='user'?'You':'Eliza'}</span>
+        ${intBadge}
+        <span class="bubble-ts">${ev.time}</span>
+      </div>
+      <div class="bubble-text">${ev.text}${cursor}</div>
+      ${card}${attHtml}
+    </div>`;
+  eventsCol.appendChild(row);
+}
+
+function initTimeline(){
+  initialEvents.forEach(renderEvent);
+  addRailTime('3:02','10%');addRailTime('3:07','44%');addRailTime('3:10','74%');
+  renderSuggestions();scrollToBottom();
+}
+
+function addRailTime(t,top){
+  const el=document.createElement('div');
+  el.className='rail-time';el.style.top=top;el.textContent=t;
+  timeRail.appendChild(el);
+}
+
+// ── Suggestions ────────────────────────────────────────────────────────────
+const followUps=['Book the trail','Check the forecast','Make a packing list'];
+function renderSuggestions(chips){
+  suggestionsRow.innerHTML='';
+  (chips||followUps).forEach(s=>{
+    const ch=document.createElement('button');
+    ch.className='suggestion-chip';ch.textContent=s;
+    ch.onclick=()=>{composerInput.value=s;updateMorphBtn();suggestionsRow.style.opacity='0'};
+    suggestionsRow.appendChild(ch);
+  });
+  suggestionsRow.style.opacity='1';
+}
+
+// ── Attachment ─────────────────────────────────────────────────────────────
+let pendingAttach=null;
+function stageAttachment(){
+  pendingAttach={name:'photo.jpg',emoji:'🌄'};
+  stagedAttachments.innerHTML=`<div class="attach-chip">🌄 photo.jpg <span class="attach-chip-remove" onclick="removeAttachment()">×</span></div>`;
+  stagedAttachments.classList.add('has-items');
+}
+function removeAttachment(){pendingAttach=null;stagedAttachments.innerHTML='';stagedAttachments.classList.remove('has-items')}
+
+// ── setState ───────────────────────────────────────────────────────────────
+function setState(s){
+  appState=s;
+  const labels={idle:'Present · ready',listening:'Listening…',thinking:'Thinking…',speaking:'Speaking…'};
+  statusLabel.textContent=isMuted?'Muted':labels[s];
+  listenIndicator.classList.toggle('active',s==='listening'&&!isMuted);
+  mutedIndicator.classList.toggle('active',isMuted);
+}
+
+// ── Morph ──────────────────────────────────────────────────────────────────
+function updateMorphBtn(){
+  hasText=composerInput.value.trim().length>0;
+  if(appState==='thinking'||appState==='speaking')morphBtn.className='morph-btn stop-mode';
+  else if(hasText)morphBtn.className='morph-btn send-mode';
+  else morphBtn.className='morph-btn';
+  suggestionsRow.style.opacity=hasText?'0':'1';
+  suggestionsRow.style.pointerEvents=hasText?'none':'';
+}
+
+composerInput.addEventListener('input',()=>{
+  updateMorphBtn();
+  composerInput.style.height='auto';
+  composerInput.style.height=Math.min(composerInput.scrollHeight,96)+'px';
+});
+composerInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg()}});
+
+function handleMorph(){
+  if(appState==='thinking'||appState==='speaking')stopGen();
+  else if(hasText)sendMsg();
+  else runDemo();
+}
+
+// ── Send typed ─────────────────────────────────────────────────────────────
+function sendMsg(){
+  const text=composerInput.value.trim();if(!text)return;
+  const ev={id:'u'+(++msgCounter),type:'user',time:nowTime(),text,modality:'typed'};
+  if(pendingAttach){ev.attachment=pendingAttach;removeAttachment()}
+  renderEvent(ev);
+  composerInput.value='';composerInput.style.height='';updateMorphBtn();scrollToBottom();
+  setTimeout(()=>triggerReply(),900);
+}
+
+const replies=[
+  "Mount Tamalpais is exactly what you're looking for — 2.5 miles, stunning bay views, just forty minutes north. The Steep Ravine trail is particularly beautiful this time of year.",
+  "Mission Peak is another wonderful choice. Substantial elevation gain, panoramic views, and very manageable from the East Bay.",
+  "I've added that to your Saturday. I'll remind you Friday evening to check conditions."
+];
+
+function triggerReply(){
+  setState('thinking');updateMorphBtn();
+  setTimeout(()=>{
+    setState('speaking');updateMorphBtn();
+    streamAssistant(replies[Math.floor(Math.random()*replies.length)]);
+  },1100);
+}
+
+function streamAssistant(text){
+  const id='a'+(++msgCounter);
+  renderEvent({id,type:'assistant',time:nowTime(),text:'',partial:true});
+  scrollToBottom();
+  const bEl=document.querySelector('#row-'+id+' .bubble-text');
+  const bubEl=document.querySelector('#row-'+id+' .event-bubble');
+  let i=0;
+  const step=()=>{
+    if(i<=text.length){
+      bEl.innerHTML=text.slice(0,i)+(i<text.length?'<span class="partial-cursor"></span>':'');
+      i+=2;scrollToBottom();setTimeout(step,30);
+    } else{
+      bubEl.classList.remove('partial');bEl.innerHTML=text;
+      setState('idle');updateMorphBtn();renderSuggestions();scrollToBottom();
+    }
+  };step();
+}
+
+function stopGen(){setState('idle');updateMorphBtn()}
+
+// ── Mute ──────────────────────────────────────────────────────────────────
+function toggleMute(){
+  isMuted=!isMuted;
+  muteBtn.className='mute-btn'+(isMuted?' muted':'');
+  muteBtn.textContent=isMuted?'🔇 Muted':'🎙 Mute';
+  setState(isMuted?'idle':appState);updateMorphBtn();
+}
+
+// ── Demo ──────────────────────────────────────────────────────────────────
+function runDemo(){
+  if(demoTimer)clearTimeout(demoTimer);
+  setState('idle');updateMorphBtn();
+
+  const id='demo'+Date.now();
+  renderEvent({id,type:'user',time:nowTime(),text:'Are there any good Italian places nearby?',modality:'voice',partial:true});
+  scrollToBottom();
+  const bEl=document.querySelector('#row-'+id+' .bubble-text');
+  const bubEl=document.querySelector('#row-'+id+' .event-bubble');
+
+  setState('listening');updateMorphBtn();
+
+  demoTimer=setTimeout(()=>{
+    bubEl.classList.remove('partial');
+    bEl.innerHTML='Are there any good Italian places nearby?';
+    setState('thinking');updateMorphBtn();
+    demoTimer=setTimeout(()=>{
+      setState('speaking');updateMorphBtn();
+      streamAssistant("Osteria Morini comes highly recommended — beautiful hand-rolled pasta, just a short walk away. Trattoria Roma is also excellent if you prefer a livelier atmosphere with their wood-fired oven.");
+    },1300);
+  },2400);
+}
+
+// ── Utils ─────────────────────────────────────────────────────────────────
+function scrollToBottom(){const a=document.getElementById('timelineArea');requestAnimationFrame(()=>a.scrollTop=a.scrollHeight)}
+function nowTime(){const d=new Date();const h=d.getHours();return(h>12?h-12:h)+':'+String(d.getMinutes()).padStart(2,'0')+' '+(h>=12?'pm':'am')}
+
+initTimeline();updateMorphBtn();
+setTimeout(runDemo,2000);
+</script>
+</body>
+</html>

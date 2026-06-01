@@ -1,0 +1,1172 @@
+<!-- concept-D02-L3 | direction: Full-Screen Avatar + Floating Captions | look: Warm Editorial Paper | targets: 420x760, 960x640 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D02 · Full-Screen Avatar + Floating Captions · Warm Editorial Paper</title>
+<style>
+:root {
+  --bg:#F6F1E7;
+  --surface:#FFFDF8;
+  --surface-2:#F0E8D9;
+  --border:#E2D8C6;
+  --text:#23201A;
+  --text-muted:#7A7163;
+  --accent:#C8643C;
+  --accent-2:#4F6B57;
+  --danger:#B23A48;
+  --radius:14px;
+  --radius-sm:10px;
+  --font:"Iowan Old Style","Palatino Linotype","Georgia","Times New Roman",serif;
+  --font-ui:"Avenir Next","Segoe UI",system-ui,sans-serif;
+  --shadow:0 6px 24px rgba(60,45,25,0.10);
+  --shadow-sm:0 2px 8px rgba(60,45,25,0.07);
+  --ease:cubic-bezier(.4,.0,.2,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: #EDE5D5;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Paper texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+}
+
+.app-frame {
+  width: 420px;
+  height: 760px;
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--bg);
+  box-shadow: 0 20px 60px rgba(60,45,25,0.18), 0 0 0 1px rgba(60,45,25,0.08);
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+}
+
+/* Running header */
+.editorial-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  z-index: 20;
+}
+
+.brand-name {
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--text);
+  letter-spacing: 0.01em;
+  font-style: italic;
+}
+
+.brand-issue {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+}
+
+/* Avatar stage — the ink mark / clay form */
+.avatar-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 600ms var(--ease);
+  z-index: 1;
+  padding-top: 48px;
+}
+
+.avatar-stage.feed-active {
+  transform: scale(0.38) translate(-110px, 70px);
+}
+
+/* The clay/ink mark container */
+.orb {
+  width: 200px;
+  height: 200px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* SVG-based ink stroke avatar */
+.ink-canvas {
+  width: 200px;
+  height: 200px;
+  position: absolute;
+}
+
+/* Clay blob using CSS */
+.orb-clay {
+  width: 160px;
+  height: 160px;
+  position: relative;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 38%, #D4956A 0%, #C8643C 40%, #A04A28 80%, #8B3E22 100%);
+  box-shadow: 0 8px 32px rgba(200,100,60,0.25), 0 2px 8px rgba(60,45,25,0.15);
+  animation: clayBreathe 5s ease-in-out infinite;
+  overflow: hidden;
+}
+
+/* Warm specular */
+.orb-clay::before {
+  content: '';
+  position: absolute;
+  width: 35%;
+  height: 25%;
+  top: 14%;
+  left: 18%;
+  background: radial-gradient(ellipse, rgba(255,240,220,0.5) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+/* Undulating line in foreground */
+.orb-line-container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orb-clay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 60% 65%, rgba(255,200,150,0.1) 0%, transparent 60%);
+}
+
+@keyframes clayBreathe {
+  0%, 100% {
+    transform: scale(1);
+    border-radius: 50%;
+    box-shadow: 0 8px 32px rgba(200,100,60,0.25), 0 2px 8px rgba(60,45,25,0.15);
+  }
+  33% {
+    transform: scale(1.03);
+    border-radius: 48% 52% 50% 50% / 51% 49% 51% 49%;
+    box-shadow: 0 10px 40px rgba(200,100,60,0.3), 0 4px 12px rgba(60,45,25,0.18);
+  }
+  66% {
+    transform: scale(0.98);
+    border-radius: 52% 48% 49% 51% / 49% 52% 48% 52%;
+  }
+}
+
+/* Listening state */
+.orb-clay.listening {
+  animation: clayListen 0.8s ease-in-out infinite;
+}
+
+@keyframes clayListen {
+  0%, 100% { transform: scale(1) scaleX(1); border-radius: 50%; }
+  25% { transform: scale(1.05) scaleX(0.97); border-radius: 46% 54% 52% 48% / 54% 46% 54% 46%; }
+  75% { transform: scale(0.96) scaleX(1.03); border-radius: 54% 46% 48% 52% / 46% 54% 46% 54%; }
+}
+
+/* Thinking state */
+.orb-clay.thinking {
+  animation: clayThink 2.5s ease-in-out infinite;
+  background: radial-gradient(circle at 40% 38%, #C8A080 0%, #A07850 40%, #7A5830 80%, #6A4820 100%);
+}
+
+@keyframes clayThink {
+  0% { filter: brightness(1); }
+  50% { filter: brightness(1.08) sepia(0.2); }
+  100% { filter: brightness(1); }
+}
+
+/* Speaking state */
+.orb-clay.speaking {
+  animation: claySpeak 0.7s ease-in-out infinite;
+}
+
+@keyframes claySpeak {
+  0%, 100% {
+    transform: scale(1);
+    border-radius: 50%;
+    box-shadow: 0 8px 32px rgba(200,100,60,0.25);
+  }
+  50% {
+    transform: scale(1.05);
+    border-radius: 48% 52% 51% 49% / 52% 48% 52% 48%;
+    box-shadow: 0 12px 48px rgba(200,100,60,0.4), 0 4px 16px rgba(60,45,25,0.2);
+  }
+}
+
+/* Caption box */
+.caption-box {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 340px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px 20px;
+  transition: all 600ms var(--ease);
+  z-index: 10;
+  top: 50%;
+  margin-top: -50px;
+}
+
+.caption-box.feed-active {
+  top: 58px;
+  margin-top: 0;
+}
+
+/* Rule above caption label */
+.caption-box::before {
+  content: '';
+  display: block;
+  height: 1px;
+  background: var(--border);
+  margin: -16px -20px 12px;
+}
+
+.caption-label {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.caption-text {
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.65;
+  min-height: 58px;
+  font-style: normal;
+}
+
+/* Suggestion chips */
+.chips-area {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 350px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  justify-content: center;
+  z-index: 10;
+  bottom: 135px;
+}
+
+.chip {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 500ms var(--ease);
+}
+
+.chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(200,100,60,0.05);
+}
+
+.chip.dismiss { opacity: 0; transform: scale(0.9); pointer-events: none; }
+
+/* Listen indicator */
+.listen-indicator {
+  position: absolute;
+  top: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 7px 14px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent-2);
+  opacity: 0;
+  transition: opacity 500ms var(--ease);
+  z-index: 20;
+  box-shadow: var(--shadow-sm);
+}
+
+.listen-indicator.visible { opacity: 1; }
+.listen-indicator.muted { color: var(--danger); }
+
+.mic-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-2);
+  animation: dotBreath 2s ease-in-out infinite;
+}
+
+.listen-indicator.muted .mic-dot { background: var(--danger); animation: none; }
+
+@keyframes dotBreath {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.7); }
+}
+
+/* Muted banner */
+.muted-banner {
+  position: absolute;
+  top: 96px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(178,58,72,0.07);
+  border: 1px solid rgba(178,58,72,0.2);
+  border-radius: var(--radius-sm);
+  padding: 4px 14px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--danger);
+  display: none;
+  z-index: 20;
+}
+
+.muted-banner.visible { display: block; }
+
+/* Controls */
+.controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 22px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: linear-gradient(to top, var(--bg) 60%, transparent);
+  border-top: 1px solid var(--border);
+  z-index: 15;
+}
+
+.ctrl-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 500ms var(--ease);
+  font-size: 18px;
+  color: var(--text-muted);
+  outline: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.ctrl-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.ctrl-btn.active { border-color: var(--accent-2); color: var(--accent-2); }
+.ctrl-btn.muted-btn { border-color: var(--danger); color: var(--danger); }
+.ctrl-btn.end-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+/* Main mic button */
+.mic-btn {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 1px solid var(--accent);
+  background: var(--surface);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 500ms var(--ease);
+  box-shadow: var(--shadow);
+  font-size: 22px;
+  color: var(--accent);
+  outline: none;
+}
+
+.mic-btn:hover { background: rgba(200,100,60,0.06); }
+.mic-btn.listening {
+  background: rgba(200,100,60,0.1);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(200,100,60,0.12), var(--shadow);
+  animation: micRingPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes micRingPulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(200,100,60,0.12), var(--shadow); }
+  50% { box-shadow: 0 0 0 8px rgba(200,100,60,0.08), var(--shadow); }
+}
+
+/* Composer */
+.composer-overlay {
+  position: absolute;
+  bottom: 90px;
+  left: 20px;
+  right: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 12px 16px;
+  display: none;
+  gap: 10px;
+  align-items: flex-end;
+  z-index: 20;
+}
+
+.composer-overlay.visible { display: flex; }
+
+.composer-overlay textarea {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: var(--font);
+  font-size: 15px;
+  color: var(--text);
+  resize: none;
+  outline: none;
+  line-height: 1.55;
+  max-height: 90px;
+  min-height: 34px;
+}
+
+.composer-overlay textarea::placeholder { color: var(--text-muted); font-style: italic; }
+
+.send-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 400ms var(--ease);
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+.send-btn:hover { color: var(--accent); border-color: var(--accent); }
+.send-btn.send-mode { background: var(--accent); color: white; border-color: var(--accent); }
+.send-btn.stop-mode { background: rgba(178,58,72,0.1); color: var(--danger); border-color: var(--danger); }
+
+/* Transcript */
+.transcript-panel {
+  position: absolute;
+  inset: 0;
+  background: var(--surface);
+  border-radius: 20px;
+  overflow-y: auto;
+  padding: 48px 24px 100px;
+  z-index: 30;
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.transcript-panel.visible { display: flex; }
+
+.transcript-header {
+  font-family: var(--font);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 4px 0 10px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+  letter-spacing: 0.02em;
+}
+
+.turn { display: flex; flex-direction: column; gap: 4px; }
+.turn.user { align-items: flex-end; }
+.turn.assistant { align-items: flex-start; }
+
+.turn-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-ui);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+}
+
+.turn-bubble {
+  max-width: 82%;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.turn.user .turn-bubble { background: rgba(200,100,60,0.06); border-color: rgba(200,100,60,0.15); }
+.turn-bubble.partial { opacity: 0.45; font-style: italic; }
+.turn-bubble.interrupted::after { content: ' — interrupted'; font-style: italic; color: var(--text-muted); font-size: 12px; }
+
+/* App card */
+.app-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  max-width: 88%;
+  box-shadow: var(--shadow-sm);
+}
+
+.app-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-family: var(--font-ui);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.app-icon { width: 20px; height: 20px; border-radius: 6px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 11px; }
+.weather-display { text-align: center; padding: 8px 0; }
+.weather-temp { font-family: var(--font); font-size: 38px; font-weight: 300; color: var(--text); }
+.weather-cond { font-family: var(--font-ui); font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+.weather-row { display: flex; justify-content: space-around; margin-top: 8px; font-family: var(--font-ui); font-size: 11px; color: var(--text-muted); }
+.card-actions { display: flex; gap: 8px; margin-top: 10px; }
+.card-btn { flex: 1; padding: 7px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: transparent; color: var(--text-muted); font-family: var(--font-ui); font-size: 12px; cursor: pointer; transition: all 400ms var(--ease); }
+.card-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Attach chips */
+.attach-chips { position: absolute; bottom: 175px; left: 20px; right: 20px; display: flex; gap: 7px; flex-wrap: wrap; z-index: 20; pointer-events: none; }
+.attach-chips:empty { display: none; }
+.attach-chip { display: inline-flex; align-items: center; gap: 5px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 5px 10px; font-family: var(--font-ui); font-size: 11px; color: var(--text-muted); pointer-events: all; box-shadow: var(--shadow-sm); }
+.attach-chip button { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; line-height: 1; padding: 0 0 0 2px; }
+.attach-chip button:hover { color: var(--danger); }
+
+/* Attachment row inside a sent message turn */
+.turn-attachments { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; justify-content: flex-end; max-width: 82%; }
+.attach-chip.static { box-shadow: none; background: rgba(200,100,60,0.05); border-color: rgba(200,100,60,0.18); color: var(--text); }
+
+/* Demo button */
+.demo-btn {
+  position: absolute;
+  top: 56px;
+  right: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--accent);
+  cursor: pointer;
+  z-index: 25;
+  box-shadow: var(--shadow-sm);
+  transition: all 400ms var(--ease);
+}
+
+.demo-btn:hover { border-color: var(--accent); }
+
+/* Keyboard button */
+.kbd-btn {
+  position: absolute;
+  bottom: 94px;
+  right: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 20;
+  font-size: 15px;
+  color: var(--text-muted);
+  box-shadow: var(--shadow-sm);
+  transition: all 400ms var(--ease);
+}
+
+.kbd-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+/* Feed window */
+.feed-window {
+  position: absolute;
+  top: 56px;
+  right: 14px;
+  width: 165px;
+  height: 108px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  display: none;
+  overflow: hidden;
+  z-index: 12;
+  box-shadow: var(--shadow);
+}
+
+.feed-window.visible { display: block; }
+.feed-label { position: absolute; top: 6px; left: 8px; font-family: var(--font-ui); font-size: 10px; color: var(--text-muted); }
+.feed-dots { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 26px; opacity: 0.2; }
+
+/* Sharing badge */
+.sharing-badge {
+  position: absolute;
+  top: 56px;
+  left: 14px;
+  background: rgba(79,107,87,0.1);
+  border: 1px solid rgba(79,107,87,0.25);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  font-family: var(--font-ui);
+  font-size: 10px;
+  color: var(--accent-2);
+  display: none;
+  z-index: 20;
+}
+
+.sharing-badge.visible { display: block; }
+
+/* State label */
+.state-label {
+  position: absolute;
+  bottom: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  transition: all 500ms var(--ease);
+  font-style: italic;
+}
+
+/* Waveform — organic ripple lines */
+.waveform-bars {
+  position: absolute;
+  bottom: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  height: 20px;
+  opacity: 0;
+  transition: opacity 500ms var(--ease);
+}
+
+.waveform-bars.visible { opacity: 1; }
+
+.bar {
+  width: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+  min-height: 2px;
+  transition: height 120ms ease;
+  opacity: 0.7;
+}
+
+@media (max-width: 440px) {
+  .app-frame { width: 100vw; height: 100vh; border-radius: 0; }
+}
+</style>
+</head>
+<body>
+<div class="app-frame" id="appFrame">
+
+  <!-- Editorial header -->
+  <div class="editorial-header">
+    <span class="brand-name">Eliza</span>
+    <span class="brand-issue">Voice &amp; Chat</span>
+  </div>
+
+  <!-- Demo button -->
+  <button class="demo-btn" id="demoBtn">▶ Play demo</button>
+
+  <!-- Sharing badge -->
+  <div class="sharing-badge" id="sharingBadge">● Sharing screen</div>
+
+  <!-- Listening indicator -->
+  <div class="listen-indicator" id="listenIndicator">
+    <div class="mic-dot"></div>
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+      <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+    </svg>
+    <span id="listenText">Listening…</span>
+  </div>
+
+  <!-- Muted banner -->
+  <div class="muted-banner" id="mutedBanner">Mic muted — screen still sharing</div>
+
+  <!-- Avatar stage -->
+  <div class="avatar-stage" id="avatarStage">
+    <div class="orb" id="orb">
+      <!-- Animated SVG undulating line behind clay blob -->
+      <svg class="ink-canvas" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <path id="inkLine" fill="none" stroke="#C8643C" stroke-width="1.5" stroke-linecap="round" opacity="0.25"
+          d="M30,100 Q60,85 100,100 Q140,115 170,100"/>
+        <path id="inkLine2" fill="none" stroke="#4F6B57" stroke-width="1" stroke-linecap="round" opacity="0.15"
+          d="M40,110 Q70,95 100,110 Q130,125 160,110"/>
+      </svg>
+      <div class="orb-clay" id="orbCore"></div>
+      <!-- Waveform bars -->
+      <div class="waveform-bars" id="waveformBars">
+        <div class="bar" id="b1"></div><div class="bar" id="b2"></div><div class="bar" id="b3"></div>
+        <div class="bar" id="b4"></div><div class="bar" id="b5"></div><div class="bar" id="b6"></div>
+        <div class="bar" id="b7"></div>
+      </div>
+    </div>
+    <div class="state-label" id="stateLabel">Ready to listen</div>
+  </div>
+
+  <!-- Feed window -->
+  <div class="feed-window" id="feedWindow">
+    <div class="feed-label" id="feedLabel">Camera</div>
+    <div class="feed-dots">📷</div>
+  </div>
+
+  <!-- Caption box -->
+  <div class="caption-box" id="captionBox">
+    <div class="caption-label">Eliza says</div>
+    <div class="caption-text" id="captionText">Hello — it's good to hear you. What shall we talk about today?</div>
+  </div>
+
+  <!-- Chips -->
+  <div class="chips-area" id="chipsArea">
+    <div class="chip" onclick="useChip(this,'What can you help me with?')">What can you help with?</div>
+    <div class="chip" onclick="useChip(this,'Tell me the weather')">The weather</div>
+    <div class="chip" onclick="useChip(this,'Help me think through something')">Help me think</div>
+  </div>
+
+  <!-- Attach chips -->
+  <div class="attach-chips" id="attachChips"></div>
+
+  <!-- Keyboard toggle -->
+  <button class="kbd-btn" id="kbdBtn">⌨</button>
+
+  <!-- Composer -->
+  <div class="composer-overlay" id="composerOverlay">
+    <textarea id="composerInput" rows="1" placeholder="Write your message…"></textarea>
+    <button class="send-btn" id="sendBtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="ctrl-btn" id="muteBtn" onclick="toggleMute()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+      </svg>
+    </button>
+    <button class="ctrl-btn" id="cameraBtn" onclick="toggleFeed('camera')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M15 8v8H5V8h10m1-2H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4V7c0-.55-.45-1-1-1z"/>
+      </svg>
+    </button>
+    <button class="mic-btn" id="mainMicBtn" onclick="toggleVoice()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+      </svg>
+    </button>
+    <button class="ctrl-btn" id="screenBtn" onclick="toggleFeed('screen')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20 3H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h3l-1 1v1h12v-1l-1-1h3c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 13H4V5h16v11z"/>
+      </svg>
+    </button>
+    <button class="ctrl-btn end-btn" onclick="endSession()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11H7v-2h10v2z"/>
+      </svg>
+    </button>
+    <button class="ctrl-btn" onclick="addAttachment()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Transcript -->
+  <div class="transcript-panel" id="transcriptPanel"></div>
+</div>
+
+<script>
+// Animate SVG ink lines
+let inkPhase = 0;
+function animateInk() {
+  inkPhase += 0.018;
+  const a = Math.sin(inkPhase) * 10;
+  const b = Math.cos(inkPhase * 0.7) * 8;
+  document.getElementById('inkLine').setAttribute('d',
+    `M30,100 Q60,${85+a} 100,${100+b} Q140,${115-a} 170,100`);
+  document.getElementById('inkLine2').setAttribute('d',
+    `M40,110 Q70,${95-b} 100,${110+a} Q130,${125+b} 160,110`);
+  requestAnimationFrame(animateInk);
+}
+animateInk();
+
+// ===== STATE =====
+let state = 'idle';
+let isMuted = false;
+let feedActive = false;
+let feedType = null;
+let composerVisible = false;
+let demoTimers = [];
+let isGenerating = false;
+let sessionLog = [];
+let ampPhase = 0;
+let pendingAttachments = [];
+
+const orbCore = document.getElementById('orbCore');
+const avatarStage = document.getElementById('avatarStage');
+const captionBox = document.getElementById('captionBox');
+const captionText = document.getElementById('captionText');
+const listenIndicator = document.getElementById('listenIndicator');
+const listenText = document.getElementById('listenText');
+const mutedBanner = document.getElementById('mutedBanner');
+const chipsArea = document.getElementById('chipsArea');
+const composerOverlay = document.getElementById('composerOverlay');
+const composerInput = document.getElementById('composerInput');
+const sendBtn = document.getElementById('sendBtn');
+const muteBtn = document.getElementById('muteBtn');
+const feedWindow = document.getElementById('feedWindow');
+const sharingBadge = document.getElementById('sharingBadge');
+const transcriptPanel = document.getElementById('transcriptPanel');
+const attachChips = document.getElementById('attachChips');
+const stateLabel = document.getElementById('stateLabel');
+const waveformBars = document.getElementById('waveformBars');
+const bars = Array.from({length:7}, (_,i) => document.getElementById('b'+(i+1)));
+
+function animBars() {
+  if (state === 'listening' && !isMuted) {
+    ampPhase += 0.1;
+    const amp = 0.3 + 0.7 * Math.abs(Math.sin(ampPhase * 1.2) * 0.6 + Math.cos(ampPhase * 0.5) * 0.4 + Math.random() * 0.1);
+    bars.forEach((b,i) => { if (b) b.style.height = (2 + amp * 14 * (0.4 + 0.6 * Math.abs(Math.sin(ampPhase + i * 0.7)))) + 'px'; });
+  } else if (state === 'speaking') {
+    ampPhase += 0.07;
+    const s = 0.4 + 0.6 * Math.abs(Math.sin(ampPhase * 1.8));
+    bars.forEach((b,i) => { if (b) b.style.height = (2 + s * 11 * (0.3 + 0.7 * Math.abs(Math.sin(ampPhase + i * 0.5)))) + 'px'; });
+  } else {
+    bars.forEach(b => { if (b) b.style.height = '2px'; });
+  }
+  requestAnimationFrame(animBars);
+}
+animBars();
+
+function setState(s) {
+  state = s;
+  orbCore.className = 'orb-clay ' + s;
+  stateLabel.textContent = {idle:'Ready to listen', listening:'Listening…', thinking:'Thinking…', speaking:'Speaking'}[s] || s;
+  listenIndicator.classList.toggle('visible', s === 'listening' && !isMuted);
+  listenIndicator.classList.toggle('muted', s === 'listening' && isMuted);
+  waveformBars.classList.toggle('visible', s === 'listening' && !isMuted);
+  const mb = document.getElementById('mainMicBtn');
+  mb.className = 'mic-btn' + (s === 'listening' ? ' listening' : '');
+}
+
+function toggleVoice() {
+  if (demoTimers.length) { clearDemoTimers(); setState('idle'); return; }
+  runDemoOnce();
+}
+
+function toggleMute() {
+  isMuted = !isMuted;
+  muteBtn.classList.toggle('muted-btn', isMuted);
+  mutedBanner.classList.toggle('visible', isMuted && feedActive);
+  if (isMuted) {
+    muteBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 11h-1.7c0 .74-.16 1.43-.43 2.05l1.23 1.23c.56-.98.9-2.09.9-3.28zm-4.02.17c0-.06.02-.11.02-.17V5c0-1.66-1.34-3-3-3S9 3.34 9 5v.18l5.98 5.99zM4.27 3L3 4.27l6.01 6.01V11c0 1.66 1.34 3 3 3 .23 0 .44-.03.65-.08l1.66 1.66c-.71.33-1.5.52-2.31.52-2.76 0-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c.57-.08 1.12-.24 1.64-.46L19.73 21 21 19.73 4.27 3z"/></svg>`;
+    muteBtn.style.color = 'var(--danger)';
+    if (state === 'listening') { listenText.textContent = 'Muted'; listenIndicator.classList.add('muted'); waveformBars.classList.remove('visible'); }
+  } else {
+    muteBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>`;
+    muteBtn.style.color = '';
+    mutedBanner.classList.remove('visible');
+    if (state === 'listening') { listenText.textContent = 'Listening…'; listenIndicator.classList.remove('muted'); waveformBars.classList.add('visible'); }
+  }
+}
+
+function toggleFeed(type) {
+  if (feedActive && feedType === type) {
+    feedActive = false; feedType = null;
+    feedWindow.classList.remove('visible');
+    avatarStage.classList.remove('feed-active');
+    captionBox.classList.remove('feed-active');
+    sharingBadge.classList.remove('visible');
+    document.getElementById('screenBtn').classList.remove('active');
+    document.getElementById('cameraBtn').classList.remove('active');
+    updateChips('idle');
+    mutedBanner.classList.remove('visible');
+  } else {
+    feedActive = true; feedType = type;
+    feedWindow.classList.add('visible');
+    document.getElementById('feedLabel').textContent = type === 'camera' ? 'Camera' : 'Your screen';
+    avatarStage.classList.add('feed-active');
+    captionBox.classList.add('feed-active');
+    if (type === 'screen') { sharingBadge.classList.add('visible'); document.getElementById('screenBtn').classList.add('active'); document.getElementById('cameraBtn').classList.remove('active'); mutedBanner.classList.toggle('visible', isMuted); }
+    else { document.getElementById('cameraBtn').classList.add('active'); document.getElementById('screenBtn').classList.remove('active'); }
+    updateChips('feed');
+  }
+}
+
+function updateChips(mode) {
+  chipsArea.innerHTML = mode === 'feed'
+    ? `<div class="chip" onclick="useChip(this,'Ask about screen')">Ask about screen</div><div class="chip" onclick="useChip(this,'Describe what you see')">Describe what you see</div>`
+    : `<div class="chip" onclick="useChip(this,'What can you help with?')">What can you help with?</div><div class="chip" onclick="useChip(this,'Tell me the weather')">The weather</div><div class="chip" onclick="useChip(this,'Help me think through something')">Help me think</div>`;
+}
+
+function useChip(el, text) {
+  el.classList.add('dismiss');
+  setTimeout(() => { composerInput.value = text; updateSendBtn(); sendMessage(); }, 250);
+}
+
+document.getElementById('kbdBtn').onclick = () => {
+  composerVisible = !composerVisible;
+  composerOverlay.classList.toggle('visible', composerVisible);
+  if (composerVisible) composerInput.focus();
+};
+
+composerInput.addEventListener('input', updateSendBtn);
+composerInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+
+function updateSendBtn() {
+  const val = composerInput.value.trim();
+  if (isGenerating) {
+    sendBtn.className = 'send-btn stop-mode';
+    sendBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="3"/></svg>`;
+  } else if (val.length > 0) {
+    sendBtn.className = 'send-btn send-mode';
+    sendBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>`;
+  } else {
+    sendBtn.className = 'send-btn';
+    sendBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>`;
+  }
+}
+
+sendBtn.onclick = () => { if (isGenerating) { stopGen(); return; } sendMessage(); };
+
+function sendMessage() {
+  const val = composerInput.value.trim();
+  if (!val) return;
+  sessionLog.push({ role:'user', text:val, modality:'typed', attachments: pendingAttachments.slice() });
+  pendingAttachments = [];
+  attachChips.innerHTML = '';
+  composerInput.value = ''; updateSendBtn();
+  isGenerating = true; setState('thinking');
+  captionText.textContent = '…';
+  const resps = [
+    { text:"Lovely day in San Francisco — partly cloudy and around 64°F, with a gentle westerly breeze. Perfect weather for a stroll.", hasCard:true },
+    { text:"I'd be glad to help you think through that. Tell me what's on your mind, and we can work through it together.", hasCard:false },
+    { text:"Of course — writing is a pleasure. What kind of piece are you working on, and what tone are you hoping for?", hasCard:false },
+  ];
+  const resp = resps[Math.floor(Math.random() * resps.length)];
+  setTimeout(() => {
+    if (!isGenerating) return;
+    setState('speaking');
+    streamCaption(resp.text, () => {
+      isGenerating = false; updateSendBtn(); setState('idle');
+      sessionLog.push({ role:'assistant', text:resp.text, modality:'text', hasCard:resp.hasCard });
+      addFollowUpChip();
+    });
+  }, 1200 + Math.random() * 500);
+}
+
+function addFollowUpChip() {
+  const fc = document.createElement('div'); fc.className = 'chip';
+  fc.style.borderColor = 'rgba(200,100,60,0.25)'; fc.textContent = 'Tell me more';
+  fc.onclick = () => useChip(fc, 'Tell me more about that');
+  chipsArea.appendChild(fc);
+}
+
+function stopGen() { isGenerating = false; setState('idle'); updateSendBtn(); captionText.textContent = 'Paused.'; }
+
+function streamCaption(text, onDone) {
+  captionText.textContent = '';
+  let i = 0; const words = text.split(' ');
+  function next() {
+    if (!isGenerating && onDone) { onDone(); return; }
+    if (i >= words.length) { if (onDone) setTimeout(onDone, 350); return; }
+    captionText.textContent += (i > 0 ? ' ' : '') + words[i++];
+    setTimeout(next, 90 + Math.random() * 70);
+  }
+  next();
+}
+
+function addAttachment() {
+  const att = { name:'note.pdf', icon:'📄' };
+  pendingAttachments.push(att);
+  const chip = document.createElement('div'); chip.className = 'attach-chip';
+  const label = document.createElement('span'); label.textContent = att.name;
+  const removeBtn = document.createElement('button'); removeBtn.textContent = '×'; removeBtn.setAttribute('aria-label', 'Remove attachment');
+  removeBtn.onclick = () => {
+    const idx = pendingAttachments.indexOf(att);
+    if (idx > -1) pendingAttachments.splice(idx, 1);
+    chip.remove();
+  };
+  chip.append(att.icon + ' ', label, removeBtn);
+  attachChips.appendChild(chip);
+  // Open the composer so the attachment can be sent via the typed path.
+  composerVisible = true;
+  composerOverlay.classList.add('visible');
+  composerInput.focus();
+}
+
+function endSession() {
+  clearDemoTimers(); setState('idle');
+  transcriptPanel.classList.add('visible');
+  renderTranscript();
+}
+
+function renderTranscript() {
+  transcriptPanel.innerHTML = '';
+  const header = document.createElement('div'); header.className = 'transcript-header'; header.textContent = 'Session transcript'; transcriptPanel.appendChild(header);
+  if (!sessionLog.length) {
+    sessionLog = [
+      { role:'user', text:'What\'s the weather like today?', modality:'voice' },
+      { role:'assistant', text:'A mild and partly cloudy 64°F in San Francisco today, with a gentle westerly breeze — quite pleasant, really.', modality:'text', hasCard:true },
+      { role:'user', text:'And what about Thursday — will there be rain? Here are my notes.', modality:'typed', attachments:[{ name:'note.pdf', icon:'📄' }] },
+      { role:'assistant', text:'Thursday is looking a bit grey, with light showers expected through the afternoon.', modality:'text', interrupted:true },
+    ];
+  }
+  sessionLog.forEach(turn => {
+    const div = document.createElement('div'); div.className = `turn ${turn.role}`;
+    const meta = document.createElement('div'); meta.className = 'turn-meta';
+    if (turn.role === 'user') meta.innerHTML = turn.modality === 'voice'
+      ? `<svg width="10" height="10" viewBox="0 0 24 24" fill="var(--accent-2)"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg> You, by voice`
+      : `⌨ You, typed`;
+    else meta.innerHTML = `✦ Eliza`;
+    const bubble = document.createElement('div'); bubble.className = 'turn-bubble' + (turn.interrupted ? ' interrupted' : ''); bubble.textContent = turn.text;
+    div.appendChild(meta); div.appendChild(bubble);
+    if (turn.attachments && turn.attachments.length) {
+      const row = document.createElement('div'); row.className = 'turn-attachments';
+      turn.attachments.forEach(att => {
+        const chip = document.createElement('div'); chip.className = 'attach-chip static';
+        const label = document.createElement('span'); label.textContent = att.name;
+        chip.append((att.icon || '📄') + ' ', label);
+        row.appendChild(chip);
+      });
+      div.appendChild(row);
+    }
+    if (turn.hasCard) div.appendChild(buildWeatherCard());
+    transcriptPanel.appendChild(div);
+  });
+  const closeBtn = document.createElement('button');
+  closeBtn.style.cssText = 'margin:14px auto 0;display:block;background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 24px;font-family:var(--font-ui);font-size:12px;color:var(--text-muted);cursor:pointer;';
+  closeBtn.textContent = 'Close transcript';
+  closeBtn.onclick = () => { transcriptPanel.classList.remove('visible'); sessionLog = []; };
+  transcriptPanel.appendChild(closeBtn);
+}
+
+function buildWeatherCard() {
+  const card = document.createElement('div'); card.className = 'app-card';
+  card.innerHTML = `<div class="app-card-header"><div class="app-icon">🌤</div>Weather — San Francisco</div><div class="weather-display"><div class="weather-temp">64°</div><div class="weather-cond">Partly Cloudy</div><div class="weather-row"><span>Humidity 72%</span><span>Wind 12mph W</span></div></div><div class="card-actions"><button class="card-btn">7-day forecast</button><button class="card-btn">Set reminder</button></div>`;
+  return card;
+}
+
+function clearDemoTimers() { demoTimers.forEach(clearTimeout); demoTimers = []; }
+
+function runDemoOnce() {
+  clearDemoTimers(); isGenerating = false;
+  setState('idle'); captionText.textContent = 'Hello — it\'s good to hear you. What shall we talk about today?';
+
+  const t1 = setTimeout(() => {
+    setState('listening'); captionText.textContent = '…';
+    sessionLog.push({ role:'user', text:'What\'s the weather like today in San Francisco?', modality:'voice' });
+  }, 1000);
+  const t2 = setTimeout(() => { captionText.textContent = '"What\'s the weather today…" '; }, 2600);
+  const t3 = setTimeout(() => { setState('thinking'); captionText.textContent = '…'; }, 4100);
+  const t4 = setTimeout(() => {
+    setState('speaking'); isGenerating = true;
+    const reply = "A mild and partly cloudy 64°F in San Francisco today, with a gentle westerly breeze. Rather lovely, if you ask me — perfect for a walk or a café terrace.";
+    streamCaption(reply, () => { isGenerating = false; sessionLog.push({ role:'assistant', text:reply, modality:'text', hasCard:true }); });
+  }, 5400);
+  const t5 = setTimeout(() => {
+    setState('idle');
+    const fc = document.createElement('div'); fc.className = 'chip'; fc.textContent = 'What about the weekend?';
+    fc.onclick = () => useChip(fc, 'What about the weekend?'); chipsArea.appendChild(fc);
+  }, 10200);
+  const t6 = setTimeout(() => {
+    setState('listening'); captionText.textContent = '"Will it rain on Thursday?" ';
+    sessionLog.push({ role:'user', text:'Will it rain on Thursday?', modality:'voice' });
+  }, 12000);
+  const t7 = setTimeout(() => { setState('thinking'); captionText.textContent = '…'; }, 13500);
+  const t8 = setTimeout(() => {
+    setState('speaking'); isGenerating = true;
+    const r2 = "Thursday does look a bit unsettled — light showers are likely through the afternoon, clearing towards evening. Worth keeping an umbrella close.";
+    streamCaption(r2, () => { isGenerating = false; sessionLog.push({ role:'assistant', text:r2, modality:'text' }); });
+  }, 14800);
+  const t9 = setTimeout(() => {
+    setState('idle'); captionText.textContent = 'Let me know if there\'s anything else I can help with.';
+    document.getElementById('demoBtn').textContent = '↺ Replay';
+    isGenerating = false;
+  }, 20000);
+
+  demoTimers = [t1,t2,t3,t4,t5,t6,t7,t8,t9];
+}
+
+document.getElementById('demoBtn').onclick = () => { transcriptPanel.classList.remove('visible'); sessionLog = []; runDemoOnce(); };
+setTimeout(runDemoOnce, 600);
+</script>
+</body>
+</html>

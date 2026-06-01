@@ -1,0 +1,941 @@
+<!-- concept-D14-L5 | direction: Voice-Memo / Audio-Waveform Style | look: Brutalist Mono | targets: 420x760, 960x640 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D14 · Voice-Memo / Audio-Waveform Style · Brutalist Mono</title>
+<style>
+:root{
+  --bg:#F4F2EC;
+  --surface:#FFFFFF;
+  --surface-2:#E8E5DC;
+  --border:#111111;
+  --text:#111111;
+  --text-muted:#555555;
+  --accent:#1A57FF;
+  --accent-2:#FF4A00;
+  --danger:#D90429;
+  --radius:0px;
+  --radius-sm:0px;
+  --font:"JetBrains Mono","IBM Plex Mono","SF Mono","Cascadia Mono","Courier New",monospace;
+  --shadow:4px 4px 0 #111111;
+  --shadow-sm:2px 2px 0 #111111;
+  --border-w:2px;
+  --ease:steps(1,end);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+body{
+  background:var(--bg);
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font);
+  color:var(--text);
+  image-rendering:pixelated;
+}
+
+/* Grid lines background */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(17,17,17,0.06) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(17,17,17,0.06) 1px,transparent 1px);
+  background-size:20px 20px;
+  pointer-events:none;
+}
+
+.app-window{
+  width:420px;height:760px;
+  background:var(--surface);
+  border:var(--border-w) solid var(--border);
+  box-shadow:var(--shadow);
+  display:flex;flex-direction:column;overflow:hidden;
+  position:relative;
+}
+
+/* Header */
+.header{
+  padding:12px 16px;
+  border-bottom:var(--border-w) solid var(--border);
+  display:flex;align-items:center;gap:12px;
+  background:var(--surface);flex-shrink:0;
+}
+
+/* Avatar: ASCII waveform box */
+.avatar-container{
+  width:56px;height:48px;flex-shrink:0;
+  border:var(--border-w) solid var(--border);
+  box-shadow:var(--shadow-sm);
+  display:flex;align-items:flex-end;justify-content:center;
+  padding:4px 4px 2px;
+  gap:2px;
+  overflow:hidden;
+  position:relative;
+  background:var(--surface);
+}
+
+.av-bar{
+  width:5px;
+  background:var(--text);
+  min-height:3px;
+  transition:height 0s steps(1,end);
+}
+
+/* State label inside avatar */
+.av-state{
+  position:absolute;top:2px;left:0;right:0;
+  font-size:8px;text-align:center;
+  letter-spacing:0.05em;
+  color:var(--text-muted);
+  font-weight:700;
+}
+
+.header-info{flex:1;}
+.header-title{
+  font-size:16px;font-weight:700;
+  letter-spacing:0.04em;text-transform:uppercase;
+  line-height:1;
+}
+.header-sub{
+  font-size:10px;color:var(--text-muted);
+  letter-spacing:0.08em;text-transform:uppercase;
+  margin-top:3px;
+}
+
+/* Listening badge */
+.listen-badge{
+  border:var(--border-w) solid var(--border);
+  box-shadow:var(--shadow-sm);
+  padding:4px 8px;
+  font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+  display:flex;align-items:center;gap:6px;
+  color:var(--text);
+  opacity:0;transition:opacity 0s steps(1,end);
+  background:var(--accent);color:#fff;
+}
+.listen-badge.visible{opacity:1;}
+.listen-dot{
+  width:6px;height:6px;background:#fff;
+  animation:cursor-blink 0.5s steps(1,end) infinite;
+}
+@keyframes cursor-blink{0%,100%{opacity:1;}50%{opacity:0;}}
+
+/* State bar */
+.state-bar{
+  border-bottom:var(--border-w) solid var(--border);
+  padding:6px 16px;
+  font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+  display:flex;align-items:center;gap:8px;
+  height:0;overflow:hidden;opacity:0;
+  transition:all 0s steps(1,end);
+}
+.state-bar.listening{height:30px;opacity:1;background:var(--accent);color:#fff;}
+.state-bar.muted-bar{height:30px;opacity:1;background:var(--danger);color:#fff;}
+.state-cursor{animation:cursor-blink 0.5s steps(1,end) infinite;}
+
+/* Memo list */
+.memo-list{
+  flex:1;overflow-y:auto;
+  padding:12px;
+  display:flex;flex-direction:column;gap:10px;
+  background:var(--bg);
+  scroll-behavior:auto;
+}
+.memo-list::-webkit-scrollbar{width:8px;}
+.memo-list::-webkit-scrollbar-track{background:var(--surface-2);border-left:2px solid var(--border);}
+.memo-list::-webkit-scrollbar-thumb{background:var(--border);}
+
+/* Memo */
+.memo{
+  background:var(--surface);
+  border:var(--border-w) solid var(--border);
+  box-shadow:var(--shadow-sm);
+  padding:10px 12px;
+  animation:snap-in 0s steps(1,end) both;
+}
+@keyframes snap-in{from{opacity:0;}to{opacity:1;}}
+
+.memo.user{border-left:4px solid var(--accent);}
+.memo.assistant{border-left:4px solid var(--text);}
+.memo.interrupted{opacity:0.5;border-style:dashed;}
+
+.memo-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.memo-glyph{
+  font-size:10px;font-weight:700;letter-spacing:0.04em;
+  border:1px solid var(--border);padding:2px 5px;
+  background:var(--surface-2);
+  white-space:nowrap;
+}
+.memo.user .memo-glyph{background:var(--accent);color:#fff;border-color:var(--accent);}
+.memo-label{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);}
+.memo-duration{margin-left:auto;font-size:10px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;}
+
+/* Waveform */
+.waveform-container{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.play-btn{
+  width:28px;height:28px;
+  border:var(--border-w) solid var(--border);
+  background:var(--surface);cursor:pointer;
+  font-family:var(--font);font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow-sm);
+  transition:all 0s steps(1,end);flex-shrink:0;
+}
+.play-btn:hover{background:var(--border);color:var(--surface);}
+.play-btn:active{box-shadow:none;transform:translate(2px,2px);}
+
+.waveform{
+  flex:1;height:32px;
+  border:1px solid var(--border);
+  display:flex;align-items:flex-end;gap:1px;
+  padding:3px 3px;
+  cursor:pointer;position:relative;overflow:hidden;
+  background:var(--surface-2);
+}
+.wave-bar{
+  flex:1;background:var(--border);
+  min-height:2px;
+}
+.wave-bar.played{background:var(--accent);}
+.memo.assistant .wave-bar.played{background:var(--text);}
+.scrub-cursor{
+  position:absolute;left:0;top:0;bottom:0;
+  width:2px;background:var(--accent);
+  pointer-events:none;
+}
+.memo.assistant .scrub-cursor{background:var(--text);}
+
+/* Block char waveform label */
+.waveform-chars{
+  font-size:11px;letter-spacing:0.02em;
+  color:var(--text-muted);margin-bottom:4px;
+  overflow:hidden;white-space:nowrap;
+  height:18px;
+  display:flex;align-items:center;
+}
+
+/* Transcript */
+.transcript-toggle{
+  font-family:var(--font);font-size:9px;font-weight:700;
+  letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--text-muted);cursor:pointer;
+  border:1px solid var(--border);background:var(--surface-2);
+  padding:3px 8px;display:inline-block;
+  transition:all 0s steps(1,end);margin-top:4px;
+}
+.transcript-toggle:hover{background:var(--border);color:var(--surface);}
+.transcript-body{
+  font-size:12px;line-height:1.5;color:var(--text);
+  border-top:1px solid var(--border);
+  padding-top:6px;margin-top:6px;display:none;
+}
+.transcript-body.open{display:block;}
+.word.active{background:var(--accent);color:#fff;padding:0 2px;}
+
+.interrupted-tag{
+  font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--danger);border:1px solid var(--danger);
+  padding:2px 6px;display:inline-block;margin-top:4px;
+}
+
+.attach-row{display:flex;gap:6px;margin-top:8px;}
+.attach-thumb{
+  width:36px;height:36px;
+  border:var(--border-w) solid var(--border);
+  box-shadow:var(--shadow-sm);
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+  background:var(--surface-2);
+}
+
+.partial-indicator{
+  display:inline-block;font-weight:700;color:var(--accent-2);
+  animation:cursor-blink 0.5s steps(1,end) infinite;
+  margin-left:4px;
+}
+
+/* App card */
+.app-card{
+  background:var(--surface-2);
+  border:var(--border-w) solid var(--border);
+  box-shadow:var(--shadow-sm);
+  padding:10px 12px;margin-top:8px;
+}
+.app-card-header{
+  display:flex;align-items:center;gap:8px;
+  border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:8px;
+}
+.app-icon{
+  width:24px;height:24px;
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:12px;
+  background:var(--surface);
+}
+.app-card-title{font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;}
+.app-card-sub{font-size:9px;color:var(--text-muted);letter-spacing:0.08em;margin-top:1px;text-transform:uppercase;}
+.app-card-temp{font-size:32px;font-weight:700;line-height:1;margin-bottom:4px;}
+.app-card-detail{font-size:10px;color:var(--text-muted);letter-spacing:0.04em;}
+.app-card-actions{display:flex;gap:8px;margin-top:8px;border-top:1px solid var(--border);padding-top:8px;}
+.app-card-btn{
+  flex:1;padding:6px 10px;
+  border:var(--border-w) solid var(--border);
+  font-family:var(--font);font-size:10px;font-weight:700;
+  letter-spacing:0.08em;text-transform:uppercase;
+  cursor:pointer;background:var(--surface);color:var(--text);
+  transition:all 0s steps(1,end);box-shadow:var(--shadow-sm);
+}
+.app-card-btn:hover{background:var(--border);color:var(--surface);}
+.app-card-btn:active{box-shadow:none;transform:translate(2px,2px);}
+.app-card-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+.app-card-btn.primary:hover{background:#0040cc;}
+
+/* Suggestions */
+.suggestions{
+  padding:8px 12px;border-top:var(--border-w) solid var(--border);
+  display:flex;gap:6px;flex-wrap:wrap;
+  background:var(--surface-2);
+  transition:opacity 0s steps(1,end);
+}
+.chip{
+  padding:5px 10px;
+  border:var(--border-w) solid var(--border);
+  background:var(--surface);
+  font-family:var(--font);font-size:9px;font-weight:700;
+  letter-spacing:0.1em;text-transform:uppercase;
+  cursor:pointer;box-shadow:var(--shadow-sm);
+  transition:all 0s steps(1,end);white-space:nowrap;color:var(--text);
+}
+.chip:hover{background:var(--border);color:var(--surface);}
+.chip:active{box-shadow:none;transform:translate(2px,2px);}
+
+/* Composer */
+.composer{
+  padding:10px 12px 14px;
+  border-top:var(--border-w) solid var(--border);
+  background:var(--surface);flex-shrink:0;
+}
+
+.attach-staged{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;}
+.staged-chip{
+  display:flex;align-items:center;gap:6px;
+  border:var(--border-w) solid var(--border);box-shadow:var(--shadow-sm);
+  padding:3px 8px;font-family:var(--font);font-size:9px;font-weight:700;
+  letter-spacing:0.06em;text-transform:uppercase;background:var(--surface-2);
+}
+.staged-chip-remove{cursor:pointer;color:var(--danger);margin-left:4px;font-weight:700;}
+
+/* Live waveform (ASCII style) */
+.live-waveform-row{
+  display:flex;align-items:center;gap:6px;
+  margin-bottom:6px;height:0;overflow:hidden;opacity:0;
+  transition:all 0s steps(1,end);
+}
+.live-waveform-row.active{height:24px;opacity:1;}
+.live-label{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--danger);white-space:nowrap;}
+.live-chars{
+  flex:1;font-size:14px;letter-spacing:0.1em;
+  overflow:hidden;white-space:nowrap;color:var(--accent);
+}
+
+.composer-row{display:flex;align-items:flex-end;gap:8px;}
+.attach-btn{
+  width:34px;height:34px;
+  border:var(--border-w) solid var(--border);
+  background:var(--surface-2);cursor:pointer;
+  font-family:var(--font);font-size:20px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow-sm);flex-shrink:0;
+  transition:all 0s steps(1,end);
+}
+.attach-btn:hover{background:var(--border);color:var(--surface);}
+.attach-btn:active{box-shadow:none;transform:translate(2px,2px);}
+
+.text-input{
+  flex:1;background:var(--surface-2);
+  border:var(--border-w) solid var(--border);
+  padding:7px 10px;
+  font-family:var(--font);font-size:12px;color:var(--text);
+  resize:none;outline:none;display:none;
+  min-height:34px;max-height:70px;
+  caret-color:var(--accent);
+}
+.text-input:focus{border-color:var(--accent);}
+.text-input::placeholder{color:var(--text-muted);}
+
+.primary-btn{
+  width:40px;height:40px;
+  border:var(--border-w) solid var(--border);
+  background:var(--text);color:var(--surface);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:700;
+  box-shadow:var(--shadow-sm);
+  transition:all 0s steps(1,end);flex-shrink:0;
+  position:relative;overflow:hidden;
+  font-family:var(--font);
+}
+.primary-btn.mic{background:var(--text);color:var(--surface);}
+.primary-btn.send{background:var(--accent);color:#fff;border-color:var(--accent);}
+.primary-btn.stop{background:var(--danger);color:#fff;border-color:var(--danger);}
+.primary-btn.recording{background:var(--danger);color:#fff;border-color:var(--danger);animation:blink-rec 0.5s steps(1,end) infinite;}
+@keyframes blink-rec{0%,100%{background:var(--danger);}50%{background:#a00020;}}
+.primary-btn:active{box-shadow:none;transform:translate(2px,2px);}
+
+.btn-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transition:all 0s steps(1,end);}
+.btn-icon.hidden{opacity:0;pointer-events:none;}
+
+.mute-row{display:flex;align-items:center;gap:8px;margin-top:6px;}
+.mute-btn{
+  border:var(--border-w) solid var(--border);
+  background:var(--surface-2);cursor:pointer;
+  font-family:var(--font);font-size:9px;font-weight:700;
+  letter-spacing:0.1em;text-transform:uppercase;
+  padding:4px 8px;box-shadow:var(--shadow-sm);
+  transition:all 0s steps(1,end);color:var(--text);
+}
+.mute-btn.muted{background:var(--danger);color:#fff;border-color:var(--danger);}
+.mute-btn:hover{background:var(--border);color:var(--surface);}
+.muted-label{
+  font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--danger);display:none;
+}
+.muted-label.visible{display:block;}
+
+.keyboard-toggle{
+  font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--text-muted);cursor:pointer;margin-top:6px;display:inline-block;
+  text-decoration:underline;
+}
+.keyboard-toggle:hover{color:var(--accent);}
+
+.demo-btn{
+  display:block;width:100%;margin-top:8px;padding:8px;
+  border:var(--border-w) solid var(--border);
+  background:var(--surface-2);cursor:pointer;
+  font-family:var(--font);font-size:10px;font-weight:700;
+  letter-spacing:0.12em;text-transform:uppercase;
+  box-shadow:var(--shadow-sm);color:var(--text);
+  transition:all 0s steps(1,end);text-align:center;
+}
+.demo-btn:hover{background:var(--border);color:var(--surface);}
+.demo-btn:active{box-shadow:none;transform:translate(2px,2px);}
+
+@media(min-width:640px){.app-window{width:420px;}}
+</style>
+</head>
+<body>
+
+<div class="app-window">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="avatar-container" id="avatarBox">
+      <div class="av-state" id="avState">IDLE</div>
+      <!-- bars injected by JS -->
+    </div>
+    <div class="header-info">
+      <div class="header-title">ELIZA</div>
+      <div class="header-sub" id="statusLabel">VOICE_MEMOS_SYS</div>
+    </div>
+    <div class="listen-badge" id="listenBadge">
+      <div class="listen-dot"></div>
+      <span id="badgeText">REC</span>
+    </div>
+  </div>
+
+  <!-- State bar -->
+  <div class="state-bar" id="stateBar">
+    <span class="state-cursor" id="stateCursor">▌</span>
+    <span id="stateBarText">[LISTENING…]</span>
+  </div>
+
+  <!-- Memo list -->
+  <div class="memo-list" id="memoList">
+
+    <!-- Typed turn -->
+    <div class="memo user">
+      <div class="memo-header">
+        <div class="memo-glyph">[KB]</div>
+        <div class="memo-label">YOU // TYPED</div>
+        <div class="memo-duration">00:08</div>
+      </div>
+      <div class="waveform-chars" id="wc-t1">▁▂▄▆▄▂▁▂▃▅▆▅▃▁▂▄▅▃▁▂▄▆▄▁</div>
+      <div class="waveform-container">
+        <button class="play-btn">[▶]</button>
+        <div class="waveform" id="wf-t1"></div>
+      </div>
+      <button class="transcript-toggle" onclick="toggleTranscript('t1')">[ SHOW TRANSCRIPT ]</button>
+      <div class="transcript-body" id="tr-t1">What's the weather in San Francisco today?</div>
+    </div>
+
+    <!-- Assistant with app card -->
+    <div class="memo assistant">
+      <div class="memo-header">
+        <div class="memo-glyph">[AI]</div>
+        <div class="memo-label">ELIZA // VOICE</div>
+        <div class="memo-duration">00:11</div>
+      </div>
+      <div class="waveform-chars" id="wc-a1">▁▃▅▇▅▃▁▂▅▇▅▂▁▃▆▇▆▃▁▂▃▅▃▁</div>
+      <div class="waveform-container">
+        <button class="play-btn">[▶]</button>
+        <div class="waveform" id="wf-a1"></div>
+      </div>
+      <button class="transcript-toggle" onclick="toggleTranscript('a1')">[ SHOW TRANSCRIPT ]</button>
+      <div class="transcript-body" id="tr-a1">
+        <span class="word">San</span> <span class="word">Francisco:</span> <span class="word">62°F,</span> <span class="word">light</span> <span class="word">fog.</span> <span class="word">Clears</span> <span class="word">by</span> <span class="word">noon.</span> <span class="word">High</span> <span class="word">67°F.</span> <span class="word">Wind</span> <span class="word">SW</span> <span class="word">12mph.</span>
+      </div>
+      <div class="app-card">
+        <div class="app-card-header">
+          <div class="app-icon">🌤</div>
+          <div>
+            <div class="app-card-title">WEATHER // SFO</div>
+            <div class="app-card-sub">TODAY // FOG ADVISORY</div>
+          </div>
+        </div>
+        <div class="app-card-temp">62°F</div>
+        <div class="app-card-detail">HUM:78% // WIND:SW_12MPH // UV:LOW // HIGH:67°F</div>
+        <div class="app-card-actions">
+          <button class="app-card-btn">[ 5-DAY ]</button>
+          <button class="app-card-btn primary">[ BRIEF ME ]</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Voice + attachment (partial) -->
+    <div class="memo user" style="opacity:0.55">
+      <div class="memo-header">
+        <div class="memo-glyph">[MIC]</div>
+        <div class="memo-label">YOU // VOICE <span class="partial-indicator">▌</span></div>
+        <div class="memo-duration">00:04</div>
+      </div>
+      <div class="waveform-chars">▁▂▃▄▃▂▁▂▃▄▃▁▂▃▄▃▂▁▂▃▄▃▂▁</div>
+      <div class="waveform-container">
+        <button class="play-btn">[▶]</button>
+        <div class="waveform" id="wf-v1"></div>
+      </div>
+      <div class="attach-row">
+        <div class="attach-thumb">📸</div>
+        <div class="attach-thumb">📄</div>
+      </div>
+    </div>
+
+    <!-- Interrupted -->
+    <div class="memo assistant interrupted">
+      <div class="memo-header">
+        <div class="memo-glyph">[AI]</div>
+        <div class="memo-label">ELIZA // VOICE</div>
+        <div class="memo-duration">00:02</div>
+      </div>
+      <div class="waveform-chars">▁▂▃▂▁▂▃▂▁▂▃▂▁▂▃▂▁</div>
+      <div class="waveform-container">
+        <button class="play-btn">[▶]</button>
+        <div class="waveform" id="wf-a2"></div>
+      </div>
+      <div class="interrupted-tag">[INTERRUPTED]</div>
+      <button class="transcript-toggle" style="margin-top:6px;" onclick="toggleTranscript('a2')">[ SHOW TRANSCRIPT ]</button>
+      <div class="transcript-body" id="tr-a2">Let me check your calendar—</div>
+    </div>
+
+  </div>
+
+  <!-- Suggestions -->
+  <div class="suggestions" id="followSuggs">
+    <div class="chip" onclick="sendChip(this)">[SUMMARIZE]</div>
+    <div class="chip" onclick="sendChip(this)">[SHORTER]</div>
+    <div class="chip" onclick="sendChip(this)">[REMIND_ME]</div>
+  </div>
+
+  <!-- Composer -->
+  <div class="composer">
+    <div class="attach-staged" id="attachStaged"></div>
+
+    <!-- Live ASCII waveform -->
+    <div class="live-waveform-row" id="liveWaveformRow">
+      <span class="live-label">● REC</span>
+      <span class="live-chars" id="liveChars">▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁</span>
+    </div>
+
+    <div class="composer-row">
+      <button class="attach-btn" onclick="stageAttachment()" title="Attach">[+]</button>
+      <textarea class="text-input" id="textInput" placeholder="TYPE_INPUT_HERE…" rows="1"></textarea>
+      <button class="primary-btn mic" id="primaryBtn" onclick="handlePrimaryBtn()">
+        <span class="btn-icon" id="iconMic">🎙</span>
+        <span class="btn-icon hidden" id="iconSend">↑</span>
+        <span class="btn-icon hidden" id="iconStop">■</span>
+        <span class="btn-icon hidden" id="iconRec">⏹</span>
+      </button>
+    </div>
+
+    <div class="mute-row">
+      <button class="mute-btn" id="muteBtn" onclick="toggleMute()">[MUTE_MIC]</button>
+      <div class="muted-label" id="mutedLabel">// MIC_DISABLED</div>
+    </div>
+
+    <span class="keyboard-toggle" id="keyboardToggle" onclick="toggleKeyboard()">[SWITCH_TO_KEYBOARD]</span>
+    <button class="demo-btn" id="demoBtn" onclick="playDemo()">[ ▶ PLAY_VOICE_DEMO ]</button>
+  </div>
+
+</div>
+
+<script>
+let appState='idle';
+let muted=false;
+let keyboardOpen=false;
+let demoTimer=null;
+let animRunning=false;
+let rafId=null;
+let ampPhase=0;
+let speakPhase=0;
+let attachCount=0;
+let stagedAttach=[];
+let mc=10;
+
+const avatarBox=document.getElementById('avatarBox');
+const avState=document.getElementById('avState');
+const listenBadge=document.getElementById('listenBadge');
+const badgeText=document.getElementById('badgeText');
+const stateBar=document.getElementById('stateBar');
+const stateBarText=document.getElementById('stateBarText');
+const statusLabel=document.getElementById('statusLabel');
+const primaryBtn=document.getElementById('primaryBtn');
+const iconMic=document.getElementById('iconMic');
+const iconSend=document.getElementById('iconSend');
+const iconStop=document.getElementById('iconStop');
+const iconRec=document.getElementById('iconRec');
+const muteBtn=document.getElementById('muteBtn');
+const mutedLabel=document.getElementById('mutedLabel');
+const liveWaveformRow=document.getElementById('liveWaveformRow');
+const liveChars=document.getElementById('liveChars');
+const textInput=document.getElementById('textInput');
+const memoList=document.getElementById('memoList');
+const followSuggs=document.getElementById('followSuggs');
+
+// Build avatar bars
+const AV_BARS=8;const avBars=[];
+for(let i=0;i<AV_BARS;i++){
+  const b=document.createElement('div');
+  b.className='av-bar';b.style.height='4px';
+  avatarBox.appendChild(b);avBars.push(b);
+}
+
+// Block characters for waveform
+const BLOCK_CHARS=['▁','▂','▃','▄','▅','▆','▇','█'];
+
+// Build static waveforms
+function buildWaveform(id){
+  const el=document.getElementById('wf-'+id);if(!el)return;
+  const cur=document.createElement('div');cur.className='scrub-cursor';cur.id='cur-'+id;el.appendChild(cur);
+  for(let i=0;i<26;i++){
+    const b=document.createElement('div');b.className='wave-bar';
+    b.style.height=(4+Math.random()*24)+'px';
+    el.appendChild(b);
+  }
+  el.addEventListener('click',e=>{
+    const rect=el.getBoundingClientRect();const pct=(e.clientX-rect.left)/rect.width;
+    const bars=el.querySelectorAll('.wave-bar');
+    const isAssistant=el.closest('.memo.assistant');
+    bars.forEach((b,i)=>{
+      if(i/bars.length<pct) b.classList.add('played');
+      else b.classList.remove('played');
+    });
+    document.getElementById('cur-'+id).style.left=(pct*100)+'%';
+  });
+}
+['t1','a1','v1','a2'].forEach(id=>buildWaveform(id));
+
+function toggleTranscript(id){
+  const body=document.getElementById('tr-'+id);
+  const btn=document.querySelector(`[onclick="toggleTranscript('${id}')"]`);
+  if(!body||!btn) return;
+  const open=body.classList.toggle('open');
+  btn.textContent=open?'[ HIDE TRANSCRIPT ]':'[ SHOW TRANSCRIPT ]';
+}
+
+// ASCII block char animation
+function getBlockChar(level){
+  const idx=Math.floor(level*7);
+  return BLOCK_CHARS[Math.max(0,Math.min(7,idx))];
+}
+
+function setOrbState(state){
+  avState.textContent='['+state.toUpperCase()+']';
+  const colors={idle:'var(--text)',listening:'var(--accent)',thinking:'var(--text-muted)',speaking:'var(--accent-2)'};
+  avBars.forEach(b=>{b.style.background=colors[state]||'var(--text)';});
+}
+
+function setStateBar(st){
+  stateBar.className='state-bar';
+  listenBadge.classList.remove('visible');
+  if(st==='listening'&&!muted){
+    stateBar.classList.add('listening');
+    stateBarText.textContent='[LISTENING…]';
+    listenBadge.classList.add('visible');
+    badgeText.textContent='REC';
+    statusLabel.textContent='REC_ACTIVE';
+  } else if(st==='muted'){
+    stateBar.classList.add('muted-bar');
+    stateBarText.textContent='[MIC_DISABLED]';
+    statusLabel.textContent='VOICE_MEMOS_SYS';
+  } else {
+    statusLabel.textContent='VOICE_MEMOS_SYS';
+  }
+}
+
+let thinkChars=['|','/','-','\\'];let thinkIdx=0;
+let thinkTimer=null;
+
+function startAnim(){
+  if(animRunning) return;animRunning=true;
+  if(thinkTimer){clearInterval(thinkTimer);thinkTimer=null;}
+  function frame(){
+    if(!animRunning)return;
+    ampPhase+=0.1;speakPhase+=0.15;
+    if(appState==='thinking'){
+      // Use interval for thinking — only update every few frames
+    } else if((appState==='listening'||appState==='recording')&&!muted){
+      avBars.forEach((b,i)=>{
+        const h=4+Math.floor(Math.abs(Math.sin(ampPhase+i*0.4))*36);
+        b.style.height=h+'px';
+      });
+      // Update live ASCII chars
+      let chars='';
+      for(let i=0;i<20;i++){
+        const level=Math.abs(Math.sin(ampPhase+i*0.3));
+        chars+=getBlockChar(level);
+      }
+      liveChars.textContent=chars;
+    } else if(appState==='speaking'){
+      avBars.forEach((b,i)=>{
+        const h=4+Math.floor(Math.abs(Math.sin(speakPhase+i*0.35))*30);
+        b.style.height=h+'px';
+      });
+    } else {
+      // idle — slow low bars
+      const t=Date.now()/2000;
+      avBars.forEach((b,i)=>{
+        const h=3+Math.floor(Math.abs(Math.sin(t+i*0.5))*12);
+        b.style.height=h+'px';
+      });
+    }
+    rafId=requestAnimationFrame(frame);
+  }
+  rafId=requestAnimationFrame(frame);
+}
+
+function startThinkAnim(){
+  thinkTimer=setInterval(()=>{
+    thinkIdx=(thinkIdx+1)%4;
+    avBars.forEach((b,i)=>{b.style.height=(3+((thinkIdx+i)%4)*6)+'px';});
+  },150);
+}
+
+function stopAnim(){
+  animRunning=false;if(rafId)cancelAnimationFrame(rafId);rafId=null;
+  if(thinkTimer){clearInterval(thinkTimer);thinkTimer=null;}
+}
+
+function toggleMute(){
+  muted=!muted;
+  muteBtn.textContent=muted?'[UNMUTE_MIC]':'[MUTE_MIC]';
+  muteBtn.classList.toggle('muted',muted);
+  mutedLabel.classList.toggle('visible',muted);
+  if(muted){
+    liveWaveformRow.classList.remove('active');
+    liveChars.textContent='▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁';
+    if(appState==='listening'||appState==='recording') setStateBar('muted');
+  } else {
+    if(appState==='listening'||appState==='recording'){
+      liveWaveformRow.classList.add('active');setStateBar('listening');
+    }
+  }
+}
+
+function setBtn(mode){
+  [iconMic,iconSend,iconStop,iconRec].forEach(i=>i.classList.add('hidden'));
+  primaryBtn.className='primary-btn '+mode;
+  switch(mode){
+    case 'mic':iconMic.classList.remove('hidden');break;
+    case 'send':iconSend.classList.remove('hidden');break;
+    case 'stop':iconStop.classList.remove('hidden');break;
+    case 'recording':iconRec.classList.remove('hidden');break;
+  }
+}
+
+function handlePrimaryBtn(){
+  if(appState==='speaking'||appState==='thinking'){cancelDemo();return;}
+  if(keyboardOpen){const v=textInput.value.trim();if(v){sendTyped(v);textInput.value='';setBtn('mic');}return;}
+  if(appState==='recording') stopRecording();else startRecording();
+}
+
+function startRecording(){
+  appState='recording';setBtn('recording');setOrbState('listening');
+  liveWaveformRow.classList.add('active');
+  if(!muted) setStateBar('listening');
+  startAnim();
+}
+function stopRecording(){
+  appState='idle';setBtn('mic');setOrbState('idle');
+  liveWaveformRow.classList.remove('active');setStateBar('idle');
+  addVoiceMemo('What can you help me with right now?','user');
+}
+
+textInput.addEventListener('input',()=>{
+  const v=textInput.value.trim();
+  setBtn(v?'send':'mic');
+  followSuggs.style.opacity=v?'0':'1';
+});
+textInput.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();const v=textInput.value.trim();if(v){sendTyped(v);textInput.value='';setBtn('mic');}}
+});
+
+function toggleKeyboard(){
+  keyboardOpen=!keyboardOpen;
+  textInput.style.display=keyboardOpen?'block':'none';
+  document.getElementById('keyboardToggle').textContent=keyboardOpen?'[SWITCH_TO_VOICE]':'[SWITCH_TO_KEYBOARD]';
+  if(keyboardOpen) textInput.focus();
+  else{textInput.value='';setBtn('mic');followSuggs.style.opacity='1';}
+}
+
+const attachTypes=[{icon:'📸',label:'IMG_001.JPG'},{icon:'📄',label:'DOC.PDF'},{icon:'🎵',label:'AUD.M4A'}];
+function stageAttachment(){
+  const a=attachTypes[attachCount%attachTypes.length];attachCount++;stagedAttach.push(a);renderStaged();
+}
+function renderStaged(){
+  const el=document.getElementById('attachStaged');el.innerHTML='';
+  stagedAttach.forEach((a,i)=>{
+    const c=document.createElement('div');c.className='staged-chip';
+    c.innerHTML=`<span>${a.icon}</span><span>${a.label}</span><span class="staged-chip-remove" onclick="removeAttach(${i})">[X]</span>`;
+    el.appendChild(c);
+  });
+}
+function removeAttach(i){stagedAttach.splice(i,1);renderStaged();}
+
+function sendTyped(text){
+  const m=createMemo('user','typed',text,'00:0'+(2+Math.floor(Math.random()*7)));
+  memoList.appendChild(m);stagedAttach=[];renderStaged();
+  memoList.scrollTop=memoList.scrollHeight;
+  setTimeout(()=>triggerReply(),400);
+}
+function sendChip(el){el.style.opacity='0.3';el.style.pointerEvents='none';sendTyped(el.textContent);}
+
+function createMemo(role,modality,text,dur){
+  mc++;const id='m'+mc;
+  const div=document.createElement('div');div.className='memo '+role;
+  const glyph=modality==='typed'?'[KB]':'[MIC]';
+  const glabel=modality==='typed'?'TYPED':'VOICE';
+  const barCount=8+Math.floor(Math.random()*16);
+  let wc='';
+  for(let i=0;i<barCount;i++) wc+=BLOCK_CHARS[Math.floor(Math.random()*8)];
+
+  div.innerHTML=`
+    <div class="memo-header">
+      <div class="memo-glyph">${glyph}</div>
+      <div class="memo-label">${role==='user'?'YOU':'ELIZA'} // ${glabel}</div>
+      <div class="memo-duration">${dur}</div>
+    </div>
+    <div class="waveform-chars">${wc}</div>
+    <div class="waveform-container">
+      <button class="play-btn">[▶]</button>
+      <div class="waveform" id="wf-${id}"></div>
+    </div>
+    <button class="transcript-toggle" onclick="toggleTranscript('${id}')">[ SHOW TRANSCRIPT ]</button>
+    <div class="transcript-body" id="tr-${id}">${text}</div>
+  `;
+  buildWaveform(id);
+  return div;
+}
+
+function triggerReply(text){
+  appState='thinking';setOrbState('thinking');setBtn('stop');
+  stopAnim();startThinkAnim();
+  const replies=[
+    "TASK_COMPLETE. Here is your status summary: 3 meetings, 2 flagged emails.",
+    "QUERY_PROCESSED. I've found the information you need.",
+    "ANALYSIS_DONE. Your briefing is ready.",
+    "REMINDER_SET. I'll alert you 30 minutes before.",
+    "SUMMARY_GENERATED. Key points extracted from your request."
+  ];
+  const reply=text||replies[Math.floor(Math.random()*replies.length)];
+  setTimeout(()=>{
+    stopAnim();
+    appState='speaking';setOrbState('speaking');startAnim();
+    const p=createMemo('assistant','voice',reply,'00:07');
+    p.style.opacity='0.6';
+    const pi=document.createElement('span');pi.className='partial-indicator';pi.textContent='▌';
+    p.querySelector('.memo-label').appendChild(pi);
+    memoList.appendChild(p);memoList.scrollTop=memoList.scrollHeight;
+    setTimeout(()=>{
+      p.style.opacity='1';
+      const pi2=p.querySelector('.partial-indicator');if(pi2)pi2.remove();
+      appState='idle';setOrbState('idle');setBtn('mic');setStateBar('idle');
+      memoList.scrollTop=memoList.scrollHeight;
+    },2500);
+  },900);
+}
+
+function addVoiceMemo(text,role){
+  const m=createMemo(role,'voice',text,'00:0'+(3+Math.floor(Math.random()*5)));
+  memoList.appendChild(m);memoList.scrollTop=memoList.scrollHeight;
+}
+
+function cancelDemo(){
+  if(demoTimer) clearTimeout(demoTimer);demoTimer=null;
+  stopAnim();
+  appState='idle';setOrbState('idle');setBtn('mic');
+  liveWaveformRow.classList.remove('active');setStateBar('idle');
+  startAnim();
+}
+
+function playDemo(){
+  cancelDemo();
+  document.getElementById('demoBtn').textContent='[ ▶ REPLAY_DEMO ]';
+
+  appState='listening';setOrbState('listening');setBtn('recording');
+  liveWaveformRow.classList.add('active');
+  if(!muted) setStateBar('listening');
+  startAnim();
+
+  demoTimer=setTimeout(()=>{
+    stopAnim();startThinkAnim();
+    appState='thinking';setOrbState('thinking');setBtn('stop');
+    liveWaveformRow.classList.remove('active');setStateBar('idle');
+    addVoiceMemo('Run diagnostic and give me a status report.','user');
+
+    demoTimer=setTimeout(()=>{
+      stopAnim();appState='speaking';setOrbState('speaking');setBtn('stop');startAnim();
+      const p=createMemo('assistant','voice',"DIAGNOSTIC_COMPLETE. All systems nominal. Two pending tasks: email reply due 12:00, calendar conflict at 14:00. Recommend immediate resolution of conflict. Shall I proceed?",'00:10');
+      p.style.opacity='0.6';
+      const pi=document.createElement('span');pi.className='partial-indicator';pi.textContent='▌';
+      p.querySelector('.memo-label').appendChild(pi);
+      memoList.appendChild(p);memoList.scrollTop=memoList.scrollHeight;
+
+      demoTimer=setTimeout(()=>{
+        p.style.opacity='1';const pi2=p.querySelector('.partial-indicator');if(pi2)pi2.remove();
+        // Barge-in
+        demoTimer=setTimeout(()=>{
+          stopAnim();appState='listening';setOrbState('listening');startAnim();
+          liveWaveformRow.classList.add('active');
+          if(!muted) setStateBar('listening');
+
+          const ib=createMemo('assistant','voice','Proceeding with—','00:01');
+          ib.classList.add('interrupted');
+          const it=document.createElement('div');it.className='interrupted-tag';it.textContent='[INTERRUPTED]';
+          ib.appendChild(it);memoList.appendChild(ib);memoList.scrollTop=memoList.scrollHeight;
+
+          demoTimer=setTimeout(()=>{
+            stopAnim();appState='idle';setOrbState('idle');setBtn('mic');
+            liveWaveformRow.classList.remove('active');setStateBar('idle');
+            addVoiceMemo('Yes. Fix the calendar conflict.','user');
+            startAnim();
+          },2000);
+        },2800);
+      },2500);
+    },900);
+  },2500);
+}
+
+setOrbState('idle');setBtn('mic');startAnim();
+</script>
+</body>
+</html>

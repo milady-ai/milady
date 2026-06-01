@@ -1,0 +1,729 @@
+<!-- concept-D19-L2 | direction: Glass HUD Overlay | look: OLED Neon Cyber | targets: 420x760, 960x640 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D19 · Glass HUD Overlay · OLED Neon Cyber</title>
+<style>
+:root {
+  --bg:#000000;
+  --surface:#0B0E14;
+  --surface-2:#131826;
+  --border:rgba(0,229,255,0.28);
+  --text:#E8FBFF;
+  --text-muted:#6B7A90;
+  --accent:#00E5FF;
+  --accent-2:#FF3DCB;
+  --accent-3:#B6FF3D;
+  --danger:#FF2E4D;
+  --radius:8px;
+  --radius-sm:5px;
+  --font:"SF Pro Text","Inter","Segoe UI",system-ui,sans-serif;
+  --font-mono:"SF Mono","JetBrains Mono","Cascadia Mono",ui-monospace,monospace;
+  --shadow:0 0 0 1px rgba(0,229,255,0.25),0 0 24px rgba(0,229,255,0.35);
+  --shadow-sm:0 0 12px rgba(0,229,255,0.25);
+  --glow-cyan:0 0 16px rgba(0,229,255,0.6);
+  --glow-magenta:0 0 16px rgba(255,61,203,0.6);
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+body {
+  font-family:var(--font);
+  background:#000;
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* Scanline overlay */
+.scanlines {
+  position:fixed;inset:0;pointer-events:none;z-index:1000;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.06) 2px,rgba(0,0,0,0.06) 4px);
+}
+
+/* Device */
+.device {
+  position:relative;
+  width:420px;height:760px;
+  border-radius:12px;
+  background:var(--bg);
+  border:1px solid rgba(0,229,255,0.3);
+  box-shadow:0 0 0 1px rgba(0,229,255,0.15),0 0 60px rgba(0,229,255,0.12);
+  overflow:hidden;
+  display:flex;flex-direction:column;
+  z-index:2;
+}
+
+/* Grid background */
+.device::before {
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(0,229,255,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,229,255,0.04) 1px,transparent 1px);
+  background-size:40px 40px;
+  pointer-events:none;z-index:0;
+}
+
+/* Edge glow */
+.edge-glow {
+  position:absolute;inset:0;border-radius:12px;
+  pointer-events:none;z-index:100;
+  transition:box-shadow 0.15s var(--ease), opacity 0.15s var(--ease);
+  opacity:0;
+}
+.edge-glow.listening { opacity:1; box-shadow:inset 0 0 0 1.5px var(--accent),inset 0 0 30px rgba(0,229,255,0.2); }
+.edge-glow.speaking { opacity:1; box-shadow:inset 0 0 0 1.5px var(--accent-3),inset 0 0 30px rgba(182,255,61,0.15); }
+.edge-glow.muted { opacity:1; box-shadow:inset 0 0 0 1.5px var(--danger),inset 0 0 20px rgba(255,46,77,0.15); }
+@keyframes neon-pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.edge-glow.listening{animation:neon-pulse 0.8s ease-in-out infinite}
+
+/* HUD layer */
+.hud-layer {
+  position:relative;z-index:5;
+  display:flex;flex-direction:column;
+  height:100%;
+  padding:12px;
+  gap:8px;
+}
+
+/* Status bar */
+.status-bar {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 10px;
+  background:rgba(11,14,20,0.9);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-sm);
+}
+.status-time {
+  font-family:var(--font-mono);
+  font-size:13px;font-weight:700;color:var(--accent);
+  letter-spacing:0.08em;
+}
+.live-badge {
+  display:flex;align-items:center;gap:5px;
+  font-family:var(--font-mono);
+  font-size:10px;font-weight:700;
+  color:var(--accent);
+  text-transform:uppercase;letter-spacing:0.12em;
+  opacity:0;transition:opacity 0.15s;
+}
+.live-badge.visible{opacity:1}
+.live-dot{width:6px;height:6px;background:var(--accent);border-radius:50%;}
+@keyframes dot-blink{0%,100%{opacity:1}50%{opacity:0}}
+.live-badge.visible .live-dot{animation:dot-blink 0.8s steps(1,end) infinite}
+.session-timer{font-family:var(--font-mono);color:var(--accent)}
+.muted-label{
+  font-family:var(--font-mono);font-size:10px;font-weight:700;
+  color:var(--danger);text-transform:uppercase;letter-spacing:0.12em;
+  opacity:0;transition:opacity 0.15s;
+  text-shadow:0 0 8px var(--danger);
+}
+.muted-label.visible{opacity:1}
+
+/* Chat log */
+.chat-log {
+  flex:1;overflow-y:auto;
+  display:flex;flex-direction:column;gap:8px;
+  scrollbar-width:thin;scrollbar-color:rgba(0,229,255,0.3) transparent;
+}
+.chat-log::-webkit-scrollbar{width:2px}
+.chat-log::-webkit-scrollbar-thumb{background:rgba(0,229,255,0.3);border-radius:1px}
+
+.turn{display:flex;flex-direction:column;gap:3px;animation:turn-in 0.15s ease both}
+@keyframes turn-in{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+.turn-header{
+  font-family:var(--font-mono);font-size:9px;font-weight:700;
+  text-transform:uppercase;letter-spacing:0.12em;color:var(--text-muted);
+  padding:0 4px;display:flex;align-items:center;gap:5px;
+}
+
+.bubble {
+  padding:9px 12px;
+  border-radius:var(--radius);
+  font-size:13px;line-height:1.5;color:var(--text);
+  background:var(--surface);
+  border:1px solid rgba(0,229,255,0.15);
+  position:relative;
+  max-width:100%;
+}
+.bubble.user {
+  background:rgba(0,229,255,0.08);
+  border-color:rgba(0,229,255,0.25);
+  margin-left:16px;
+}
+.bubble.assistant{margin-right:6px}
+.bubble.partial{opacity:0.6;border-style:dashed}
+.bubble.interrupted::after{content:' ⊘ interrupted';font-size:10px;color:var(--accent-2);font-family:var(--font-mono);margin-left:6px}
+
+/* Attachment chip */
+.attachment-chip {
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(0,229,255,0.08);
+  border:1px solid rgba(0,229,255,0.25);
+  border-radius:4px;padding:4px 8px;
+  font-family:var(--font-mono);font-size:11px;color:var(--accent);
+}
+.thumb{font-size:14px}
+.chip-remove{cursor:pointer;opacity:0.5;color:var(--danger)}
+.chip-remove:hover{opacity:1}
+
+/* App card */
+.app-card {
+  background:var(--surface);
+  border:1px solid rgba(0,229,255,0.25);
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:var(--shadow-sm);
+  margin-right:6px;
+}
+.app-card-header {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 12px;
+  border-bottom:1px solid rgba(0,229,255,0.15);
+  background:rgba(0,229,255,0.05);
+}
+.app-card-title {
+  display:flex;align-items:center;gap:7px;
+  font-family:var(--font-mono);font-size:11px;font-weight:700;
+  color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;
+}
+.app-icon {
+  width:20px;height:20px;border-radius:4px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  display:flex;align-items:center;justify-content:center;font-size:11px;
+}
+.app-expand{font-size:13px;cursor:pointer;color:var(--text-muted)}
+.app-card-body{padding:10px 12px}
+
+/* Weather card body */
+.weather-main{display:flex;align-items:flex-end;gap:8px}
+.weather-temp{font-family:var(--font-mono);font-size:32px;font-weight:700;color:var(--accent);line-height:1;text-shadow:var(--glow-cyan)}
+.weather-detail{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);line-height:1.6}
+.weather-forecast{display:flex;gap:6px;margin-top:8px}
+.forecast-item{
+  flex:1;text-align:center;padding:5px 3px;
+  border:1px solid rgba(0,229,255,0.2);border-radius:4px;
+  font-family:var(--font-mono);font-size:10px;color:var(--text-muted);
+}
+.forecast-item span{display:block;font-size:14px;margin:2px 0}
+.forecast-item strong{color:var(--accent);font-weight:700}
+.app-card-actions{display:flex;gap:6px;padding:0 12px 10px}
+.card-btn {
+  flex:1;padding:6px 10px;border-radius:4px;
+  font-family:var(--font-mono);font-size:11px;font-weight:700;
+  text-transform:uppercase;letter-spacing:0.08em;
+  border:none;cursor:pointer;transition:all 0.12s;
+}
+.card-btn.primary{background:var(--accent);color:#000;box-shadow:var(--glow-cyan)}
+.card-btn.primary:hover{background:#33eaff}
+.card-btn.secondary{background:transparent;color:var(--accent);border:1px solid rgba(0,229,255,0.35)}
+
+/* Suggestions */
+.suggestions {
+  display:flex;gap:5px;flex-wrap:wrap;
+  transition:opacity 0.12s;
+}
+.suggestions.hidden{opacity:0;pointer-events:none}
+.suggestion-chip {
+  display:inline-flex;align-items:center;gap:4px;
+  background:rgba(0,229,255,0.07);
+  border:1px solid rgba(0,229,255,0.3);
+  border-radius:4px;padding:4px 10px;
+  font-family:var(--font-mono);font-size:11px;
+  color:var(--accent);cursor:pointer;
+  text-transform:uppercase;letter-spacing:0.06em;
+  transition:all 0.12s;
+}
+.suggestion-chip:hover{background:rgba(0,229,255,0.15);box-shadow:var(--shadow-sm)}
+
+.staged-attachments{display:flex;gap:5px;flex-wrap:wrap}
+
+/* Waveform avatar */
+.orb-container {
+  display:flex;align-items:center;justify-content:center;
+  width:34px;height:34px;
+  cursor:pointer;flex-shrink:0;
+  position:relative;
+}
+.waveform {
+  display:flex;align-items:center;gap:1.5px;height:20px;
+}
+.wbar {
+  width:2.5px;border-radius:1px;
+  background:var(--accent);
+  height:4px;
+  transition:height 0.08s ease;
+  box-shadow:0 0 4px var(--accent);
+}
+.orb-container.listening .wbar{background:var(--accent)}
+.orb-container.thinking .wbar{background:var(--accent-2);box-shadow:var(--glow-magenta)}
+.orb-container.speaking .wbar{background:var(--accent-3);box-shadow:0 0 4px var(--accent-3)}
+.orb-container.idle .wbar{animation:idle-bar 2s ease-in-out infinite}
+@keyframes idle-bar{0%,100%{height:4px}50%{height:8px}}
+.orb-container.idle .wbar:nth-child(2){animation-delay:0.2s}
+.orb-container.idle .wbar:nth-child(3){animation-delay:0.4s}
+.orb-container.idle .wbar:nth-child(4){animation-delay:0.2s}
+.orb-container.thinking .wbar{animation:think-bar 0.4s steps(1,end) infinite}
+@keyframes think-bar{0%{height:2px}25%{height:14px}50%{height:6px}75%{height:10px}100%{height:2px}}
+.orb-container.thinking .wbar:nth-child(1){animation-delay:0s}
+.orb-container.thinking .wbar:nth-child(2){animation-delay:0.1s}
+.orb-container.thinking .wbar:nth-child(3){animation-delay:0.2s}
+.orb-container.thinking .wbar:nth-child(4){animation-delay:0.15s}
+
+/* Pill */
+.pill-row {
+  display:flex;align-items:center;gap:6px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:5px;
+  box-shadow:var(--shadow-sm);
+}
+.pill-attach {
+  width:32px;height:32px;
+  border:1px solid rgba(0,229,255,0.3);border-radius:4px;
+  background:rgba(0,229,255,0.07);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:16px;color:var(--accent);
+  flex-shrink:0;transition:all 0.12s;
+}
+.pill-attach:hover{background:rgba(0,229,255,0.15)}
+.pill-input {
+  flex:1;border:none;background:transparent;
+  font-family:var(--font-mono);font-size:13px;color:var(--text);
+  outline:none;
+}
+.pill-input::placeholder{color:var(--text-muted)}
+.pill-action {
+  width:32px;height:32px;border:none;border-radius:4px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:15px;flex-shrink:0;
+  transition:all 0.12s;font-family:var(--font-mono);
+}
+.pill-action.mic{background:rgba(0,229,255,0.12);color:var(--accent);border:1px solid rgba(0,229,255,0.3)}
+.pill-action.mic:hover{background:rgba(0,229,255,0.2);box-shadow:var(--glow-cyan)}
+.pill-action.send{background:var(--accent);color:#000;box-shadow:var(--glow-cyan)}
+.pill-action.stop{background:var(--danger);color:#fff;box-shadow:0 0 12px rgba(255,46,77,0.5)}
+
+/* Listening indicator */
+.listening-indicator {
+  display:flex;align-items:center;gap:6px;
+  padding:4px 9px;
+  background:rgba(0,229,255,0.07);
+  border:1px solid rgba(0,229,255,0.3);
+  border-radius:4px;
+  font-family:var(--font-mono);font-size:11px;font-weight:700;
+  text-transform:uppercase;letter-spacing:0.1em;
+  color:var(--accent);
+  opacity:0;transition:opacity 0.12s;pointer-events:none;
+}
+.listening-indicator.visible{opacity:1}
+.listening-indicator.muted-indicator{background:rgba(255,46,77,0.1);border-color:rgba(255,46,77,0.4);color:var(--danger)}
+.mic-wave{display:flex;align-items:center;gap:1.5px;height:12px}
+.mic-wave span{width:2px;border-radius:1px;background:currentColor;height:4px;display:block}
+
+/* Controls */
+.controls-row {
+  display:flex;align-items:center;justify-content:center;gap:10px;
+}
+.ctrl-btn {
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  background:none;border:none;cursor:pointer;font-family:var(--font-mono);
+}
+.ctrl-icon {
+  width:34px;height:34px;
+  border:1px solid rgba(0,229,255,0.3);border-radius:4px;
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+  background:rgba(0,229,255,0.05);
+  transition:all 0.12s;
+}
+.ctrl-icon:hover{background:rgba(0,229,255,0.15);box-shadow:var(--shadow-sm)}
+.ctrl-icon.danger{border-color:rgba(255,46,77,0.4)}
+.ctrl-icon.danger.active{background:rgba(255,46,77,0.2);box-shadow:0 0 12px rgba(255,46,77,0.4)}
+.ctrl-label{font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em}
+
+/* Detach bubble */
+.detach-bubble {
+  position:absolute;bottom:80px;right:14px;
+  width:52px;height:52px;border-radius:4px;
+  background:var(--surface-2);
+  border:1px solid var(--accent);
+  box-shadow:var(--shadow);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;z-index:50;
+  opacity:0;pointer-events:none;
+  transition:opacity 0.15s;
+}
+.detach-bubble.visible{opacity:1;pointer-events:auto}
+.bubble-timer{font-family:var(--font-mono);font-size:9px;color:var(--accent);font-weight:700;letter-spacing:0.08em}
+@keyframes bubble-glow{0%,100%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 1px var(--accent),0 0 30px rgba(0,229,255,0.5)}}
+.detach-bubble.visible{animation:bubble-glow 1.5s ease-in-out infinite}
+
+/* Play demo */
+.play-demo {
+  position:absolute;top:10px;right:10px;z-index:200;
+  background:rgba(0,229,255,0.1);
+  border:1px solid rgba(0,229,255,0.4);
+  border-radius:4px;
+  padding:4px 10px;
+  font-family:var(--font-mono);font-size:10px;font-weight:700;
+  text-transform:uppercase;letter-spacing:0.1em;
+  color:var(--accent);cursor:pointer;
+  transition:all 0.12s;
+}
+.play-demo:hover{background:rgba(0,229,255,0.2);box-shadow:var(--shadow-sm)}
+
+@media(min-width:760px){
+  .device{width:960px;height:640px;border-radius:8px}
+}
+</style>
+</head>
+<body>
+<div class="scanlines" aria-hidden="true"></div>
+
+<div class="device" id="device">
+  <div class="edge-glow" id="edgeGlow"></div>
+
+  <div class="hud-layer">
+    <!-- Status -->
+    <div class="status-bar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="status-time" id="clockDisplay">09:41</span>
+        <div class="live-badge" id="liveBadge">
+          <div class="live-dot"></div>
+          <span>LIVE</span>
+          <span class="session-timer" id="sessionTimer">0:00</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="muted-label" id="mutedLabel">◉ MUTED</span>
+        <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em">ELIZA/SYS</span>
+      </div>
+    </div>
+
+    <!-- Chat log -->
+    <div class="chat-log" id="chatLog">
+      <div class="turn">
+        <div class="turn-header">🎙 VOICE · USER</div>
+        <div class="bubble user">What's the weather like in Tokyo right now?</div>
+      </div>
+      <div class="turn">
+        <div class="turn-header">▶ ELIZA · RESPONSE</div>
+        <div class="bubble assistant interrupted">Tokyo is currently 18°C, partly cloudy — mild conditions, low wind</div>
+      </div>
+      <div class="turn">
+        <div class="turn-header">⌨ TYPED · USER</div>
+        <div class="bubble user">
+          <div class="attachment-chip" style="margin-bottom:7px">
+            <div class="thumb">📄</div>
+            <span>photo_tokyo.jpg</span>
+          </div>
+          <div>What is this building in the photo?</div>
+        </div>
+      </div>
+      <div class="turn">
+        <div class="turn-header">▶ ELIZA · RESPONSE</div>
+        <div class="bubble assistant">That's Shibuya Crossing — busiest pedestrian crossing on the planet. Roughly 2,500+ pedestrians every light cycle during rush hour.</div>
+      </div>
+      <div class="turn">
+        <div class="turn-header">▶ ELIZA · WEATHER WIDGET</div>
+        <div class="app-card">
+          <div class="app-card-header">
+            <div class="app-card-title"><div class="app-icon">🌤</div>TOKYO · WEATHER</div>
+            <span class="app-expand">⤢</span>
+          </div>
+          <div class="app-card-body">
+            <div class="weather-main">
+              <div class="weather-temp">18°C</div>
+              <div class="weather-detail">PARTLY_CLOUDY<br>HUMIDITY: 62% · WIND: 8KPH</div>
+            </div>
+            <div class="weather-forecast">
+              <div class="forecast-item"><div>MON</div><span>🌤</span><strong>19°</strong></div>
+              <div class="forecast-item"><div>TUE</div><span>🌧</span><strong>14°</strong></div>
+              <div class="forecast-item"><div>WED</div><span>☀️</span><strong>22°</strong></div>
+            </div>
+          </div>
+          <div class="app-card-actions">
+            <button class="card-btn primary">FULL_FORECAST</button>
+            <button class="card-btn secondary">HOURLY</button>
+          </div>
+        </div>
+      </div>
+      <div class="turn" id="streamingTurn" style="display:none">
+        <div class="turn-header">▶ ELIZA · STREAMING</div>
+        <div class="bubble assistant partial" id="streamingBubble"></div>
+      </div>
+    </div>
+
+    <!-- Listening indicator -->
+    <div class="listening-indicator" id="listeningIndicator">
+      <div class="mic-wave">
+        <span id="w1"></span><span id="w2"></span><span id="w3"></span><span id="w4"></span><span id="w5"></span>
+      </div>
+      🎙 <span id="listenLabel">LISTENING</span>
+    </div>
+
+    <!-- Suggestions -->
+    <div class="suggestions" id="suggestions">
+      <div class="suggestion-chip" onclick="fillSuggestion('Ask about this screen')">▸ SCREEN</div>
+      <div class="suggestion-chip" onclick="fillSuggestion('Summarize what I see')">▸ SUMMARIZE</div>
+    </div>
+
+    <div class="staged-attachments" id="stagedAttachments"></div>
+
+    <!-- Pill -->
+    <div class="pill-row">
+      <button class="pill-attach" onclick="handleAttach()">+</button>
+      <div class="orb-container idle" id="pillOrb" onclick="toggleVoice()">
+        <div class="waveform">
+          <div class="wbar" id="b1"></div>
+          <div class="wbar" id="b2"></div>
+          <div class="wbar" id="b3"></div>
+          <div class="wbar" id="b4"></div>
+        </div>
+      </div>
+      <input class="pill-input" id="pillInput" placeholder="Query…" oninput="onInput()" onkeydown="onKeydown(event)">
+      <button class="pill-action mic" id="pillAction" onclick="handleAction()">🎙</button>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls-row">
+      <button class="ctrl-btn" onclick="toggleMute()">
+        <div class="ctrl-icon danger" id="muteIcon">🎙</div>
+        <span class="ctrl-label" id="muteLabel">MUTE</span>
+      </button>
+      <button class="ctrl-btn" onclick="endSession()">
+        <div class="ctrl-icon danger">⊗</div>
+        <span class="ctrl-label">END</span>
+      </button>
+      <button class="ctrl-btn" onclick="toggleDetach()">
+        <div class="ctrl-icon">⤢</div>
+        <span class="ctrl-label">DETACH</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="detach-bubble" id="detachBubble" onclick="toggleDetach()">
+    <div style="font-size:16px">◉</div>
+    <div class="bubble-timer" id="bubbleTimer">0:00</div>
+  </div>
+
+  <button class="play-demo" id="playDemoBtn" onclick="playDemo()">▶ DEMO</button>
+</div>
+
+<script>
+const STATE={mode:'idle',muted:false,sessionActive:false,sessionSeconds:0,hasAttachment:false,detached:false};
+let demoTimer=null,ampTimer=null,sessionInterval=null;
+
+const edgeGlow=document.getElementById('edgeGlow');
+const pillOrb=document.getElementById('pillOrb');
+const pillAction=document.getElementById('pillAction');
+const pillInput=document.getElementById('pillInput');
+const listeningIndicator=document.getElementById('listeningIndicator');
+const listenLabel=document.getElementById('listenLabel');
+const liveBadge=document.getElementById('liveBadge');
+const sessionTimer=document.getElementById('sessionTimer');
+const mutedLabel=document.getElementById('mutedLabel');
+const muteIcon=document.getElementById('muteIcon');
+const muteLabel=document.getElementById('muteLabel');
+const suggestions=document.getElementById('suggestions');
+const stagedAttachments=document.getElementById('stagedAttachments');
+const chatLog=document.getElementById('chatLog');
+const detachBubble=document.getElementById('detachBubble');
+const bubbleTimer=document.getElementById('bubbleTimer');
+const streamingTurn=document.getElementById('streamingTurn');
+const streamingBubble=document.getElementById('streamingBubble');
+const playDemoBtn=document.getElementById('playDemoBtn');
+const bars=[document.getElementById('b1'),document.getElementById('b2'),document.getElementById('b3'),document.getElementById('b4')];
+const waveEls=[document.getElementById('w1'),document.getElementById('w2'),document.getElementById('w3'),document.getElementById('w4'),document.getElementById('w5')];
+
+function updateClock(){
+  const now=new Date();
+  document.getElementById('clockDisplay').textContent=
+    now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+}
+updateClock();setInterval(updateClock,1000);
+
+function startSessionTimer(){
+  if(sessionInterval)return;
+  STATE.sessionActive=true;
+  liveBadge.classList.add('visible');
+  sessionInterval=setInterval(()=>{
+    STATE.sessionSeconds++;
+    const m=Math.floor(STATE.sessionSeconds/60),s=STATE.sessionSeconds%60;
+    const t=m+':'+s.toString().padStart(2,'0');
+    sessionTimer.textContent=t;bubbleTimer.textContent=t;
+  },1000);
+}
+function stopSessionTimer(){
+  clearInterval(sessionInterval);sessionInterval=null;
+  STATE.sessionActive=false;STATE.sessionSeconds=0;
+  liveBadge.classList.remove('visible');
+}
+
+function setMode(mode){
+  STATE.mode=mode;
+  pillOrb.className='orb-container '+mode;
+  edgeGlow.className='edge-glow';
+  listeningIndicator.className='listening-indicator';
+  listeningIndicator.style.cssText='';
+
+  if(mode==='listening'){
+    if(STATE.muted){
+      listeningIndicator.classList.add('visible','muted-indicator');
+      listenLabel.textContent='MUTED';
+      edgeGlow.classList.add('muted');
+    } else {
+      listeningIndicator.classList.add('visible');
+      listenLabel.textContent='LISTENING';
+      edgeGlow.classList.add('listening');
+      startAmp();
+    }
+    updateActionBtn('stop');
+  } else if(mode==='thinking'){
+    listeningIndicator.classList.add('visible');
+    listeningIndicator.style.background='rgba(255,61,203,0.07)';
+    listeningIndicator.style.borderColor='rgba(255,61,203,0.3)';
+    listeningIndicator.style.color='var(--accent-2)';
+    listenLabel.textContent='PROCESSING';
+    edgeGlow.classList.add('listening');
+    stopAmp();updateActionBtn('stop');
+  } else if(mode==='speaking'){
+    listeningIndicator.classList.add('visible');
+    listeningIndicator.style.background='rgba(182,255,61,0.07)';
+    listeningIndicator.style.borderColor='rgba(182,255,61,0.3)';
+    listeningIndicator.style.color='var(--accent-3)';
+    listenLabel.textContent='OUTPUT';
+    edgeGlow.classList.add('speaking');
+    startAmp();updateActionBtn('stop');
+  } else {
+    stopAmp();updateActionBtn('mic');
+  }
+}
+
+function updateActionBtn(type){
+  pillAction.className='pill-action '+type;
+  if(type==='mic')pillAction.textContent=STATE.muted?'🔇':'🎙';
+  else if(type==='send')pillAction.textContent='↑';
+  else if(type==='stop')pillAction.textContent='■';
+}
+
+let ampRaf=null;
+function startAmp(){
+  stopAmp();
+  function tick(){
+    const amp=STATE.mode==='listening'?Math.random()*16+4:Math.random()*12+2;
+    bars.forEach(b=>{
+      const h=Math.max(2,amp*(0.5+Math.random()*0.8));
+      b.style.height=h+'px';
+    });
+    waveEls.forEach(el=>{const h=2+Math.random()*10;el.style.height=h+'px'});
+    ampRaf=requestAnimationFrame(()=>setTimeout(tick,80));
+  }
+  tick();
+}
+function stopAmp(){
+  if(ampRaf){cancelAnimationFrame(ampRaf);ampRaf=null;}
+  bars.forEach(b=>b.style.height='4px');
+  waveEls.forEach(el=>el.style.height='4px');
+}
+
+function toggleVoice(){
+  if(STATE.mode==='idle'){startSessionTimer();setMode('listening');}
+  else{setMode('idle');stopSessionTimer();}
+}
+
+function onInput(){
+  const val=pillInput.value.trim();
+  suggestions.classList.toggle('hidden',val.length>0);
+  if(val.length>0)updateActionBtn('send');
+  else if(STATE.mode==='idle')updateActionBtn('mic');
+}
+
+function onKeydown(e){if(e.key==='Enter'&&pillInput.value.trim())handleSend();}
+
+function handleAction(){
+  if(STATE.mode!=='idle'){setMode('idle');stopSessionTimer();}
+  else if(pillInput.value.trim())handleSend();
+  else toggleVoice();
+}
+
+function handleSend(){
+  const text=pillInput.value.trim();if(!text)return;
+  addTurn('user','⌨ TYPED · USER',text,STATE.hasAttachment?'attachment.pdf':null);
+  pillInput.value='';STATE.hasAttachment=false;stagedAttachments.innerHTML='';
+  onInput();suggestions.classList.remove('hidden');
+  setTimeout(()=>streamReply('Analyzing the uploaded file. Three sections identified: methodology, results, conclusions. Key finding: 34% performance improvement over the baseline model.'),500);
+}
+
+function handleAttach(){
+  if(STATE.hasAttachment)return;STATE.hasAttachment=true;
+  const chip=document.createElement('div');chip.className='attachment-chip';
+  chip.innerHTML=`<div class="thumb">📄</div><span>document.pdf</span><span class="chip-remove" onclick="removeAttachment()">✕</span>`;
+  stagedAttachments.appendChild(chip);
+}
+function removeAttachment(){STATE.hasAttachment=false;stagedAttachments.innerHTML='';}
+
+function fillSuggestion(text){pillInput.value=text;onInput();pillInput.focus();}
+
+function addTurn(who,header,text,attachment){
+  const div=document.createElement('div');div.className='turn';
+  const cls=who==='user'?'user':'assistant';
+  div.innerHTML=`<div class="turn-header">${header}</div>
+    ${attachment?`<div class="bubble ${cls}"><div class="attachment-chip" style="margin-bottom:6px"><div class="thumb">📄</div><span>${attachment}</span></div><div>${text}</div></div>`
+    :`<div class="bubble ${cls}">${text}</div>`}`;
+  chatLog.appendChild(div);chatLog.scrollTop=chatLog.scrollHeight;
+}
+
+function streamReply(text){
+  streamingTurn.style.display='';streamingBubble.classList.add('partial');streamingBubble.textContent='';
+  chatLog.scrollTop=chatLog.scrollHeight;let i=0;
+  const iv=setInterval(()=>{
+    if(i>=text.length){clearInterval(iv);streamingBubble.classList.remove('partial');
+      addTurn('assistant','▶ ELIZA · RESPONSE',text);
+      streamingTurn.style.display='none';streamingBubble.textContent='';return;}
+    streamingBubble.textContent+=text[i++];chatLog.scrollTop=chatLog.scrollHeight;
+  },18);
+}
+
+function toggleMute(){
+  STATE.muted=!STATE.muted;
+  mutedLabel.classList.toggle('visible',STATE.muted);
+  muteIcon.textContent=STATE.muted?'🔇':'🎙';
+  muteIcon.classList.toggle('active',STATE.muted);
+  muteLabel.textContent=STATE.muted?'UNMUTE':'MUTE';
+  if(STATE.mode==='listening')setMode('listening');
+}
+
+function toggleDetach(){
+  STATE.detached=!STATE.detached;
+  detachBubble.classList.toggle('visible',STATE.detached&&STATE.sessionActive);
+}
+
+function endSession(){setMode('idle');stopSessionTimer();STATE.detached=false;detachBubble.classList.remove('visible');}
+
+function playDemo(){
+  if(demoTimer){clearTimeout(demoTimer);demoTimer=null;}
+  setMode('idle');stopSessionTimer();
+  playDemoBtn.disabled=true;playDemoBtn.textContent='● RUNNING';
+  const steps=[
+    ()=>{startSessionTimer();setMode('listening');},
+    ()=>{setMode('thinking');},
+    ()=>{setMode('speaking');},
+    ()=>{addTurn('user','🎙 VOICE · USER',"What will the weather be like this weekend?");
+      streamReply("Weekend forecast: Saturday 22°C sunny, Sunday 19°C partly cloudy. Both days clear for outdoor activity.");
+      setMode('idle');},
+    ()=>{setMode('listening');},
+    ()=>{setMode('idle');stopSessionTimer();playDemoBtn.disabled=false;playDemoBtn.textContent='▶ DEMO';}
+  ];
+  const delays=[0,2200,1200,1800,3500,2000];
+  let el=0;steps.forEach((fn,i)=>{el+=delays[i];demoTimer=setTimeout(fn,el);});
+}
+
+setTimeout(playDemo,600);
+</script>
+</body>
+</html>

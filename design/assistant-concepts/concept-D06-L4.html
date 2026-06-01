@@ -1,0 +1,699 @@
+<!-- concept-D06-L4 | direction: Terminal / CLI Hybrid | look: Clean System Light | targets: 420x760, 960x640 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D06 · Terminal / CLI Hybrid · Clean System Light</title>
+<style>
+:root{
+  --bg:#F2F2F7;
+  --surface:#FFFFFF;
+  --surface-2:#FFFFFF;
+  --border:rgba(60,60,67,0.18);
+  --text:#1C1C1E;
+  --text-secondary:rgba(60,60,67,0.60);
+  --text-muted:#8E8E93;
+  --accent:#0A84FF;
+  --accent-2:#30D158;
+  --danger:#FF3B30;
+  --radius:13px;
+  --radius-sm:9px;
+  --font:"SF Pro Text",-apple-system,"Segoe UI Variable","Helvetica Neue",system-ui,sans-serif;
+  --font-mono:"SF Mono","Cascadia Mono","Consolas",ui-monospace,monospace;
+  --shadow:0 8px 30px rgba(0,0,0,0.12);
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.10);
+  --ease:cubic-bezier(.32,.72,0,1);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+body{
+  min-height:100vh;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font);
+  color:var(--text);
+  overflow:hidden;
+}
+
+.app-window{
+  position:relative;
+  width:420px;height:760px;
+  background:var(--surface);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+
+/* Title bar */
+.title-bar{
+  display:flex;align-items:center;gap:8px;
+  padding:12px 16px 10px;
+  border-bottom:1px solid var(--border);
+  background:rgba(255,255,255,0.9);
+  flex-shrink:0;
+  backdrop-filter:blur(20px);
+}
+.title-dots{display:flex;gap:5px;}
+.title-dot{
+  width:11px;height:11px;border-radius:50%;
+  background:var(--border);
+}
+.dot-red{background:#FF3B30;}
+.dot-yellow{background:#FFD60A;}
+.dot-green{background:#30D158;}
+.title-text{
+  flex:1;text-align:center;
+  font-size:13px;font-weight:600;
+  color:var(--text);
+}
+.title-conn{
+  font-size:11px;color:var(--accent-2);
+  font-weight:500;
+}
+
+/* Avatar bar */
+.avatar-bar{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 16px 10px;
+  border-bottom:1px solid var(--border);
+  background:var(--surface);
+  flex-shrink:0;
+}
+
+/* Siri-style orb */
+.avatar-orb{
+  position:relative;
+  width:52px;height:52px;flex-shrink:0;
+}
+.orb-ring{
+  position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(from 0deg,#0A84FF,#5AC8FA,#30D158,#FFD60A,#FF6B6B,#0A84FF);
+  transition:all 0.35s var(--ease);
+  opacity:0.15;
+}
+.orb-inner{
+  position:absolute;inset:3px;border-radius:50%;
+  background:radial-gradient(circle at 38% 35%,rgba(255,255,255,0.95),rgba(90,200,250,0.3) 50%,rgba(10,132,255,0.5));
+  box-shadow:0 4px 16px rgba(10,132,255,0.25);
+}
+.orb-inner::after{
+  content:'';position:absolute;
+  width:12px;height:8px;
+  background:rgba(255,255,255,0.8);
+  border-radius:50%;top:8px;left:9px;
+  filter:blur(1px);transform:rotate(-20deg);
+}
+.orb-glow{
+  position:absolute;inset:-4px;border-radius:50%;
+  background:transparent;
+  border:2px solid transparent;
+  transition:all 0.35s var(--ease);
+}
+.avatar-orb.listening .orb-ring{opacity:0.6;animation:ring-spin 2s linear infinite;}
+.avatar-orb.listening .orb-glow{border-color:rgba(10,132,255,0.4);animation:glow-pulse 0.3s ease infinite alternate;}
+.avatar-orb.thinking .orb-ring{opacity:0.4;animation:ring-spin 4s linear infinite;}
+.avatar-orb.thinking .orb-inner{background:radial-gradient(circle at 38% 35%,rgba(255,255,255,0.9),rgba(200,100,250,0.4) 50%,rgba(10,132,255,0.4));}
+.avatar-orb.speaking .orb-ring{opacity:0.5;animation:ring-spin 1.5s linear infinite;}
+.avatar-orb.speaking .orb-glow{border-color:rgba(48,209,88,0.5);animation:glow-pulse 0.8s ease infinite alternate;}
+.avatar-orb.muted .orb-ring{opacity:0.1;animation:none;}
+.avatar-orb.muted .orb-inner{background:radial-gradient(circle at 38% 35%,rgba(255,255,255,0.9),rgba(142,142,147,0.4));}
+
+@keyframes ring-spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+@keyframes glow-pulse{from{box-shadow:0 0 0 2px rgba(10,132,255,0.2);}to{box-shadow:0 0 0 8px rgba(10,132,255,0.05);}}
+
+.waveform-display{
+  display:flex;align-items:center;gap:2px;
+  height:28px;flex:1;
+  background:var(--bg);
+  border-radius:var(--radius-sm);
+  padding:4px 10px;
+  border:none;
+}
+.wave-bar{
+  width:3px;min-height:2px;max-height:22px;
+  border-radius:2px;
+  transition:height 0.08s var(--ease);
+  background:var(--accent);
+  opacity:0.4;flex-shrink:0;
+}
+
+.avatar-state-label{
+  font-family:var(--font-mono);font-size:11px;
+  color:var(--text-muted);
+  min-width:82px;text-align:right;
+  transition:color 0.35s var(--ease);
+}
+.avatar-state-label.listening{color:var(--accent);}
+.avatar-state-label.thinking{color:#BF5AF2;}
+.avatar-state-label.speaking{color:var(--accent-2);}
+.avatar-state-label.muted{color:var(--danger);}
+
+/* Console log */
+.console-log{
+  flex:1;overflow-y:auto;
+  padding:12px 16px;
+  font-family:var(--font-mono);
+  font-size:13px;line-height:1.65;
+  scroll-behavior:smooth;
+}
+.console-log::-webkit-scrollbar{width:4px;}
+.console-log::-webkit-scrollbar-thumb{background:rgba(60,60,67,0.12);border-radius:2px;}
+
+.log-entry{
+  display:block;word-break:break-word;padding:1px 0;
+  animation:entry-in 0.25s var(--ease) both;
+}
+@keyframes entry-in{
+  from{opacity:0;transform:translateY(4px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.log-entry.system{color:var(--text-muted);font-family:var(--font);font-size:12px;}
+.log-entry.user .prefix{color:var(--accent);}
+.log-entry.assistant .prefix{color:var(--accent-2);}
+.log-entry.partial{color:var(--text-muted);font-style:italic;}
+.log-entry.state{color:var(--accent);}
+.log-entry.muted-label{color:var(--danger);}
+.log-entry .glyph{margin-right:4px;font-size:11px;}
+
+/* App card */
+.app-card{
+  border-radius:var(--radius);
+  margin:6px 0;
+  background:var(--surface);
+  box-shadow:0 2px 12px rgba(0,0,0,0.09),0 0 0 0.5px var(--border);
+  overflow:hidden;
+  animation:entry-in 0.35s var(--ease) both;
+}
+.app-card-header{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 12px 7px;
+  border-bottom:0.5px solid var(--border);
+}
+.app-card-icon{
+  width:22px;height:22px;border-radius:6px;
+  background:linear-gradient(135deg,#0A84FF,#5AC8FA);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:#fff;flex-shrink:0;
+}
+.app-card-title{font-size:12px;font-weight:600;color:var(--text);font-family:var(--font);}
+.app-card-expand{
+  margin-left:auto;font-size:11px;color:var(--accent);
+  cursor:pointer;background:none;border:none;
+  font-family:var(--font);font-weight:400;
+  transition:opacity 0.2s;padding:0;
+}
+.app-card-expand:hover{opacity:0.7;}
+.app-card-body{padding:10px 12px;font-family:var(--font);}
+.weather-temp{font-size:28px;font-weight:300;color:var(--text);}
+.weather-desc{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.weather-row{display:flex;gap:16px;margin-top:6px;}
+.weather-stat{font-size:11px;color:var(--text-muted);}
+.weather-stat span{color:var(--text);}
+.app-card-actions{
+  display:flex;gap:8px;padding:8px 12px;
+  border-top:0.5px solid var(--border);
+}
+.card-btn{
+  flex:1;padding:6px 0;border-radius:var(--radius-sm);
+  background:rgba(10,132,255,0.1);border:none;
+  color:var(--accent);font-size:12px;font-weight:500;
+  cursor:pointer;font-family:var(--font);
+  transition:all 0.25s var(--ease);
+}
+.card-btn:hover{background:rgba(10,132,255,0.18);}
+
+/* Log attachment */
+.log-attach{
+  display:inline-flex;align-items:center;gap:3px;
+  background:rgba(10,132,255,0.08);
+  border-radius:5px;padding:1px 7px;
+  font-size:11px;color:var(--accent);margin-right:4px;
+}
+
+/* Suggestions */
+.suggestions{
+  padding:5px 16px 8px;
+  display:flex;flex-wrap:wrap;gap:6px;
+  transition:opacity 0.25s var(--ease);flex-shrink:0;
+}
+.suggestions.hidden{opacity:0;pointer-events:none;}
+.suggest-chip{
+  background:var(--bg);border-radius:20px;
+  padding:4px 12px;font-size:12px;color:var(--accent);
+  cursor:pointer;font-family:var(--font);
+  border:none;transition:all 0.25s var(--ease);white-space:nowrap;
+}
+.suggest-chip:hover{background:rgba(10,132,255,0.1);}
+
+/* Attach staging */
+.attach-staging{
+  display:flex;flex-wrap:wrap;gap:6px;
+  padding:3px 16px 0;flex-shrink:0;min-height:0;
+}
+.attach-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(10,132,255,0.08);
+  border-radius:8px;padding:4px 10px;
+  font-size:11px;color:var(--accent);
+  font-family:var(--font-mono);
+  animation:entry-in 0.25s var(--ease) both;
+}
+.attach-chip button{
+  background:none;border:none;color:var(--text-muted);
+  cursor:pointer;font-size:13px;line-height:1;padding:0;
+}
+.attach-chip button:hover{color:var(--danger);}
+
+/* Composer */
+.composer{
+  padding:8px 16px 14px;
+  border-top:0.5px solid var(--border);
+  background:rgba(255,255,255,0.95);
+  backdrop-filter:blur(16px);
+  flex-shrink:0;
+}
+.composer-row{display:flex;align-items:center;gap:7px;}
+.composer-prompt{
+  font-family:var(--font-mono);font-size:13px;
+  color:var(--accent);font-weight:600;flex-shrink:0;
+  line-height:36px;
+}
+.composer-input-wrap{flex:1;position:relative;}
+.composer-input{
+  width:100%;
+  background:var(--bg);
+  border:none;border-radius:var(--radius-sm);
+  padding:8px 12px;
+  font-family:var(--font-mono);font-size:13px;
+  color:var(--text);outline:none;resize:none;
+  height:36px;line-height:20px;
+  transition:box-shadow 0.25s var(--ease);
+  caret-color:var(--accent);
+}
+.composer-input:focus{box-shadow:0 0 0 3px rgba(10,132,255,0.2);}
+.composer-input::placeholder{color:var(--text-muted);}
+
+.attach-btn{
+  width:36px;height:36px;border-radius:var(--radius-sm);
+  background:var(--bg);border:none;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text-muted);font-size:16px;
+  transition:all 0.25s var(--ease);flex-shrink:0;
+}
+.attach-btn:hover{background:rgba(10,132,255,0.1);color:var(--accent);}
+
+.action-btn{
+  width:36px;height:36px;border-radius:var(--radius-sm);
+  border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;flex-shrink:0;
+  transition:all 0.25s var(--ease);
+  background:var(--accent);color:#fff;
+  box-shadow:0 2px 8px rgba(10,132,255,0.35);
+}
+.action-btn:hover{transform:scale(1.04);}
+.action-btn.stop{background:var(--danger);box-shadow:0 2px 8px rgba(255,59,48,0.35);}
+.action-btn.send{background:var(--accent-2);box-shadow:0 2px 8px rgba(48,209,88,0.35);}
+
+.mute-btn{
+  width:32px;height:32px;border-radius:var(--radius-sm);
+  background:var(--bg);border:none;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:13px;color:var(--text-muted);flex-shrink:0;
+  transition:all 0.25s var(--ease);
+}
+.mute-btn:hover{background:rgba(255,59,48,0.1);color:var(--danger);}
+.mute-btn.active{background:rgba(255,59,48,0.1);color:var(--danger);}
+
+.listening-indicator{
+  display:flex;align-items:center;gap:6px;
+  padding:3px 0 2px;
+  font-family:var(--font);font-size:11px;
+  color:var(--accent);font-weight:500;
+  opacity:0;transition:opacity 0.25s var(--ease);
+}
+.listening-indicator.visible{opacity:1;}
+.mic-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--accent);
+  animation:mic-blink 1s ease-in-out infinite;
+}
+@keyframes mic-blink{0%,100%{opacity:1;}50%{opacity:0.25;};}
+
+.play-demo-btn{
+  display:flex;align-items:center;gap:6px;
+  margin-top:8px;padding:7px 14px;
+  border-radius:var(--radius-sm);
+  background:var(--bg);border:none;
+  cursor:pointer;font-family:var(--font);font-size:12px;
+  color:var(--text-muted);
+  width:100%;justify-content:center;
+  transition:all 0.25s var(--ease);font-weight:500;
+}
+.play-demo-btn:hover{background:rgba(10,132,255,0.08);color:var(--accent);}
+
+@media(min-width:640px){
+  .app-window{width:440px;height:720px;}
+}
+</style>
+</head>
+<body>
+
+<div class="app-window" id="appWindow">
+  <!-- Title bar -->
+  <div class="title-bar">
+    <div class="title-dots">
+      <div class="title-dot dot-red"></div>
+      <div class="title-dot dot-yellow"></div>
+      <div class="title-dot dot-green"></div>
+    </div>
+    <div class="title-text">Eliza Terminal</div>
+    <div class="title-conn" id="titleConn">● Connected</div>
+  </div>
+
+  <!-- Avatar + waveform -->
+  <div class="avatar-bar">
+    <div class="avatar-orb" id="avatarOrb">
+      <div class="orb-ring"></div>
+      <div class="orb-inner"></div>
+      <div class="orb-glow"></div>
+    </div>
+    <div class="waveform-display" id="waveformDisplay"></div>
+    <div class="avatar-state-label" id="avatarLabel">IDLE</div>
+  </div>
+
+  <!-- Console log -->
+  <div class="console-log" id="consoleLog">
+    <div class="log-entry system">Eliza Terminal · Clean System · v2.1</div>
+    <div class="log-entry system">try: <span style="color:var(--accent)">weather</span>, <span style="color:var(--accent)">/summarize</span>, <span style="color:var(--accent)">/imagine</span></div>
+    <div class="log-entry" style="height:6px"></div>
+
+    <!-- Interrupted turn -->
+    <div class="log-entry assistant"><span class="prefix">eliza&gt;</span> <span style="color:var(--text-muted)">Your calendar shows a conflict on Thursday — the team sync overlaps with your dentist appoin</span><span style="color:var(--danger)">— [interrupted]</span></div>
+
+    <!-- Voice turn -->
+    <div class="log-entry user">
+      <span class="glyph">🎙</span><span class="prefix">you&gt;</span> What's the weather in San Francisco today?
+    </div>
+
+    <!-- App card reply -->
+    <div class="log-entry assistant"><span class="prefix">eliza&gt;</span> Current conditions:</div>
+    <div class="log-entry">
+      <div class="app-card">
+        <div class="app-card-header">
+          <div class="app-card-icon">☀</div>
+          <div class="app-card-title">Weather · San Francisco</div>
+          <button class="app-card-expand" onclick="alert('Full view')">Details</button>
+        </div>
+        <div class="app-card-body">
+          <div class="weather-temp">68°F</div>
+          <div class="weather-desc">Mostly Sunny · marine layer at dusk</div>
+          <div class="weather-row">
+            <div class="weather-stat">Humidity <span>54%</span></div>
+            <div class="weather-stat">Wind <span>12 mph W</span></div>
+            <div class="weather-stat">UV <span>5</span></div>
+          </div>
+        </div>
+        <div class="app-card-actions">
+          <button class="card-btn">7-Day Forecast</button>
+          <button class="card-btn">Set Rain Alert</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Typed turn with attachment -->
+    <div class="log-entry user">
+      <span class="glyph">⌨</span><span class="prefix">you&gt;</span>
+      <span class="log-attach">📎 report.pdf</span>
+      Summarize this for me
+    </div>
+    <div class="log-entry assistant"><span class="prefix">eliza&gt;</span> The report covers Q2 performance across three product lines. Revenue was up 14% YoY, driven by enterprise contracts. Key risk flagged: customer acquisition cost rose 22% — management recommends a 15% budget reallocation to retention programs for Q3.</div>
+
+    <!-- Partial transcript -->
+    <div class="log-entry partial" id="partialLine" style="display:none">
+      <span class="glyph">🎙</span><span style="color:var(--accent)">you&gt;</span> <span id="partialText" style="color:var(--text-muted);font-style:italic"></span><span style="color:var(--accent);opacity:0.5">▌</span>
+    </div>
+  </div>
+
+  <!-- Suggestions -->
+  <div class="suggestions" id="suggestions">
+    <span class="suggest-chip" onclick="insertSuggest('/imagine a coastal sunrise')">✦ /imagine</span>
+    <span class="suggest-chip" onclick="insertSuggest('/summarize')">◈ /summarize</span>
+    <span class="suggest-chip" onclick="insertSuggest('weather today')">☁ weather</span>
+    <span class="suggest-chip" onclick="insertSuggest('/timer 25min')">⏱ /timer</span>
+  </div>
+
+  <!-- Attach staging -->
+  <div class="attach-staging" id="attachStaging"></div>
+
+  <!-- Composer -->
+  <div class="composer">
+    <div class="listening-indicator" id="listeningIndicator">
+      <div class="mic-dot"></div>
+      <span>Listening…</span>
+    </div>
+    <div class="composer-row">
+      <div class="composer-prompt">you&gt;</div>
+      <div class="composer-input-wrap">
+        <input type="text" class="composer-input" id="composerInput"
+          placeholder="type or speak a command…" autocomplete="off">
+      </div>
+      <button class="attach-btn" id="attachBtn" title="Attach" onclick="addAttachment()">+</button>
+      <button class="mute-btn" id="muteBtn" onclick="toggleMute()">🎤</button>
+      <button class="action-btn" id="actionBtn" onclick="handleAction()">🎙</button>
+    </div>
+    <button class="play-demo-btn" id="demoBtn" onclick="runDemo()">▶ Play voice demo</button>
+  </div>
+</div>
+
+<script>
+// ── State ──
+let state='idle';let isMuted=false;
+let demoTimer=null;let ampInterval=null;let streamInterval=null;
+let attachments=[];let isGenerating=false;
+
+// ── Wave bars ──
+const WAVE_COUNT=22;
+const waveDisplay=document.getElementById('waveformDisplay');
+const bars=[];
+for(let i=0;i<WAVE_COUNT;i++){
+  const b=document.createElement('div');b.className='wave-bar';
+  b.style.cssText='height:2px;';waveDisplay.appendChild(b);bars.push(b);
+}
+
+function animateBars(t){
+  bars.forEach((b,i)=>{
+    let h,color,op;
+    if(isMuted){
+      h=2;color='var(--danger)';op=0.2;
+    } else if(state==='listening'){
+      const a=window._micAmp||0.3;
+      h=2+a*20*Math.abs(Math.sin(t*5+i*0.7+Math.random()*0.3));
+      color='var(--accent)';op=0.4+a*0.5;
+    } else if(state==='thinking'){
+      h=2+7*Math.abs(Math.sin(t*1.8+i*0.85));
+      color='#BF5AF2';op=0.35;
+    } else if(state==='speaking'){
+      const e=window._ttsEnv||0.5;
+      h=2+e*16*Math.abs(Math.sin(t*6+i*0.5));
+      color='var(--accent-2)';op=0.4+e*0.4;
+    } else {
+      h=2+3*Math.sin(t*0.7+i*0.5)*Math.sin(t*0.3);
+      color='var(--accent)';op=0.3;
+    }
+    b.style.height=Math.max(2,Math.min(22,h))+'px';
+    b.style.background=color;b.style.opacity=op;
+  });
+}
+
+let _t=0;
+function rafLoop(ts){_t=ts/1000;animateBars(_t);requestAnimationFrame(rafLoop);}
+requestAnimationFrame(rafLoop);
+
+function startMicSim(){window._micAmp=0.3;ampInterval=setInterval(()=>{window._micAmp=0.15+0.85*Math.pow(Math.random(),0.45);},110);}
+function stopMicSim(){clearInterval(ampInterval);window._micAmp=0;}
+function startTTSSim(){window._ttsEnv=0.5;ampInterval=setInterval(()=>{window._ttsEnv=0.3+0.7*Math.abs(Math.sin(Date.now()/750+Math.random()*0.5));},95);}
+function stopTTSSim(){clearInterval(ampInterval);window._ttsEnv=0;}
+
+// ── Avatar state ──
+const orbEl=document.getElementById('avatarOrb');
+const labelEl=document.getElementById('avatarLabel');
+function setAvatarState(s){
+  state=s;
+  orbEl.className='avatar-orb '+(isMuted?'muted':s);
+  labelEl.className='avatar-state-label '+(isMuted?'muted':s);
+  const lbl={idle:'IDLE',listening:'[LISTENING]',thinking:'[THINKING…]',speaking:'[SPEAKING]',muted:'[MUTED]'};
+  labelEl.textContent=isMuted?'[MUTED]':(lbl[s]||s.toUpperCase());
+}
+
+// ── Log ──
+const log=document.getElementById('consoleLog');
+function addLog(type,html){
+  const partial=document.getElementById('partialLine');
+  const e=document.createElement('div');e.className='log-entry '+type;e.innerHTML=html;
+  log.insertBefore(e,partial);log.scrollTop=log.scrollHeight;return e;
+}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+const listeningInd=document.getElementById('listeningIndicator');
+function showListening(v){listeningInd.className='listening-indicator'+(v?' visible':'');}
+
+// ── Action button ──
+const actionBtn=document.getElementById('actionBtn');
+const composerInput=document.getElementById('composerInput');
+function updateActionBtn(){
+  if(isGenerating){actionBtn.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="2" width="10" height="10" rx="2" fill="white"/></svg>';actionBtn.className='action-btn stop';}
+  else if(state==='listening'){actionBtn.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="2" width="10" height="10" rx="2" fill="white"/></svg>';actionBtn.className='action-btn stop';}
+  else if(composerInput.value.trim()){actionBtn.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 11V3M7 3L3 7M7 3l4 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';actionBtn.className='action-btn send';}
+  else{actionBtn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2a4 4 0 0 1 4 4v7a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z" fill="white"/><path d="M19 11v1a7 7 0 0 1-14 0v-1" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="21" x2="12" y2="23" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>';actionBtn.className='action-btn';}
+}
+
+composerInput.addEventListener('input',()=>{
+  updateActionBtn();
+  document.getElementById('suggestions').className='suggestions'+(composerInput.value.trim()?' hidden':'');
+});
+composerInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(composerInput.value.trim())sendTyped();}});
+
+function handleAction(){
+  if(isGenerating){cancelGeneration();return;}
+  if(state==='listening'){stopListening();return;}
+  if(composerInput.value.trim()){sendTyped();return;}
+  startListeningManual();
+}
+
+const REPLIES=[
+  'Your Thursday calendar has two conflicts. The 10am standup and 10:15am review overlap. I\'d suggest moving the review to 11:30am — your next opening. Should I send the reschedule request?',
+  'Q2 summary: Revenue up 14% ($24.8M), ARR $92M, NRR 118%. Three risks: CAC increase +22%, churn uptick in SMB segment, and delayed Series C close. Board deck is due Friday.',
+  'That async race condition: both handlers are triggered by the same event listener but resolve on different microtask cycles. Add a dedup flag or use a mutex pattern — I can write the implementation.',
+  'The BART Richmond line: 6:22pm from Civic Center, arrives 16th St 6:28pm. Last train is 11:48pm. Clipper balance $12.40. Save tap time: tap at the reader, not the gate.',
+];
+
+function sendTyped(){
+  const text=composerInput.value.trim();if(!text)return;
+  const chips=attachments.slice();composerInput.value='';updateActionBtn();
+  document.getElementById('suggestions').className='suggestions';
+  let ah=chips.map(a=>`<span class="log-attach">${a}</span>`).join('');
+  attachments=[];renderAttachStaging();
+  addLog('user',`<span class="glyph">⌨</span><span class="prefix">you&gt;</span> ${ah}${esc(text)}`);
+  triggerReply(text);
+}
+
+function triggerReply(trigger,isVoice=false){
+  isGenerating=true;updateActionBtn();setAvatarState('thinking');
+  setTimeout(()=>{
+    if(!isGenerating)return;
+    setAvatarState('speaking');startTTSSim();
+    const reply=REPLIES[Math.floor(Math.random()*REPLIES.length)];
+    const e=addLog('assistant',`<span class="prefix">eliza&gt;</span> `);
+    let i=0;const cur=document.createElement('span');
+    cur.textContent='▌';cur.style.cssText='color:var(--accent);opacity:0.5;';
+    e.appendChild(cur);
+    streamInterval=setInterval(()=>{
+      if(i>=reply.length||!isGenerating){
+        clearInterval(streamInterval);cur.remove();
+        stopTTSSim();isGenerating=false;setAvatarState('idle');updateActionBtn();return;
+      }
+      cur.before(document.createTextNode(reply[i++]));log.scrollTop=log.scrollHeight;
+    },24);
+  },700+Math.random()*500);
+}
+
+function cancelGeneration(){
+  isGenerating=false;clearInterval(streamInterval);stopTTSSim();stopMicSim();
+  setAvatarState('idle');showListening(false);updateActionBtn();
+  addLog('state','<span style="color:var(--danger)">^C</span> <span style="color:var(--text-muted)">Generation stopped</span>');
+}
+
+function startListeningManual(){
+  if(isMuted)return;
+  setAvatarState('listening');showListening(true);startMicSim();updateActionBtn();
+  setTimeout(()=>{if(state==='listening')stopListening();},3000);
+}
+function stopListening(){stopMicSim();showListening(false);setAvatarState('idle');updateActionBtn();}
+
+const muteBtn=document.getElementById('muteBtn');
+function toggleMute(){
+  isMuted=!isMuted;
+  muteBtn.className='mute-btn'+(isMuted?' active':'');
+  muteBtn.textContent=isMuted?'🔇':'🎤';
+  if(isMuted){
+    stopMicSim();showListening(false);setAvatarState('muted');
+    addLog('muted-label','<span style="color:var(--danger)">[MUTED]</span> <span style="color:var(--text-muted)">Microphone disabled</span>');
+  } else {
+    setAvatarState('idle');
+    addLog('state','<span style="color:var(--accent-2)">[UNMUTED]</span> <span style="color:var(--text-muted)">Microphone enabled</span>');
+  }
+  updateActionBtn();
+}
+
+const attachStaging=document.getElementById('attachStaging');
+const ATTACH_NAMES=['📎 report.pdf','🖼 photo.jpg','📄 notes.txt','📊 data.csv','🎵 audio.m4a'];
+function addAttachment(){
+  const name=ATTACH_NAMES[attachments.length%ATTACH_NAMES.length];
+  attachments.push(name);renderAttachStaging();
+}
+function renderAttachStaging(){
+  attachStaging.innerHTML='';
+  attachments.forEach((a,i)=>{
+    const chip=document.createElement('div');chip.className='attach-chip';
+    chip.innerHTML=`${a} <button onclick="removeAttach(${i})">×</button>`;
+    attachStaging.appendChild(chip);
+  });
+}
+function removeAttach(i){attachments.splice(i,1);renderAttachStaging();}
+function insertSuggest(t){composerInput.value=t;composerInput.dispatchEvent(new Event('input'));composerInput.focus();}
+
+// ── Demo ──
+const DEMO_PARTIAL=['Set','Set a','Set a reminder','Set a reminder for','Set a reminder for my','Set a reminder for my 3pm','Set a reminder for my 3pm meeting'];
+function runDemo(){
+  if(demoTimer)clearTimeout(demoTimer);
+  cancelGeneration();stopMicSim();showListening(false);composerInput.value='';
+  const partial=document.getElementById('partialLine');
+  const partialText=document.getElementById('partialText');
+  partial.style.display='none';
+  document.getElementById('demoBtn').textContent='↻ Running…';
+
+  demoTimer=setTimeout(()=>{
+    setAvatarState('listening');showListening(true);startMicSim();updateActionBtn();
+    partial.style.display='block';partialText.textContent='';
+    addLog('state','<span style="color:var(--accent)">[LISTENING ▂▅▇▃▁]</span> <span style="color:var(--text-muted)">Speak now</span>');
+    let pi=0;
+    const pt=setInterval(()=>{
+      if(pi<DEMO_PARTIAL.length){partialText.textContent=DEMO_PARTIAL[pi++];log.scrollTop=log.scrollHeight;}
+      else {
+        clearInterval(pt);
+        demoTimer=setTimeout(()=>{
+          stopMicSim();showListening(false);partial.style.display='none';
+          addLog('user',`<span class="glyph">🎙</span><span class="prefix">you&gt;</span> ${esc(DEMO_PARTIAL[DEMO_PARTIAL.length-1])}`);
+          setAvatarState('thinking');updateActionBtn();
+          demoTimer=setTimeout(()=>{
+            setAvatarState('speaking');startTTSSim();isGenerating=true;updateActionBtn();
+            const reply='Reminder set for 2:55pm — 5 minutes before your 3pm team sync. I\'ll send a notification to all your devices. Should I also block 20 minutes before for prep time?';
+            const e=addLog('assistant',`<span class="prefix">eliza&gt;</span> `);
+            let ri=0;const cur=document.createElement('span');
+            cur.textContent='▌';cur.style.cssText='color:var(--accent);opacity:0.5;';
+            e.appendChild(cur);
+            const st=setInterval(()=>{
+              if(ri>=reply.length){
+                clearInterval(st);cur.remove();stopTTSSim();isGenerating=false;
+                setAvatarState('idle');updateActionBtn();
+                document.getElementById('demoBtn').textContent='▶ Play again';
+                addLog('system','<span style="color:var(--text-muted)">try: <span style="color:var(--accent)">add prep block</span> · <span style="color:var(--accent)">show my day</span></span>');
+                return;
+              }
+              cur.before(document.createTextNode(reply[ri++]));log.scrollTop=log.scrollHeight;
+            },23);
+          },750);
+        },350);
+      }
+    },175);
+  },500);
+}
+
+setTimeout(runDemo,1000);
+</script>
+</body>
+</html>

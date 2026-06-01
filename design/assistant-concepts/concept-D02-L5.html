@@ -1,0 +1,1238 @@
+<!-- concept-D02-L5 | direction: Full-Screen Avatar + Floating Captions | look: Brutalist Mono | targets: 420x760, 960x640 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D02 · Full-Screen Avatar + Floating Captions · Brutalist Mono</title>
+<style>
+:root {
+  --bg:#F4F2EC;
+  --surface:#FFFFFF;
+  --surface-2:#E8E5DC;
+  --border:#111111;
+  --text:#111111;
+  --text-muted:#555555;
+  --accent:#1A57FF;
+  --accent-2:#FF4A00;
+  --danger:#D90429;
+  --radius:0px;
+  --radius-sm:0px;
+  --font:"JetBrains Mono","IBM Plex Mono","SF Mono","Cascadia Mono","Courier New",monospace;
+  --shadow:4px 4px 0 #111111;
+  --shadow-sm:2px 2px 0 #111111;
+  --border-w:2px;
+  --ease:steps(1,end);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: #CCCCBB;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.app-frame {
+  width: 420px;
+  height: 760px;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg);
+  border: var(--border-w) solid var(--border);
+  box-shadow: 8px 8px 0 #111111;
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+}
+
+/* Header bar */
+.header-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: var(--text);
+  color: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  z-index: 20;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.header-brand { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; }
+.header-status { font-size: 10px; color: rgba(244,242,236,0.6); }
+
+/* Avatar stage — the waveform / block-art container */
+.avatar-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 128px;
+  transition: none;
+  z-index: 1;
+}
+
+/* When feed is active, avatar shifts to corner — hard snap */
+.avatar-stage.feed-active {
+  transform: scale(0.5) translate(-150px, -40px);
+  transform-origin: top center;
+  transition: none;
+}
+
+.orb {
+  width: 150px;
+  height: 150px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-w) solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+/* State text label inside avatar */
+.avatar-state-text {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  transition: none;
+}
+
+.avatar-state-text.active { color: var(--text); }
+.avatar-state-text.listening-state { color: var(--accent); }
+.avatar-state-text.thinking-state { color: var(--accent-2); }
+.avatar-state-text.speaking-state { color: var(--text); }
+
+/* Waveform block characters — the avatar core */
+.waveform-display {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+  line-height: 1;
+  text-align: center;
+}
+
+/* Individual bar chars for the big waveform */
+.wf-bar-display {
+  display: inline-block;
+  width: 1ch;
+  text-align: center;
+  vertical-align: bottom;
+  transition: none;
+}
+
+/* Spinner for thinking */
+.spinner-display {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--accent-2);
+  display: none;
+  letter-spacing: 0;
+}
+
+/* Idle blinking cursor */
+.cursor-display {
+  font-size: 40px;
+  font-weight: 400;
+  color: var(--text);
+  animation: blinkCursor steps(1,end) 1s infinite;
+  display: none;
+}
+
+@keyframes blinkCursor {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* Border flash on state changes */
+@keyframes borderFlash {
+  0% { border-color: var(--accent); }
+  50% { border-color: var(--text); }
+  100% { border-color: var(--border); }
+}
+
+/* Inverted accent block for speaking */
+.speak-block {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  background: var(--text);
+  transition: none;
+}
+
+/* Caption box */
+.caption-box {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+  box-shadow: var(--shadow);
+  padding: 10px 12px;
+  z-index: 10;
+  top: auto;
+  bottom: 190px;
+  margin-top: 0;
+  transition: none;
+}
+
+.caption-box.feed-active {
+  top: 168px;
+  bottom: auto;
+  margin-top: 0;
+  transition: none;
+}
+
+.caption-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.caption-label::before {
+  content: '>';
+  color: var(--accent);
+  font-weight: 900;
+}
+
+.caption-text {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.55;
+  min-height: 52px;
+}
+
+/* Inline app/widget card surfaced in the live caption flow,
+   sits in the open band between the orb and the caption */
+.inline-card {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 292px;
+  z-index: 11;
+  display: none;
+}
+
+.inline-card.visible { display: block; }
+.inline-card .app-card { max-width: 100%; box-shadow: var(--shadow); padding: 8px 10px; }
+.inline-card .app-card-header { margin-bottom: 6px; padding-bottom: 5px; }
+.inline-card .weather-display { padding: 2px 0; }
+.inline-card .weather-temp { font-size: 28px; }
+.inline-card .card-actions { margin-top: 6px; }
+.inline-card .card-btn { padding: 5px; }
+
+/* Suggestion chips */
+.chips-area {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  z-index: 10;
+  bottom: 130px;
+}
+
+.chip {
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+  padding: 4px 10px;
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text);
+  cursor: pointer;
+  transition: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.chip:hover { background: var(--text); color: var(--bg); box-shadow: none; }
+.chip.dismiss { display: none; }
+
+/* Listen indicator */
+.listen-indicator {
+  position: absolute;
+  top: 48px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent);
+  border: var(--border-w) solid var(--border);
+  padding: 5px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: white;
+  opacity: 0;
+  z-index: 20;
+  box-shadow: var(--shadow-sm);
+  transition: none;
+}
+
+.listen-indicator.visible { opacity: 1; }
+.listen-indicator.muted { background: var(--danger); }
+
+.mic-dot {
+  width: 8px;
+  height: 8px;
+  background: white;
+  animation: blinkCursor steps(1,end) 0.6s infinite;
+}
+
+/* Muted banner */
+.muted-banner {
+  position: absolute;
+  top: 78px;
+  left: 16px;
+  right: 16px;
+  background: var(--danger);
+  border: var(--border-w) solid var(--border);
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: white;
+  display: none;
+  z-index: 20;
+  box-shadow: var(--shadow-sm);
+}
+
+.muted-banner.visible { display: block; }
+
+/* Controls */
+.controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 10px 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--surface-2);
+  border-top: var(--border-w) solid var(--border);
+  z-index: 15;
+}
+
+.ctrl-btn {
+  width: 46px;
+  height: 46px;
+  border: var(--border-w) solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--text-muted);
+  outline: none;
+  font-family: var(--font);
+  box-shadow: var(--shadow-sm);
+  transition: none;
+}
+
+.ctrl-btn:hover { background: var(--text); color: var(--bg); box-shadow: none; }
+.ctrl-btn:active { transform: translate(2px, 2px); box-shadow: none; }
+.ctrl-btn.active { background: var(--accent); color: white; box-shadow: none; }
+.ctrl-btn.muted-btn { background: var(--danger); color: white; box-shadow: none; }
+
+/* Main mic button — larger */
+.mic-btn {
+  width: 58px;
+  height: 58px;
+  border: var(--border-w) solid var(--border);
+  background: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: var(--bg);
+  outline: none;
+  box-shadow: var(--shadow);
+  transition: none;
+}
+
+.mic-btn:hover { background: var(--accent); color: white; }
+.mic-btn:active { transform: translate(4px, 4px); box-shadow: none; }
+.mic-btn.listening { background: var(--accent); color: white; box-shadow: none; animation: listenBlink steps(1,end) 1s infinite; }
+
+@keyframes listenBlink {
+  0%, 49% { border-color: var(--accent); }
+  50%, 100% { border-color: var(--text); }
+}
+
+/* Composer */
+.composer-overlay {
+  position: absolute;
+  bottom: 84px;
+  left: 12px;
+  right: 12px;
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+  box-shadow: var(--shadow);
+  padding: 8px 10px;
+  display: none;
+  gap: 8px;
+  align-items: flex-end;
+  z-index: 20;
+}
+
+.composer-overlay.visible { display: flex; }
+
+.composer-overlay textarea {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: var(--font);
+  font-size: 12px;
+  color: var(--text);
+  resize: none;
+  outline: none;
+  line-height: 1.4;
+  max-height: 80px;
+  min-height: 32px;
+}
+
+.composer-overlay textarea::placeholder { color: var(--text-muted); }
+
+.send-btn {
+  width: 32px;
+  height: 32px;
+  border: var(--border-w) solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-family: var(--font);
+  box-shadow: var(--shadow-sm);
+  transition: none;
+  flex-shrink: 0;
+}
+
+.send-btn:hover { background: var(--text); color: var(--bg); box-shadow: none; }
+.send-btn.send-mode { background: var(--accent); color: white; box-shadow: none; }
+.send-btn.stop-mode { background: var(--danger); color: white; box-shadow: none; }
+
+/* Transcript */
+.transcript-panel {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  overflow-y: auto;
+  padding: 40px 12px 100px;
+  z-index: 30;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  border: none;
+}
+
+.transcript-panel.visible { display: flex; }
+
+.transcript-header {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 6px 0;
+  border-bottom: var(--border-w) solid var(--border);
+  margin-bottom: 4px;
+}
+
+.turn { display: flex; flex-direction: column; gap: 3px; }
+.turn.user { align-items: flex-end; }
+.turn.assistant { align-items: flex-start; }
+
+.turn-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.turn-bubble {
+  max-width: 85%;
+  padding: 7px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.turn.user .turn-bubble {
+  background: var(--text);
+  color: var(--bg);
+  box-shadow: none;
+}
+
+.turn-bubble.partial { opacity: 0.45; }
+.turn-bubble.interrupted::after { content: ' [CUT]'; font-size: 9px; color: var(--accent-2); font-weight: 700; }
+
+/* App card */
+.app-card {
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+  padding: 10px;
+  max-width: 88%;
+  box-shadow: var(--shadow);
+}
+
+.app-card-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding-bottom: 6px;
+  border-bottom: var(--border-w) solid var(--border);
+}
+
+.app-icon { width: 18px; height: 18px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 10px; }
+.weather-display { text-align: center; padding: 6px 0; }
+.weather-temp { font-size: 36px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
+.weather-cond { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin-top: 2px; }
+.weather-row { display: flex; justify-content: space-around; margin-top: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.04em; }
+.card-actions { display: flex; gap: 6px; margin-top: 8px; }
+.card-btn { flex: 1; padding: 6px; border: var(--border-w) solid var(--border); background: var(--surface-2); color: var(--text); font-family: var(--font); font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; box-shadow: var(--shadow-sm); }
+.card-btn:hover { background: var(--text); color: var(--bg); box-shadow: none; }
+
+/* Attach chips */
+.attach-chips { position: absolute; bottom: 148px; left: 12px; right: 12px; display: flex; gap: 6px; flex-wrap: wrap; z-index: 20; pointer-events: none; }
+.attach-chip { display: flex; align-items: center; gap: 4px; background: var(--surface-2); border: var(--border-w) solid var(--border); padding: 4px 8px; font-family: var(--font); font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); pointer-events: all; box-shadow: var(--shadow-sm); }
+.attach-chip span:first-of-type { color: var(--text); }
+.attach-chip button { background: none; border: none; color: var(--text); cursor: pointer; font-family: var(--font); font-size: 14px; font-weight: 900; line-height: 1; }
+
+/* Attachment chips rendered inside a sent message bubble */
+.bubble-attachments { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.bubble-attach { display: inline-flex; align-items: center; gap: 4px; border: var(--border-w) solid var(--bg); background: transparent; padding: 2px 6px; font-size: 9px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.bubble-attach .att-thumb { width: 14px; height: 14px; background: var(--bg); color: var(--text); display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 900; flex-shrink: 0; }
+
+/* Demo button */
+.demo-btn {
+  position: absolute;
+  top: 48px;
+  right: 12px;
+  background: var(--accent);
+  border: var(--border-w) solid var(--border);
+  padding: 5px 10px;
+  font-family: var(--font);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: white;
+  cursor: pointer;
+  z-index: 25;
+  box-shadow: var(--shadow-sm);
+  transition: none;
+}
+
+.demo-btn:hover { background: var(--text); box-shadow: none; }
+
+/* Keyboard button */
+.kbd-btn {
+  position: absolute;
+  bottom: 88px;
+  right: 12px;
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 20;
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--text-muted);
+  box-shadow: var(--shadow-sm);
+}
+
+.kbd-btn:hover { background: var(--text); color: var(--bg); box-shadow: none; }
+
+/* Feed window */
+.feed-window {
+  position: absolute;
+  top: 48px;
+  right: 12px;
+  width: 165px;
+  height: 108px;
+  border: var(--border-w) solid var(--border);
+  background: var(--surface-2);
+  display: none;
+  overflow: hidden;
+  z-index: 12;
+  box-shadow: var(--shadow);
+}
+
+.feed-window.visible { display: block; }
+.feed-label { position: absolute; top: 4px; left: 6px; font-family: var(--font); font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+.feed-dots { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 30px; opacity: 0.15; }
+
+/* Sharing badge */
+.sharing-badge {
+  position: absolute;
+  top: 48px;
+  left: 12px;
+  background: var(--accent-2);
+  border: var(--border-w) solid var(--border);
+  padding: 4px 8px;
+  font-family: var(--font);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: white;
+  display: none;
+  z-index: 20;
+  box-shadow: var(--shadow-sm);
+}
+
+.sharing-badge.visible { display: block; animation: sharingBlink steps(1,end) 2s infinite; }
+
+@keyframes sharingBlink {
+  0%, 74% { opacity: 1; }
+  75%, 100% { opacity: 0; }
+}
+
+/* State label under orb */
+.state-label {
+  position: absolute;
+  bottom: 52px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+  transition: none;
+}
+
+/* Waveform bars below orb (small, secondary) */
+.waveform-bars-small {
+  position: absolute;
+  bottom: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2px;
+  align-items: flex-end;
+  height: 20px;
+  opacity: 0;
+}
+
+.waveform-bars-small.visible { opacity: 1; }
+
+.bar-s {
+  width: 4px;
+  background: var(--accent);
+  min-height: 2px;
+}
+
+@media (max-width: 440px) { .app-frame { width: 100vw; height: 100vh; } }
+</style>
+</head>
+<body>
+<div class="app-frame" id="appFrame">
+
+  <!-- Header bar (inverted) -->
+  <div class="header-bar">
+    <span class="header-brand">ELIZA.EXE</span>
+    <span class="header-status" id="headerStatus">STANDBY</span>
+  </div>
+
+  <!-- Demo button -->
+  <button class="demo-btn" id="demoBtn">[PLAY DEMO]</button>
+
+  <!-- Sharing badge -->
+  <div class="sharing-badge" id="sharingBadge">[STREAMING]</div>
+
+  <!-- Listen indicator -->
+  <div class="listen-indicator" id="listenIndicator">
+    <div class="mic-dot"></div>
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+      <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+    </svg>
+    <span id="listenText">[LISTENING]</span>
+  </div>
+
+  <!-- Muted banner -->
+  <div class="muted-banner" id="mutedBanner">[MIC MUTED] STREAM STILL ACTIVE</div>
+
+  <!-- Avatar stage -->
+  <div class="avatar-stage" id="avatarStage">
+    <div class="orb" id="orb">
+      <!-- State text in corner -->
+      <div class="avatar-state-text" id="avatarStateText">[IDLE]</div>
+      <!-- Main waveform display -->
+      <div class="waveform-display" id="waveformDisplay">
+        <span class="wf-bar-display" id="wf0">▁</span><span class="wf-bar-display" id="wf1">▁</span><span class="wf-bar-display" id="wf2">▁</span><span class="wf-bar-display" id="wf3">▁</span><span class="wf-bar-display" id="wf4">▁</span><span class="wf-bar-display" id="wf5">▁</span><span class="wf-bar-display" id="wf6">▁</span>
+      </div>
+      <!-- Spinner (thinking) -->
+      <div class="spinner-display" id="spinnerDisplay">|</div>
+      <!-- Cursor (idle) -->
+      <div class="cursor-display" id="cursorDisplay">█</div>
+      <!-- Small bars below -->
+      <div class="waveform-bars-small" id="waveformBarsSmall">
+        <div class="bar-s" id="bs0"></div><div class="bar-s" id="bs1"></div><div class="bar-s" id="bs2"></div>
+        <div class="bar-s" id="bs3"></div><div class="bar-s" id="bs4"></div>
+      </div>
+    </div>
+    <div class="state-label" id="stateLabel">[READY]</div>
+  </div>
+
+  <!-- Feed window -->
+  <div class="feed-window" id="feedWindow">
+    <div class="feed-label" id="feedLabel">CAM</div>
+    <div class="feed-dots" id="feedDots">📷</div>
+  </div>
+
+  <!-- Inline app/widget card (surfaced in live flow) -->
+  <div class="inline-card" id="inlineCard"></div>
+
+  <!-- Caption box -->
+  <div class="caption-box" id="captionBox">
+    <div class="caption-label">ELIZA OUTPUT</div>
+    <div class="caption-text" id="captionText">SYSTEM READY. VOICE CHANNEL OPEN. BEGIN SPEAKING OR TYPE BELOW.</div>
+  </div>
+
+  <!-- Chips -->
+  <div class="chips-area" id="chipsArea">
+    <div class="chip" onclick="useChip(this,'What can you do?')">[HELP]</div>
+    <div class="chip" onclick="useChip(this,'Show weather')">[WEATHER]</div>
+    <div class="chip" onclick="useChip(this,'Help me write')">[WRITE]</div>
+  </div>
+
+  <!-- Attach chips -->
+  <div class="attach-chips" id="attachChips"></div>
+
+  <!-- Keyboard toggle -->
+  <button class="kbd-btn" id="kbdBtn">[⌨]</button>
+
+  <!-- Composer -->
+  <div class="composer-overlay" id="composerOverlay">
+    <textarea id="composerInput" rows="1" placeholder="> type command_"></textarea>
+    <button class="send-btn" id="sendBtn">[>]</button>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="ctrl-btn" id="muteBtn" onclick="toggleMute()" title="Mute">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+      </svg>
+    </button>
+    <button class="ctrl-btn" id="cameraBtn" onclick="toggleFeed('camera')" title="Camera">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M15 8v8H5V8h10m1-2H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4V7c0-.55-.45-1-1-1z"/>
+      </svg>
+    </button>
+    <button class="mic-btn" id="mainMicBtn" onclick="toggleVoice()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+      </svg>
+    </button>
+    <button class="ctrl-btn" id="screenBtn" onclick="toggleFeed('screen')" title="Screen share">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20 3H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h3l-1 1v1h12v-1l-1-1h3c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 13H4V5h16v11z"/>
+      </svg>
+    </button>
+    <button class="ctrl-btn" style="font-weight:900;color:var(--danger);" onclick="endSession()" title="End">[X]</button>
+    <button class="ctrl-btn" onclick="addAttachment()" title="Attach">[+]</button>
+  </div>
+
+  <!-- Transcript -->
+  <div class="transcript-panel" id="transcriptPanel"></div>
+</div>
+
+<script>
+// Block character sets for waveform
+const BLOCK_CHARS = ['▁','▂','▃','▄','▅','▆','▇','█'];
+const SPINNER_FRAMES = ['|','/','-','\\','|','/','-','\\'];
+let spinnerIdx = 0;
+let spinnerInterval = null;
+
+// ===== STATE =====
+let state = 'idle';
+let isMuted = false;
+let feedActive = false;
+let feedType = null;
+let composerVisible = false;
+let demoTimers = [];
+let isGenerating = false;
+let sessionLog = [];
+let ampPhase = 0;
+let animLoopId = null;
+let pendingAttachments = [];
+let attachSeq = 0;
+
+const wfBars = Array.from({length:7}, (_,i) => document.getElementById('wf'+i));
+const smallBars = Array.from({length:5}, (_,i) => document.getElementById('bs'+i));
+const waveformDisplay = document.getElementById('waveformDisplay');
+const spinnerDisplay = document.getElementById('spinnerDisplay');
+const cursorDisplay = document.getElementById('cursorDisplay');
+const avatarStateText = document.getElementById('avatarStateText');
+const orb = document.getElementById('orb');
+const avatarStage = document.getElementById('avatarStage');
+const captionBox = document.getElementById('captionBox');
+const captionText = document.getElementById('captionText');
+const listenIndicator = document.getElementById('listenIndicator');
+const listenText = document.getElementById('listenText');
+const mutedBanner = document.getElementById('mutedBanner');
+const chipsArea = document.getElementById('chipsArea');
+const composerOverlay = document.getElementById('composerOverlay');
+const composerInput = document.getElementById('composerInput');
+const sendBtn = document.getElementById('sendBtn');
+const muteBtn = document.getElementById('muteBtn');
+const feedWindow = document.getElementById('feedWindow');
+const sharingBadge = document.getElementById('sharingBadge');
+const transcriptPanel = document.getElementById('transcriptPanel');
+const attachChips = document.getElementById('attachChips');
+const stateLabel = document.getElementById('stateLabel');
+const waveformBarsSmall = document.getElementById('waveformBarsSmall');
+const headerStatus = document.getElementById('headerStatus');
+const inlineCard = document.getElementById('inlineCard');
+
+// Animation loop — stepwise not eased
+let lastAnimTime = 0;
+function animLoop(ts) {
+  if (ts - lastAnimTime < 80) { animLoopId = requestAnimationFrame(animLoop); return; } // ~12fps max for brutalist feel
+  lastAnimTime = ts;
+
+  if (state === 'listening' && !isMuted) {
+    ampPhase += 0.3;
+    const amp = Math.abs(Math.sin(ampPhase) * 0.6 + Math.sin(ampPhase * 2.1) * 0.4 + (Math.random()-0.5)*0.3);
+    wfBars.forEach((b,i) => {
+      const level = Math.max(0, Math.min(7, Math.floor(amp * 8 * (0.3 + 0.7 * Math.abs(Math.sin(ampPhase + i * 0.9))))));
+      if (b) b.textContent = BLOCK_CHARS[level];
+    });
+    smallBars.forEach((b,i) => {
+      const h = Math.max(2, Math.floor(amp * 18 * (0.3 + 0.7 * Math.abs(Math.sin(ampPhase + i * 1.1)))));
+      b.style.height = h + 'px';
+    });
+    waveformDisplay.style.color = 'var(--accent)';
+  } else if (state === 'speaking') {
+    ampPhase += 0.2;
+    const s = Math.abs(Math.sin(ampPhase * 1.8));
+    wfBars.forEach((b,i) => {
+      const level = Math.max(0, Math.min(7, Math.floor(s * 7 * (0.2 + 0.8 * Math.abs(Math.sin(ampPhase * 1.2 + i * 0.7))))));
+      if (b) b.textContent = BLOCK_CHARS[level];
+    });
+    smallBars.forEach(b => b.style.height = '2px');
+    waveformDisplay.style.color = 'var(--text)';
+  } else {
+    wfBars.forEach(b => { if(b) b.textContent = '▁'; });
+    smallBars.forEach(b => b.style.height = '2px');
+    waveformDisplay.style.color = 'var(--text-muted)';
+  }
+
+  animLoopId = requestAnimationFrame(animLoop);
+}
+animLoopId = requestAnimationFrame(animLoop);
+
+function startSpinner() {
+  spinnerIdx = 0;
+  spinnerDisplay.style.display = 'inline';
+  waveformDisplay.style.display = 'none';
+  cursorDisplay.style.display = 'none';
+  spinnerInterval = setInterval(() => {
+    spinnerDisplay.textContent = SPINNER_FRAMES[spinnerIdx++ % SPINNER_FRAMES.length];
+  }, 120);
+}
+
+function stopSpinner() {
+  if (spinnerInterval) { clearInterval(spinnerInterval); spinnerInterval = null; }
+  spinnerDisplay.style.display = 'none';
+}
+
+function setState(s) {
+  state = s;
+
+  // Avatar display modes
+  stopSpinner();
+  cursorDisplay.style.display = 'none';
+  waveformDisplay.style.display = 'inline';
+
+  avatarStateText.className = 'avatar-state-text';
+  orb.style.borderColor = 'var(--border)';
+  orb.style.background = 'var(--surface)';
+
+  switch(s) {
+    case 'idle':
+      waveformDisplay.style.display = 'none';
+      cursorDisplay.style.display = 'inline';
+      avatarStateText.textContent = '[IDLE]';
+      headerStatus.textContent = 'STANDBY';
+      break;
+    case 'listening':
+      waveformDisplay.style.display = 'inline';
+      avatarStateText.className = 'avatar-state-text listening-state';
+      avatarStateText.textContent = !isMuted ? '[LISTENING]' : '[MUTED]';
+      orb.style.borderColor = 'var(--accent)';
+      headerStatus.textContent = isMuted ? 'MUTED' : 'LISTENING';
+      waveformBarsSmall.classList.toggle('visible', !isMuted);
+      break;
+    case 'thinking':
+      startSpinner();
+      avatarStateText.className = 'avatar-state-text thinking-state';
+      avatarStateText.textContent = '[PROC]';
+      orb.style.borderColor = 'var(--accent-2)';
+      headerStatus.textContent = 'PROCESSING';
+      waveformBarsSmall.classList.remove('visible');
+      break;
+    case 'speaking':
+      waveformDisplay.style.display = 'inline';
+      avatarStateText.className = 'avatar-state-text speaking-state';
+      avatarStateText.textContent = '[OUTPUT]';
+      orb.style.background = 'var(--surface-2)';
+      headerStatus.textContent = 'OUTPUT';
+      waveformBarsSmall.classList.remove('visible');
+      break;
+  }
+
+  stateLabel.textContent = {idle:'[READY]', listening:'[LISTENING]', thinking:'[PROCESSING]', speaking:'[OUTPUT]'}[s] || '[?]';
+
+  // Listening indicator
+  listenIndicator.classList.toggle('visible', s === 'listening' && !isMuted);
+  listenIndicator.classList.toggle('muted', s === 'listening' && isMuted);
+  if (s === 'listening') { listenText.textContent = isMuted ? '[MUTED]' : '[LISTENING]'; }
+
+  document.getElementById('mainMicBtn').className = 'mic-btn' + (s === 'listening' ? ' listening' : '');
+}
+
+function toggleVoice() {
+  if (demoTimers.length) { clearDemoTimers(); setState('idle'); return; }
+  runDemoOnce();
+}
+
+function toggleMute() {
+  isMuted = !isMuted;
+  muteBtn.classList.toggle('muted-btn', isMuted);
+  mutedBanner.classList.toggle('visible', isMuted && feedActive);
+
+  if (isMuted) {
+    muteBtn.innerHTML = `<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M19 11h-1.7c0 .74-.16 1.43-.43 2.05l1.23 1.23c.56-.98.9-2.09.9-3.28zm-4.02.17c0-.06.02-.11.02-.17V5c0-1.66-1.34-3-3-3S9 3.34 9 5v.18l5.98 5.99zM4.27 3L3 4.27l6.01 6.01V11c0 1.66 1.34 3 3 3 .23 0 .44-.03.65-.08l1.66 1.66c-.71.33-1.5.52-2.31.52-2.76 0-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c.57-.08 1.12-.24 1.64-.46L19.73 21 21 19.73 4.27 3z"/></svg>`;
+    if (state === 'listening') { listenText.textContent = '[MUTED]'; listenIndicator.classList.add('muted'); waveformBarsSmall.classList.remove('visible'); avatarStateText.textContent = '[MUTED]'; headerStatus.textContent = 'MUTED'; }
+  } else {
+    muteBtn.innerHTML = `<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>`;
+    mutedBanner.classList.remove('visible');
+    if (state === 'listening') { listenText.textContent = '[LISTENING]'; listenIndicator.classList.remove('muted'); waveformBarsSmall.classList.add('visible'); avatarStateText.textContent = '[LISTENING]'; headerStatus.textContent = 'LISTENING'; }
+  }
+}
+
+function toggleFeed(type) {
+  if (feedActive && feedType === type) {
+    feedActive = false; feedType = null;
+    feedWindow.classList.remove('visible');
+    avatarStage.classList.remove('feed-active');
+    captionBox.classList.remove('feed-active');
+    sharingBadge.classList.remove('visible');
+    document.getElementById('screenBtn').classList.remove('active');
+    document.getElementById('cameraBtn').classList.remove('active');
+    mutedBanner.classList.remove('visible');
+    updateChips('idle');
+  } else {
+    feedActive = true; feedType = type; hideInlineCard();
+    feedWindow.classList.add('visible');
+    document.getElementById('feedLabel').textContent = type === 'camera' ? 'CAM' : 'SCR';
+    document.getElementById('feedDots').textContent = type === 'camera' ? '📷' : '🖥';
+    avatarStage.classList.add('feed-active');
+    captionBox.classList.add('feed-active');
+    if (type === 'screen') {
+      sharingBadge.classList.add('visible');
+      document.getElementById('screenBtn').classList.add('active');
+      document.getElementById('cameraBtn').classList.remove('active');
+      mutedBanner.classList.toggle('visible', isMuted);
+    } else {
+      document.getElementById('cameraBtn').classList.add('active');
+      document.getElementById('screenBtn').classList.remove('active');
+    }
+    updateChips('feed');
+  }
+}
+
+function updateChips(mode) {
+  chipsArea.innerHTML = mode === 'feed'
+    ? `<div class="chip" onclick="useChip(this,'Analyze screen')">[ANALYZE]</div><div class="chip" onclick="useChip(this,'Summarize screen')">[SUMMARIZE]</div>`
+    : `<div class="chip" onclick="useChip(this,'What can you do?')">[HELP]</div><div class="chip" onclick="useChip(this,'Show weather')">[WEATHER]</div><div class="chip" onclick="useChip(this,'Help me write')">[WRITE]</div>`;
+}
+
+function useChip(el, text) {
+  el.classList.add('dismiss');
+  composerInput.value = text; updateSendBtn(); sendMessage();
+}
+
+document.getElementById('kbdBtn').onclick = () => {
+  composerVisible = !composerVisible;
+  composerOverlay.classList.toggle('visible', composerVisible);
+  if (composerVisible) composerInput.focus();
+};
+
+composerInput.addEventListener('input', updateSendBtn);
+composerInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+
+function updateSendBtn() {
+  const val = composerInput.value.trim();
+  if (isGenerating) {
+    sendBtn.className = 'send-btn stop-mode'; sendBtn.textContent = '[■]';
+  } else if (val.length > 0 || pendingAttachments.length > 0) {
+    sendBtn.className = 'send-btn send-mode'; sendBtn.textContent = '[→]';
+  } else {
+    sendBtn.className = 'send-btn'; sendBtn.textContent = '[>]';
+  }
+}
+
+sendBtn.onclick = () => { if (isGenerating) { stopGen(); return; } sendMessage(); };
+
+function sendMessage() {
+  const val = composerInput.value.trim();
+  const attachments = pendingAttachments.slice();
+  if (!val && !attachments.length) return;
+  sessionLog.push({ role:'user', text: val || '[ATTACHMENT]', modality:'typed', attachments });
+  pendingAttachments = []; renderAttachChips();
+  composerInput.value = ''; updateSendBtn();
+  isGenerating = true; setState('thinking'); captionText.textContent = '...';
+  const resps = [
+    { text:"WEATHER // SAN FRANCISCO // 64F // PARTLY CLOUDY // WIND 12MPH W // HUMIDITY 72% // HIGH 68F", hasCard:true },
+    { text:"CAPABILITIES: VOICE CONVERSATION / SCREEN ANALYSIS / TEXT GENERATION / RESEARCH / CODE EXECUTION / REMINDERS", hasCard:false },
+    { text:"WRITE MODE ACTIVATED. SPECIFY: TYPE=EMAIL|CODE|CREATIVE|TECHNICAL. LENGTH=SHORT|MEDIUM|LONG. TONE=FORMAL|CASUAL.", hasCard:false },
+  ];
+  const resp = resps[Math.floor(Math.random()*resps.length)];
+  hideInlineCard();
+  setTimeout(() => {
+    if (!isGenerating) return;
+    setState('speaking');
+    if (resp.hasCard) showInlineCard();
+    streamCaption(resp.text, () => {
+      isGenerating = false; updateSendBtn(); setState('idle');
+      sessionLog.push({ role:'assistant', text:resp.text, hasCard:resp.hasCard });
+      addFollowUpChip();
+    });
+  }, 1000 + Math.random()*300);
+}
+
+function addFollowUpChip() {
+  const fc = document.createElement('div'); fc.className = 'chip'; fc.textContent = '[MORE]';
+  fc.onclick = () => useChip(fc, 'Tell me more'); chipsArea.appendChild(fc);
+}
+
+function stopGen() { isGenerating = false; setState('idle'); updateSendBtn(); captionText.textContent = '[STOPPED]'; hideInlineCard(); }
+
+function streamCaption(text, onDone) {
+  captionText.textContent = '';
+  let i = 0; const chars = text.split('');
+  function next() {
+    if (!isGenerating && onDone) { onDone(); return; }
+    if (i >= chars.length) { if (onDone) setTimeout(onDone, 200); return; }
+    captionText.textContent += chars[i++];
+    setTimeout(next, 22 + Math.random()*18);
+  }
+  next();
+}
+
+const ATTACH_MOCKS = [
+  { glyph:'[IMG]', name:'screenshot.png' },
+  { glyph:'[FILE]', name:'report.pdf' },
+  { glyph:'[CSV]', name:'data.csv' },
+  { glyph:'[AUD]', name:'memo.wav' },
+];
+
+function renderAttachChips() {
+  attachChips.innerHTML = '';
+  pendingAttachments.forEach(att => {
+    const chip = document.createElement('div'); chip.className = 'attach-chip';
+    const label = document.createElement('span'); label.textContent = att.glyph;
+    const name = document.createElement('span'); name.textContent = att.name;
+    const rm = document.createElement('button'); rm.textContent = '×'; rm.title = 'Remove attachment';
+    rm.onclick = () => { pendingAttachments = pendingAttachments.filter(a => a.id !== att.id); renderAttachChips(); };
+    chip.appendChild(label); chip.appendChild(name); chip.appendChild(rm);
+    attachChips.appendChild(chip);
+  });
+}
+
+function addAttachment() {
+  const mock = ATTACH_MOCKS[attachSeq % ATTACH_MOCKS.length];
+  attachSeq++;
+  pendingAttachments.push({ id: 'att-' + attachSeq, glyph: mock.glyph, name: mock.name });
+  renderAttachChips();
+  if (!composerVisible) {
+    composerVisible = true;
+    composerOverlay.classList.add('visible');
+  }
+}
+
+function endSession() {
+  clearDemoTimers(); setState('idle'); hideInlineCard();
+  transcriptPanel.classList.add('visible'); renderTranscript();
+}
+
+function renderTranscript() {
+  transcriptPanel.innerHTML = '';
+  const header = document.createElement('div'); header.className = 'transcript-header'; header.textContent = '// SESSION LOG //'; transcriptPanel.appendChild(header);
+  if (!sessionLog.length) {
+    sessionLog = [
+      { role:'user', text:'QUERY: WEATHER SAN FRANCISCO', modality:'voice' },
+      { role:'assistant', text:'WEATHER // SF // 64F // PARTLY CLOUDY // WIND 12MPH W', hasCard:true },
+      { role:'user', text:'QUERY: RAIN FORECAST THURSDAY', modality:'typed' },
+      { role:'assistant', text:'THU: 60% PRECIP // LIGHT SHOWERS 14:00-19:00 // CLEARING EVENING', interrupted:true },
+    ];
+  }
+  sessionLog.forEach(turn => {
+    const div = document.createElement('div'); div.className = `turn ${turn.role}`;
+    const meta = document.createElement('div'); meta.className = 'turn-meta';
+    if (turn.role === 'user') meta.innerHTML = turn.modality === 'voice'
+      ? `<svg width="9" height="9" viewBox="0 0 24 24" fill="var(--accent)"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg> USR::VOICE`
+      : `[KB] USR::TYPED`;
+    else meta.innerHTML = `[SYS] ELIZA`;
+    const bubble = document.createElement('div'); bubble.className = 'turn-bubble' + (turn.interrupted ? ' interrupted' : ''); bubble.textContent = turn.text;
+    if (turn.attachments && turn.attachments.length) {
+      const wrap = document.createElement('div'); wrap.className = 'bubble-attachments';
+      turn.attachments.forEach(att => {
+        const a = document.createElement('span'); a.className = 'bubble-attach';
+        const thumb = document.createElement('span'); thumb.className = 'att-thumb'; thumb.textContent = att.glyph.replace(/[\[\]]/g, '').charAt(0);
+        const nm = document.createElement('span'); nm.textContent = att.name;
+        a.appendChild(thumb); a.appendChild(nm); wrap.appendChild(a);
+      });
+      bubble.appendChild(wrap);
+    }
+    div.appendChild(meta); div.appendChild(bubble);
+    if (turn.hasCard) div.appendChild(buildWeatherCard());
+    transcriptPanel.appendChild(div);
+  });
+  const closeBtn = document.createElement('button');
+  closeBtn.style.cssText = 'margin:10px auto 0;display:block;background:var(--text);border:var(--border-w) solid var(--border);padding:8px 20px;font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--bg);cursor:pointer;box-shadow:var(--shadow);';
+  closeBtn.textContent = '[CLOSE LOG]';
+  closeBtn.onclick = () => { transcriptPanel.classList.remove('visible'); sessionLog = []; };
+  transcriptPanel.appendChild(closeBtn);
+}
+
+function buildWeatherCard() {
+  const card = document.createElement('div'); card.className = 'app-card';
+  card.innerHTML = `<div class="app-card-header"><div class="app-icon" style="font-size:10px;color:white">WX</div>WEATHER // SAN FRANCISCO</div><div class="weather-display"><div class="weather-temp">64°F</div><div class="weather-cond">PARTLY CLOUDY</div><div class="weather-row"><span>HUM:72%</span><span>WND:12W</span><span>HI:68F</span></div></div><div class="card-actions"><button class="card-btn">[7-DAY]</button><button class="card-btn">[ALERT]</button></div>`;
+  return card;
+}
+
+function showInlineCard() {
+  inlineCard.innerHTML = '';
+  inlineCard.appendChild(buildWeatherCard());
+  inlineCard.classList.add('visible');
+}
+
+function hideInlineCard() {
+  inlineCard.classList.remove('visible');
+  inlineCard.innerHTML = '';
+}
+
+function clearDemoTimers() { demoTimers.forEach(clearTimeout); demoTimers = []; }
+
+function runDemoOnce() {
+  clearDemoTimers(); isGenerating = false; hideInlineCard();
+  setState('idle'); captionText.textContent = 'SYSTEM READY. VOICE CHANNEL OPEN. BEGIN SPEAKING OR TYPE BELOW.';
+
+  const t1 = setTimeout(() => {
+    setState('listening'); captionText.textContent = '...';
+    sessionLog.push({ role:'user', text:'QUERY: WEATHER SAN FRANCISCO TODAY', modality:'voice' });
+  }, 700);
+
+  const t2 = setTimeout(() => { captionText.textContent = '"WHAT IS THE WEATHER..." '; }, 2000);
+
+  const t3 = setTimeout(() => { setState('thinking'); captionText.textContent = '...'; }, 3400);
+
+  const t4 = setTimeout(() => {
+    setState('speaking'); isGenerating = true;
+    showInlineCard();
+    const reply = "WEATHER // SAN FRANCISCO // 64F // PARTLY CLOUDY // WIND 12MPH W // HUMIDITY 72% // HIGH 68F EXPECTED // AIR QUALITY GOOD";
+    streamCaption(reply, () => { isGenerating = false; sessionLog.push({ role:'assistant', text:reply, hasCard:true }); });
+  }, 4600);
+
+  const t5 = setTimeout(() => {
+    setState('idle');
+    const fc = document.createElement('div'); fc.className = 'chip'; fc.textContent = '[FORECAST]';
+    fc.onclick = () => useChip(fc, 'Show weekly forecast'); chipsArea.appendChild(fc);
+  }, 9000);
+
+  const t6 = setTimeout(() => {
+    hideInlineCard();
+    setState('listening'); captionText.textContent = '"RAIN THURSDAY?" ';
+    sessionLog.push({ role:'user', text:'QUERY: RAIN FORECAST THURSDAY', modality:'voice' });
+  }, 10800);
+
+  const t7 = setTimeout(() => { setState('thinking'); captionText.textContent = '...'; }, 12300);
+
+  const t8 = setTimeout(() => {
+    setState('speaking'); isGenerating = true;
+    const r2 = "THU FORECAST: 60% PRECIPITATION PROBABILITY // LIGHT SHOWERS 14:00-19:00 LOCAL // EVENING CLEARING // CARRY UMBRELLA";
+    streamCaption(r2, () => { isGenerating = false; sessionLog.push({ role:'assistant', text:r2, interrupted:false }); });
+  }, 13500);
+
+  const t9 = setTimeout(() => {
+    setState('idle'); captionText.textContent = '[STANDING BY] AWAITING INPUT_';
+    document.getElementById('demoBtn').textContent = '[REPLAY]';
+    isGenerating = false;
+  }, 18000);
+
+  demoTimers = [t1,t2,t3,t4,t5,t6,t7,t8,t9];
+}
+
+document.getElementById('demoBtn').onclick = () => { transcriptPanel.classList.remove('visible'); sessionLog = []; runDemoOnce(); };
+setTimeout(runDemoOnce, 400);
+</script>
+</body>
+</html>

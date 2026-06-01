@@ -54,16 +54,15 @@ import {
   shouldInstallMainWindowOnboardingPatches,
   syncDetachedShellLocation,
 } from "@elizaos/app-core";
-// Pill / voice-capture symbols live in upstream @elizaos/ui source but are
-// not yet published on the `alpha` dist-tag. Route through the local stub so
-// package-mode builds stay green; see apps/app/src/pill-stubs.tsx.
 import {
   type ConversationMessage,
   createVoiceCapture,
   type VoiceCaptureHandle,
+  type VoiceCaptureSegment as VoiceCaptureTranscriptSegment,
+  type VoiceCaptureState,
+  normalizePillMessage,
   VoicePill,
   type VoicePillMessage,
-  normalizePillMessage,
 } from "./pill-stubs";
 import { AppWindowRenderer } from "@elizaos/app-core";
 import { dispatchQueuedLifeOpsGithubCallbackFromUrl } from "@elizaos/app-lifeops/platform";
@@ -1184,7 +1183,12 @@ function PillRoot() {
             role: "assistant",
             text: result.text ?? "",
             timestamp: Date.now(),
-            ...(result.failureKind ? { failureKind: result.failureKind } : {}),
+            ...(typeof result.failureKind === "string"
+              ? {
+                  failureKind:
+                    result.failureKind as ConversationMessage["failureKind"],
+                }
+              : {}),
           });
         } finally {
           sendInFlightRef.current = false;
@@ -1215,7 +1219,7 @@ function PillRoot() {
     if (recording) {
       if (!voiceCaptureRef.current) {
         voiceCaptureRef.current = createVoiceCapture({
-          onTranscript: (segment) => {
+          onTranscript: (segment: VoiceCaptureTranscriptSegment) => {
             if (!segment.final) {
               // Interim segments are best-guess partials — useful for a future
               // live caption surface but not safe to submit. Log only.
@@ -1229,7 +1233,7 @@ function PillRoot() {
             if (!submit) return;
             submit(segment.text);
           },
-          onStateChange: (state, error) => {
+          onStateChange: (state: VoiceCaptureState, error?: Error) => {
             if (error) {
               console.warn(
                 `${APP_LOG_PREFIX} [pill] voice ${state}`,

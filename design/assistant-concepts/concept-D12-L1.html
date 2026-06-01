@@ -1,0 +1,1233 @@
+<!-- concept-D12-L1 | direction: App-Launcher-First Home | look: Soft Aurora Glass | targets: 420x760, 960x640 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D12 · App-Launcher-First Home · Soft Aurora Glass</title>
+<style>
+:root {
+  --bg:#EAF0FB;
+  --bg-aurora:radial-gradient(120% 90% at 18% 12%,#F3E9FB 0%,transparent 55%),radial-gradient(120% 90% at 82% 88%,#E6F7F4 0%,transparent 55%),linear-gradient(160deg,#EAF0FB,#EFEAFB);
+  --surface:rgba(255,255,255,0.55);
+  --surface-2:rgba(255,255,255,0.72);
+  --border:rgba(255,255,255,0.65);
+  --text:#1B2233;
+  --text-muted:#5A6582;
+  --accent:#6E8BFF;
+  --accent-2:#9C6CF0;
+  --accent-3:#5FE3C0;
+  --danger:#FF6B8B;
+  --radius:22px;
+  --radius-sm:14px;
+  --font:"SF Pro Display","Segoe UI Variable","Helvetica Neue",system-ui,sans-serif;
+  --shadow:0 12px 40px rgba(80,90,160,0.18);
+  --shadow-sm:0 4px 16px rgba(80,90,160,0.12);
+  --blur:saturate(1.4) blur(24px);
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:var(--font);
+  background:var(--bg);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  position:relative;
+}
+
+/* Aurora background */
+.aurora-bg{
+  position:fixed;inset:0;z-index:0;
+  background:var(--bg-aurora);
+  animation:aurora-shift 30s ease-in-out infinite alternate;
+}
+@keyframes aurora-shift{
+  0%{filter:hue-rotate(0deg) brightness(1)}
+  50%{filter:hue-rotate(15deg) brightness(1.03)}
+  100%{filter:hue-rotate(-10deg) brightness(0.98)}
+}
+
+/* Device frame */
+.device{
+  position:relative;z-index:1;
+  width:420px;height:760px;
+  background:rgba(234,240,251,0.82);
+  backdrop-filter:var(--blur);
+  border-radius:44px;
+  border:1.5px solid var(--border);
+  box-shadow:0 32px 80px rgba(80,90,160,0.22),inset 0 1px 0 rgba(255,255,255,0.9);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+
+/* Command bar */
+.cmd-bar{
+  flex-shrink:0;
+  padding:14px 14px 10px;
+  background:var(--surface-2);
+  backdrop-filter:var(--blur);
+  border-bottom:1px solid var(--border);
+  display:flex;flex-direction:column;gap:8px;
+  position:relative;z-index:10;
+}
+
+.cmd-row{
+  display:flex;align-items:center;gap:10px;
+}
+
+/* Orb avatar in command bar */
+.orb{
+  width:38px;height:38px;
+  flex-shrink:0;
+  border-radius:50%;
+  position:relative;
+  cursor:pointer;
+  transition:transform 0.3s var(--ease);
+}
+.orb-inner{
+  width:100%;height:100%;
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #9C6CF0 0%, #6E8BFF 45%, #5FE3C0 100%);
+  box-shadow:0 0 0 2px rgba(255,255,255,0.5), 0 4px 16px rgba(110,139,255,0.45);
+  position:relative;
+  overflow:hidden;
+  transition:box-shadow 0.3s var(--ease);
+}
+.orb-specular{
+  position:absolute;
+  top:6px;left:8px;
+  width:14px;height:10px;
+  background:rgba(255,255,255,0.75);
+  border-radius:50%;
+  filter:blur(3px);
+}
+.orb-halo{
+  position:absolute;
+  inset:-6px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(110,139,255,0.3) 0%, transparent 70%);
+  animation:halo-breathe 3s ease-in-out infinite;
+}
+@keyframes halo-breathe{
+  0%,100%{transform:scale(1);opacity:0.6}
+  50%{transform:scale(1.15);opacity:1}
+}
+
+/* Orb states */
+.orb.listening .orb-inner{
+  animation:orb-listen 0.3s var(--ease) infinite alternate;
+  box-shadow:0 0 0 3px rgba(110,139,255,0.6),0 0 24px rgba(110,139,255,0.5);
+}
+@keyframes orb-listen{
+  from{transform:scale(1)}
+  to{transform:scale(1.12)}
+}
+.orb.thinking .orb-inner{
+  animation:orb-think 2s linear infinite;
+}
+@keyframes orb-think{
+  from{filter:hue-rotate(0deg)}
+  to{filter:hue-rotate(360deg)}
+}
+.orb.speaking .orb-inner{
+  animation:orb-speak 0.5s ease-in-out infinite alternate;
+  box-shadow:0 0 0 2px rgba(95,227,192,0.6),0 0 20px rgba(95,227,192,0.4);
+}
+@keyframes orb-speak{
+  from{transform:scale(1)}
+  to{transform:scale(1.08)}
+}
+.orb.idle .orb-inner{
+  animation:orb-idle 3s ease-in-out infinite;
+}
+@keyframes orb-idle{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.04)}
+}
+
+/* Muted orb state */
+.orb.muted .orb-inner{
+  background:radial-gradient(circle at 35% 30%, #FF6B8B 0%, #d44 45%, #888 100%);
+  animation:orb-idle 3s ease-in-out infinite;
+  box-shadow:0 0 0 2px rgba(255,107,139,0.5),0 4px 16px rgba(255,107,139,0.3);
+}
+
+.cmd-input-wrap{
+  flex:1;
+  background:var(--surface);
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+  display:flex;align-items:center;
+  padding:0 10px;
+  gap:6px;
+  backdrop-filter:blur(16px);
+  box-shadow:var(--shadow-sm);
+}
+.cmd-input{
+  flex:1;
+  background:transparent;
+  border:none;outline:none;
+  font-family:var(--font);
+  font-size:15px;
+  color:var(--text);
+  padding:10px 0;
+}
+.cmd-input::placeholder{color:var(--text-muted);font-weight:300}
+.at-btn{
+  font-size:16px;color:var(--text-muted);cursor:pointer;padding:4px;
+  transition:color 0.2s;border:none;background:none;font-family:var(--font);
+}
+.at-btn:hover{color:var(--accent)}
+
+/* Mic/Send/Stop morph button */
+.action-btn{
+  width:38px;height:38px;
+  border-radius:50%;
+  border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background 0.3s var(--ease),transform 0.2s var(--ease),box-shadow 0.2s;
+  flex-shrink:0;
+}
+.action-btn.mic-mode{
+  background:linear-gradient(135deg,#6E8BFF,#9C6CF0);
+  box-shadow:0 4px 14px rgba(110,139,255,0.45);
+}
+.action-btn.send-mode{
+  background:linear-gradient(135deg,#5FE3C0,#6E8BFF);
+  box-shadow:0 4px 14px rgba(95,227,192,0.4);
+}
+.action-btn.stop-mode{
+  background:linear-gradient(135deg,#FF6B8B,#9C6CF0);
+  box-shadow:0 4px 14px rgba(255,107,139,0.4);
+}
+.action-btn:active{transform:scale(0.92)}
+.action-btn svg{width:18px;height:18px;fill:white;transition:transform 0.3s var(--ease)}
+
+/* Attach button */
+.attach-btn{
+  background:none;border:1px solid var(--border);
+  width:30px;height:30px;border-radius:50%;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--text-muted);font-size:16px;transition:background 0.2s;
+}
+.attach-btn:hover{background:var(--surface)}
+
+/* Listening indicator */
+.listening-bar{
+  display:none;
+  align-items:center;gap:8px;
+  padding:4px 8px;
+  background:rgba(110,139,255,0.12);
+  border-radius:var(--radius-sm);
+  font-size:12px;color:var(--accent);font-weight:600;
+  letter-spacing:0.04em;
+}
+.listening-bar.visible{display:flex}
+.listening-bar .mic-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--accent);
+  animation:mic-blink 1s ease-in-out infinite;
+}
+@keyframes mic-blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+
+/* Muted pill */
+.muted-pill{
+  display:none;
+  align-items:center;gap:6px;
+  padding:3px 10px;
+  background:rgba(255,107,139,0.12);
+  border-radius:20px;
+  font-size:12px;color:var(--danger);font-weight:600;
+  letter-spacing:0.04em;
+}
+.muted-pill.visible{display:flex}
+
+/* Attachment chips above input */
+.attach-chips{
+  display:flex;gap:6px;flex-wrap:wrap;
+}
+.attach-chip{
+  display:flex;align-items:center;gap:5px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:4px 10px 4px 6px;
+  font-size:12px;color:var(--text);
+  box-shadow:var(--shadow-sm);
+}
+.attach-chip-remove{
+  background:none;border:none;cursor:pointer;
+  color:var(--text-muted);font-size:14px;padding:0;margin-left:2px;
+}
+
+/* Suggestion chips */
+.suggestion-chips{
+  display:flex;gap:8px;flex-wrap:wrap;
+  padding:0 14px 8px;
+  opacity:1;transition:opacity 0.3s var(--ease);
+}
+.suggestion-chips.hidden{opacity:0;pointer-events:none}
+.chip{
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:6px 14px;
+  font-size:13px;color:var(--text);
+  cursor:pointer;white-space:nowrap;
+  transition:background 0.2s var(--ease),transform 0.15s;
+  backdrop-filter:blur(12px);
+  box-shadow:var(--shadow-sm);
+}
+.chip:hover{background:rgba(110,139,255,0.12);transform:translateY(-1px);border-color:rgba(110,139,255,0.4)}
+
+/* Main scroll area */
+.main-area{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  padding:14px;
+  display:flex;flex-direction:column;gap:12px;
+}
+.main-area::-webkit-scrollbar{width:4px}
+.main-area::-webkit-scrollbar-thumb{background:rgba(110,139,255,0.3);border-radius:4px}
+
+/* App grid */
+.app-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+}
+.app-tile{
+  background:var(--surface);
+  backdrop-filter:var(--blur);
+  border-radius:var(--radius);
+  border:1px solid var(--border);
+  padding:14px 10px 12px;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  cursor:pointer;
+  box-shadow:var(--shadow-sm);
+  transition:transform 0.25s var(--ease),box-shadow 0.25s var(--ease),background 0.2s;
+  position:relative;
+  overflow:hidden;
+}
+.app-tile:hover{
+  transform:translateY(-3px) scale(1.02);
+  box-shadow:var(--shadow);
+  background:var(--surface-2);
+}
+.app-tile.active{
+  background:rgba(110,139,255,0.12);
+  border-color:rgba(110,139,255,0.5);
+  box-shadow:0 8px 28px rgba(110,139,255,0.25);
+  transform:translateY(-4px) scale(1.03);
+}
+.tile-icon{
+  font-size:28px;
+  line-height:1;
+}
+.tile-name{
+  font-size:12px;font-weight:600;
+  color:var(--text);text-align:center;
+  letter-spacing:0.02em;
+}
+.tile-chips{
+  display:flex;flex-direction:column;gap:4px;width:100%;
+}
+.tile-chip{
+  background:rgba(110,139,255,0.1);
+  border-radius:8px;
+  padding:3px 6px;
+  font-size:10px;color:var(--accent);
+  text-align:center;cursor:pointer;
+  transition:background 0.15s;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.tile-chip:hover{background:rgba(110,139,255,0.2)}
+
+/* Chat thread */
+.chat-thread{
+  display:flex;flex-direction:column;gap:10px;
+}
+
+.turn{
+  display:flex;flex-direction:column;gap:4px;
+  animation:turn-in 0.35s var(--ease) both;
+}
+@keyframes turn-in{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:none}
+}
+
+.turn.user{align-items:flex-end}
+.turn.assistant{align-items:flex-start}
+
+.turn-meta{
+  font-size:11px;color:var(--text-muted);
+  display:flex;align-items:center;gap:4px;
+  padding:0 4px;
+}
+.turn-glyph{font-size:12px}
+
+.bubble{
+  max-width:82%;
+  padding:10px 14px;
+  border-radius:var(--radius-sm);
+  font-size:14px;line-height:1.5;
+  position:relative;
+}
+.turn.user .bubble{
+  background:linear-gradient(135deg,rgba(110,139,255,0.85),rgba(156,108,240,0.8));
+  color:white;
+  border:1px solid rgba(255,255,255,0.3);
+  backdrop-filter:blur(12px);
+  box-shadow:var(--shadow-sm);
+}
+.turn.assistant .bubble{
+  background:var(--surface-2);
+  color:var(--text);
+  border:1px solid var(--border);
+  backdrop-filter:blur(16px);
+  box-shadow:var(--shadow-sm);
+}
+.bubble.partial{opacity:0.55;font-style:italic}
+.bubble .interrupted-label{
+  font-size:10px;color:var(--danger);
+  margin-top:4px;display:block;
+  opacity:0.8;
+}
+
+/* Attachment in bubble */
+.bubble-attach{
+  margin-top:6px;
+  display:flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,0.3);
+  border-radius:8px;padding:5px 8px;
+  font-size:12px;color:rgba(255,255,255,0.85);
+}
+
+/* App card */
+.app-card{
+  background:var(--surface-2);
+  backdrop-filter:var(--blur);
+  border-radius:var(--radius);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  max-width:95%;
+  animation:turn-in 0.4s var(--ease) both;
+}
+.app-card-header{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px 10px;
+  border-bottom:1px solid var(--border);
+}
+.app-card-icon{font-size:20px}
+.app-card-title{font-size:14px;font-weight:600;color:var(--text)}
+.app-card-expand{
+  margin-left:auto;
+  background:none;border:1px solid var(--border);
+  border-radius:8px;padding:3px 8px;
+  font-size:11px;color:var(--text-muted);cursor:pointer;
+  transition:background 0.2s;
+}
+.app-card-expand:hover{background:var(--surface)}
+.app-card-body{padding:12px 14px}
+.app-card-actions{
+  display:flex;gap:8px;
+  padding:0 14px 12px;
+}
+.card-btn{
+  flex:1;padding:8px 12px;
+  border-radius:var(--radius-sm);
+  border:none;cursor:pointer;
+  font-family:var(--font);font-size:13px;font-weight:600;
+  transition:transform 0.15s,box-shadow 0.15s;
+}
+.card-btn.primary{
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  color:white;
+  box-shadow:0 4px 12px rgba(110,139,255,0.3);
+}
+.card-btn.secondary{
+  background:var(--surface);
+  color:var(--text);
+  border:1px solid var(--border);
+}
+.card-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+
+/* Music card tracks */
+.track-list{display:flex;flex-direction:column;gap:6px}
+.track{
+  display:flex;align-items:center;gap:10px;
+  padding:6px 8px;border-radius:10px;
+  background:rgba(110,139,255,0.07);
+  font-size:13px;
+}
+.track-num{color:var(--text-muted);width:16px;text-align:center;font-size:12px}
+.track-info{flex:1}
+.track-name{font-weight:500;color:var(--text)}
+.track-artist{font-size:11px;color:var(--text-muted)}
+.track-dur{font-size:11px;color:var(--text-muted)}
+
+/* Follow-up chips */
+.followup-chips{
+  display:flex;gap:6px;flex-wrap:wrap;
+  padding:4px 0;
+}
+
+/* Demo controls */
+.demo-controls{
+  position:absolute;bottom:0;left:0;right:0;
+  display:flex;align-items:center;justify-content:center;
+  padding:10px;
+  background:rgba(234,240,251,0.85);
+  backdrop-filter:blur(16px);
+  border-top:1px solid var(--border);
+  gap:10px;
+  z-index:20;
+}
+.demo-btn{
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  color:white;border:none;
+  padding:8px 20px;border-radius:20px;
+  font-family:var(--font);font-size:13px;font-weight:600;
+  cursor:pointer;
+  box-shadow:var(--shadow-sm);
+  transition:transform 0.15s,box-shadow 0.15s;
+}
+.demo-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+.demo-btn:active{transform:scale(0.96)}
+.mute-btn{
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  padding:8px 16px;border-radius:20px;
+  font-family:var(--font);font-size:13px;
+  cursor:pointer;color:var(--text);
+  transition:background 0.2s,color 0.2s;
+}
+.mute-btn.muted{
+  background:rgba(255,107,139,0.15);
+  color:var(--danger);
+  border-color:rgba(255,107,139,0.4);
+}
+
+/* State label */
+.state-label{
+  font-size:11px;color:var(--text-muted);
+  padding:3px 10px;
+  background:var(--surface);
+  border-radius:12px;
+  border:1px solid var(--border);
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+}
+
+/* Waveform bars (listening visual) */
+.wave-bars{
+  display:none;align-items:center;gap:2px;height:20px;
+}
+.wave-bars.visible{display:flex}
+.wave-bar{
+  width:3px;border-radius:2px;
+  background:var(--accent);
+  height:4px;
+  transition:height 0.08s ease;
+}
+
+@media(min-width:640px){
+  body{background:radial-gradient(ellipse 80% 60% at 50% 40%,rgba(110,139,255,0.12) 0%,transparent 70%), var(--bg-aurora)}
+  .device{
+    width:420px;height:700px;
+    box-shadow:0 40px 100px rgba(80,90,160,0.28),inset 0 1px 0 rgba(255,255,255,0.9);
+  }
+}
+</style>
+</head>
+<body>
+<div class="aurora-bg"></div>
+
+<div class="device" id="device">
+
+  <!-- Command Bar -->
+  <div class="cmd-bar">
+    <div class="cmd-row">
+      <div class="orb idle" id="orb" title="Tap to speak">
+        <div class="orb-inner">
+          <div class="orb-specular"></div>
+        </div>
+        <div class="orb-halo"></div>
+      </div>
+
+      <div class="cmd-input-wrap">
+        <button class="at-btn" id="atBtn" title="@-mention">@</button>
+        <input class="cmd-input" id="cmdInput" placeholder="Ask or @mention…" autocomplete="off">
+      </div>
+
+      <button class="action-btn mic-mode" id="actionBtn" title="Voice input">
+        <svg viewBox="0 0 24 24" id="actionIcon"><path d="M12 1a4 4 0 0 0-4 4v6a4 4 0 0 0 8 0V5a4 4 0 0 0-4-4zm-1.5 4a1.5 1.5 0 0 1 3 0v6a1.5 1.5 0 0 1-3 0V5zm8 6a.75.75 0 0 0-1.5 0 5 5 0 0 1-10 0A.75.75 0 0 0 5.5 11a6.5 6.5 0 0 0 5.75 6.46V20H8.5a.75.75 0 0 0 0 1.5h7a.75.75 0 0 0 0-1.5h-2.75v-2.54A6.5 6.5 0 0 0 18.5 11z"/></svg>
+      </button>
+
+      <button class="attach-btn" id="attachBtn" title="Attach">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M16.5 6v11.5A4.5 4.5 0 0 1 7.5 17.5V5a3 3 0 0 1 6 0v11a1.5 1.5 0 0 1-3 0V7h-1.5v9a3 3 0 0 0 6 0V5a4.5 4.5 0 0 0-9 0v12.5a6 6 0 0 0 12 0V6H16.5z"/></svg>
+      </button>
+    </div>
+
+    <!-- Attachment chips -->
+    <div class="attach-chips" id="attachChips"></div>
+
+    <!-- Listening indicator -->
+    <div class="listening-bar" id="listeningBar">
+      <div class="mic-dot"></div>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1a4 4 0 0 0-4 4v6a4 4 0 0 0 8 0V5a4 4 0 0 0-4-4z"/></svg>
+      <span>Listening…</span>
+      <div class="wave-bars visible" id="waveBars">
+        <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+      </div>
+    </div>
+
+    <!-- Muted pill -->
+    <div class="muted-pill" id="mutedPill">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18 6L6 18M12 1a4 4 0 0 0-4 4v6a4 4 0 0 0 8 0V5a4 4 0 0 0-4-4zM5.5 11a6.5 6.5 0 0 0 5.75 6.46V20H8.5m7-0h-2.75v-2.54A6.5 6.5 0 0 0 18.5 11"/><line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="2"/></svg>
+      Muted
+    </div>
+  </div>
+
+  <!-- Suggestion chips (global) -->
+  <div class="suggestion-chips" id="globalChips">
+    <div class="chip" onclick="fillCmd(this)">🎵 Play something chill</div>
+    <div class="chip" onclick="fillCmd(this)">☀️ Today's weather</div>
+    <div class="chip" onclick="fillCmd(this)">📅 My schedule</div>
+  </div>
+
+  <!-- Main scroll area -->
+  <div class="main-area" id="mainArea">
+
+    <!-- App grid -->
+    <div class="app-grid" id="appGrid">
+      <div class="app-tile" data-app="Spotify" onclick="invokeApp('Spotify')">
+        <div class="tile-icon">🎵</div>
+        <div class="tile-name">Spotify</div>
+        <div class="tile-chips">
+          <div class="tile-chip">Party playlist</div>
+          <div class="tile-chip">Discover weekly</div>
+        </div>
+      </div>
+      <div class="app-tile" data-app="Weather" onclick="invokeApp('Weather')">
+        <div class="tile-icon">🌤</div>
+        <div class="tile-name">Weather</div>
+        <div class="tile-chips">
+          <div class="tile-chip">Today's forecast</div>
+          <div class="tile-chip">Weekend rain?</div>
+        </div>
+      </div>
+      <div class="app-tile" data-app="Calendar" onclick="invokeApp('Calendar')">
+        <div class="tile-icon">📅</div>
+        <div class="tile-name">Calendar</div>
+        <div class="tile-chips">
+          <div class="tile-chip">Next meeting</div>
+          <div class="tile-chip">Free slots</div>
+        </div>
+      </div>
+      <div class="app-tile" data-app="Notes" onclick="invokeApp('Notes')">
+        <div class="tile-icon">📝</div>
+        <div class="tile-name">Notes</div>
+        <div class="tile-chips">
+          <div class="tile-chip">Quick note</div>
+        </div>
+      </div>
+      <div class="app-tile" data-app="Timer" onclick="invokeApp('Timer')">
+        <div class="tile-icon">⏱</div>
+        <div class="tile-name">Timer</div>
+        <div class="tile-chips">
+          <div class="tile-chip">25 min focus</div>
+        </div>
+      </div>
+      <div class="app-tile" data-app="Maps" onclick="invokeApp('Maps')">
+        <div class="tile-icon">🗺</div>
+        <div class="tile-name">Maps</div>
+        <div class="tile-chips">
+          <div class="tile-chip">Home route</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat thread (hidden initially) -->
+    <div class="chat-thread" id="chatThread"></div>
+
+  </div>
+
+  <!-- Demo controls -->
+  <div class="demo-controls">
+    <button class="demo-btn" id="playDemoBtn" onclick="runDemo()">▶ Play Demo</button>
+    <button class="mute-btn" id="muteBtn" onclick="toggleMute()">🎙 Mute</button>
+    <div class="state-label" id="stateLabel">IDLE</div>
+  </div>
+
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let state = 'idle';
+let muted = false;
+let demoTimers = [];
+let waveAF = null;
+let typed = false;
+let attachments = [];
+let generating = false;
+
+const orb = document.getElementById('orb');
+const actionBtn = document.getElementById('actionBtn');
+const actionIcon = document.getElementById('actionIcon');
+const cmdInput = document.getElementById('cmdInput');
+const listeningBar = document.getElementById('listeningBar');
+const mutedPill = document.getElementById('mutedPill');
+const stateLabel = document.getElementById('stateLabel');
+const chatThread = document.getElementById('chatThread');
+const appGrid = document.getElementById('appGrid');
+const globalChips = document.getElementById('globalChips');
+const waveBars = document.getElementById('waveBars');
+const attachChips = document.getElementById('attachChips');
+const muteBtn = document.getElementById('muteBtn');
+
+// SVG icons
+const svgMic = `<svg viewBox="0 0 24 24" fill="white"><path d="M12 1a4 4 0 0 0-4 4v6a4 4 0 0 0 8 0V5a4 4 0 0 0-4-4zm-1.5 4a1.5 1.5 0 0 1 3 0v6a1.5 1.5 0 0 1-3 0V5zm8 6a.75.75 0 0 0-1.5 0 5 5 0 0 1-10 0A.75.75 0 0 0 5.5 11a6.5 6.5 0 0 0 5.75 6.46V20H8.5a.75.75 0 0 0 0 1.5h7a.75.75 0 0 0 0-1.5h-2.75v-2.54A6.5 6.5 0 0 0 18.5 11z"/></svg>`;
+const svgSend = `<svg viewBox="0 0 24 24" fill="white"><path d="M3 12l18-9-9 18V13L3 12zm2.7 0 8 .8-4.5 9z"/></svg>`;
+const svgStop = `<svg viewBox="0 0 24 24" fill="white"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>`;
+
+// ── Orb state ──────────────────────────────────────────────────────────────
+function setOrbState(s) {
+  state = s;
+  orb.className = 'orb ' + (muted ? 'muted' : s);
+  stateLabel.textContent = s.toUpperCase();
+
+  listeningBar.className = 'listening-bar' + (s === 'listening' && !muted ? ' visible' : '');
+  mutedPill.className = 'muted-pill' + (muted ? ' visible' : '');
+
+  if (s === 'listening' && !muted) {
+    startWave();
+  } else {
+    stopWave();
+  }
+}
+
+// ── Wave animation ─────────────────────────────────────────────────────────
+let wavePhase = 0;
+function startWave() {
+  if (waveAF) return;
+  const bars = waveBars.querySelectorAll('.wave-bar');
+  function tick() {
+    wavePhase += 0.18;
+    bars.forEach((b, i) => {
+      const amp = (Math.sin(wavePhase + i * 0.9) * 0.5 + 0.5) * 14 + 4;
+      b.style.height = amp + 'px';
+    });
+    waveAF = requestAnimationFrame(tick);
+  }
+  waveAF = requestAnimationFrame(tick);
+}
+function stopWave() {
+  if (waveAF) { cancelAnimationFrame(waveAF); waveAF = null; }
+  waveBars.querySelectorAll('.wave-bar').forEach(b => b.style.height = '4px');
+}
+
+// ── Mic/Send morph ─────────────────────────────────────────────────────────
+function updateActionBtn() {
+  if (generating) {
+    actionBtn.className = 'action-btn stop-mode';
+    actionBtn.innerHTML = svgStop;
+    actionBtn.title = 'Stop generation';
+  } else if (typed) {
+    actionBtn.className = 'action-btn send-mode';
+    actionBtn.innerHTML = svgSend;
+    actionBtn.title = 'Send message';
+  } else {
+    actionBtn.className = 'action-btn mic-mode';
+    actionBtn.innerHTML = svgMic;
+    actionBtn.title = 'Voice input';
+  }
+}
+
+cmdInput.addEventListener('input', () => {
+  typed = cmdInput.value.length > 0;
+  updateActionBtn();
+  if (typed) {
+    globalChips.className = 'suggestion-chips hidden';
+  } else {
+    globalChips.className = 'suggestion-chips';
+  }
+});
+
+actionBtn.addEventListener('click', () => {
+  if (generating) { stopGeneration(); return; }
+  if (typed) { sendTyped(); return; }
+  startVoiceCycle();
+});
+
+// ── App invocation ─────────────────────────────────────────────────────────
+function invokeApp(name) {
+  document.querySelectorAll('.app-tile').forEach(t => t.classList.remove('active'));
+  document.querySelector(`[data-app="${name}"]`)?.classList.add('active');
+  cmdInput.placeholder = `@${name}: tell me more…`;
+
+  if (name === 'Spotify') {
+    addSpotifyCard();
+  } else if (name === 'Weather') {
+    addWeatherCard();
+  } else if (name === 'Calendar') {
+    addCalendarCard();
+  }
+  scrollThread();
+}
+
+// ── Turn rendering ─────────────────────────────────────────────────────────
+function addUserTurn(text, modality, attach) {
+  const turn = document.createElement('div');
+  turn.className = 'turn user';
+  const meta = document.createElement('div');
+  meta.className = 'turn-meta';
+  meta.innerHTML = modality === 'voice'
+    ? '<span class="turn-glyph" title="Voice turn">🎙</span><span>You · voice</span>'
+    : '<span class="turn-glyph" title="Typed">⌨️</span><span>You · typed</span>';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.textContent = text;
+  if (attach) {
+    const ac = document.createElement('div');
+    ac.className = 'bubble-attach';
+    ac.innerHTML = '📎 ' + attach;
+    bubble.appendChild(ac);
+  }
+  turn.appendChild(meta);
+  turn.appendChild(bubble);
+  chatThread.appendChild(turn);
+}
+
+function addPartialTurn(text) {
+  const turn = document.createElement('div');
+  turn.className = 'turn assistant';
+  turn.id = 'partialTurn';
+  const meta = document.createElement('div');
+  meta.className = 'turn-meta';
+  meta.innerHTML = '<span class="turn-glyph">🎙</span><span>Eliza · partial</span>';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble partial';
+  bubble.id = 'partialBubble';
+  bubble.textContent = text;
+  turn.appendChild(meta);
+  turn.appendChild(bubble);
+  chatThread.appendChild(turn);
+  return bubble;
+}
+
+function finalizePartialTurn(finalText, interrupted) {
+  const b = document.getElementById('partialBubble');
+  const t = document.getElementById('partialTurn');
+  if (b) {
+    b.className = 'bubble';
+    b.textContent = finalText;
+    if (interrupted) {
+      const lbl = document.createElement('span');
+      lbl.className = 'interrupted-label';
+      lbl.textContent = '⚡ Interrupted by barge-in';
+      b.appendChild(lbl);
+    }
+    if (t) {
+      const meta = t.querySelector('.turn-meta');
+      if (meta) meta.innerHTML = '<span class="turn-glyph">🎙</span><span>Eliza · voice</span>';
+    }
+  }
+}
+
+function addAssistantTurn(text) {
+  const turn = document.createElement('div');
+  turn.className = 'turn assistant';
+  const meta = document.createElement('div');
+  meta.className = 'turn-meta';
+  meta.innerHTML = '<span>Eliza</span>';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.textContent = text;
+
+  // Follow-up chips
+  const fc = document.createElement('div');
+  fc.className = 'followup-chips';
+  fc.innerHTML = '<div class="chip" onclick="fillCmd(this)">Make it more upbeat</div><div class="chip" onclick="fillCmd(this)">Add to queue</div>';
+
+  turn.appendChild(meta);
+  turn.appendChild(bubble);
+  turn.appendChild(fc);
+  chatThread.appendChild(turn);
+}
+
+function addSpotifyCard() {
+  const turn = document.createElement('div');
+  turn.className = 'turn assistant';
+  const meta = document.createElement('div');
+  meta.className = 'turn-meta';
+  meta.innerHTML = '<span>Eliza · Spotify</span>';
+  const card = document.createElement('div');
+  card.className = 'app-card';
+  card.innerHTML = `
+    <div class="app-card-header">
+      <div class="app-card-icon">🎵</div>
+      <div class="app-card-title">Party Playlist · 8 tracks</div>
+      <button class="app-card-expand">⤢ Full</button>
+    </div>
+    <div class="app-card-body">
+      <div class="track-list">
+        <div class="track"><div class="track-num">1</div><div class="track-info"><div class="track-name">Blinding Lights</div><div class="track-artist">The Weeknd</div></div><div class="track-dur">3:20</div></div>
+        <div class="track"><div class="track-num">2</div><div class="track-info"><div class="track-name">Levitating</div><div class="track-artist">Dua Lipa</div></div><div class="track-dur">3:23</div></div>
+        <div class="track"><div class="track-num">3</div><div class="track-info"><div class="track-name">As It Was</div><div class="track-artist">Harry Styles</div></div><div class="track-dur">2:47</div></div>
+      </div>
+    </div>
+    <div class="app-card-actions">
+      <button class="card-btn primary" onclick="fillCmd({textContent:'Make it more upbeat'})">▶ Play Now</button>
+      <button class="card-btn secondary">💾 Save</button>
+    </div>`;
+  turn.appendChild(meta);
+  turn.appendChild(card);
+
+  // Follow-up chips
+  const fc = document.createElement('div');
+  fc.className = 'followup-chips';
+  fc.innerHTML = '<div class="chip" onclick="fillCmd(this)">Make it more upbeat</div><div class="chip" onclick="fillCmd(this)">Add Drake</div>';
+  turn.appendChild(fc);
+  chatThread.appendChild(turn);
+}
+
+function addWeatherCard() {
+  const turn = document.createElement('div');
+  turn.className = 'turn assistant';
+  const card = document.createElement('div');
+  card.className = 'app-card';
+  card.innerHTML = `
+    <div class="app-card-header">
+      <div class="app-card-icon">🌤</div>
+      <div class="app-card-title">San Francisco · Today</div>
+      <button class="app-card-expand">⤢ Full</button>
+    </div>
+    <div class="app-card-body" style="font-size:15px;color:var(--text)">
+      <div style="display:flex;gap:16px;align-items:center;margin-bottom:8px">
+        <span style="font-size:36px">🌤</span>
+        <div><div style="font-size:28px;font-weight:600;color:var(--text)">68°F</div><div style="color:var(--text-muted);font-size:13px">Partly cloudy · Low 54°</div></div>
+      </div>
+      <div style="display:flex;gap:10px;font-size:12px;color:var(--text-muted)">
+        <span>💧 Humidity 72%</span><span>💨 Wind 8 mph</span>
+      </div>
+    </div>
+    <div class="app-card-actions">
+      <button class="card-btn primary">📍 5-Day Forecast</button>
+      <button class="card-btn secondary">🔔 Rain Alert</button>
+    </div>`;
+  turn.appendChild(card);
+  chatThread.appendChild(turn);
+}
+
+function addCalendarCard() {
+  const turn = document.createElement('div');
+  turn.className = 'turn assistant';
+  const card = document.createElement('div');
+  card.className = 'app-card';
+  card.innerHTML = `
+    <div class="app-card-header">
+      <div class="app-card-icon">📅</div>
+      <div class="app-card-title">Today's Schedule</div>
+      <button class="app-card-expand">⤢ Full</button>
+    </div>
+    <div class="app-card-body" style="font-size:13px">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;gap:10px;align-items:center;padding:6px 8px;background:rgba(110,139,255,0.08);border-radius:8px">
+          <span style="color:var(--accent);font-weight:600;white-space:nowrap">10:00</span>
+          <span style="color:var(--text)">Design Review · 45 min</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;padding:6px 8px">
+          <span style="color:var(--text-muted);font-weight:600;white-space:nowrap">12:30</span>
+          <span style="color:var(--text)">Lunch break (free)</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;padding:6px 8px;background:rgba(156,108,240,0.08);border-radius:8px">
+          <span style="color:var(--accent-2);font-weight:600;white-space:nowrap">14:00</span>
+          <span style="color:var(--text)">1:1 with Sarah · 30 min</span>
+        </div>
+      </div>
+    </div>
+    <div class="app-card-actions">
+      <button class="card-btn primary">➕ Add Event</button>
+      <button class="card-btn secondary">📋 Full Calendar</button>
+    </div>`;
+  turn.appendChild(card);
+  chatThread.appendChild(turn);
+}
+
+// ── Attach ─────────────────────────────────────────────────────────────────
+document.getElementById('attachBtn').addEventListener('click', () => {
+  const names = ['photo.jpg', 'doc.pdf', 'screenshot.png'];
+  const name = names[Math.floor(Math.random() * names.length)];
+  if (attachments.includes(name)) return;
+  attachments.push(name);
+  renderAttachChips();
+});
+
+function renderAttachChips() {
+  attachChips.innerHTML = '';
+  attachments.forEach(a => {
+    const chip = document.createElement('div');
+    chip.className = 'attach-chip';
+    chip.innerHTML = `📎 ${a} <button class="attach-chip-remove" onclick="removeAttach('${a}')">×</button>`;
+    attachChips.appendChild(chip);
+  });
+}
+
+function removeAttach(name) {
+  attachments = attachments.filter(a => a !== name);
+  renderAttachChips();
+}
+
+// ── Typed send ─────────────────────────────────────────────────────────────
+function sendTyped() {
+  const text = cmdInput.value.trim();
+  if (!text) return;
+  const attach = attachments[0] || null;
+  addUserTurn(text, 'typed', attach);
+  cmdInput.value = '';
+  typed = false;
+  attachments = [];
+  renderAttachChips();
+  updateActionBtn();
+  globalChips.className = 'suggestion-chips';
+
+  // Simulate assistant reply
+  generating = true;
+  updateActionBtn();
+  setOrbState('thinking');
+  setTimeout(() => {
+    generating = false;
+    setOrbState('speaking');
+    addAssistantTurn(`Got it! Here's what I found for "${text}". Anything else you'd like to refine?`);
+    updateActionBtn();
+    setTimeout(() => setOrbState('idle'), 2000);
+    scrollThread();
+  }, 1400);
+  scrollThread();
+}
+
+function stopGeneration() {
+  generating = false;
+  updateActionBtn();
+  setOrbState('idle');
+}
+
+// ── Fill cmd from chip ─────────────────────────────────────────────────────
+function fillCmd(el) {
+  cmdInput.value = el.textContent.replace(/^[^\w]*/, '').trim();
+  cmdInput.focus();
+  typed = true;
+  updateActionBtn();
+  globalChips.className = 'suggestion-chips hidden';
+}
+
+// ── Voice cycle ────────────────────────────────────────────────────────────
+function startVoiceCycle() {
+  if (muted) return;
+  clearDemoTimers();
+  setOrbState('listening');
+  cmdInput.value = '';
+  cmdInput.placeholder = 'Listening…';
+
+  // Simulate transcript appearing
+  let partialBubble = null;
+  let partial = document.getElementById('partialTurn');
+  if (partial) partial.remove();
+
+  demoTimers.push(setTimeout(() => {
+    // Show partial transcript
+    partialBubble = addPartialTurn('Spotify, make a party playlist…');
+    scrollThread();
+  }, 1200));
+
+  demoTimers.push(setTimeout(() => {
+    setOrbState('thinking');
+    cmdInput.placeholder = 'Ask or @mention…';
+  }, 2200));
+
+  demoTimers.push(setTimeout(() => {
+    setOrbState('speaking');
+    finalizePartialTurn('Spotify, make a party playlist.', false);
+    // Add user turn properly
+    const userTurn = document.getElementById('partialTurn');
+    if (userTurn) {
+      const meta = userTurn.querySelector('.turn-meta');
+      if (meta) {
+        meta.innerHTML = '<span class="turn-glyph">🎙</span><span>You · voice</span>';
+        userTurn.className = 'turn user';
+        const bubble = userTurn.querySelector('.bubble');
+        if (bubble) bubble.style.cssText = 'background:linear-gradient(135deg,rgba(110,139,255,0.85),rgba(156,108,240,0.8));color:white;border:1px solid rgba(255,255,255,0.3)';
+      }
+    }
+    scrollThread();
+  }, 3500));
+
+  demoTimers.push(setTimeout(() => {
+    // Mark tile active and show card
+    document.querySelectorAll('.app-tile').forEach(t => t.classList.remove('active'));
+    document.querySelector('[data-app="Spotify"]')?.classList.add('active');
+    addSpotifyCard();
+    scrollThread();
+  }, 4200));
+
+  demoTimers.push(setTimeout(() => {
+    setOrbState('idle');
+  }, 6000));
+}
+
+// ── Full demo ──────────────────────────────────────────────────────────────
+let autoStartTimer = null;
+function runDemo() {
+  if (autoStartTimer) { clearTimeout(autoStartTimer); autoStartTimer = null; }
+  clearDemoTimers();
+  // Reset
+  chatThread.innerHTML = '';
+  document.querySelectorAll('.app-tile').forEach(t => t.classList.remove('active'));
+  cmdInput.value = '';
+  typed = false;
+  generating = false;
+  attachments = [];
+  renderAttachChips();
+  updateActionBtn();
+  globalChips.className = 'suggestion-chips';
+  cmdInput.placeholder = 'Ask or @mention…';
+
+  setOrbState('idle');
+
+  // Step 1: Add an already-finalized typed turn to show history
+  demoTimers.push(setTimeout(() => {
+    addUserTurn("What's the weather today?", 'typed', null);
+    scrollThread();
+  }, 600));
+
+  demoTimers.push(setTimeout(() => {
+    setOrbState('thinking');
+    scrollThread();
+  }, 1000));
+
+  demoTimers.push(setTimeout(() => {
+    setOrbState('speaking');
+    addWeatherCard();
+    setOrbState('idle');
+    scrollThread();
+  }, 2000));
+
+  // Step 2: Attach demo
+  demoTimers.push(setTimeout(() => {
+    attachments = ['photo.jpg'];
+    renderAttachChips();
+  }, 2800));
+
+  // Step 3: Voice demo — "Spotify, make a party playlist"
+  demoTimers.push(setTimeout(() => {
+    attachments = [];
+    renderAttachChips();
+    setOrbState('listening');
+    cmdInput.placeholder = 'Listening…';
+  }, 3500));
+
+  demoTimers.push(setTimeout(() => {
+    addPartialTurn('Spotify, make a party playlist…');
+    scrollThread();
+  }, 4700));
+
+  // Barge-in demo: assistant starts speaking, user interrupts
+  demoTimers.push(setTimeout(() => {
+    setOrbState('thinking');
+    cmdInput.placeholder = 'Ask or @mention…';
+  }, 5700));
+
+  demoTimers.push(setTimeout(() => {
+    setOrbState('speaking');
+    finalizePartialTurn('Spotify, make a party playlist.', false);
+    const userTurn = document.getElementById('partialTurn');
+    if (userTurn) {
+      userTurn.className = 'turn user';
+      const meta = userTurn.querySelector('.turn-meta');
+      if (meta) meta.innerHTML = '<span class="turn-glyph">🎙</span><span>You · voice</span>';
+      const bubble = userTurn.querySelector('.bubble');
+      if (bubble) bubble.style.cssText = 'background:linear-gradient(135deg,rgba(110,139,255,0.85),rgba(156,108,240,0.8));color:white;border:1px solid rgba(255,255,255,0.3)';
+    }
+    document.querySelector('[data-app="Spotify"]')?.classList.add('active');
+    addSpotifyCard();
+    scrollThread();
+  }, 7000));
+
+  // Barge-in: assistant speaking, user says "make it more upbeat"
+  demoTimers.push(setTimeout(() => {
+    // Snap to listening (barge-in)
+    setOrbState('listening');
+    cmdInput.placeholder = 'Listening…';
+  }, 9000));
+
+  demoTimers.push(setTimeout(() => {
+    addPartialTurn('Make it more upbeat…');
+    scrollThread();
+  }, 9800));
+
+  demoTimers.push(setTimeout(() => {
+    setOrbState('thinking');
+    cmdInput.placeholder = 'Ask or @mention…';
+  }, 10600));
+
+  demoTimers.push(setTimeout(() => {
+    setOrbState('speaking');
+    // Add interrupted marker to previous card and finalize
+    finalizePartialTurn('Make it more upbeat.', false);
+    const userTurn = document.getElementById('partialTurn');
+    if (userTurn) {
+      userTurn.className = 'turn user';
+      const meta = userTurn.querySelector('.turn-meta');
+      if (meta) meta.innerHTML = '<span class="turn-glyph">🎙</span><span>You · voice</span>';
+      const bubble = userTurn.querySelector('.bubble');
+      if (bubble) bubble.style.cssText = 'background:linear-gradient(135deg,rgba(110,139,255,0.85),rgba(156,108,240,0.8));color:white;border:1px solid rgba(255,255,255,0.3)';
+    }
+    addAssistantTurn('Updated! The playlist now leads with Doja Cat, Calvin Harris, and Charli XCX. Ready to play?');
+    scrollThread();
+  }, 11800));
+
+  demoTimers.push(setTimeout(() => {
+    setOrbState('idle');
+  }, 13500));
+}
+
+function clearDemoTimers() {
+  demoTimers.forEach(t => clearTimeout(t));
+  demoTimers = [];
+}
+
+function scrollThread() {
+  const area = document.getElementById('mainArea');
+  setTimeout(() => area.scrollTo({ top: area.scrollHeight, behavior: 'smooth' }), 50);
+}
+
+// ── Mute ──────────────────────────────────────────────────────────────────
+function toggleMute() {
+  muted = !muted;
+  muteBtn.className = 'mute-btn' + (muted ? ' muted' : '');
+  muteBtn.textContent = muted ? '🔇 Unmute' : '🎙 Mute';
+  setOrbState(state);
+}
+
+// ── @ trigger ─────────────────────────────────────────────────────────────
+document.getElementById('atBtn').addEventListener('click', () => {
+  cmdInput.value = '@';
+  cmdInput.focus();
+  typed = true;
+  updateActionBtn();
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────
+updateActionBtn();
+setOrbState('idle');
+
+// Autostart the scripted demo (delayed so the idle state renders cleanly first).
+// A manual Play Demo click cancels this pending auto-start to avoid double-runs.
+autoStartTimer = setTimeout(() => { autoStartTimer = null; runDemo(); }, 2200);
+</script>
+</body>
+</html>

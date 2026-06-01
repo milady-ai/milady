@@ -32,9 +32,10 @@ import * as THREE from "three";
 // the tsconfig path-map bypasses the package exports field, so the deep
 // confirm-dialog subpath does not resolve in this stub.
 type PromptOptions = {
-  title: string;
+  title?: string;
   description?: string;
   placeholder?: string;
+  defaultValue?: string;
   initialValue?: string;
   confirmLabel?: string;
   cancelLabel?: string;

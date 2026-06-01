@@ -21,8 +21,10 @@ PRODUCT_MANUFACTURER := Milady
 
 PRODUCT_PACKAGES += \
     Milady \
+    ElizaSystemBridge \
     default-permissions-ai.milady.milady.xml \
-    privapp-permissions-ai.milady.milady.xml
+    privapp-permissions-ai.milady.milady.xml \
+    privapp-permissions-ai.elizaos.system.bridge.xml
 
 # Strip every stock app whose role Milady owns. Trebuchet is LineageOS's
 # launcher; absent from AOSP but harmless to list. SetupWizard ships with
@@ -55,6 +57,7 @@ PRODUCT_ARTIFACT_PATH_REQUIREMENT_ALLOWED_LIST += \
     system/priv-app/Milady/% \
     system/etc/default-permissions/default-permissions-ai.milady.milady.xml \
     system/etc/permissions/privapp-permissions-ai.milady.milady.xml \
+    system/etc/permissions/privapp-permissions-ai.elizaos.system.bridge.xml \
     product/etc/init/init.milady.rc \
     product/media/bootanimation.zip
 

@@ -1,11 +1,14 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+// @ts-expect-error — .mjs module, no declaration file
+import { syncElizaEnvAliases } from "../../../scripts/lib/sync-eliza-env-aliases.mjs";
 import appConfig from "../app.config";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const appRoot = path.resolve(here, "..");
+const savedRouteModules = process.env.ELIZA_APP_ROUTE_PLUGIN_MODULES;
 
 /**
  * Contract tests for app registration wiring.
@@ -15,6 +18,15 @@ const appRoot = path.resolve(here, "..");
  * installing their package and adding them to app.config.ts.
  */
 describe("app registration contracts", () => {
+  afterEach(() => {
+    if (savedRouteModules === undefined) {
+      delete process.env.ELIZA_APP_ROUTE_PLUGIN_MODULES;
+    } else {
+      process.env.ELIZA_APP_ROUTE_PLUGIN_MODULES = savedRouteModules;
+    }
+    vi.resetModules();
+  });
+
   it("does not require unpublished elizaOS app packages by default", () => {
     expect(appConfig.defaultApps).toEqual([]);
   });
@@ -43,13 +55,26 @@ describe("app registration contracts", () => {
     );
   });
 
-  it("all defaultApps have corresponding tsconfig path aliases", () => {
+  it("keeps runtime route-module injection empty when no default apps are configured", async () => {
+    delete process.env.ELIZA_APP_ROUTE_PLUGIN_MODULES;
+    syncElizaEnvAliases({
+      brandedPrefix: appConfig.envPrefix,
+      cloudManagedAgentsApiSegment: appConfig.namespace,
+      appRoutePluginModules: appConfig.defaultApps,
+    });
+
+    expect(appConfig.defaultApps).toEqual([]);
+    expect(process.env.ELIZA_APP_ROUTE_PLUGIN_MODULES).toBe("");
+  });
+
+  it("all configured defaultApps have corresponding tsconfig path aliases", () => {
     const tsconfig = JSON.parse(
       fs.readFileSync(path.join(appRoot, "tsconfig.json"), "utf8"),
     );
     const paths: Record<string, string[]> =
       tsconfig?.compilerOptions?.paths ?? {};
 
+    expect.assertions(appConfig.defaultApps.length * 2);
     for (const appPkg of appConfig.defaultApps) {
       expect(
         paths[appPkg],
