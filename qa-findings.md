@@ -33,7 +33,49 @@ Branch: `qa/2am-2026-06-01` off `develop` at commit `765e547d4` ("chore: remove 
 
 ## Phase 1 — Automated test sweep
 
-_(pending)_
+| Step | Status | Time | Notes |
+|------|--------|------|-------|
+| 1.1 `bun run verify:typecheck` | ❌ **Finding #2** | ~5–7 min | Root workspace typecheck passed. `apps/app` typecheck failed (see below). |
+| 1.2 `bun run verify:lint` | ✅ | 5s | All Biome checks passed: submodule contract, repo (37+40+40+9+16+40+40+38+12 files), apps/app (81), apps/homepage (81). Zero fixes needed. |
+| 1.3 `bun run test` | ❌ **Findings #3, #4, #5** | ~70s | 207 passed, 3 failed, 1 skipped across 31 test files. Two files affected: `scripts/release-workflow-contract.test.mjs` (1 fail) and `scripts/standalone-eliza-package-contract.test.ts` (2 fails). |
+| 1.4 `bun run test:e2e` | ⚠ **Finding #6** | <1s | Exit 0 but "No test files found, exiting with code 0" — false-green. |
+| 1.5 `bun run verify:secrets` | ⚠ inconclusive | >5 min hung | Script `check-secret-hygiene.mjs` produced no output, no exit. Suspected hang. Not blocking. |
+
+### Finding #6 — `bun run test:e2e` finds no test files (false-green)
+
+- **Command:** `bun run test:e2e` → `bunx vitest run --config eliza/packages/app-core/vitest.e2e.config.ts --passWithNoTests --exclude ...`
+- **Behavior:** prints `No test files found, exiting with code 0` and reports success.
+- **Cause:** [eliza/packages/app-core/vitest.e2e.config.ts:24](eliza/packages/app-core/vitest.e2e.config.ts#L24) sets `include: ["src/**/*.e2e.test.ts", "src/**/*.e2e.test.tsx"]` (relative to the config dir = `eliza/packages/app-core/`). But the e2e tests in this repo live under `test/**` (e.g., `eliza/packages/app-core/test/app/*.real.e2e.test.ts`), not `src/**`. The `--exclude` paths in the package.json script all point at `test/**` files that wouldn't be matched by the include anyway.
+- **Effect:** `bun run test:e2e` runs **zero tests** and passes. CI is not actually exercising any e2e suite from this command.
+- **Severity:** high. This is a silent CI hole — anyone relying on `test:e2e` to gate merges is getting no e2e coverage from it.
+- **Fix path:** add `test/**/*.e2e.test.ts` to the include pattern in `vitest.e2e.config.ts`, OR change the package.json script to point at `eliza/packages/app-core/test/...` paths explicitly.
+
+### Finding #2 — apps/app typecheck: missing `@elizaos/plugin-task-coordinator/register`
+
+- **File:** [apps/app/src/main.tsx:97](apps/app/src/main.tsx#L97)
+- **Error:** `TS2882: Cannot find module or type declarations for side-effect import of '@elizaos/plugin-task-coordinator/register'.`
+- **Cause:** `apps/app/src/main.tsx` imports `@elizaos/plugin-task-coordinator/register` as a side-effect. Either the plugin isn't installed, or it doesn't expose a `/register` subpath in its `package.json` exports.
+- **Severity:** medium-high. Blocks `bun run verify` and CI typecheck. Root workspace typecheck passes — only `apps/app` is affected.
+
+### Finding #3 — release-workflow-contract.test.mjs: BUN_VERSION drift
+
+- **Test:** `scripts/release-workflow-contract.test.mjs:800` — "Electrobun release has a lightweight PR contract workflow"
+- **Failure:** assertion `match(workflowText, /BUN_VERSION: "1\.3\.13"/)` failed; actual workflow file has `BUN_VERSION: "1.3.14"`.
+- **Cause:** The workflow `.github/workflows/test-electrobun-release.yml` was bumped from `1.3.13` → `1.3.14`, but `scripts/release-workflow-contract.test.mjs:800` still expects `1.3.13`. Contract test was not updated alongside the version bump.
+- **Severity:** low (stale-test). Fix: update the regex to `1.3.14` (or whichever is current).
+
+### Finding #4 — standalone-eliza-package-contract.test.ts: root tsconfig references `./eliza/` paths in packages mode
+
+- **Test:** `scripts/standalone-eliza-package-contract.test.ts` — "root tsconfig.json is packages-mode-clean by default"
+- **Failure:** `AssertionError: root tsconfig.json must not reference ./eliza/ paths in packages mode`
+- **Cause:** The checked-in `tsconfig.json` has `paths` and `include` entries pointing into `./eliza/packages/*/src/*` and `./eliza/plugins/*/src/*`. In `packages` (default) mode this is forbidden — only the installed package paths should resolve. Looks like a `local`-mode tsconfig accidentally got committed, or the source-mode switcher isn't restoring `packages` mode on `eliza:packages`.
+- **Severity:** medium. Breaks the contract guarantee that fresh clones default to `packages` mode. Would also mask real type errors when developing without `./eliza/` cloned.
+
+### Finding #5 — standalone-eliza-package-contract.test.ts: checked-in tsconfig diverges from packages-mode template
+
+- **Test:** `scripts/standalone-eliza-package-contract.test.ts` — "checked-in tsconfig.json matches the packages-mode template"
+- **Same root cause as #4.** Diff shows the checked-in `tsconfig.json` has extra `./eliza/...` paths and includes/excludes vs. the canonical `scripts/templates/tsconfig.packages-mode.json`.
+- **Fix path:** run `bun run eliza:packages` (or `bun run workspace:restore-refs`) to restore the packages-mode tsconfig, then commit the diff. Investigate why it drifted.
 
 ---
 
