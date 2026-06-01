@@ -43,6 +43,8 @@ if (!scriptName) {
   process.exit(1);
 }
 
+syncElizaEnvAliases({ defaultNamespace: "milady" });
+
 // Desktop and iOS builds compile @elizaos/app-core source directly out of the
 // repo-local eliza/ checkout, which only exists in local mode. In packages
 // mode the script file is absent and the build dies with a cryptic
@@ -62,8 +64,6 @@ if ((isDesktopBuild || isIosBuild) && !localModeActive) {
   );
   process.exit(1);
 }
-
-syncElizaEnvAliases({ defaultNamespace: "milady" });
 
 const scriptPath = resolveElizaAppCoreScript(scriptName, { repoRoot });
 const localScriptPath = path.join(

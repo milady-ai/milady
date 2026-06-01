@@ -1958,16 +1958,6 @@ jobs:
           retention-days: 30
           compression-level: 0
 
-      - name: Upload MSIX artifact
-        if: matrix.platform.os == 'windows'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: electrobun-${{ matrix.platform.artifact-name }}-msix
-          path: eliza/packages/app-core/platforms/electrobun/artifacts/*.msix
-          if-no-files-found: warn
-          retention-days: 30
-          compression-level: 6
-
   release:
     name: Create Release
     if: ${{ (inputs.platform == '' || inputs.platform == 'all') && (github.event_name != 'workflow_call' || inputs.publish_release) }}
