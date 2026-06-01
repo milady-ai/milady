@@ -2835,6 +2835,12 @@ export default defineConfig({
         // server-side Solana payment path. Not a declared dep; the renderer
         // never enters that branch. Externalize to skip the resolver.
         if (/^@solana\/web3\.js$/.test(id)) return true;
+        // @opentelemetry/api is a server/Node-only distributed-tracing package
+        // that the `ai` package (v6+) imports as an optional peer dep. The
+        // renderer never enters those tracing code paths. Externalize so Rollup
+        // doesn't fail trying to resolve a Node-only package in the browser
+        // build context.
+        if (/^@opentelemetry\/api(\/|$)/.test(id)) return true;
         // Note: server-only native binaries (@napi-rs/keyring, @node-rs/argon2,
         // @snazzah/davey, .node) are NOT externalized here — externalizing
         // leaves bare-specifier `import "@snazzah/davey"` in the renderer
