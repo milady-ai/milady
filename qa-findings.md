@@ -102,6 +102,7 @@ _(pending)_
 - **Cause hypothesis:** `dispatch.ts` unconditionally imports `rpc-mac.js`, but `plugin-remote-manifest` only ships that file on macOS builds (or the build matrix forgot Windows). Should be a platform-conditional import.
 - **Severity:** **high.** Blocks all local dev of `apps/app` on Windows. Same code path likely affects Linux. Only macOS would boot.
 - **Repro:** clean clone on Windows, `bun install`, `bun run dev`.
+- **Verification of fix (Windows perspective only):** confirming the gating works on Windows is doable here; confirming the fix doesn't regress macOS dev would need a Mac runner — flag as **macOS-side verification out of scope** for this branch.
 
 ### 2.2 apps/homepage — ✅ GREEN
 
@@ -162,7 +163,7 @@ All 8 messaging connector test suites passed on `develop` HEAD.
 | WhatsApp | ✅ | 114s | `vitest run --config ./vitest.config.ts` |
 | Signal | ✅ | 24s | `vitest run` |
 | WeChat | ✅ | 2s | `vitest run --config ./vitest.config.ts` (note: very fast — verify test file count) |
-| iMessage | ✅ | 8s | `vitest run --config vitest.config.ts` |
+| iMessage | ⚠ partial | 8s | Unit test green (`vitest run --config vitest.config.ts`), but **live send/receive verification requires macOS + BlueBubbles** — not testable from this Windows host. Mark as code-only verified. |
 | Bluesky | ✅ | 40s | `vitest run` |
 | Farcaster | ✅ | 39s | `npx -y vitest@4.0.18 run` (note: pinned to vitest 4.0.18 vs. repo's 4.1.6 — possible mismatch worth checking) |
 
@@ -222,4 +223,10 @@ All 8 messaging connector test suites passed on `develop` HEAD.
 - Packaged desktop smoke (`test:desktop:packaged:windows`) — not run; #7 makes packaged-app smoke moot until dev boots.
 - Mobile (iOS/Android via Capacitor).
 - The visual audit's 5-loop manual-review protocol — only 1 loop run, no per-page verdicts written into `manual-review/*.md` stubs (out of scope at smoke depth).
+
+### Cannot be tested from this Windows host (need macOS to verify)
+
+- **plugin-imessage live send/receive** — needs Mac + BlueBubbles. Code-level test passes; runtime can't be confirmed.
+- **macOS-side regression check for Finding #7 fix** — gating the `rpc-mac.js` import would need a Mac runner to confirm apps/app still boots there.
+- **Anything else macOS-platform-conditional** (Apple Notes / Apple Reminders / Things-mac / camsnap / imsg skills, macOS-only signing & notarization in the release pipeline) — flagged here as a category, not enumerated; hand off to a Mac runner.
 
