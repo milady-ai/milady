@@ -2923,6 +2923,14 @@ export default defineConfig({
       "socks",
       // OS keychain binding is desktop/server-only and pulls native .node assets.
       "@napi-rs/keyring",
+      // Discord voice/gateway natives leak in via @discordjs/ws: @snazzah/davey
+      // re-exports @snazzah/davey-wasm32-wasi and zlib-sync is a compiled .node
+      // addon — neither resolves in the browser. nativeModuleStubPlugin covers
+      // the rollup build + dev-server module serving, but esbuild's optimizeDeps
+      // pre-bundle uses its own resolver; exclude them so the dev server's
+      // pre-bundle scan doesn't crash (white screen) trying to resolve them.
+      "@snazzah/davey",
+      "zlib-sync",
     ],
   },
   build: {
