@@ -48,16 +48,6 @@ const {
 const here = path.dirname(fileURLToPath(import.meta.url));
 const miladyRoot = path.resolve(here, "../..");
 const capacitorCoreEntry = _require.resolve("@capacitor/core");
-const publishedSharedCharacterPresetsEntry = (() => {
-  try {
-    return _require.resolve("@elizaos/shared/character-presets");
-  } catch {
-    return path.resolve(
-      here,
-      "../../eliza/packages/shared/dist/character-presets.js",
-    );
-  }
-})();
 const patheEntry = _require.resolve("pathe");
 const optionalElizaAppStubEntry = path.join(
   here,
@@ -586,10 +576,6 @@ function resolveLocalAppCoreAliases(): Alias[] {
     {
       find: /^@elizaos\/core$/,
       replacement: resolveElizaCoreBundlePath(),
-    },
-    {
-      find: /^@elizaos\/shared\/character-presets$/,
-      replacement: publishedSharedCharacterPresetsEntry,
     },
     // When a local eliza workspace is present and @elizaos/shared has been
     // built, prefer the local dist over the bun-store published copy which

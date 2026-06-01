@@ -233,19 +233,6 @@ declare module "@elizaos/app-core/api" {
   export type WhitelistStatus = unknown;
 }
 
-declare module "@elizaos/shared/character-presets" {
-  // Minimal shape needed by character-catalog.ts and main.tsx.
-  // buildElizaCharacterCatalog is the real export from character-presets.ts;
-  // the dist publish may lag the workspace source, so it is shimmed here.
-  export interface StylePreset {
-    name: string;
-    avatarIndex: number;
-    [key: string]: unknown;
-  }
-  export function getStylePresets(): StylePreset[];
-  export function buildElizaCharacterCatalog(): unknown;
-}
-
 declare module "@elizaos/shared/dist/index.js" {
   // The PR #2148 rename target lives in @elizaos/shared/dist/themes/presets,
   // not in the top-level index. Augment the index here so the existing
