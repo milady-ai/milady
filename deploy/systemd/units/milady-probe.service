@@ -1,7 +1,0 @@
-[Unit]
-Description=Milady — active health probe (restarts bot on stuck / auth-failed state)
-
-[Service]
-Type=oneshot
-EnvironmentFile=%h/.config/milady/env
-ExecStart=%h/bin/milady-health-probe.sh

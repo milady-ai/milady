@@ -4,9 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "predev": "node ../../scripts/write-homepage-release-data.mjs",
     "dev": "vite",
-    "prebuild": "node ../../scripts/write-homepage-release-data.mjs",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "bunx @biomejs/biome check src test vite.config.ts vitest.config.ts playwright.config.ts package.json",
@@ -15,8 +13,8 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@elizaos/app-core": "alpha",
-    "@elizaos/ui": "alpha",
+    "@elizaos/app-core": "beta",
+    "@elizaos/ui": "beta",
     "dompurify": "^3.4.0",
     "mermaid": "^11.14.0",
     "react": "^19.0.0",

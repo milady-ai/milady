@@ -1,19 +1,14 @@
 # scripts/
 
-Repo-level helper scripts. Most are invoked via `bun run <name>` from the
-root `package.json`.
+Milady-only lifecycle shims for installing, building, starting, and running the
+app from this workspace.
 
-### Action-planner auto-tuning
-Run after the action benchmark to improve planner accuracy:
-  1. `bun run test:benchmark:actions:mocked`   # generate trajectories
-  2. `bun run action:trajectories-to-dataset`  # trajectories -> JSONL
-  3. `bun run action:optimize-planner`         # MIPRO-style tuning
+Keep this folder small. If a script is generally useful to elizaOS, put it in
+`eliza/packages/app-core/scripts/` and call it through:
 
-Re-run step 1 to measure improvement. The `OptimizedPromptService`
-loads the new artifact at next runtime boot; the action planner
-prompt is automatically substituted.
+```bash
+node scripts/run-eliza-app-core-script.mjs <script-name> [...args]
+```
 
-The dataset is written to
-`eliza/plugins/app-training/datasets/action_planner_from_benchmark.jsonl`
-(plus a sibling `.meta.json`), and artifacts land under
-`~/.local/state/milady/optimized-prompts/action_planner/`.
+Root scripts should only remain here when they need Milady-specific package
+mode behavior, workspace layout, npm packaging, or runtime patches.

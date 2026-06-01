@@ -17,10 +17,6 @@ import type { BrandingConfig } from "@elizaos/app-core";
 import {
   type AppBootConfig,
   getBootConfig,
-  ANDROID_LOCAL_AGENT_API_BASE,
-  MOBILE_RUNTIME_MODE_STORAGE_KEY,
-  normalizeMobileRuntimeMode,
-  preSeedAndroidLocalRuntimeIfFresh,
   setBootConfig,
 } from "@elizaos/app-core";
 import {
@@ -35,15 +31,25 @@ import {
   TRAY_ACTION_EVENT,
 } from "@elizaos/app-core";
 import {
+  ANDROID_LOCAL_AGENT_API_BASE,
+  MOBILE_RUNTIME_MODE_STORAGE_KEY,
+  normalizeMobileRuntimeMode,
+  preSeedAndroidLocalRuntimeIfFresh,
+} from "./first-run/mobile-runtime-mode";
+// Navigation + platform helpers are re-exported from the published
+// @elizaos/app-core barrel (which bridges @elizaos/ui). Importing them from
+// app-core keeps package-mode builds green; the granular @elizaos/ui/* subpaths
+// these symbols live under are not published on the `alpha` dist-tag.
+import {
   applyForceFreshOnboardingReset,
-  applyLaunchConnectionFromUrl,
   applyLaunchConnection,
+  applyLaunchConnectionFromUrl,
+  getWindowNavigationPath,
   installDesktopPermissionsClientPatch,
   installForceFreshOnboardingClientPatch,
   installLocalProviderCloudPreferencePatch,
   isAppWindowRoute,
   isDetachedWindowShell,
-  getWindowNavigationPath,
   resolveWindowShellRoute,
   shouldInstallMainWindowOnboardingPatches,
   syncDetachedShellLocation,
@@ -93,8 +99,6 @@ import "@elizaos/app-lifeops/widgets";
 // slot wrappers (CodingAgentControlChip, PtyConsoleBase, etc.) render the
 // real components instead of nulls.
 import "@elizaos/app-task-coordinator/register-slots";
-// Side-effect: register the full `/orchestrator` app-shell workbench route.
-import "@elizaos/plugin-task-coordinator/register";
 // Side-effect: register game operator surfaces + detail extensions.
 import "@elizaos/app-babylon/ui";
 import "@elizaos/app-scape/ui";
@@ -293,7 +297,7 @@ installDesktopPermissionsClientPatch(client);
 window.__ELIZA_APP_CHARACTER_EDITOR__ = CharacterEditor;
 getAppWindow()[BRANDED_WINDOW_KEYS.characterEditor] = CharacterEditor;
 
-import { getStylePresets } from "@elizaos/shared/character-presets";
+import { getStylePresets } from "@elizaos/shared";
 
 // Derive VRM roster from STYLE_PRESETS so character names stay in one place.
 const APP_STYLE_PRESETS = getStylePresets();

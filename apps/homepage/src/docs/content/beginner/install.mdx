@@ -32,7 +32,7 @@ Grab the right file from the [latest GitHub release](https://github.com/milady-a
 | macOS (Apple Silicon — M1/M2/M3/M4) | Apple Silicon `.dmg` |
 | macOS (Intel — pre-2020 Macs) | Intel `.dmg` |
 | Windows 10 and 11 | Windows `.exe` installer |
-| Linux | Linux `.tar.gz`, AppImage, or `.deb` when published |
+| Linux | `stable-linux-x64-Milady-Setup.tar.gz` (installer tarball, x86_64) |
 | iOS | App Store (coming soon) |
 | Android | [Google Play](https://play.google.com/store/apps/details?id=ai.milady.app) or `Milady-Android.apk` on GitHub |
 
@@ -51,19 +51,19 @@ Every desktop build is code-signed and (on macOS) notarized. You shouldn't see a
 ### Windows
 
 <Steps>
-  <li>Download `Milady-Setup.exe`.</li>
+  <li>Download the Windows installer from the [latest release](https://github.com/milady-ai/milady/releases/latest).</li>
   <li>Run the installer. Accept the SmartScreen prompt if it appears — the installer is signed but SmartScreen can be cautious with new publishers.</li>
   <li>Milady lands in your Start menu. Open it and follow the first-launch flow.</li>
 </Steps>
 
 ### Linux
 
-Pick the Linux asset published on the latest release. When both are present, AppImage works everywhere and `.deb` is best for Debian, Ubuntu, Pop!_OS, and the like.
+The Linux desktop app ships as a single installer tarball — `stable-linux-x64-Milady-Setup.tar.gz` (x86_64). There is no AppImage, `.deb`, Snap, Flatpak, or APT repo today.
 
 <Steps>
-  <li>Download the `.AppImage` or `.deb`.</li>
-  <li>**AppImage:** `chmod +x Milady.AppImage` and double-click (or run from a terminal). **.deb:** `sudo dpkg -i milady_*.deb`.</li>
-  <li>Launch from your application menu or by running `milady-desktop` in a terminal.</li>
+  <li>Download `stable-linux-x64-Milady-Setup.tar.gz` from the [latest release](https://github.com/milady-ai/milady/releases/latest).</li>
+  <li>Extract it: `tar -xzf stable-linux-x64-Milady-Setup.tar.gz` (unpacks `installer` and `README.txt` into the current directory).</li>
+  <li>Run the installer: `./installer`. Then launch Milady from your application menu.</li>
 </Steps>
 
 ## CLI install (power users)

@@ -182,7 +182,7 @@ jobs:
                   echo "::error::Auto-bump for stable releases is not supported — supply an explicit inputs.tag." >&2
                   return 1
                   ;;
-                *)     ident="alpha" ;;
+                *)     ident="beta" ;;
               esac
             fi
             n="$(highest_in_series "$base" "$ident")"
@@ -1580,19 +1580,6 @@ jobs:
           Write-Host "Public installer still valid for release upload: $($installer.Name)"
           Write-Host "Installer size: $([math]::Round($installer.Length / 1MB, 1)) MB"
 
-      - name: Build MSIX package
-        if: matrix.platform.os == 'windows' && steps.build-electrobun-app.outputs.fallback != 'true'
-        env:
-          WINDOWS_SIGN_CERT_BASE64: ${{ secrets.WINDOWS_SIGN_CERT_BASE64 }}
-          WINDOWS_SIGN_CERT_PASSWORD: ${{ secrets.WINDOWS_SIGN_CERT_PASSWORD }}
-          WINDOWS_SIGN_TIMESTAMP_URL: ${{ secrets.WINDOWS_SIGN_TIMESTAMP_URL }}
-        shell: pwsh
-        run: |
-          pwsh -File eliza/packages/app-core/packaging/msix/build-msix.ps1 `
-            -BuildDir (Join-Path $PWD "eliza/packages/app-core/platforms/electrobun/build") `
-            -OutputDir (Join-Path $PWD "eliza/packages/app-core/platforms/electrobun/artifacts") `
-            -Version "${{ needs.prepare.outputs.version }}"
-
       # When building unsigned (skip_codesign=1), the CEF framework ships with
       # a pre-existing signature.  Injecting version.json into Resources breaks
       # that signature (resource hash mismatch).  Ad-hoc re-sign the .app so
@@ -1971,16 +1958,6 @@ jobs:
           retention-days: 30
           compression-level: 0
 
-      - name: Upload MSIX artifact
-        if: matrix.platform.os == 'windows'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: electrobun-${{ matrix.platform.artifact-name }}-msix
-          path: eliza/packages/app-core/platforms/electrobun/artifacts/*.msix
-          if-no-files-found: warn
-          retention-days: 30
-          compression-level: 6
-
   release:
     name: Create Release
     if: ${{ (inputs.platform == '' || inputs.platform == 'all') && (github.event_name != 'workflow_call' || inputs.publish_release) }}
@@ -2017,8 +1994,7 @@ jobs:
             -name "ElizaOSApp-Setup-*.exe" -o \
             -name "ElizaOSApp-Setup-*.exe.zip" -o \
             -name "eliza-*.exe.zip" -o \
-            -name "*Setup*.tar.gz" -o \
-            -name "*.msix" \
+            -name "*Setup*.tar.gz" \
           \) -exec cp {} release-files/ \; 2>/dev/null || true
 
           # Decompress Windows .exe.zip back to .exe for end-user downloads
@@ -2032,8 +2008,7 @@ jobs:
             -name "ElizaOSApp-Setup-*.exe" -o \
             -name "*.dmg" -o \
             -name "*.app.tar.gz" -o \
-            -name "*.tar.zst" -o \
-            -name "*.msix" \
+            -name "*.tar.zst" \
           \) -exec mv -f {} release-files/ \; 2>/dev/null || true
           find release-files -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} + 2>/dev/null || true
 
@@ -2068,7 +2043,7 @@ jobs:
         with:
           tag_name: ${{ needs.prepare.outputs.tag }}
           target_commitish: ${{ needs.prepare.outputs.source_sha }}
-          name: Eliza ${{ needs.prepare.outputs.tag }}
+          name: Milady ${{ needs.prepare.outputs.tag }}
           draft: ${{ inputs.draft || false }}
           prerelease: ${{ contains(needs.prepare.outputs.version, 'alpha') || contains(needs.prepare.outputs.version, 'beta') || contains(needs.prepare.outputs.version, 'rc') || contains(needs.prepare.outputs.version, 'nightly') }}
           generate_release_notes: true

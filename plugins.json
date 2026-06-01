@@ -5239,7 +5239,7 @@
         "trust-score",
         "shill-tracker",
         "social",
-        "alpha"
+        "beta"
       ],
       "category": "feature",
       "envKey": "HELIUS_API_KEY",

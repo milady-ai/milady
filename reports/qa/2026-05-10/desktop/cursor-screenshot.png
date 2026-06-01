@@ -1,1 +1,0 @@
-{"error":"desktop screenshot server not enabled","hint":"Desktop dev enables the screenshot server by default; use dev-platform or set ELIZA_ELECTROBUN_SCREENSHOT_URL. Disable with ELIZA_DESKTOP_SCREENSHOT_SERVER=0."}

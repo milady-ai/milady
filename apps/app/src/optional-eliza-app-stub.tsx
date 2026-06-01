@@ -28,8 +28,9 @@ import type {
 import type { ComponentType } from "react";
 import * as THREE from "three";
 
-// Mirrors the confirm-dialog PromptOptions shape; this package-mode stub cannot
-// import the unpublished deep UI subpath.
+// Mirrors @elizaos/ui's confirm-dialog PromptOptions. Declared locally because
+// the tsconfig path-map bypasses the package exports field, so the deep
+// confirm-dialog subpath does not resolve in this stub.
 type PromptOptions = {
   title?: string;
   description?: string;

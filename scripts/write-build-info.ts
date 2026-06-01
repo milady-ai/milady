@@ -54,7 +54,7 @@ const resolveCommit = () => {
 const detectChannel = (version: string): string => {
   if (version.includes("-nightly")) return "nightly";
   if (version.includes("-beta")) return "beta";
-  if (version.includes("-alpha")) return "alpha";
+  if (version.includes("-alpha")) return "beta";
   if (version.includes("-rc")) return "rc";
   return "stable";
 };

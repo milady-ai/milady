@@ -757,7 +757,19 @@ function resolveLocalAppCoreAliases(): Alias[] {
   const uiComponentsSourceDir = uiPkgRoot ? path.join(uiPkgRoot, "src") : null;
 
   function resolveAppCoreWithUiFallback(id: string): string {
-    if (fs.existsSync(id)) return id;
+    if (fs.existsSync(id)) {
+      // A subpath like `@elizaos/app-core/api/auth` can map to a directory when
+      // eliza refactors a single file into a folder (api/auth.ts -> api/auth/index.ts).
+      // fs.existsSync() is true for directories, so resolve the directory's index
+      // instead of returning the dir itself (which vite tries to read -> EISDIR).
+      if (fs.statSync(id).isDirectory()) {
+        for (const idx of [`${id}/index.ts`, `${id}/index.tsx`]) {
+          if (fs.existsSync(idx)) return idx;
+        }
+      } else {
+        return id;
+      }
+    }
     const withTsx = id.endsWith(".tsx") ? id : `${id}.tsx`;
     if (fs.existsSync(withTsx)) return withTsx;
     const withTs = id.endsWith(".ts") ? id : `${id}.ts`;
@@ -1496,7 +1508,7 @@ function generateNodeBuiltinStub(moduleId: string, req = _require): string {
     //   * mutation traps (set / defineProperty) don't throw under strict mode
     //   * `instanceof`, `default`, `__esModule` resolve sensibly for ESM<->CJS
     "function noopFn() { return noop; }",
-    "const handler = { get(t, p) { if (typeof p === 'symbol') return undefined; if (p === '__esModule') return true; if (p === 'default') return noop; if (p === 'prototype') return {}; if (p in t) return t[p]; return noop; }, set(t, p, v) { try { t[p] = v; } catch {} return true; }, has() { return true; }, ownKeys() { return []; }, getOwnPropertyDescriptor() { return { configurable: true, enumerable: true }; }, apply() { return noop; }, construct() { return noop; }, defineProperty(t, p, d) { try { Object.defineProperty(t, p, { configurable: true, writable: true, enumerable: true, ...d }); } catch {} return true; } };",
+    "const handler = { get(t, p) { if (typeof p === 'symbol') return undefined; if (p === '__esModule') return true; if (p === 'default') return noop; if (p === 'prototype') return {}; if (p in t) return t[p]; return noop; }, set(t, p, v) { try { t[p] = v; } catch {} return true; }, has() { return true; }, ownKeys(t) { return Reflect.ownKeys(t); }, getOwnPropertyDescriptor(t, p) { return Reflect.getOwnPropertyDescriptor(t, p) || { configurable: true, enumerable: true }; }, apply() { return noop; }, construct() { return noop; }, defineProperty(t, p, d) { try { Object.defineProperty(t, p, { configurable: true, writable: true, enumerable: true, ...d }); } catch {} return true; } };",
     "const noop = new Proxy(noopFn, handler);",
     "const stub = noop;",
     "const asyncNoop = () => Promise.resolve();",
@@ -2938,6 +2950,12 @@ export default defineConfig({
       // Contains native-only pty-state-capture / pty-console imports; skip pre-bundling.
       "@elizaos/plugin-agent-orchestrator",
       "pty-console",
+      // @elizaos/agent is server-side and the published alpha lags develop
+      // (missing newer subpaths like runtime/plugin-collector). esbuild
+      // dep-prebundling resolves it from the stale published package and
+      // crashes ("Missing ./runtime/plugin-collector specifier"); excluding it
+      // lets resolve.alias map @elizaos/agent[/*] to local source instead.
+      "@elizaos/agent",
       // Built-in secrets live in @elizaos/core features; Vite must not externalize them as a separate package.
       // Node-only HTTP client — crashes in browser, stub via nativeModuleStubPlugin
       "undici",
@@ -2949,6 +2967,14 @@ export default defineConfig({
       "socks",
       // OS keychain binding is desktop/server-only and pulls native .node assets.
       "@napi-rs/keyring",
+      // Discord voice/gateway natives leak in via @discordjs/ws: @snazzah/davey
+      // re-exports @snazzah/davey-wasm32-wasi and zlib-sync is a compiled .node
+      // addon — neither resolves in the browser. nativeModuleStubPlugin covers
+      // the rollup build + dev-server module serving, but esbuild's optimizeDeps
+      // pre-bundle uses its own resolver; exclude them so the dev server's
+      // pre-bundle scan doesn't crash (white screen) trying to resolve them.
+      "@snazzah/davey",
+      "zlib-sync",
     ],
   },
   build: {
@@ -3001,6 +3027,12 @@ export default defineConfig({
         // server-side Solana payment path. Not a declared dep; the renderer
         // never enters that branch. Externalize to skip the resolver.
         if (/^@solana\/web3\.js$/.test(id)) return true;
+        // @opentelemetry/api is a server/Node-only distributed-tracing package
+        // that the `ai` package (v6+) imports as an optional peer dep. The
+        // renderer never enters those tracing code paths. Externalize so Rollup
+        // doesn't fail trying to resolve a Node-only package in the browser
+        // build context.
+        if (/^@opentelemetry\/api(\/|$)/.test(id)) return true;
         // Note: server-only native binaries (@napi-rs/keyring, @node-rs/argon2,
         // @snazzah/davey, .node) are NOT externalized here — externalizing
         // leaves bare-specifier `import "@snazzah/davey"` in the renderer
@@ -3032,6 +3064,18 @@ export default defineConfig({
           /dynamically imported by[\s\S]*but also statically imported by/.test(
             message,
           )
+        )
+          return;
+        // @elizaos/core's importAiProvider (features/documents/llm.ts) lazy-loads
+        // AI SDK providers by string specifier: `import(/* @vite-ignore */ spec)`.
+        // The /* @vite-ignore */ is present in source but Bun.build strips it when
+        // minifying dist/browser/index.browser.js, so vite:import-analysis re-warns
+        // (only in local mode — the symlinked core realpath has no node_modules
+        // segment so Vite's auto-suppression misses it). The import is intentional
+        // and resolves correctly at runtime.
+        if (
+          warning.plugin === "vite:import-analysis" &&
+          /dynamic import cannot be analyzed by Vite/.test(message)
         )
           return;
         defaultHandler(warning);

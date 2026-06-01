@@ -73,14 +73,14 @@ View your agent's wallet addresses in the Settings tab or ask: *"what's my walle
 
 Grab from **[Releases](https://github.com/milady-ai/milady/releases/latest)**:
 
-| Platform | File | |
-|----------|------|---|
-| macOS (Apple Silicon) | [`Milady-arm64.dmg`](https://github.com/milady-ai/milady/releases/latest) | for your overpriced rectangle |
-| macOS (Intel) | [`Milady-x64.dmg`](https://github.com/milady-ai/milady/releases/latest) | boomer mac (why separate arm64/x64: [Build & release](docs/build-and-release.md#macos-why-two-dmgs-arm64-and-x64)) |
-| Windows | [`Milady-Setup.exe`](https://github.com/milady-ai/milady/releases/latest) | for the gamer anons |
+| Platform | Download | |
+|----------|----------|---|
+| macOS (Apple Silicon) | [latest macOS installer](https://github.com/milady-ai/milady/releases/latest) | for your overpriced rectangle |
+| macOS (Intel) | [latest macOS installer](https://github.com/milady-ai/milady/releases/latest) | boomer mac (why separate arm64/x64: [Build & release](docs/build-and-release.md#macos-why-two-dmgs-arm64-and-x64)) |
+| Windows | [latest Windows installer](https://github.com/milady-ai/milady/releases/latest) | for the gamer anons |
 | iOS | App Store (coming soon) | for the privacy-pilled |
 | Android | [Google Play](https://play.google.com/store/apps/details?id=ai.milady.app) / [APK](https://github.com/milady-ai/milady/releases/latest) | for the degen on the go |
-| Linux | [`.AppImage`](https://github.com/milady-ai/milady/releases/latest) / [`.deb`](https://github.com/milady-ai/milady/releases/latest) / [Snap](#snap) / [Flatpak](#flatpak) / [APT repo](#debian--ubuntu-apt) | I use arch btw |
+| Linux | [`stable-linux-x64-Milady-Setup.tar.gz`](https://github.com/milady-ai/milady/releases/latest) | I use arch btw — see [Linux install](#linux) |
 
 Signed and notarized. No Gatekeeper FUD. We're legit.
 
@@ -235,7 +235,8 @@ The checked-in `tsconfig.json` always matches the packages-mode template; the [s
 
 **Test coverage in each mode:**
 
-- `bun run test`, `bun run verify:typecheck`, `bun run verify:lint`, `bun run build:web`, `bun run build:desktop`, `bun run build:ios`, `bun run build:android` — all work in both modes.
+- `bun run test`, `bun run verify:typecheck`, `bun run verify:lint`, `bun run build:web`, `bun run build:android` — work in both modes.
+- `bun run build:desktop` and `bun run build:ios` (plus `dev:desktop`) require **local mode** first (`bun run eliza:local`). Packages mode ships no `platforms/` directory, so the published `@elizaos/app-core` tarball has nothing for Electrobun / the iOS Capacitor shell to resolve against.
 - The packaged-Electrobun E2E suite at `apps/app/test/electrobun-packaged/` requires **local mode** (it imports source-level test helpers from `eliza/packages/app-core/test/helpers/`).
 
 #### Windows: enable long paths
@@ -258,50 +259,26 @@ git config --global core.longPaths true
 ### Homebrew (macOS / Linux)
 
 ```bash
-brew tap milady-ai/milady
-brew install milady          # CLI
-brew install --cask milady   # Desktop app (macOS only)
+brew tap milady-ai/tap
+brew install milady-ai/tap/milady          # CLI
+brew install --cask milady-ai/tap/milady   # Desktop app (macOS only)
 ```
 
-### Snap
+<a id="linux"></a>
+
+### Linux
+
+The Linux desktop app ships as a single installer tarball: **`stable-linux-x64-Milady-Setup.tar.gz`** on the [latest release](https://github.com/milady-ai/milady/releases/latest). There is no AppImage, `.deb`, Snap, Flatpak, or APT repo today.
 
 ```bash
-sudo snap install milady
-milady setup
+cd ~/Downloads
+curl -fsSLO https://github.com/milady-ai/milady/releases/latest/download/stable-linux-x64-Milady-Setup.tar.gz
+tar -xzf stable-linux-x64-Milady-Setup.tar.gz
+# Extracts `installer` + `README.txt` into the current directory; run the installer:
+./installer
 ```
 
-Snap packages auto-update in the background. Available on Ubuntu, Fedora, Manjaro, and any distro with [snapd](https://snapcraft.io/docs/installing-snapd) installed.
-
-For the latest development builds:
-```bash
-sudo snap install milady --edge
-```
-
-### Flatpak
-
-```bash
-flatpak install flathub ai.milady.Milady
-flatpak run ai.milady.Milady
-```
-
-Or sideload from a [release bundle](https://github.com/milady-ai/milady/releases/latest):
-```bash
-flatpak --user install milady.flatpak
-```
-
-### Debian / Ubuntu (APT)
-
-```bash
-# Add the repository
-curl -fsSL https://apt.milady.ai/gpg.key | sudo gpg --dearmor -o /usr/share/keyrings/milady.gpg
-echo "deb [signed-by=/usr/share/keyrings/milady.gpg] https://apt.milady.ai stable main" | \
-  sudo tee /etc/apt/sources.list.d/milady.list
-
-# Install
-sudo apt update && sudo apt install milady
-```
-
-Works on Debian 12+, Ubuntu 22.04+, Linux Mint 22+, Pop!_OS, and other Debian derivatives. Updates come through `apt upgrade`.
+x86_64 only. (Prefer the terminal? The `curl … | bash` CLI install above works on any Linux box.)
 
 ### Security: API token
 
