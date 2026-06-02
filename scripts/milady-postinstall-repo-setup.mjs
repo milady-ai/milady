@@ -13,6 +13,7 @@
  * of @elizaos/app-core.
  */
 import { spawn } from "node:child_process";
+import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { isLocalElizaDisabled } from "./lib/eliza-package-mode.mjs";
@@ -84,6 +85,12 @@ const miladyBridgePatchScripts = packageMode
 
 for (const scriptName of miladyBridgePatchScripts) {
   const scriptPath = path.join(repoRoot, "scripts", scriptName);
+  if (!existsSync(scriptPath)) {
+    console.warn(
+      `[milady-postinstall] optional patch script ${scriptName} is not present; skipping.`,
+    );
+    continue;
+  }
   await new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [scriptPath], {
       cwd: repoRoot,
