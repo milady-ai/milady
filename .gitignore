@@ -1,5 +1,6 @@
 node_modules
 /eliza/
+/llama.cpp/
 .eliza-repo-setup.lock
 **/node_modules/
 .env

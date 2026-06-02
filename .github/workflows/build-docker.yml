@@ -423,7 +423,9 @@ jobs:
         run: |
           set -a
           source eliza/packages/app-core/deploy/deploy.defaults.env
-          source deploy/deploy.env
+          if [ -f deploy/deploy.env ]; then
+            source deploy/deploy.env
+          fi
           set +a
           {
             echo "APP_ENTRYPOINT=${APP_ENTRYPOINT}"

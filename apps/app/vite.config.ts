@@ -139,6 +139,9 @@ const appCoreNativePluginEntrypoints = (() => {
 const uiPkgRoot = hasLocalElizaWorkspace
   ? path.join(localElizaRoot, "packages/ui")
   : null;
+const securityPkgSrcRoot = hasLocalElizaWorkspace
+  ? path.join(localElizaRoot, "packages/security/src")
+  : null;
 const vaultPkgRoot = hasLocalElizaWorkspace
   ? path.join(localElizaRoot, "packages/vault")
   : null;
@@ -810,6 +813,18 @@ function resolveLocalAppCoreAliases(): Alias[] {
       find: /^@elizaos\/agent\/(.+)$/,
       replacement: path.join(localElizaRoot, "packages/agent/src/$1"),
     },
+    ...(securityPkgSrcRoot
+      ? [
+          {
+            find: /^@elizaos\/security$/,
+            replacement: path.join(securityPkgSrcRoot, "index.ts"),
+          },
+          {
+            find: /^@elizaos\/security\/(.+)$/,
+            replacement: `${securityPkgSrcRoot}/$1`,
+          },
+        ]
+      : []),
     ...packageAgnosticAliases,
   ];
 }
