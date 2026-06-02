@@ -13,8 +13,8 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@elizaos/app-core": "beta",
-    "@elizaos/ui": "beta",
+    "@elizaos/app-core": "2.0.0-beta.3",
+    "@elizaos/ui": "2.0.0-beta.2",
     "dompurify": "^3.4.0",
     "mermaid": "^11.14.0",
     "react": "^19.0.0",

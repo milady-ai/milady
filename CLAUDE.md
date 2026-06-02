@@ -179,7 +179,7 @@ scripts/          Milady-owned automation (committable in this repo)
 
 ## elizaOS source modes
 
-Builds against published `@elizaos/*` (`alpha` dist-tag). `eliza/` gitignored — fresh clone resolves from npm.
+Builds against published `@elizaos/*` (`beta` dist-tag). `eliza/` gitignored — fresh clone resolves from npm.
 
 - **`packages` (default):** `MILADY_ELIZA_SOURCE=packages`. Tsconfig: `scripts/templates/tsconfig.packages-mode.json`. Enforced: `scripts/standalone-eliza-package-contract.test.ts`.
 - **`local`:** `MILADY_ELIZA_SOURCE=local`. `eliza:local` clones `eliza/`, links workspace packages, swaps to `scripts/templates/tsconfig.local-mode.json`. Use when patching upstream alongside Milady.
@@ -236,9 +236,9 @@ Cloud monetization is a first-class product constraint. App creators can earn th
 
 ## Dependencies on elizaOS
 
-All `@elizaos/*` packages use the `alpha` dist-tag. When developing locally, `bun run setup:upstreams` links packages from repo-local `./eliza` and `./plugins` so changes are picked up immediately. Set `MILADY_SKIP_LOCAL_UPSTREAMS=1` to use only npm-published versions.
+All `@elizaos/*` packages use the `beta` dist-tag. When developing locally, `bun run setup:upstreams` links packages from repo-local `./eliza` and `./plugins` so changes are picked up immediately. Set `MILADY_SKIP_LOCAL_UPSTREAMS=1` to use only npm-published versions.
 
-**`@elizaos/plugin-agent-orchestrator`:** Milady currently resolves this plugin from the repo-local `eliza/plugins/plugin-agent-orchestrator` submodule (nested under the `eliza/` submodule) via `workspace:*`. That submodule tracks upstream `alpha`, so updating the submodule updates the orchestrator used in local development checkouts. Set `MILADY_SKIP_LOCAL_UPSTREAMS=1` to force npm-published packages instead.
+**`@elizaos/plugin-agent-orchestrator`:** Milady currently resolves this plugin from the repo-local `eliza/plugins/plugin-agent-orchestrator` submodule (nested under the `eliza/` submodule) via `workspace:*`. That submodule tracks upstream `dev`, so updating the submodule updates the orchestrator used in local development checkouts. Set `MILADY_SKIP_LOCAL_UPSTREAMS=1` to force npm-published packages instead.
 
 All official elizaOS plugin repos live under [https://github.com/elizaOS-plugins](https://github.com/elizaOS-plugins). For plugin work, prefer adding the relevant plugin repo as a git submodule under `eliza/plugins/` (tracked in `eliza/.gitmodules`) so we keep a local checkout we can patch when needed, and depend on it via `workspace:*` so Milady resolves the local package directly during development. Publish new versions to npm when ready.
 

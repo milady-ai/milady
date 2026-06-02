@@ -169,7 +169,7 @@ milady setup
 
 ### Building from source (developers)
 
-Milady builds against the **published `@elizaos/*` npm packages** (`alpha` dist-tag) by default. The repo no longer tracks `eliza/` as a submodule — a fresh clone has no `eliza/` checkout and `bun install` resolves everything from npm.
+Milady builds against the **published `@elizaos/*` npm packages** (`beta` dist-tag) by default. The repo no longer tracks `eliza/` as a submodule — a fresh clone has no `eliza/` checkout and `bun install` resolves everything from npm.
 
 **First install after cloning:**
 
@@ -197,7 +197,7 @@ Milady has two source modes for `@elizaos/*` packages, selected via `MILADY_ELIZ
 
 | Mode | When to use | What resolves `@elizaos/*` |
 |---|---|---|
-| `packages` (default) | App development, builds, releases | npm registry (`alpha` dist-tag) |
+| `packages` (default) | App development, builds, releases | npm registry (`beta` dist-tag) |
 | `local` | Patching elizaOS upstream alongside Milady | A repo-local `eliza/` checkout linked into `node_modules/` |
 
 **Switch to local mode (uneject)** — clones `eliza/` if absent, links workspace packages, swaps the root tsconfig to source-priority paths:
@@ -209,8 +209,8 @@ bun run eliza:local            # clone (or restore) eliza/, link packages, run b
 **Switch back to packages mode (eject)** — rewrites the root `package.json` to pin npm versions, swaps the root tsconfig back to packages-mode-clean, and regenerates the lockfile:
 
 ```bash
-bun run eliza:packages                  # default: alpha tag
-bun run eliza:packages:alpha            # explicit alpha
+bun run eliza:packages                  # default: beta tag
+bun run eliza:packages:alpha            # explicit alpha (legacy)
 bun run eliza:packages -- --tag beta    # any other dist-tag
 bun run eliza:packages -- --version 2.0.0-alpha.116   # pin an exact version
 bun run eliza:packages -- --rename      # also rename eliza/ → .eliza.ci-disabled/
@@ -228,7 +228,7 @@ The checked-in `tsconfig.json` always matches the packages-mode template; the [s
 **Configuration env vars** (read by `scripts/lib/eliza-package-mode.mjs`):
 
 - `MILADY_ELIZA_SOURCE` — `local` or `packages` (default)
-- `MILADY_ELIZAOS_DIST_TAG` / `ELIZAOS_NPM_TAG` — npm dist-tag in packages mode (default `alpha`)
+- `MILADY_ELIZAOS_DIST_TAG` / `ELIZAOS_NPM_TAG` — npm dist-tag in packages mode (default `beta`)
 - `MILADY_ELIZAOS_VERSION` — pin an exact version
 - `MILADY_ELIZA_GIT_URL` / `MILADY_ELIZA_BRANCH` — override the eliza source clone target
 - `MILADY_SKIP_LOCAL_UPSTREAMS=1` — legacy flag equivalent to `MILADY_ELIZA_SOURCE=packages`

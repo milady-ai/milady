@@ -40,7 +40,10 @@ describe("WebCryptoSecureStore", () => {
     expect(stored).not.toContain("token-xyz");
     const decrypted = await store.get("eliza.device.auth");
     expect(decrypted).toBe("token-xyz");
-  });
+    // PBKDF2 runs twice here (set + get). jsdom's polyfilled WebCrypto is far
+    // slower than native, so the 5s default times out under CI/load even though
+    // the logic is sound. Give the only crypto-heavy test real headroom.
+  }, 30_000);
 });
 
 describe("migrateLegacyLocalStorage", () => {
