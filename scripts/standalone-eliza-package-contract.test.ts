@@ -47,6 +47,18 @@ test("Milady no longer tracks eliza as a submodule", () => {
   assert.deepEqual(rootPackage.workspaces, ["apps/*"]);
   assert.equal(rootPackage.scripts.preinstall, "node scripts/preinstall.mjs");
   assert.equal(
+    rootPackage.scripts["eliza:local"],
+    "node scripts/eliza-source-mode.mjs local --install",
+  );
+  assert.equal(
+    rootPackage.scripts["eliza:packages"],
+    "node scripts/eliza-source-mode.mjs packages --install",
+  );
+  assert.equal(
+    rootPackage.scripts["eliza:packages:alpha"],
+    "node scripts/eliza-source-mode.mjs packages --tag alpha --install",
+  );
+  assert.equal(
     rootPackage.scripts["setup:upstreams"],
     "node scripts/eliza-source-mode.mjs local --install",
   );
