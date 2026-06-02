@@ -224,6 +224,26 @@ viteLogger.error = (message, options) => {
   viteLoggerError(message, options);
 };
 
+// Surface otherwise-silent build-process failures. The production build was
+// observed exiting 1 in CI with no message after "Build complete" — almost
+// always a rejection/exception in a post-build async hook (closeBundle etc.).
+// Log the reason so the real cause is visible; keep a non-zero exit so CI still
+// fails loudly. Build-only (vite serve manages its own process handlers).
+if (process.argv.some((arg) => arg === "build")) {
+  const surfaceBuildFailure = (label: string, value: unknown): void => {
+    const detail =
+      value instanceof Error ? (value.stack ?? value.message) : String(value);
+    process.stderr.write(`[vite-build] ${label}: ${detail}\n`);
+    process.exitCode = 1;
+  };
+  process.on("unhandledRejection", (reason) =>
+    surfaceBuildFailure("unhandledRejection", reason),
+  );
+  process.on("uncaughtException", (error) =>
+    surfaceBuildFailure("uncaughtException", error),
+  );
+}
+
 function ensureTrailingSlash(value: string): string {
   return value.endsWith("/") ? value : `${value}/`;
 }

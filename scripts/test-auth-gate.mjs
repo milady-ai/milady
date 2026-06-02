@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { generateKeyPairSync, sign } from "node:crypto";
+import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -30,15 +31,30 @@ async function loadVerifyBootstrapToken() {
   const require = createRequire(import.meta.url);
   const packageJsonPath = require.resolve("@elizaos/app-core/package.json");
   const appCoreRoot = path.dirname(packageJsonPath);
-  const modulePath = path.join(
-    appCoreRoot,
-    "packages",
-    "app-core",
-    "src",
-    "api",
-    "auth",
-    "bootstrap-token.js",
-  );
+  // The published @elizaos/app-core ships built JS under dist/; only a
+  // source/workspace checkout nests it under src/ or packages/app-core/src/.
+  // Resolve the first layout that exists so this works in both install modes
+  // (the old hardcoded packages/app-core/src path broke under the published
+  // beta layout, where the package root holds dist/, not a nested monorepo).
+  const candidates = [
+    path.join(appCoreRoot, "dist", "api", "auth", "bootstrap-token.js"),
+    path.join(appCoreRoot, "src", "api", "auth", "bootstrap-token.js"),
+    path.join(
+      appCoreRoot,
+      "packages",
+      "app-core",
+      "src",
+      "api",
+      "auth",
+      "bootstrap-token.js",
+    ),
+  ];
+  const modulePath = candidates.find((candidate) => existsSync(candidate));
+  if (!modulePath) {
+    throw new Error(
+      `bootstrap-token module not found under @elizaos/app-core (tried: ${candidates.join(", ")})`,
+    );
+  }
   const moduleUrl = pathToFileURL(modulePath).href;
   const module = await import(moduleUrl);
   if (typeof module.verifyBootstrapToken !== "function") {
