@@ -2244,7 +2244,7 @@ function generateNativeModuleStub(
   }
   if (
     strippedId === "@elizaos/agent" ||
-    strippedId.startsWith("@elizaos/agent/") ||
+    normalizedStrippedId.startsWith("@elizaos/agent/") ||
     normalizedStrippedId.includes("/packages/agent/src/")
   ) {
     return generateElizaAgentStub();
@@ -2303,20 +2303,6 @@ function nativeModuleStubPlugin(): Plugin {
     // The renderer never paints to a terminal; stub so the server-side OAuth
     // QR helper that imports it doesn't blow up the browser bundle.
     "qrcode-terminal",
-    // Server-only plugins statically imported from the @elizaos/agent runtime.
-    // Their exports maps nest browser/node conditional exports that Vite 6's
-    // commonjs--resolver cannot walk. Stubbing returns an empty Proxy virtual
-    // module so the browser bundle never tries to execute server-only code.
-    // plugin-local-inference creates a Node dns.Resolver at module load
-    // (mobileDnsResolver) — server-only side effect. Stub so the renderer
-    // never evaluates that initializer.
-    "@elizaos/plugin-local-inference",
-    "@elizaos/plugin-anthropic",
-    "@elizaos/plugin-pdf",
-    "@elizaos/plugin-browser",
-    "@elizaos/plugin-sql",
-    "@elizaos/plugin-agent-skills",
-    "@elizaos/plugin-agent-orchestrator",
     "@elizaos/skills",
     // The agent runtime is server-only — it lives in the API child
     // process, not in the renderer. app-core/dist code can leak agent
