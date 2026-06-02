@@ -77,6 +77,51 @@ function patchStylesheet(appCoreDir) {
   return true;
 }
 
+function patchProductionBuildTsdownResolution(appCoreDir) {
+  const scriptPath = path.join(appCoreDir, "scripts/run-production-build.mjs");
+  if (!fs.existsSync(scriptPath)) {
+    return false;
+  }
+
+  const original = fs.readFileSync(scriptPath, "utf8");
+  const currentImplementation = `function resolveTsdownCli() {
+  const p = path.join(rootDir, "node_modules", "tsdown", "dist", "run.mjs");
+  if (!fs.existsSync(p)) {
+    throw new Error("tsdown not found under node_modules; run bun install");
+  }
+  return p;
+}`;
+  const patchedImplementation = `function resolveTsdownCli() {
+  const candidates = [
+    path.join(rootDir, "node_modules", "tsdown", "dist", "run.mjs"),
+    path.join(process.cwd(), "node_modules", "tsdown", "dist", "run.mjs"),
+  ];
+  for (const p of candidates) {
+    if (fs.existsSync(p)) {
+      return p;
+    }
+  }
+  throw new Error("tsdown not found under node_modules; run bun install");
+}`;
+
+  if (original.includes(patchedImplementation)) {
+    return false;
+  }
+
+  if (!original.includes(currentImplementation)) {
+    return false;
+  }
+
+  fs.writeFileSync(
+    scriptPath,
+    original.replace(currentImplementation, patchedImplementation),
+  );
+  console.log(
+    `${LOG_PREFIX} patched ${path.relative(process.cwd(), scriptPath)}`,
+  );
+  return true;
+}
+
 const appCoreDirs = collectAppCorePackageDirs();
 if (appCoreDirs.length === 0) {
   console.warn(`${LOG_PREFIX} @elizaos/app-core is not installed; skipping.`);
@@ -86,6 +131,9 @@ if (appCoreDirs.length === 0) {
 let patched = 0;
 for (const appCoreDir of appCoreDirs) {
   if (patchStylesheet(appCoreDir)) {
+    patched += 1;
+  }
+  if (patchProductionBuildTsdownResolution(appCoreDir)) {
     patched += 1;
   }
 }
