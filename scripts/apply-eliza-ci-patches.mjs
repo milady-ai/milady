@@ -462,6 +462,10 @@ function patchAppCoreReleaseCheck(raw) {
     .replace(
       "release-check: generated homepage release data still points at legacy /apps/*/public/. Regenerate it with node scripts/write-homepage-release-data.mjs.",
       "release-check: generated homepage release data still points at legacy /apps/web/public/. Regenerate it with node scripts/write-homepage-release-data.mjs.",
+    )
+    .replace(
+      `'-name "*Setup*.tar.gz" -o \\\\',`,
+      `'-name "*Setup*.tar.gz" \\\\',`,
     );
 
   patched = patched.replace(
@@ -485,7 +489,7 @@ function patchAppCoreReleaseCheck(raw) {
   "workflow_dispatch:",
   "permissions:",
   "contents: read",
-  'BUN_VERSION: "1.3.13"',
+  'BUN_VERSION: "1.3.14"',
   "name: Release Workflow Contract",
   "bun install --ignore-scripts",
   'run-postinstall: "true"',
