@@ -14,15 +14,15 @@ tl;dr: local AI gf that's actually fast and doesn't phone home
 
 ### Energy and polish (desktop)
 
-Milady is **not** a full IDE: the product bet is **fewer wasted GPU frames and wakeups** when you are not looking at the app—especially **on battery**—while keeping the **companion visually strong** when you are. Background polling, off-screen WebGL, and battery-aware render quality are tuned toward that (see [Desktop — battery and energy](docs/apps/desktop.md#battery-and-energy-use-macos)). Comparing to **Cursor** or other heavy dev tools is **workload-dependent**; the north star is **great UX per watt** for a local assistant, not matching an editor’s surface area.
+Milady is **not** a full IDE: the product bet is **fewer wasted GPU frames and wakeups** when you are not looking at the app—especially **on battery**—while keeping the **companion visually strong** when you are. Background polling, off-screen WebGL, and battery-aware render quality are tuned toward that (see [Desktop — battery and energy](https://docs.milady.ai)). Comparing to **Cursor** or other heavy dev tools is **workload-dependent**; the north star is **great UX per watt** for a local assistant, not matching an editor’s surface area.
 
 ### Desktop 3D avatar (Electrobun / Vite)
 
-If the **VRM** or **Gaussian splat** background fails only in the **desktop** build, the usual cause is **two copies of `three`** in the bundle (nested `node_modules` vs repo root), which breaks Spark’s **`splatDefines`** shader chunk. Milady forces **one** Three resolution path in Vite and isolates world-load failures so the **avatar** can still load. **Why it matters:** the companion is an **agent surface** (visibility + voice sync), not decoration. See **[Desktop VRM, Three.js, and Spark — WHYs](docs/apps/desktop-vrm-three-and-spark.md)**.
+If the **VRM** or **Gaussian splat** background fails only in the **desktop** build, the usual cause is **two copies of `three`** in the bundle (nested `node_modules` vs repo root), which breaks Spark’s **`splatDefines`** shader chunk. Milady forces **one** Three resolution path in Vite and isolates world-load failures so the **avatar** can still load. **Why it matters:** the companion is an **agent surface** (visibility + voice sync), not decoration. See **[Desktop VRM, Three.js, and Spark — WHYs](https://docs.milady.ai)**.
 
 ### Dashboard chat: progressive action updates
 
-When **actions** call `HandlerCallback` several times in one turn (same idea as Discord **progressive messages**), the Milady API **replaces** the last action-produced segment in the SSE stream instead of concatenating every status line. **Why:** Live status should read like **edits to one message**, not a glued blob. The elizaOS contract stays **`callback({ text, source })`**. **Docs:** [Action callbacks and SSE streaming](docs/runtime/action-callback-streaming.md).
+When **actions** call `HandlerCallback` several times in one turn (same idea as Discord **progressive messages**), the Milady API **replaces** the last action-produced segment in the SSE stream instead of concatenating every status line. **Why:** Live status should read like **edits to one message**, not a glued blob. The elizaOS contract stays **`callback({ text, source })`**. **Docs:** [Action callbacks and SSE streaming](https://docs.milady.ai).
 
 ---
 
@@ -76,7 +76,7 @@ Grab from **[Releases](https://github.com/milady-ai/milady/releases/latest)**:
 | Platform | Download | |
 |----------|----------|---|
 | macOS (Apple Silicon) | [latest macOS installer](https://github.com/milady-ai/milady/releases/latest) | for your overpriced rectangle |
-| macOS (Intel) | [latest macOS installer](https://github.com/milady-ai/milady/releases/latest) | boomer mac (why separate arm64/x64: [Build & release](docs/build-and-release.md#macos-why-two-dmgs-arm64-and-x64)) |
+| macOS (Intel) | [latest macOS installer](https://github.com/milady-ai/milady/releases/latest) | boomer mac (why separate arm64/x64: [Build & release](https://docs.milady.ai)) |
 | Windows | [latest Windows installer](https://github.com/milady-ai/milady/releases/latest) | for the gamer anons |
 | iOS | App Store (coming soon) | for the privacy-pilled |
 | Android | [Google Play](https://play.google.com/store/apps/details?id=ai.milady.app) / [APK](https://github.com/milady-ai/milady/releases/latest) | for the degen on the go |
@@ -96,8 +96,8 @@ shasum -a 256 --check --ignore-missing SHA256SUMS.txt
 
 **Milady → Reset Milady…** (menu bar) confirms in the **native** dialog, then the **main process** calls **`POST /api/agent/reset`**, restarts the agent (embedded or external API), and tells the renderer to apply the **same local state wipe** as the end of Settings reset (onboarding, API client, cloud UI, conversations). **Why main does HTTP:** on macOS/WKWebView, the webview can fail to run **`fetch`** immediately after a native dialog, so a renderer-only reset looked stuck. **Why the renderer still runs teardown:** one implementation of “clear UI + `MiladyClient`” avoids duplicating logic in TypeScript main vs React.
 
-- **Docs:** [Desktop app](docs/apps/desktop.md) (native application menu section), [Main-process reset — WHYs](docs/apps/desktop-main-process-reset.md)
-- **Optional network / TTS:** with the agent orchestrator loaded, Edge TTS may call **Microsoft’s cloud** unless you set **`MILADY_DISABLE_EDGE_TTS=1`** — see [Environment variables](docs/cli/environment.mdx#runtime-behavior) and [TTS plugin](docs/plugin-registry/tts.md)
+- **Docs:** [Desktop app](https://docs.milady.ai) (native application menu section), [Main-process reset — WHYs](https://docs.milady.ai)
+- **Optional network / TTS:** with the agent orchestrator loaded, Edge TTS may call **Microsoft’s cloud** unless you set **`MILADY_DISABLE_EDGE_TTS=1`** — see [Environment variables](https://docs.milady.ai) and [TTS plugin](https://docs.milady.ai)
 
 ---
 
@@ -212,7 +212,7 @@ bun run eliza:local            # clone (or restore) eliza/, link packages, run b
 bun run eliza:packages                  # default: beta tag
 bun run eliza:packages:alpha            # explicit alpha (legacy)
 bun run eliza:packages -- --tag beta    # any other dist-tag
-bun run eliza:packages -- --version 2.0.0-alpha.116   # pin an exact version
+bun run eliza:packages -- --version 2.0.0-beta.1      # pin an exact version
 bun run eliza:packages -- --rename      # also rename eliza/ → .eliza.ci-disabled/
 ```
 
@@ -357,9 +357,9 @@ Managed browser flow:
 
 The desktop/local app still exposes local `/api/cloud/*` passthrough routes for cloud login, billing, and compat management so it can persist the Eliza Cloud API key into the local config/runtime. That is local app plumbing, not a separate hosted Milady server.
 
-The integration plan lives in [docs/eliza-cloud-rollout.md](docs/eliza-cloud-rollout.md).
+The integration plan lives in [docs/eliza-cloud-rollout.md](https://docs.milady.ai).
 
-The implementation and proxy runbook lives in [docs/eliza-cloud-deployment.md](docs/eliza-cloud-deployment.md).
+The implementation and proxy runbook lives in [docs/eliza-cloud-deployment.md](https://docs.milady.ai).
 
 ---
 
@@ -501,7 +501,7 @@ Logs go to `stdout/stderr`. Daemonize with your favorite process manager.
 | Dashboard UI (Vite) | `2138` | `MILADY_PORT` |
 | Gateway | `19001` | `MILADY_GATEWAY_PORT` (set by `--profile dev`) |
 
-**If a default port is already in use:** `bun run dev` / `dev-server.ts` can bind to a different port and then **sync `MILADY_API_PORT` / `ELIZA_PORT`** to match. **`dev:desktop` / `dev:desktop:watch`** resolve **free** loopback ports **before** spawning Vite + API + Electrobun so proxy, `MILADY_RENDERER_URL`, and `MILADY_DESKTOP_API_BASE` stay aligned—**why:** Vite reads `vite.config.ts` once; guessing the API port only inside the API process would desync the UI proxy. The **packaged Electrobun** shell picks the next free port from `MILADY_PORT` for the embedded child instead of `lsof`+SIGKILL by default—**why:** two Milady installs (separate state dirs) should coexist. Opt-in old reclaim: **`MILADY_AGENT_RECLAIM_STALE_PORT=1`**. See [Desktop local development](docs/apps/desktop-local-development.md#when-default-ports-are-busy) and [Desktop — Port configuration](docs/apps/desktop.md#port-configuration).
+**If a default port is already in use:** `bun run dev` / `dev-server.ts` can bind to a different port and then **sync `MILADY_API_PORT` / `ELIZA_PORT`** to match. **`dev:desktop` / `dev:desktop:watch`** resolve **free** loopback ports **before** spawning Vite + API + Electrobun so proxy, `MILADY_RENDERER_URL`, and `MILADY_DESKTOP_API_BASE` stay aligned—**why:** Vite reads `vite.config.ts` once; guessing the API port only inside the API process would desync the UI proxy. The **packaged Electrobun** shell picks the next free port from `MILADY_PORT` for the embedded child instead of `lsof`+SIGKILL by default—**why:** two Milady installs (separate state dirs) should coexist. Opt-in old reclaim: **`MILADY_AGENT_RECLAIM_STALE_PORT=1`**. See [Desktop local development](https://docs.milady.ai) and [Desktop — Port configuration](https://docs.milady.ai).
 
 ```bash
 # custom ports
@@ -552,7 +552,7 @@ Or use `~/.local/state/milady/.env` for secrets.
 | [Zai](https://homunculuslabs.com) | `ZAI_API_KEY` | homunculus labs zai |
 | [Vercel AI Gateway](https://sdk.vercel.ai) | `AI_GATEWAY_API_KEY` | unified gateway |
 
-See [Model Providers](docs/model-providers.mdx) for the full provider reference with configuration details. The `milady models` command checks which providers are configured.
+See [Model Providers](https://docs.milady.ai) for the full provider reference with configuration details. The `milady models` command checks which providers are configured.
 
 ### Using Ollama (local models)
 
@@ -582,8 +582,6 @@ Edit `~/.local/state/milady/milady.json`:
 ```
 
 This routes through the OpenAI plugin instead of the broken Ollama plugin. Works with any Ollama model — just make sure `ollama serve` is running.
-
-> **OpenRouter (`@elizaos/plugin-openrouter`):** Milady pins the dependency to **`2.0.0-alpha.13`**. **Why:** npm **`2.0.0-alpha.12`** published **truncated** JavaScript bundles: the files export `openrouterPlugin` / default but never define them (the main plugin chunk is missing), so Bun fails when loading the plugin. A caret range would allow that broken version again. See [Plugin resolution — pinned OpenRouter](docs/plugin-resolution-and-node-path.md#pinned-elizaosplugin-openrouter) and [OpenRouter plugin doc](docs/plugin-registry/llm/openrouter.md#milady-pinned-version-and-upstream-bundle-bug).
 
 **Recommended models for local use:**
 
@@ -644,7 +642,7 @@ bun run dev:desktop        # API + Electrobun; skips vite build when apps/app/di
 bun run dev:desktop:watch  # + Vite dev server and MILADY_RENDERER_URL (HMR for UI work)
 ```
 
-**Why a separate flow:** the desktop stack runs **multiple processes** (orchestrator, Vite and/or built assets, API, Electrobun). The orchestrator **pre-allocates** free **API** and **Vite** ports when defaults are taken so every child gets consistent env—**why:** misaligned ports cause blank UI or 502s on `/api`. See **[docs/apps/desktop-local-development.md](docs/apps/desktop-local-development.md)** (including [when default ports are busy](docs/apps/desktop-local-development.md#when-default-ports-are-busy)) for signals, shutdown when you quit the app, and env vars.
+**Why a separate flow:** the desktop stack runs **multiple processes** (orchestrator, Vite and/or built assets, API, Electrobun). The orchestrator **pre-allocates** free **API** and **Vite** ports when defaults are taken so every child gets consistent env—**why:** misaligned ports cause blank UI or 502s on `/api`. See **[docs/apps/desktop-local-development.md](https://docs.milady.ai)** (including [when default ports are busy](https://docs.milady.ai)) for signals, shutdown when you quit the app, and env vars.
 
 **IDE / agent hooks** — Editors and agents do not see the native window or auto-discover localhost. **Why we added hooks:** with desktop dev running, the API exposes **`GET /api/dev/stack`** (JSON: ports, renderer URL, which features are on). **`bun run desktop:stack-status -- --json`** probes ports and merges stack + health + status. By default, **`~/.local/state/milady/desktop-dev-console.log`** mirrors prefixed child logs and **`GET /api/dev/cursor-screenshot`** (loopback) returns a full-screen PNG via OS capture — both are opt-out via env (see doc). Cursor uses **`.cursor/rules/milady-desktop-dev-observability.mdc`** plus that guide.
 
@@ -657,20 +655,13 @@ bun run workspace:deps:sync   # normalize workspace:* / local checkout edges (`f
 bun run workspace:deps:check  # verify workspace deps without writing (`fix-deps:check`)
 ```
 
-**Why workspace scripts:** Local **`./eliza`** and **`plugins/*`** checkouts frequently drift dependency edges; the scripts automate what used to be manual `package.json` surgery. See **[Developer diagnostics and workspace](docs/guides/developer-diagnostics-and-workspace.md)**.
+**Why workspace scripts:** Local **`./eliza`** and **`plugins/*`** checkouts frequently drift dependency edges; the scripts automate what used to be manual `package.json` surgery. See **[Developer diagnostics and workspace](https://docs.milady.ai)**.
 
-See **[Architecture](docs/architecture.mdx)** for the full development guide including architecture overview and config reference. See **[CONTRIBUTING.md](./CONTRIBUTING.md)** for contribution guidelines.
+See **[Architecture](https://docs.milady.ai)** for the full development guide including architecture overview and config reference. See the [Contributing](#contributing) section for contribution guidelines.
 
-### Documentation (with WHYs)
+### Documentation
 
-- **[Developer diagnostics and workspace](docs/guides/developer-diagnostics-and-workspace.md)** — Why optional-plugin logs include **load provenance**, why stagehand path **walks parents**, why life-ops migrations use explicit **transactions** and **deferred indexes**, and why **workspace:** scripts / **gitignore** rules exist for local checkouts.
-- **[Plugin resolution and NODE_PATH](docs/plugin-resolution-and-node-path.md)** — Why we set `NODE_PATH` in three places so dynamic plugin imports resolve when building from source (CLI, desktop dev, Electrobun). Includes **pinned `@elizaos/plugin-openrouter`**, **why** `alpha.12` must not be resolved until upstream fixes the published bundle, and **optional plugin provenance** when a package is missing.
-- **[Build and release](docs/build-and-release.md)** — Why the release pipeline uses strict shell, retries, `actions/setup-node@v4` + `check-latest: false`, Bun cache, timeouts; why size-report pipelines handle SIGPIPE; why Windows plugin build uses `npx -p typescript tsc`.
-- **[Desktop local development](docs/apps/desktop-local-development.md)** — Why `dev:desktop` / `dev:desktop:watch` orchestrate Vite, API, and Electrobun; HMR vs `vite build --watch`; Ctrl-C, Quit, and `detached` children; **IDE/agent observability** (`/api/dev/stack`, aggregated console, screenshot proxy, WHY loopback and opt-out).
-- **[Desktop main-process reset](docs/apps/desktop-main-process-reset.md)** — Why **Reset Milady…** runs HTTP in the Electrobun main process after native confirm, how the renderer syncs UI state, reachable API probing (`res.ok`), and where tests live.
-- **[Darwin vs macOS version (Electrobun WebGPU)](docs/apps/electrobun-darwin-macos-webgpu-version.md)** — Why **`uname -r` / `os.release()`** is not the macOS marketing major after Tahoe, how we map **Darwin 25 → macOS 26**, and why the WebGPU gate used to print “macOS 16.”
-- **[Changelog](docs/changelog.mdx)** — Shipped features and fixes with rationale (**WHY** bullets in each update).
-- **[Roadmap](docs/roadmap.md)** — Direction and follow-ups; points to changelog for what already landed.
+Full documentation — including the **WHY** behind key engineering decisions (plugin resolution, build & release, desktop development, changelog, and roadmap) — lives at **[docs.milady.ai](https://docs.milady.ai)**.
 
 ---
 
@@ -680,7 +671,7 @@ See **[Architecture](docs/architecture.mdx)** for the full development guide inc
 
 Humans contribute as QA testers — use the app, find bugs, report them. That's the most valuable thing you can do. All code contributions are reviewed and merged by AI agents. No exceptions.
 
-Read [CONTRIBUTING.md](./CONTRIBUTING.md) for the full details.
+See **[docs.milady.ai](https://docs.milady.ai)** for the full details.
 
 ---
 

@@ -2,7 +2,7 @@
 
 Local-first AI assistant on [elizaOS](https://github.com/elizaOS). CLI + desktop (Electrobun) + web dashboard + connectors.
 
-Architecture commandments, QA protocol, git workflow: [AGENTS.md](AGENTS.md). Sandbox/distribution: [docs/sandbox-mode.md](docs/sandbox-mode.md).
+Architecture commandments, QA protocol, git workflow: [AGENTS.md](AGENTS.md). Sandbox/distribution: [docs.milady.ai](https://docs.milady.ai).
 
 ## Naming
 
