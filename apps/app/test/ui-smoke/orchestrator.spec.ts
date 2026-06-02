@@ -409,40 +409,43 @@ async function installOrchestratorRoutes(page: Page, initialTask = detail()) {
     await fulfillJson(route, currentTask);
   });
 
+  await page.route("**/api/orchestrator/tasks/*/validate", async (route) => {
+    if (route.request().method() !== "POST") {
+      await route.fallback();
+      return;
+    }
+    const input = route.request().postDataJSON() as {
+      passed: boolean;
+      humanOverride?: boolean;
+    };
+    validations.push(input);
+    currentTask = detail({
+      ...currentTask,
+      status: input.passed ? "done" : "active",
+      closedAt: input.passed ? ISO : null,
+      events: [
+        ...currentTask.events,
+        {
+          id: `validation-${validations.length}`,
+          threadId: currentTask.id,
+          sessionId: null,
+          eventType: input.passed ? "validation_passed" : "validation_failed",
+          summary: input.passed
+            ? "Human approved in the orchestrator UI."
+            : "Human rejected in the orchestrator UI.",
+          data: { humanOverride: input.humanOverride === true },
+          timestamp: NOW + validations.length,
+          createdAt: ISO,
+        },
+      ],
+    });
+    await fulfillJson(route, currentTask);
+  });
+
   await page.route("**/api/orchestrator/tasks/*", async (route) => {
     const method = route.request().method();
     const url = new URL(route.request().url());
     const segments = url.pathname.split("/").filter(Boolean);
-    const action = segments.at(-1);
-    if (method === "POST" && action === "validate") {
-      const input = route.request().postDataJSON() as {
-        passed: boolean;
-        humanOverride?: boolean;
-      };
-      validations.push(input);
-      currentTask = detail({
-        ...currentTask,
-        status: input.passed ? "done" : "active",
-        closedAt: input.passed ? ISO : null,
-        events: [
-          ...currentTask.events,
-          {
-            id: `validation-${validations.length}`,
-            threadId: currentTask.id,
-            sessionId: null,
-            eventType: input.passed ? "validation_passed" : "validation_failed",
-            summary: input.passed
-              ? "Human approved in the orchestrator UI."
-              : "Human rejected in the orchestrator UI.",
-            data: { humanOverride: input.humanOverride === true },
-            timestamp: NOW + validations.length,
-            createdAt: ISO,
-          },
-        ],
-      });
-      await fulfillJson(route, currentTask);
-      return;
-    }
     if (segments.length !== 4) {
       await route.fallback();
       return;
@@ -589,7 +592,7 @@ async function installManyOrchestratorRoutes(page: Page) {
     await fulfillJson(route, { tasks: rows });
   });
 
-  await page.route("**/api/orchestrator/tasks/*/messages", async (route) => {
+  const handleScaleMessagesRoute = async (route: Route) => {
     await fulfillJson(route, {
       items: [
         {
@@ -606,11 +609,16 @@ async function installManyOrchestratorRoutes(page: Page) {
       ],
       nextCursor: null,
     });
-  });
-  await page.route("**/api/orchestrator/tasks/*/messages?*", async (route) => {
-    await fulfillJson(route, { items: [], nextCursor: null });
-  });
-  await page.route("**/api/orchestrator/tasks/*/events", async (route) => {
+  };
+  await page.route(
+    "**/api/orchestrator/tasks/*/messages",
+    handleScaleMessagesRoute,
+  );
+  await page.route(
+    "**/api/orchestrator/tasks/*/messages?*",
+    handleScaleMessagesRoute,
+  );
+  const handleScaleEventsRoute = async (route: Route) => {
     await fulfillJson(route, {
       items: [
         {
@@ -626,10 +634,15 @@ async function installManyOrchestratorRoutes(page: Page) {
       ],
       nextCursor: null,
     });
-  });
-  await page.route("**/api/orchestrator/tasks/*/events?*", async (route) => {
-    await fulfillJson(route, { items: [], nextCursor: null });
-  });
+  };
+  await page.route(
+    "**/api/orchestrator/tasks/*/events",
+    handleScaleEventsRoute,
+  );
+  await page.route(
+    "**/api/orchestrator/tasks/*/events?*",
+    handleScaleEventsRoute,
+  );
   await page.route("**/api/orchestrator/tasks/*", async (route) => {
     const segments = new URL(route.request().url()).pathname
       .split("/")
@@ -677,7 +690,7 @@ test("orchestrator workbench renders live task data and supports task operations
     "22.3K",
   );
 
-  await page.getByText("Build Pixel Notes app").click();
+  await page.getByTestId("orchestrator-task-item").first().click();
   await expect(page.getByTestId("orchestrator-timeline")).toContainText(
     "I will spawn Codex and verify visible UI state.",
   );
@@ -788,7 +801,7 @@ test("orchestrator validation actions supply human evidence", async ({
   );
 
   await openAppPath(page, "/orchestrator");
-  await page.getByRole("button", { name: /Validate Notes release/ }).click();
+  await page.getByTestId("orchestrator-task-item").first().click();
   await expect(page.getByTestId("orchestrator-approve")).toBeVisible();
   await page.getByTestId("orchestrator-approve").click();
   await expect
@@ -819,14 +832,20 @@ test("orchestrator handles ten active tasks and twenty archived tasks", async ({
     /20\/20\s*agents/,
   );
   await expect(page.getByTestId("orchestrator-task-item")).toHaveCount(10);
-  await expect(page.getByText("Active app build 1")).toBeVisible();
-  await expect(page.getByText("Archived app build 1")).toHaveCount(0);
+  await expect(
+    page.locator('[data-agent-label="Active app build 1"]'),
+  ).toBeVisible();
+  await expect(
+    page.locator('[data-agent-label="Archived app build 1"]'),
+  ).toHaveCount(0);
 
   await page.getByTestId("orchestrator-show-archived").check();
   await expect(page.getByTestId("orchestrator-task-item")).toHaveCount(30);
-  await expect(page.getByText("Archived app build 20")).toBeVisible();
+  await expect(
+    page.locator('[data-agent-label="Archived app build 20"]'),
+  ).toBeVisible();
 
-  await page.getByText("Active app build 1").click();
+  await page.locator('[data-agent-label="Active app build 1"]').click();
   await expect(page.getByTestId("orchestrator-timeline")).toContainText(
     "Status: browser E2E is checking visible screen data.",
   );
