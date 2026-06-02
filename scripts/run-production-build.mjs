@@ -1,37 +1,76 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { isLocalElizaDisabled } from "./lib/eliza-package-mode.mjs";
 import { resolveElizaAppCoreScript } from "./lib/resolve-eliza-app-core-script.mjs";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(__dirname, "..");
-const scriptPath = resolveElizaAppCoreScript("run-production-build.mjs", {
-  repoRoot,
-});
+const require = createRequire(import.meta.url);
+const repoRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+);
 
-const child = spawn(process.execPath, [scriptPath, ...process.argv.slice(2)], {
-  cwd: repoRoot,
-  env: {
-    ...process.env,
-    MILADY_REPO_ROOT: process.env.MILADY_REPO_ROOT?.trim() || repoRoot,
-  },
-  stdio: "inherit",
-});
+function run(command, args, cwd = repoRoot) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, {
+      cwd,
+      env: {
+        ...process.env,
+        MILADY_REPO_ROOT: process.env.MILADY_REPO_ROOT?.trim() || repoRoot,
+      },
+      stdio: "inherit",
+      shell: false,
+    });
+    child.on("error", (error) => {
+      reject(new Error(`${command} failed to start: ${error.message}`));
+    });
+    child.on("exit", (code, signal) => {
+      if (signal) {
+        reject(new Error(`${command} exited due to signal ${signal}`));
+        return;
+      }
+      if ((code ?? 1) !== 0) {
+        reject(new Error(`${command} exited with code ${code ?? 1}`));
+        return;
+      }
+      resolve();
+    });
+  });
+}
 
-child.on("error", (error) => {
-  console.error(
-    `[milady] Failed to start production build: ${
-      error instanceof Error ? error.message : String(error)
-    }`,
+if (!isLocalElizaDisabled()) {
+  await run(process.execPath, [
+    resolveElizaAppCoreScript("run-production-build.mjs", { repoRoot }),
+    ...process.argv.slice(2),
+  ]);
+} else {
+  const tsdownCli = require.resolve("tsdown/run");
+  const vitePackageRoot = path.dirname(require.resolve("vite/package.json"));
+  const viteCli = path.join(vitePackageRoot, "bin", "vite.js");
+
+  await run(process.execPath, [
+    "scripts/ensure-elizaos-optional-app-stubs.mjs",
+  ]);
+  await run(process.execPath, ["scripts/patch-elizaos-package-styles.mjs"]);
+  await run(process.execPath, [
+    "scripts/patch-elizaos-plugin-browser-bridge-package.mjs",
+  ]);
+  await run(process.execPath, [
+    tsdownCli,
+    "--config-loader",
+    "native",
+    "--fail-on-warn",
+    "false",
+  ]);
+  await run(process.execPath, [
+    "scripts/patch-elizaos-app-core-native-browser-package.mjs",
+  ]);
+  await run(
+    process.execPath,
+    [viteCli, "build"],
+    path.join(repoRoot, "apps/app"),
   );
-  process.exit(1);
-});
-
-child.on("exit", (code, signal) => {
-  if (signal) {
-    console.error(`[milady] production build exited due to signal ${signal}`);
-    process.exit(1);
-  }
-  process.exit(code ?? 1);
-});
+  await run("bun", ["scripts/write-build-info.ts"]);
+}

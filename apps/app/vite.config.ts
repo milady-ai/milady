@@ -139,6 +139,9 @@ const appCoreNativePluginEntrypoints = (() => {
 const uiPkgRoot = hasLocalElizaWorkspace
   ? path.join(localElizaRoot, "packages/ui")
   : null;
+const securityPkgSrcRoot = hasLocalElizaWorkspace
+  ? path.join(localElizaRoot, "packages/security/src")
+  : null;
 const vaultPkgRoot = hasLocalElizaWorkspace
   ? path.join(localElizaRoot, "packages/vault")
   : null;
@@ -810,6 +813,18 @@ function resolveLocalAppCoreAliases(): Alias[] {
       find: /^@elizaos\/agent\/(.+)$/,
       replacement: path.join(localElizaRoot, "packages/agent/src/$1"),
     },
+    ...(securityPkgSrcRoot
+      ? [
+          {
+            find: /^@elizaos\/security$/,
+            replacement: path.join(securityPkgSrcRoot, "index.ts"),
+          },
+          {
+            find: /^@elizaos\/security\/(.+)$/,
+            replacement: `${securityPkgSrcRoot}/$1`,
+          },
+        ]
+      : []),
     ...packageAgnosticAliases,
   ];
 }
@@ -3079,6 +3094,18 @@ export default defineConfig({
           /dynamically imported by[\s\S]*but also statically imported by/.test(
             message,
           )
+        )
+          return;
+        // @elizaos/core's importAiProvider (features/documents/llm.ts) lazy-loads
+        // AI SDK providers by string specifier: `import(/* @vite-ignore */ spec)`.
+        // The /* @vite-ignore */ is present in source but Bun.build strips it when
+        // minifying dist/browser/index.browser.js, so vite:import-analysis re-warns
+        // (only in local mode — the symlinked core realpath has no node_modules
+        // segment so Vite's auto-suppression misses it). The import is intentional
+        // and resolves correctly at runtime.
+        if (
+          warning.plugin === "vite:import-analysis" &&
+          /dynamic import cannot be analyzed by Vite/.test(message)
         )
           return;
         defaultHandler(warning);

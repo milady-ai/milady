@@ -4,9 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "predev": "node ../../scripts/write-homepage-release-data.mjs",
     "dev": "vite",
-    "prebuild": "node ../../scripts/write-homepage-release-data.mjs",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "bunx @biomejs/biome check src test vite.config.ts vitest.config.ts playwright.config.ts package.json",
