@@ -109,7 +109,7 @@
     "test:watch": "bunx vitest",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "verify": "bun run verify:typecheck && bun run verify:lint && bun run test",
-    "verify:typecheck": "node scripts/run-repo-checks.mjs typecheck",
+    "verify:typecheck": "tsc --noEmit -p tsconfig.json",
     "verify:typecheck:workspace": "tsc --noEmit -p tsconfig.workspace.json",
     "verify:lint": "node scripts/run-repo-checks.mjs lint",
     "verify:lint:workspace": "bunx @biomejs/biome check scripts apps package.json tsconfig.json tsdown.config.mjs",
