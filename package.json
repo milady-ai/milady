@@ -150,7 +150,7 @@
     "@elizaos/skills": "beta",
     "@hapi/boom": "^10.0.1",
     "@elizaos/agent": "beta",
-    "@elizaos/app-core": "2.0.0-alpha.537",
+    "@elizaos/app-core": "beta",
     "@elizaos/css-color-cjs": "npm:@asamuzakjp/css-color@4.1.2",
     "@noble/curves": "2.2.0",
     "@pixiv/three-vrm": "^3.5.1",
@@ -229,7 +229,7 @@
     "@elizaos/plugin-sql": "beta",
     "@elizaos/plugin-telegram": "beta",
     "@elizaos/agent": "beta",
-    "@elizaos/app-core": "2.0.0-alpha.537",
+    "@elizaos/app-core": "beta",
     "@elizaos/core": "beta",
     "@elizaos/shared": "beta",
     "@elizaos/ui": "beta",
@@ -260,8 +260,6 @@
     "coding-agent-adapters@0.16.3": "patches/coding-agent-adapters@0.16.3.patch",
     "llama-cpp-capacitor@0.1.5": "patches/llama-cpp-capacitor@0.1.5.patch",
     "tsup@8.5.1": "patches/tsup@8.5.1.patch",
-    "@elizaos/app-core@2.0.0-alpha.537": "patches/@elizaos%2Fapp-core@2.0.0-alpha.537.patch",
-    "@elizaos/agent@2.0.0-alpha.537": "patches/@elizaos%2Fagent@2.0.0-alpha.537.patch",
     "@elizaos/capacitor-llama@0.1.0": "patches/@elizaos%2Fcapacitor-llama@0.1.0.patch"
   }
 }
