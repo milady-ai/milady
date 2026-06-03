@@ -120,6 +120,222 @@ function linkLocalPackage(packageName, sourceRel, targets) {
   }
 }
 
+function ensureLoggerShimPackage() {
+  const packageDir = path.join(
+    repoRoot,
+    "node_modules",
+    ".milady-shims",
+    "@elizaos",
+    "logger",
+  );
+  fs.mkdirSync(packageDir, { recursive: true });
+  fs.writeFileSync(
+    path.join(packageDir, "package.json"),
+    JSON.stringify(
+      {
+        name: "@elizaos/logger",
+        version: "0.0.0-milady-local",
+        type: "module",
+        main: "./index.js",
+        module: "./index.js",
+        types: "./index.d.ts",
+        exports: {
+          ".": {
+            types: "./index.d.ts",
+            import: "./index.js",
+            default: "./index.js",
+          },
+        },
+      },
+      null,
+      2,
+    ) + "\n",
+  );
+  fs.writeFileSync(
+    path.join(packageDir, "index.js"),
+    `const listeners = new Set();
+
+function toConsoleArgs(args) {
+  return args.length === 0 ? [""] : args;
+}
+
+export const __loggerTestHooks = { __noop: () => {} };
+
+export function addLogListener(listener) {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+export function removeLogListener(listener) {
+  listeners.delete(listener);
+}
+
+export const customLevels = {
+  trace: 10,
+  debug: 20,
+  success: 27,
+  progress: 28,
+  log: 29,
+  info: 30,
+  warn: 40,
+  error: 50,
+  fatal: 60,
+};
+
+function makeSlug(prefix) {
+  return \`\${prefix}-\${Date.now().toString(36)}\`;
+}
+
+export function logPrompt() {
+  return makeSlug("prompt");
+}
+
+export function logResponse() {
+  return makeSlug("response");
+}
+
+export function logChatIn() {
+  return makeSlug("chat-in");
+}
+
+export function logChatOut() {
+  return makeSlug("chat-out");
+}
+
+export function createLogger(bindings = {}) {
+  const normalizedBindings = typeof bindings === "boolean" ? {} : bindings;
+  const log = (level, args) => {
+    for (const listener of listeners) {
+      try {
+        listener({ time: Date.now(), level, msg: String(args[0] ?? ""), ...normalizedBindings });
+      } catch {}
+    }
+    const method = level === "fatal" ? "error" : level === "trace" ? "debug" : level;
+    (console[method] ?? console.log)(...toConsoleArgs(args));
+  };
+  const logger = {
+    level: String(normalizedBindings.level ?? "info"),
+    trace: (...args) => log("trace", args),
+    debug: (...args) => log("debug", args),
+    info: (...args) => log("info", args),
+    warn: (...args) => log("warn", args),
+    error: (...args) => log("error", args),
+    fatal: (...args) => log("fatal", args),
+    success: (...args) => log("info", args),
+    progress: (...args) => log("info", args),
+    log: (...args) => log("log", args),
+    clear: () => {},
+    child: (childBindings = {}) => createLogger({ ...normalizedBindings, ...childBindings }),
+  };
+  return logger;
+}
+
+export const recentLogs = () => "";
+export const logger = createLogger();
+export const elizaLogger = logger;
+export default logger;
+`,
+  );
+  fs.writeFileSync(
+    path.join(packageDir, "index.d.ts"),
+    `export type LogFn = (
+  obj: Record<string, unknown> | string | Error,
+  msg?: string,
+  ...args: unknown[]
+) => void;
+
+export interface Logger {
+  level: string;
+  trace: LogFn;
+  debug: LogFn;
+  info: LogFn;
+  warn: LogFn;
+  error: LogFn;
+  fatal: LogFn;
+  success: LogFn;
+  progress: LogFn;
+  log: LogFn;
+  clear: () => void;
+  child: (bindings: Record<string, unknown>) => Logger;
+}
+
+export interface LoggerBindings extends Record<string, unknown> {
+  level?: string;
+  namespace?: string;
+  namespaces?: string[];
+  maxMemoryLogs?: number;
+  __forceType?: "browser" | "node";
+}
+
+export interface LogEntry {
+  time: number;
+  level?: number | string;
+  msg: string;
+  agentName?: string;
+  agentId?: string;
+  [key: string]: string | number | boolean | null | undefined;
+}
+
+export type LogListener = (entry: LogEntry) => void;
+
+export const __loggerTestHooks: { __noop: () => void };
+export function addLogListener(listener: LogListener): () => void;
+export function removeLogListener(listener: LogListener): void;
+export const customLevels: Record<string, number>;
+export function logPrompt(
+  modelType: string,
+  prompt: string,
+  metadata?: {
+    agentName?: string;
+    agentId?: string;
+    runId?: string;
+    provider?: string;
+    caller?: string;
+    [key: string]: unknown;
+  },
+): string;
+export function logResponse(
+  modelType: string,
+  response: string,
+  metadata?: {
+    agentName?: string;
+    agentId?: string;
+    runId?: string;
+    provider?: string;
+    duration?: number;
+    promptSlug?: string;
+    [key: string]: unknown;
+  },
+): string;
+export function logChatIn(params: {
+  agentName: string;
+  agentId: string;
+  roomId: string;
+  messageId: string;
+  text: string;
+  source?: string;
+}): string;
+export function logChatOut(params: {
+  agentName: string;
+  agentId: string;
+  roomId: string;
+  action: string;
+  text?: string;
+  emoji?: string;
+  providers?: string[];
+  reasoning?: string;
+  actions?: string[];
+}): string;
+export function createLogger(bindings?: LoggerBindings | boolean): Logger;
+export const recentLogs: () => string;
+export const logger: Logger;
+export const elizaLogger: Logger;
+export default logger;
+`,
+  );
+  return path.relative(repoRoot, packageDir);
+}
+
 function linkOptionalLocalPackage(packageName, sourceRel, targets) {
   const source = path.join(repoRoot, sourceRel, "package.json");
   if (!fs.existsSync(source)) {
@@ -247,6 +463,13 @@ linkRootPackage("drizzle-orm", [
   "eliza/node_modules/drizzle-orm",
   "eliza/packages/app-core/node_modules/drizzle-orm",
   "eliza/plugins/plugin-sql/node_modules/drizzle-orm",
+]);
+
+linkLocalPackage("@elizaos/logger", ensureLoggerShimPackage(), [
+  "node_modules/@elizaos/logger",
+  "eliza/node_modules/@elizaos/logger",
+  "eliza/packages/core/node_modules/@elizaos/logger",
+  "eliza/packages/app-core/node_modules/@elizaos/logger",
 ]);
 
 linkLocalPackage("@elizaos/core", "eliza/packages/core", [
