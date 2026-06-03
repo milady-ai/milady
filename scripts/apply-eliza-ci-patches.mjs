@@ -411,6 +411,7 @@ function patchBrowserBridgeSafariPackage(raw) {
 
 function patchAppCoreReleaseCheck(raw) {
   let patched = raw
+    .replaceAll('BUN_VERSION: "canary"', 'BUN_VERSION: "1.3.14"')
     .replaceAll('BUN_VERSION: "1.3.13"', 'BUN_VERSION: "1.3.14"')
     .replace(
       '  "if bun run browser-bridge:package:release; then",\n',
