@@ -412,6 +412,10 @@ function patchBrowserBridgeSafariPackage(raw) {
 function patchAppCoreReleaseCheck(raw) {
   let patched = raw
     .replace(
+      '\'BUN_VERSION: "1.3.13"\',',
+      '\'BUN_VERSION: "1.3.14"\',',
+    )
+    .replace(
       '  "if bun run browser-bridge:package:release; then",\n',
       '  "bun run browser-bridge:package:release",\n',
     )
@@ -477,7 +481,7 @@ function patchAppCoreReleaseCheck(raw) {
   );
 
   patched = patched.replace(
-    /const requiredElectrobunPrWorkflowSnippets = \[[\s\S]*?\];/,
+    /const requiredElectrobunPrWorkflowSnippets(?:[^=]*)= \[[\s\S]*?\];/,
     `const requiredElectrobunPrWorkflowSnippets = [
   "name: Validate Electrobun Release Workflow",
   "pull_request:",
