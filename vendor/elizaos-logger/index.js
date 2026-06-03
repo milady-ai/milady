@@ -47,21 +47,30 @@ export function logChatOut() {
   return makeSlug("chat-out");
 }
 
+function emitLogEntry(listener, level, args, normalizedBindings) {
+  listener({
+    time: Date.now(),
+    level,
+    msg: String(args[0] ?? ""),
+    ...normalizedBindings,
+  });
+}
+
+function consoleMethodForLevel(level) {
+  if (level === "fatal") return "error";
+  if (level === "trace") return "debug";
+  return level;
+}
+
 export function createLogger(bindings = {}) {
   const normalizedBindings = typeof bindings === "boolean" ? {} : bindings;
   const log = (level, args) => {
     for (const listener of listeners) {
       try {
-        listener({
-          time: Date.now(),
-          level,
-          msg: String(args[0] ?? ""),
-          ...normalizedBindings,
-        });
+        emitLogEntry(listener, level, args, normalizedBindings);
       } catch {}
     }
-    const method =
-      level === "fatal" ? "error" : level === "trace" ? "debug" : level;
+    const method = consoleMethodForLevel(level);
     (console[method] ?? console.log)(...toConsoleArgs(args));
   };
   const logger = {
