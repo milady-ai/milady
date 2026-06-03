@@ -120,40 +120,28 @@ function linkLocalPackage(packageName, sourceRel, targets) {
   }
 }
 
-function ensureLoggerShimPackage() {
-  const packageDir = path.join(
-    repoRoot,
-    "node_modules",
-    ".milady-shims",
-    "@elizaos",
-    "logger",
-  );
-  fs.mkdirSync(packageDir, { recursive: true });
-  fs.writeFileSync(
-    path.join(packageDir, "package.json"),
-    JSON.stringify(
-      {
-        name: "@elizaos/logger",
-        version: "0.0.0-milady-local",
-        type: "module",
-        main: "./index.js",
-        module: "./index.js",
+const loggerShimDirRel = "node_modules/.milady-shims/@elizaos/logger";
+const loggerShimPackageJson = `${JSON.stringify(
+  {
+    name: "@elizaos/logger",
+    version: "0.0.0-milady-local",
+    type: "module",
+    main: "./index.js",
+    module: "./index.js",
+    types: "./index.d.ts",
+    exports: {
+      ".": {
         types: "./index.d.ts",
-        exports: {
-          ".": {
-            types: "./index.d.ts",
-            import: "./index.js",
-            default: "./index.js",
-          },
-        },
+        import: "./index.js",
+        default: "./index.js",
       },
-      null,
-      2,
-    ) + "\n",
-  );
-  fs.writeFileSync(
-    path.join(packageDir, "index.js"),
-    `const listeners = new Set();
+    },
+  },
+  null,
+  2,
+)}\n`;
+
+const loggerShimIndexJs = String.raw`const listeners = new Set();
 
 function toConsoleArgs(args) {
   return args.length === 0 ? [""] : args;
@@ -183,7 +171,7 @@ export const customLevels = {
 };
 
 function makeSlug(prefix) {
-  return \`\${prefix}-\${Date.now().toString(36)}\`;
+  return prefix + "-" + Date.now().toString(36);
 }
 
 export function logPrompt() {
@@ -234,11 +222,9 @@ export const recentLogs = () => "";
 export const logger = createLogger();
 export const elizaLogger = logger;
 export default logger;
-`,
-  );
-  fs.writeFileSync(
-    path.join(packageDir, "index.d.ts"),
-    `export type LogFn = (
+`;
+
+const loggerShimIndexDts = String.raw`export type LogFn = (
   obj: Record<string, unknown> | string | Error,
   msg?: string,
   ...args: unknown[]
@@ -331,8 +317,24 @@ export const recentLogs: () => string;
 export const logger: Logger;
 export const elizaLogger: Logger;
 export default logger;
-`,
-  );
+`;
+
+function writeLoggerShimFile(packageDir, fileName, contents) {
+  // nosemgrep: javascript.lang.security.audit.detect-non-literal-fs-filename
+  const target = path.resolve(packageDir, fileName);
+  if (!target.startsWith(`${packageDir}${path.sep}`)) {
+    throw new Error(`refusing to write logger shim outside ${packageDir}`);
+  }
+  // nosemgrep: javascript.lang.security.audit.detect-non-literal-fs-filename
+  fs.writeFileSync(target, contents);
+}
+
+function ensureLoggerShimPackage() {
+  const packageDir = path.resolve(repoRoot, loggerShimDirRel);
+  fs.mkdirSync(packageDir, { recursive: true });
+  writeLoggerShimFile(packageDir, "package.json", loggerShimPackageJson);
+  writeLoggerShimFile(packageDir, "index.js", loggerShimIndexJs);
+  writeLoggerShimFile(packageDir, "index.d.ts", loggerShimIndexDts);
   return path.relative(repoRoot, packageDir);
 }
 
