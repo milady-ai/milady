@@ -485,7 +485,7 @@ function patchAppCoreReleaseCheck(raw) {
   "workflow_dispatch:",
   "permissions:",
   "contents: read",
-  'BUN_VERSION: "1.3.13"',
+  'BUN_VERSION: "1.3.14"',
   "name: Release Workflow Contract",
   "bun install --ignore-scripts",
   'run-postinstall: "true"',

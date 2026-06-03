@@ -1994,7 +1994,8 @@ jobs:
             -name "ElizaOSApp-Setup-*.exe" -o \
             -name "ElizaOSApp-Setup-*.exe.zip" -o \
             -name "eliza-*.exe.zip" -o \
-            -name "*Setup*.tar.gz" \
+            -name "*Setup*.tar.gz" -o \
+            -name "SHA256SUMS.txt" \
           \) -exec cp {} release-files/ \; 2>/dev/null || true
 
           # Decompress Windows .exe.zip back to .exe for end-user downloads
