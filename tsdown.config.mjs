@@ -125,16 +125,14 @@ export default [
     env,
     fixedExtension: false,
     platform: "node",
-    inlineOnly: false,
-    external: allExternals,
+    deps: { neverBundle: allExternals, onlyBundle: false },
   },
   {
     entry: appCoreEntry("entry", "src/entry.ts"),
     env,
     fixedExtension: false,
     platform: "node",
-    inlineOnly: false,
-    external: allExternals,
+    deps: { neverBundle: allExternals, onlyBundle: false },
     outputOptions: { codeSplitting: false },
   },
   {
@@ -142,8 +140,7 @@ export default [
     env,
     fixedExtension: false,
     platform: "node",
-    inlineOnly: false,
-    external: allExternals,
+    deps: { neverBundle: allExternals, onlyBundle: false },
     outputOptions: { codeSplitting: false },
   },
   {
@@ -151,8 +148,7 @@ export default [
     env,
     fixedExtension: false,
     platform: "node",
-    inlineOnly: false,
-    external: allExternals,
+    deps: { neverBundle: allExternals, onlyBundle: false },
     // Disable code splitting to avoid circular imports in server.js.
     outputOptions: { codeSplitting: false },
   },
