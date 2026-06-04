@@ -12,6 +12,12 @@ function getNestedElizaSubmoduleSkipArgs() {
   // don't need locally. `name` is the submodule name from eliza/.gitmodules.
   const skipped = [
     "plugin-openrouter",
+    // asimov-1 (robot vendor) and opencode (agent-orchestrator vendor) carry
+    // stale/conflicting local git-dir state that aborts the recursive init
+    // ("destination path already exists" / "submodule git dir is inside git
+    // dir"); neither is needed by the app or runtime, so skip them.
+    "packages/robot/vendor/asimov-1",
+    "plugins/plugin-agent-orchestrator/vendor/opencode",
     // omnivoice.cpp is voice-only; the elizaOS/omnivoice.cpp fork has
     // force-pushed master so the tracked ref in eliza/develop is no longer
     // reachable. Skipping unblocks local desktop builds that don't need

@@ -97,6 +97,13 @@ const child = spawn(
     env: {
       ...process.env,
       MILADY_REPO_ROOT: process.env.MILADY_REPO_ROOT?.trim() || repoRoot,
+      // Milady renames the runtime entry `eliza.mjs` -> `milady.mjs`. Upstream
+      // run-node.mjs (elizaOS/eliza#8126) honors ELIZA_ENTRY_FILE to spawn the
+      // fork's entry instead of the hardcoded `eliza.mjs`; without this, `doctor`
+      // (and any run-node.mjs-routed script) fails "Module not found eliza.mjs"
+      // since this fork ships no eliza.mjs shim. No-op for app-core builds that
+      // predate #8126 (they fall back to eliza.mjs); ignored by other scripts.
+      ELIZA_ENTRY_FILE: process.env.ELIZA_ENTRY_FILE?.trim() || "milady.mjs",
     },
     stdio: "inherit",
   },
