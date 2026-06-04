@@ -86,7 +86,11 @@ const nativeExternals = [
   "@reflink/reflink-linux-arm64-gnu",
   "@reflink/reflink-linux-x64-gnu",
   "fsevents",
-  "jose",
+  // jose is intentionally NOT external. It is pure-ESM JavaScript (no native
+  // bindings), so rolldown bundles it inline. Keeping it external left it as a
+  // bare `import "jose"` in dist/entry.js that Node-style resolution couldn't
+  // find when the dep wasn't hoisted to the top-level node_modules, surfacing
+  // as ERR_MODULE_NOT_FOUND outside Bun's workspace loader (elizaOS/eliza#8142).
   // Bun 1.3.13 fails evaluating Rolldown's unbundled ESM init wrappers for adze.
   // Keep the package external so the desktop runtime loads its published ESM files.
   "adze",
