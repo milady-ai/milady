@@ -77,6 +77,116 @@ function patchStylesheet(appCoreDir) {
   return true;
 }
 
+function patchNativePluginsRootResolution(appCoreDir) {
+  const scriptPath = path.join(
+    appCoreDir,
+    "scripts/lib/capacitor-plugin-names.mjs",
+  );
+  if (!fs.existsSync(scriptPath)) {
+    return false;
+  }
+
+  const original = fs.readFileSync(scriptPath, "utf8");
+  // Upstream resolves NATIVE_PLUGINS_ROOT with `__dirname/../../../native-plugins`,
+  // calibrated for the monorepo source tree (eliza/packages/native-plugins). The
+  // published tarball ships those packages at <app-core>/packages/native-plugins
+  // instead, and never at the sibling the walk-up points to — so in packages mode
+  // the eager top-level readdirSync throws `ENOENT scandir …/@elizaos/native-plugins`
+  // at import time, which crashes build-native-plugins.mjs before its CI skip can
+  // run and fails `bun run build`. Anchor the root to the published layout when it
+  // exists, and make the directory scan tolerate absence (empty list) so the module
+  // imports cleanly; the published plugins ship no `src/index.ts`, so the list is
+  // empty regardless and the CI native-plugin skip is preserved.
+  const currentImplementation = `export const NATIVE_PLUGINS_ROOT = path.resolve(
+  __dirname,
+  "../../../native-plugins",
+);
+
+/** Short names of each real workspace package under {@link NATIVE_PLUGINS_ROOT}. */
+export const CAPACITOR_PLUGIN_NAMES = fs
+  .readdirSync(NATIVE_PLUGINS_ROOT, { withFileTypes: true })`;
+  const patchedImplementation = `const __nativePluginsRootCandidates = [
+  path.resolve(__dirname, "../../packages/native-plugins"),
+  path.resolve(__dirname, "../../../native-plugins"),
+];
+export const NATIVE_PLUGINS_ROOT =
+  __nativePluginsRootCandidates.find((candidate) => fs.existsSync(candidate)) ??
+  __nativePluginsRootCandidates[__nativePluginsRootCandidates.length - 1];
+
+/** Short names of each real workspace package under {@link NATIVE_PLUGINS_ROOT}. */
+export const CAPACITOR_PLUGIN_NAMES = (
+  fs.existsSync(NATIVE_PLUGINS_ROOT)
+    ? fs.readdirSync(NATIVE_PLUGINS_ROOT, { withFileTypes: true })
+    : []
+)`;
+
+  if (original.includes(patchedImplementation)) {
+    return false;
+  }
+
+  if (!original.includes(currentImplementation)) {
+    return false;
+  }
+
+  fs.writeFileSync(
+    scriptPath,
+    original.replace(currentImplementation, patchedImplementation),
+  );
+  console.log(
+    `${LOG_PREFIX} patched ${path.relative(process.cwd(), scriptPath)}`,
+  );
+  return true;
+}
+
+function patchProductionBuildRootResolution(appCoreDir) {
+  const scriptPath = path.join(appCoreDir, "scripts/run-production-build.mjs");
+  if (!fs.existsSync(scriptPath)) {
+    return false;
+  }
+
+  const original = fs.readFileSync(scriptPath, "utf8");
+  // Upstream derives the repo root by walking a fixed number of parents up from
+  // the script. That only holds when app-core IS the monorepo root (local /
+  // source mode). When app-core is an installed dependency (packages mode), the
+  // walk lands inside the bun store (e.g. node_modules/.bun/@elizaos+app-core@…)
+  // instead of the consuming repo, so `appDir` resolves to a directory that does
+  // not exist. The native-plugin build then spawns Node with that bogus `cwd`,
+  // and Node surfaces it as `spawn <node> ENOENT` (the cwd, not the executable,
+  // is missing), failing `bun run build` in CI. run-eliza-app-core-script.mjs
+  // already invokes this build with cwd === the milady repo root and exports
+  // MILADY_REPO_ROOT, so anchor rootDir to that authoritative root whenever the
+  // walk-up lands inside node_modules.
+  const currentImplementation = `const rootDir = path.resolve(scriptDir, "..", "..", "..", "..");`;
+  const patchedImplementation = `const __walkUpRootDir = path.resolve(scriptDir, "..", "..", "..", "..");
+const __consumingRepoRoot = (
+  process.env.MILADY_REPO_ROOT?.trim() ||
+  process.env.ELIZA_REPO_ROOT?.trim() ||
+  process.cwd()
+);
+// When app-core is an installed dependency the fixed walk-up lands inside
+// node_modules; fall back to the repo root the build was launched from.
+const rootDir = __walkUpRootDir.split(path.sep).includes("node_modules")
+  ? path.resolve(__consumingRepoRoot)
+  : __walkUpRootDir;`;
+
+  if (original.includes(patchedImplementation)) {
+    return false;
+  }
+
+  if (!original.includes(currentImplementation)) {
+    return false;
+  }
+
+  fs.writeFileSync(
+    scriptPath,
+    original.replace(currentImplementation, patchedImplementation),
+  );
+  console.log(
+    `${LOG_PREFIX} patched ${path.relative(process.cwd(), scriptPath)}`,
+  );
+  return true;
+}
+
 function patchProductionBuildTsdownResolution(appCoreDir) {
   const scriptPath = path.join(appCoreDir, "scripts/run-production-build.mjs");
   if (!fs.existsSync(scriptPath)) {
@@ -175,6 +285,12 @@ if (appCoreDirs.length === 0) {
 let patched = 0;
 for (const appCoreDir of appCoreDirs) {
   if (patchStylesheet(appCoreDir)) {
+    patched += 1;
+  }
+  if (patchNativePluginsRootResolution(appCoreDir)) {
+    patched += 1;
+  }
+  if (patchProductionBuildRootResolution(appCoreDir)) {
     patched += 1;
   }
   if (patchProductionBuildTsdownResolution(appCoreDir)) {
