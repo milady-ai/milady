@@ -2091,6 +2091,7 @@ const ELIZA_AGENT_FUNCTION_STUB_NAMES = [
   "readRequestBodyBuffer",
   "readTriggerConfig",
   "readTriggerRuns",
+  "registerJsRuntimeFactory",
   "requestRestart",
   "resolveAdvancedCapabilitiesEnabled",
   "resolveAppHeroImage",
@@ -2237,12 +2238,14 @@ function generateNativeModuleStub(
   strippedId: string,
   capacitorNativeScopeRe: RegExp,
 ): string {
+  const normalizedStrippedId = strippedId.replace(/\\/g, "/");
   if (strippedId === "@elizaos/agent/config/plugin-auto-enable") {
     return generateAgentPluginAutoEnableStub();
   }
   if (
     strippedId === "@elizaos/agent" ||
-    strippedId.startsWith("@elizaos/agent/")
+    normalizedStrippedId.startsWith("@elizaos/agent/") ||
+    normalizedStrippedId.includes("/packages/agent/src/")
   ) {
     return generateElizaAgentStub();
   }
@@ -2300,19 +2303,7 @@ function nativeModuleStubPlugin(): Plugin {
     // The renderer never paints to a terminal; stub so the server-side OAuth
     // QR helper that imports it doesn't blow up the browser bundle.
     "qrcode-terminal",
-    // Server-only plugins statically imported from the @elizaos/agent runtime.
-    // Their exports maps nest browser/node conditional exports that Vite 6's
-    // commonjs--resolver cannot walk. Stubbing returns an empty Proxy virtual
-    // module so the browser bundle never tries to execute server-only code.
-    // plugin-local-inference creates a Node dns.Resolver at module load
-    // (mobileDnsResolver) — server-only side effect. Stub so the renderer
-    // never evaluates that initializer.
-    "@elizaos/plugin-local-inference",
-    "@elizaos/plugin-anthropic",
-    "@elizaos/plugin-pdf",
-    "@elizaos/plugin-sql",
-    "@elizaos/plugin-agent-skills",
-    "@elizaos/plugin-agent-orchestrator",
+    "@elizaos/skills",
     // The agent runtime is server-only — it lives in the API child
     // process, not in the renderer. app-core/dist code can leak agent
     // imports (account-pool etc.); stub them so Rollup doesn't try to
@@ -2368,6 +2359,10 @@ function nativeModuleStubPlugin(): Plugin {
     name: "native-module-stub",
     enforce: "pre",
     resolveId(id) {
+      const normalizedId = id.replace(/\\/g, "/");
+      if (normalizedId.includes("/packages/agent/src/")) {
+        return VIRTUAL_PREFIX + id;
+      }
       // Server-only `@elizaos/agent` is aliased via packageAgnosticAliases
       // to `elizaos-agent-browser-stub.ts`. The resolve.alias step runs
       // AFTER `commonjs--resolver` in some rollup paths, which causes
@@ -2457,6 +2452,7 @@ function nativeModuleStubPlugin(): Plugin {
       )
         return VIRTUAL_PREFIX + id;
       // Exact or sub-path match against native packages
+      if (bare.startsWith("@elizaos/plugin-")) return VIRTUAL_PREFIX + id;
       if (nativePackages.has(bare)) return VIRTUAL_PREFIX + id;
       return null;
     },
@@ -2550,14 +2546,19 @@ function nativeModuleStubPlugin(): Plugin {
         normalizeConnectorSource: "function(x){return x}",
         registerAppRoutePluginLoader: "function(){}",
         registerConnectorSourceAliases: "function(){}",
+        readWorkspaceFolderConfig: "function(){return null}",
         resolveStateDir: "function(){return ''}",
         resolveUserPath: "function(x){return x}",
       };
       // Check which are actually missing from the existing export block
       const needed = Object.keys(missingExports).filter((n) => {
-        // Check if already exported (as named export or re-export alias)
+        // Check if already exported (direct declaration, named export, or
+        // re-export alias) before appending a browser stub.
+        const directExport = new RegExp(
+          `\\bexport\\s+(?:async\\s+)?(?:function|const|let|var|class)\\s+${n}\\b`,
+        );
+        if (directExport.test(patched)) return false;
         const exportedAs = new RegExp(`\\b${n}\\b`);
-        // Search only in export{} blocks
         const exportBlocks = patched.match(/export\s*\{[^}]+\}/g) || [];
         return !exportBlocks.some((b) => exportedAs.test(b));
       });

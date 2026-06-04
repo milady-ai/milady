@@ -423,6 +423,8 @@ function patchAppCoreReleaseCheck(raw) {
       "release-check: release workflow is missing notary wrapper wiring:",
       "release-check: release workflow is missing required release wiring:",
     )
+    .replaceAll('BUN_VERSION: "canary"', 'BUN_VERSION: "1.3.14"')
+    .replaceAll('BUN_VERSION: "1.3.13"', 'BUN_VERSION: "1.3.14"')
     .replace(
       '"ELIZA_TEST_WINDOWS_PROOF_INSTALL_DIR: $" +\n    "{{ runner.temp }}\\\\el-proof",',
       '"ELIZA_TEST_WINDOWS_PROOF_INSTALL_DIR: $" + "{{ runner.temp }}\\\\el-smoke-proof",',
@@ -437,11 +439,15 @@ function patchAppCoreReleaseCheck(raw) {
     )
     .replace(
       "  if (!isExactVersion(version)) {\n",
-      '  if (!isExactVersion(version) && !["beta", "beta"].includes(version)) {\n',
+      '  if (!isExactVersion(version) && !["alpha", "beta"].includes(version)) {\n',
     )
     .replace(
       '  if (!isExactVersion(version) && version !== "beta") {\n',
+      '  if (!isExactVersion(version) && !["alpha", "beta"].includes(version)) {\n',
+    )
+    .replace(
       '  if (!isExactVersion(version) && !["beta", "beta"].includes(version)) {\n',
+      '  if (!isExactVersion(version) && !["alpha", "beta"].includes(version)) {\n',
     )
     .replace(
       "must either use workspace:* for the local checkout or be pinned to an exact version",
@@ -462,6 +468,10 @@ function patchAppCoreReleaseCheck(raw) {
     .replace(
       "release-check: generated homepage release data still points at legacy /apps/*/public/. Regenerate it with node scripts/write-homepage-release-data.mjs.",
       "release-check: generated homepage release data still points at legacy /apps/web/public/. Regenerate it with node scripts/write-homepage-release-data.mjs.",
+    )
+    .replace(
+      `'-name "*Setup*.tar.gz" -o \\\\',`,
+      `'-name "*Setup*.tar.gz" \\\\',`,
     );
 
   patched = patched.replace(
@@ -485,7 +495,7 @@ function patchAppCoreReleaseCheck(raw) {
   "workflow_dispatch:",
   "permissions:",
   "contents: read",
-  'BUN_VERSION: "1.3.13"',
+  'BUN_VERSION: "1.3.14"',
   "name: Release Workflow Contract",
   "bun install --ignore-scripts",
   'run-postinstall: "true"',
@@ -552,12 +562,33 @@ const requiredElectrobunConfigSnippets`,
       'Get-ChildItem -Path "eliza/packages/app-core/platforms/electrobun/artifacts" -File -Filter "ElizaOSApp-Setup-*.exe"',
     ],
     [
+      'Get-ChildItem -Path "packages/app-core/platforms/electrobun/artifacts" -File -Filter "*-Setup-*.exe"',
+      'Get-ChildItem -Path "eliza/packages/app-core/platforms/electrobun/artifacts" -File -Filter "ElizaOSApp-Setup-*.exe"',
+    ],
+    [
+      '$canonicalInstallers = Get-ChildItem -Path $artifactsDir -File -Filter "*-Setup-*.exe"',
+      '$canonicalInstallers = Get-ChildItem -Path $artifactsDir -File -Filter "ElizaOSApp-Setup-*.exe"',
+    ],
+    [
+      '$canonicalInstallerZips = Get-ChildItem -Path $artifactsDir -File -Filter "*-Setup-*.exe.zip"',
+      '$canonicalInstallerZips = Get-ChildItem -Path $artifactsDir -File -Filter "ElizaOSApp-Setup-*.exe.zip"',
+    ],
+    [
       "packages/app-core/platforms/electrobun/artifacts/*.exe",
       "eliza/packages/app-core/platforms/electrobun/artifacts/*.exe",
     ],
     [
       "path: packages/app-core/platforms/electrobun/artifacts/public-canary-installer/ElizaOSApp-Setup-*.exe",
       "path: eliza/packages/app-core/platforms/electrobun/artifacts/public-canary-installer/ElizaOSApp-Setup-*.exe",
+    ],
+    [
+      "path: packages/app-core/platforms/electrobun/artifacts/public-canary-installer/*-Setup-*.exe",
+      "path: eliza/packages/app-core/platforms/electrobun/artifacts/public-canary-installer/ElizaOSApp-Setup-*.exe",
+    ],
+    ['-name "*-Setup-*.exe" -o \\\\', '-name "ElizaOSApp-Setup-*.exe" -o \\\\'],
+    [
+      '-name "*-Setup-*.exe.zip" -o \\\\',
+      '-name "ElizaOSApp-Setup-*.exe.zip" -o \\\\',
     ],
     [
       'const workspacePackageJson = path.resolve("packages/app-core/platforms/electrobun/package.json");',
