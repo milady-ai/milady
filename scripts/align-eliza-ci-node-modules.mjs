@@ -249,6 +249,13 @@ linkRootPackage("drizzle-orm", [
   "eliza/plugins/plugin-sql/node_modules/drizzle-orm",
 ]);
 
+linkLocalPackage("@elizaos/logger", "vendor/elizaos-logger", [
+  "node_modules/@elizaos/logger",
+  "eliza/node_modules/@elizaos/logger",
+  "eliza/packages/core/node_modules/@elizaos/logger",
+  "eliza/packages/app-core/node_modules/@elizaos/logger",
+]);
+
 linkLocalPackage("@elizaos/core", "eliza/packages/core", [
   "node_modules/@elizaos/core",
   "eliza/node_modules/@elizaos/core",
