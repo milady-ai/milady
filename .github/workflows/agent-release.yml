@@ -73,7 +73,7 @@ jobs:
     outputs:
       proceed: ${{ steps.decision.outputs.proceed }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
         with:
           fetch-depth: 0
 
@@ -195,7 +195,7 @@ jobs:
       snap_release: ${{ steps.ver.outputs.snap_release }}
       update_homebrew: ${{ steps.ver.outputs.update_homebrew }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
         with:
           fetch-depth: 0
       - name: Fetch canonical release tags
@@ -386,7 +386,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
         with:
           submodules: false
       - name: Setup workspace dependencies
@@ -452,7 +452,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
         with:
           submodules: false
       - uses: ./.github/actions/setup-bun-workspace
@@ -495,7 +495,7 @@ jobs:
     if: needs.version.outputs.channel != 'canary'
     runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
         with:
           submodules: false
       - uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654
@@ -568,7 +568,7 @@ jobs:
     env:
       MILADY_SKIP_LOCAL_UPSTREAMS: "1"
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
         with:
           submodules: false
       - name: Init non-eliza submodules
@@ -652,7 +652,7 @@ jobs:
     if: needs.version.outputs.channel != 'canary'
     runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
         with:
           submodules: false
       - name: Init non-eliza submodules
@@ -694,7 +694,7 @@ jobs:
     if: needs.version.outputs.channel != 'canary'
     runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
         with:
           submodules: false
       - name: Init non-eliza submodules
@@ -732,7 +732,7 @@ jobs:
     if: needs.version.outputs.channel != 'canary'
     runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
         with:
           submodules: false
       - name: Init non-eliza submodules
@@ -812,7 +812,7 @@ jobs:
     if: needs.version.outputs.channel != 'canary'
     runs-on: macos-14
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
         with:
           submodules: false
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
@@ -866,7 +866,7 @@ jobs:
       MILADY_SKIP_LOCAL_UPSTREAMS: ""
       ELIZA_SKIP_LOCAL_UPSTREAMS: ""
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
         with:
           submodules: false
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
@@ -907,7 +907,7 @@ jobs:
     needs: [version]
     runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
         with:
           submodules: false
       - uses: ./.github/actions/setup-bun-workspace
@@ -931,7 +931,7 @@ jobs:
     needs: [version]
     runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
       - name: Initialize eliza docs
         run: |
           if [ ! -f eliza/packages/docs/docs.json ]; then
@@ -1100,7 +1100,7 @@ jobs:
       contents: write
       issues: write
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
         with:
           fetch-depth: 0
 
