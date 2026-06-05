@@ -66,19 +66,7 @@ if ((isDesktopBuild || isIosBuild) && !localModeActive) {
 }
 
 const scriptPath = resolveElizaAppCoreScript(scriptName, { repoRoot });
-const localScriptPath = path.join(
-  localElizaRoot,
-  "packages",
-  "app-core",
-  "scripts",
-  scriptName,
-);
-// Prefer the local elizaOS app-core script when a local checkout exists.
-// Makes `bun run eliza:local` use local source for every app-core script,
-// so patches in the local checkout (including platforms/android/build.gradle
-// templates) actually take effect.
-const shouldUseLocalScript = fs.existsSync(localScriptPath);
-const resolvedScriptPath = shouldUseLocalScript ? localScriptPath : scriptPath;
+const resolvedScriptPath = scriptPath;
 const useBun = path
   .resolve(resolvedScriptPath)
   .startsWith(`${path.resolve(localElizaRoot)}${path.sep}`);
