@@ -37,7 +37,7 @@ export async function loadBunRuntimePlugin<T extends BunRuntimePluginBase>(
   logPrefix: string,
 ): Promise<T | null> {
   try {
-    const mod = await import(LOCAL_RUNTIME_CAPACITOR_PACKAGE);
+    const mod = await import(/* @vite-ignore */ LOCAL_RUNTIME_CAPACITOR_PACKAGE);
     const plugin = (mod as unknown as { ElizaBunRuntime?: T }).ElizaBunRuntime;
     if (!plugin) {
       console.warn(
