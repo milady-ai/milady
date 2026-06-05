@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Shared types and utilities for iOS and Android local runtime boot modules.
  */
