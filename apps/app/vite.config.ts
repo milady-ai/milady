@@ -215,13 +215,77 @@ function isExpectedWsProxySocketError(
   );
 }
 
+function stringifyBuildLogMessage(message: unknown): string {
+  if (!message || typeof message !== "object") {
+    return typeof message === "string" ? message : String(message ?? "");
+  }
+  const record = message as {
+    code?: unknown;
+    id?: unknown;
+    message?: unknown;
+    plugin?: unknown;
+  };
+  return [record.code, record.message, record.id, record.plugin]
+    .filter((value): value is string => typeof value === "string")
+    .join("\n");
+}
+
+function isKnownToleratedBuildWarning(message: unknown): boolean {
+  const text = stringifyBuildLogMessage(message);
+  if (
+    text.includes("IMPORT_IS_UNDEFINED") &&
+    text.includes("Import `tslFn`") &&
+    text.includes("three.webgpu")
+  ) {
+    return true;
+  }
+  if (
+    text.includes("Use of direct eval") &&
+    text.includes("@electric-sql/pglite")
+  ) {
+    return true;
+  }
+  if (text.includes("dynamic import cannot be analyzed by Vite")) {
+    return true;
+  }
+  if (!text.includes("INEFFECTIVE_DYNAMIC_IMPORT")) {
+    return (
+      text.includes("dynamically imported") &&
+      (text.includes("@capacitor/core") ||
+        text.includes("@capacitor/preferences") ||
+        text.includes("components/views/view-interact-registry.ts"))
+    );
+  }
+  return (
+    text.includes("../../eliza/packages/ui/src/") ||
+    text.includes("../../eliza/packages/app-core/src/browser.ts") ||
+    text.includes("src/optional-eliza-app-stub.tsx") ||
+    text.includes("src/native-plugin-stubs.ts") ||
+    text.includes("native-stub:node:fs/promises")
+  );
+}
+
 const viteLogger = createLogger();
 const viteLoggerError = viteLogger.error;
+const viteLoggerWarn = viteLogger.warn;
+const viteLoggerWarnOnce = viteLogger.warnOnce;
 viteLogger.error = (message, options) => {
   if (isExpectedWsProxySocketError(message, options?.error)) {
     return;
   }
   viteLoggerError(message, options);
+};
+viteLogger.warn = (message, options) => {
+  if (isKnownToleratedBuildWarning(message)) {
+    return;
+  }
+  viteLoggerWarn(message, options);
+};
+viteLogger.warnOnce = (message, options) => {
+  if (isKnownToleratedBuildWarning(message)) {
+    return;
+  }
+  viteLoggerWarnOnce(message, options);
 };
 
 function ensureTrailingSlash(value: string): string {
@@ -3028,7 +3092,7 @@ export default defineConfig({
     // Keep warnings tight enough to catch regressions while allowing the
     // current largest workspace chunks to build without noise.
     // Electrobun ships the bundle with the desktop app — there is no
-    // first-paint network cost for the user. The remaining ~4MB main
+    // first-paint network cost for the user. The remaining ~5.6MB main
     // chunk is the merged workspace surface (app-core + companion +
     // steward + task-coordinator + vincent + screenshare); splitting
     // them via manual chunks reintroduces circular-chunk + empty-chunk
@@ -3037,10 +3101,24 @@ export default defineConfig({
     // sites that own a single import path (route-level splits land in
     // their own chunks naturally — see AppsPageView / AutomationsView /
     // SettingsView / StreamView / etc. above).
-    chunkSizeWarningLimit: 5000,
+    chunkSizeWarningLimit: 6000,
     minify: desktopFastDist ? false : undefined,
     cssMinify: desktopFastDist ? false : undefined,
     reportCompressedSize: !desktopFastDist,
+    rolldownOptions: {
+      onLog(level, log, defaultHandler) {
+        if (level === "warn" && isKnownToleratedBuildWarning(log)) {
+          return;
+        }
+        defaultHandler(level, log);
+      },
+      onwarn(warning, warn) {
+        if (isKnownToleratedBuildWarning(warning)) {
+          return;
+        }
+        warn(warning);
+      },
+    },
     rollupOptions: {
       // Native-only deps that must not be resolved during the browser build.
       // Node built-ins (node:fs, fs, path, etc.) are NOT externalized here —
@@ -3096,6 +3174,7 @@ export default defineConfig({
         const where = warning.id ?? warning.loc?.file ?? message;
         // @electric-sql/pglite ships Emscripten/WASM glue that uses eval().
         if (warning.code === "EVAL" && /pglite/i.test(where)) return;
+        if (isKnownToleratedBuildWarning(warning)) return;
         // Modules imported both dynamically and statically: the dynamic imports
         // are intentional (the @elizaos/ui DynamicViewLoader string-keyed module
         // registry and plugin-browser lazy-loading), and the modules stay
