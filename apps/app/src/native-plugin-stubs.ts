@@ -4,6 +4,8 @@ export const Agent = {
   },
 };
 
+export const ElizaBunRuntime = null;
+
 type ListenerHandle = {
   remove(): void | Promise<void>;
 };

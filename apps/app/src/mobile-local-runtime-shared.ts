@@ -2,6 +2,8 @@
  * Shared types and utilities for iOS and Android local runtime boot modules.
  */
 
+import { ElizaBunRuntime } from "@elizaos/capacitor-bun-runtime";
+
 export interface LocalAgentStatus {
   ready: boolean;
   model?: string;
@@ -31,30 +33,6 @@ export function dispatchLocalAgentEvent(name: string, detail: unknown): void {
   document.dispatchEvent(new CustomEvent(name, { detail }));
 }
 
-interface WindowWithCapacitor extends Window {
-  Capacitor?: { Plugins?: Record<string, unknown> };
-}
-
-export interface CapacitorPluginProvider {
-  Plugins?: Record<string, unknown>;
-}
-
-function isPluginRegistry(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object";
-}
-
-function getCapacitorPluginRegistry(
-  provider?: CapacitorPluginProvider,
-): Record<string, unknown> {
-  const providerPlugins = provider ? provider.Plugins : undefined;
-  if (isPluginRegistry(providerPlugins)) return providerPlugins;
-  if (typeof window === "undefined") return {};
-  const windowCapacitor = (window as WindowWithCapacitor).Capacitor;
-  const windowPlugins = windowCapacitor ? windowCapacitor.Plugins : undefined;
-  if (isPluginRegistry(windowPlugins)) return windowPlugins;
-  return {};
-}
-
 function isBunRuntimePluginBase(value: unknown): value is BunRuntimePluginBase {
   if (!value || typeof value !== "object") return false;
   const candidate = value as Record<keyof BunRuntimePluginBase, unknown>;
@@ -68,9 +46,8 @@ function isBunRuntimePluginBase(value: unknown): value is BunRuntimePluginBase {
 
 export async function loadBunRuntimePlugin<T extends BunRuntimePluginBase>(
   logPrefix: string,
-  provider?: CapacitorPluginProvider,
 ): Promise<T | null> {
-  const plugin = getCapacitorPluginRegistry(provider).ElizaBunRuntime;
+  const plugin = ElizaBunRuntime;
   if (isBunRuntimePluginBase(plugin)) return plugin as T;
 
   if (plugin) {

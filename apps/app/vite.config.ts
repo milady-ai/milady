@@ -116,6 +116,10 @@ const hasLocalElizaWorkspace =
   shouldUseLocalElizaSource() &&
   fs.existsSync(path.join(localElizaRoot, "package.json"));
 const nativePluginsRoot = path.join(localElizaRoot, "packages/native-plugins");
+const nativeBunRuntimePluginEntry = path.join(
+  localElizaRoot,
+  "plugins/plugin-native-bun-runtime/src/index.ts",
+);
 const appCoreSrcRoot = hasLocalElizaWorkspace
   ? path.join(localElizaRoot, "packages/app-core/src")
   : null;
@@ -332,22 +336,33 @@ function escapeRegExp(value: string): string {
 }
 
 function resolveNativePluginAliasEntries(): Alias[] {
-  if (!hasLocalElizaWorkspace || !fs.existsSync(nativePluginsRoot)) return [];
+  const aliases: Alias[] = [];
+  if (hasLocalElizaWorkspace && fs.existsSync(nativeBunRuntimePluginEntry)) {
+    aliases.push({
+      find: /^@elizaos\/capacitor-bun-runtime$/,
+      replacement: nativeBunRuntimePluginEntry,
+    });
+  }
+  if (!hasLocalElizaWorkspace || !fs.existsSync(nativePluginsRoot)) {
+    return aliases;
+  }
 
-  return fs
-    .readdirSync(nativePluginsRoot, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name)
-    .filter(
-      (name) =>
-        fs.existsSync(path.join(nativePluginsRoot, name, "package.json")) &&
-        fs.existsSync(path.join(nativePluginsRoot, name, "src/index.ts")),
-    )
-    .sort((a, b) => a.localeCompare(b))
-    .map((name) => ({
-      find: new RegExp(`^@elizaos/capacitor-${escapeRegExp(name)}$`),
-      replacement: path.join(nativePluginsRoot, `${name}/src/index.ts`),
-    }));
+  return aliases.concat(
+    fs
+      .readdirSync(nativePluginsRoot, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .filter(
+        (name) =>
+          fs.existsSync(path.join(nativePluginsRoot, name, "package.json")) &&
+          fs.existsSync(path.join(nativePluginsRoot, name, "src/index.ts")),
+      )
+      .sort((a, b) => a.localeCompare(b))
+      .map((name) => ({
+        find: new RegExp(`^@elizaos/capacitor-${escapeRegExp(name)}$`),
+        replacement: path.join(nativePluginsRoot, `${name}/src/index.ts`),
+      })),
+  );
 }
 
 function resolveLocalUiAliases(): Alias[] {
@@ -946,7 +961,7 @@ const CAPACITOR_BUILD_TARGET =
 const IS_CAPACITOR_MOBILE_BUILD =
   CAPACITOR_BUILD_TARGET === "ios" || CAPACITOR_BUILD_TARGET === "android";
 const ELIZA_CAPACITOR_PLUGIN_STUB_PATTERN = IS_CAPACITOR_MOBILE_BUILD
-  ? /^@elizaos\/capacitor-(?!(agent|llama)(?:$|\/)).+$/
+  ? /^@elizaos\/capacitor-(?!(agent|bun-runtime|llama)(?:$|\/)).+$/
   : /^@elizaos\/capacitor-.+$/;
 
 function appShellMetadataPlugin(): Plugin {
