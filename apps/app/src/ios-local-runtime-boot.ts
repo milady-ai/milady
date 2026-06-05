@@ -28,6 +28,7 @@ import {
   type BunRuntimePluginBase,
   buildLocalAgentReply,
   buildSendMessagePayload,
+  type CapacitorPluginProvider,
   dispatchLocalAgentEvent,
   getLocalAgentStatusFromPlugin,
   type LocalAgentReply,
@@ -106,7 +107,10 @@ async function subscribePluginEvents(plugin: BunRuntimePlugin): Promise<void> {
 }
 
 async function startRuntime(): Promise<boolean> {
-  const plugin = await loadBunRuntimePlugin<BunRuntimePlugin>(LOG_PREFIX);
+  const plugin = await loadBunRuntimePlugin<BunRuntimePlugin>(
+    LOG_PREFIX,
+    Capacitor as unknown as CapacitorPluginProvider,
+  );
   if (!plugin) {
     runtimeState = { kind: "unavailable", reason: "plugin-not-loaded" };
     return false;

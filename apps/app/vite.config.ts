@@ -1173,21 +1173,7 @@ function getUiAliasFallbackSpecs(): LocalSourceAliasSpec[] {
       replacement: `${uiPkgRoot}/src/voice/$1.ts`,
       resolve: resolveExistingUiSourceModule,
     },
-    {
-      find: /^@elizaos\/ui\/components\/ui\/(.*)$/,
-      replacement: `${uiPkgRoot}/src/components/ui/$1.tsx`,
-      resolve: resolveExistingUiSourceModule,
-    },
-    {
-      find: /^@elizaos\/ui\/components\/composites\/(.+)\/([^/]+)$/,
-      replacement: `${uiPkgRoot}/src/components/composites/$1/$2.tsx`,
-      resolve: resolveExistingUiSourceModule,
-    },
-    {
-      find: /^@elizaos\/ui\/components\/(.+)\/([^/]+)$/,
-      replacement: `${uiPkgRoot}/src/components/$1/$2.tsx`,
-      resolve: resolveExistingUiSourceModule,
-    },
+    ...getUiComponentAliasFallbackSpecs(),
     {
       find: /^@elizaos\/ui\/platform\/(.+)$/,
       replacement: `${uiPkgRoot}/src/platform/$1.ts`,
@@ -1201,6 +1187,27 @@ function getUiAliasFallbackSpecs(): LocalSourceAliasSpec[] {
     {
       find: /^@elizaos\/ui\/(.+)$/,
       replacement: `${uiPkgRoot}/src/$1.ts`,
+      resolve: resolveExistingUiSourceModule,
+    },
+  ];
+}
+
+function getUiComponentAliasFallbackSpecs(): LocalSourceAliasSpec[] {
+  if (!uiPkgRoot) return [];
+  return [
+    {
+      find: /^@elizaos\/ui\/components\/ui\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/components/ui/$1.tsx`,
+      resolve: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/components\/composites\/(.+)\/([^/]+)$/,
+      replacement: `${uiPkgRoot}/src/components/composites/$1/$2.tsx`,
+      resolve: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/components\/(.+)\/([^/]+)$/,
+      replacement: `${uiPkgRoot}/src/components/$1/$2.tsx`,
       resolve: resolveExistingUiSourceModule,
     },
   ];
