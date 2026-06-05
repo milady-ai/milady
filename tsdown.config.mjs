@@ -114,10 +114,14 @@ const vaultExternal = "@elizaos/vault";
 // contract builds should keep it as a package dependency instead of trying to
 // inline drizzle's broad optional-driver surface.
 const drizzleOrmExternal = "drizzle-orm";
+// app-core sandbox registry uses Upstash as a runtime integration. It is
+// app-core's dependency, not something the Milady bundle should inline.
+const upstashRedisExternal = "@upstash/redis";
 const allExternals = [
   ...nativeExternals,
   vaultExternal,
   drizzleOrmExternal,
+  upstashRedisExternal,
   pluginExternal,
   optionalAppExternal,
   nodeRsExternal,
