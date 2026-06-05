@@ -230,45 +230,61 @@ function stringifyBuildLogMessage(message: unknown): string {
     .join("\n");
 }
 
-function isKnownToleratedBuildWarning(message: unknown): boolean {
-  const text = stringifyBuildLogMessage(message);
-  if (
+function isThreeVrmWebGpuExportWarning(text: string): boolean {
+  return (
     text.includes("IMPORT_IS_UNDEFINED") &&
     text.includes("Import `tslFn`") &&
     text.includes("three.webgpu")
-  ) {
+  );
+}
+
+function isPgliteEvalWarning(text: string): boolean {
+  return (
+    text.includes("Use of direct eval") && text.includes("@electric-sql/pglite")
+  );
+}
+
+function isStaticLazyImportCollisionWarning(text: string): boolean {
+  if (text.includes("INEFFECTIVE_DYNAMIC_IMPORT")) return false;
+  return (
+    text.includes("dynamically imported") &&
+    (text.includes("@capacitor/core") ||
+      text.includes("@capacitor/preferences") ||
+      text.includes("components/views/view-interact-registry.ts"))
+  );
+}
+
+const INEFFECTIVE_DYNAMIC_IMPORT_TOLERATED_MARKERS = [
+  "../../eliza/packages/ui/src/",
+  "../../eliza/packages/app-core/src/browser.ts",
+  "src/optional-eliza-app-stub.tsx",
+  "src/native-plugin-stubs.ts",
+  "native-stub:node:fs/promises",
+] as const;
+
+function isToleratedIneffectiveDynamicImportWarning(text: string): boolean {
+  if (!text.includes("INEFFECTIVE_DYNAMIC_IMPORT")) return false;
+  // Deliberate suppression, not a real fix: these modules are both lazy-loaded
+  // by elizaOS route/view registries and statically reachable through UI
+  // barrels or desktop shell imports. The real cleanup is to untangle those
+  // barrels/ownership paths so route modules have a single import path.
+  return INEFFECTIVE_DYNAMIC_IMPORT_TOLERATED_MARKERS.some((marker) =>
+    text.includes(marker),
+  );
+}
+
+function isKnownToleratedBuildWarning(message: unknown): boolean {
+  const text = stringifyBuildLogMessage(message);
+  if (isThreeVrmWebGpuExportWarning(text)) {
     // Deliberate suppression, not a real fix: @pixiv/three-vrm still references
     // the old three.webgpu `tslFn` export. Remove this only after upgrading or
     // patching the VRM/WebGPU dependency path and smoke-testing avatar loading.
     return true;
   }
-  if (
-    text.includes("Use of direct eval") &&
-    text.includes("@electric-sql/pglite")
-  ) {
-    return true;
-  }
-  if (text.includes("dynamic import cannot be analyzed by Vite")) {
-    return true;
-  }
-  if (!text.includes("INEFFECTIVE_DYNAMIC_IMPORT")) {
-    return (
-      text.includes("dynamically imported") &&
-      (text.includes("@capacitor/core") ||
-        text.includes("@capacitor/preferences") ||
-        text.includes("components/views/view-interact-registry.ts"))
-    );
-  }
   return (
-    // Deliberate suppression, not a real fix: these modules are both lazy-loaded
-    // by elizaOS route/view registries and statically reachable through UI
-    // barrels or desktop shell imports. The real cleanup is to untangle those
-    // barrels/ownership paths so route modules have a single import path.
-    text.includes("../../eliza/packages/ui/src/") ||
-    text.includes("../../eliza/packages/app-core/src/browser.ts") ||
-    text.includes("src/optional-eliza-app-stub.tsx") ||
-    text.includes("src/native-plugin-stubs.ts") ||
-    text.includes("native-stub:node:fs/promises")
+    isPgliteEvalWarning(text) ||
+    isStaticLazyImportCollisionWarning(text) ||
+    isToleratedIneffectiveDynamicImportWarning(text)
   );
 }
 
@@ -1096,6 +1112,12 @@ function applyRegexReplacement(
   });
 }
 
+type LocalSourceAliasSpec = {
+  find: RegExp;
+  replacement: string;
+  resolve: (id: string) => string;
+};
+
 function resolveAppCoreWithUiFallback(id: string): string {
   if (fs.existsSync(id)) {
     // A subpath like `@elizaos/app-core/api/auth` can map to a directory when
@@ -1131,112 +1153,121 @@ function resolveAppCoreWithUiFallback(id: string): string {
   return id;
 }
 
+function getUiAliasFallbackSpecs(): LocalSourceAliasSpec[] {
+  if (!uiPkgRoot || !fs.existsSync(path.join(uiPkgRoot, "package.json"))) {
+    return [];
+  }
+  return [
+    {
+      find: /^@elizaos\/ui\/api\/(.+)$/,
+      replacement: `${uiPkgRoot}/src/api/$1.ts`,
+      resolve: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/platform\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/platform/$1.ts`,
+      resolve: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/voice\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/voice/$1.ts`,
+      resolve: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/components\/ui\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/components/ui/$1.tsx`,
+      resolve: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/components\/composites\/(.+)\/([^/]+)$/,
+      replacement: `${uiPkgRoot}/src/components/composites/$1/$2.tsx`,
+      resolve: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/components\/(.+)\/([^/]+)$/,
+      replacement: `${uiPkgRoot}/src/components/$1/$2.tsx`,
+      resolve: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/platform\/(.+)$/,
+      replacement: `${uiPkgRoot}/src/platform/$1.ts`,
+      resolve: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/state\/(.+)$/,
+      replacement: `${uiPkgRoot}/src/state/$1.ts`,
+      resolve: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/(.+)$/,
+      replacement: `${uiPkgRoot}/src/$1.ts`,
+      resolve: resolveExistingUiSourceModule,
+    },
+  ];
+}
+
+function getAppCoreUiFallbackSpecs(): LocalSourceAliasSpec[] {
+  if (!appCoreSrcRoot || !uiPkgRoot) return [];
+  const uiSrcRoot = path.join(uiPkgRoot, "src");
+  return [
+    {
+      find: /^@elizaos\/app-core\/components\/(.+)$/,
+      replacement: `${uiSrcRoot}/components/$1`,
+      resolve: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/app-core\/state\/(.+)$/,
+      replacement: `${uiSrcRoot}/state/$1.ts`,
+      resolve: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/app-core\/utils\/(.+)$/,
+      replacement: `${uiSrcRoot}/utils/$1.ts`,
+      resolve: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/app-core\/widgets\/(.+)$/,
+      replacement: `${uiSrcRoot}/widgets/$1.ts`,
+      resolve: resolveExistingUiSourceModule,
+    },
+  ];
+}
+
+function getAppCoreAliasFallbackSpecs(): LocalSourceAliasSpec[] {
+  if (!appCoreSrcRoot) return [];
+  return [
+    {
+      find: /^@elizaos\/app-core\/(.+)$/,
+      replacement: `${appCoreSrcRoot}/$1`,
+      resolve: resolveAppCoreWithUiFallback,
+    },
+  ];
+}
+
+function getLocalSourceAliasFallbackSpecs(): LocalSourceAliasSpec[] {
+  return [
+    ...getUiAliasFallbackSpecs(),
+    ...getAppCoreUiFallbackSpecs(),
+    ...getAppCoreAliasFallbackSpecs(),
+  ];
+}
+
+function resolveLocalSourceAliasFallback(source: string): string | null {
+  for (const spec of getLocalSourceAliasFallbackSpecs()) {
+    const replaced = applyRegexReplacement(source, spec.find, spec.replacement);
+    if (!replaced) continue;
+    const resolved = spec.resolve(replaced);
+    if (isExistingFile(resolved)) return resolved;
+  }
+  return null;
+}
+
 function localSourceAliasFallbackPlugin(): Plugin {
   return {
     name: "milady-local-source-alias-fallback",
     enforce: "pre",
     resolveId(source) {
-      const specs: Array<{
-        find: RegExp;
-        replacement: string;
-        resolve: (id: string) => string;
-      }> = [];
-
-      if (uiPkgRoot && fs.existsSync(path.join(uiPkgRoot, "package.json"))) {
-        specs.push(
-          {
-            find: /^@elizaos\/ui\/api\/(.+)$/,
-            replacement: `${uiPkgRoot}/src/api/$1.ts`,
-            resolve: resolveExistingUiSourceModule,
-          },
-          {
-            find: /^@elizaos\/ui\/platform\/(.*)$/,
-            replacement: `${uiPkgRoot}/src/platform/$1.ts`,
-            resolve: resolveExistingUiSourceModule,
-          },
-          {
-            find: /^@elizaos\/ui\/voice\/(.*)$/,
-            replacement: `${uiPkgRoot}/src/voice/$1.ts`,
-            resolve: resolveExistingUiSourceModule,
-          },
-          {
-            find: /^@elizaos\/ui\/components\/ui\/(.*)$/,
-            replacement: `${uiPkgRoot}/src/components/ui/$1.tsx`,
-            resolve: resolveExistingUiSourceModule,
-          },
-          {
-            find: /^@elizaos\/ui\/components\/composites\/(.+)\/([^/]+)$/,
-            replacement: `${uiPkgRoot}/src/components/composites/$1/$2.tsx`,
-            resolve: resolveExistingUiSourceModule,
-          },
-          {
-            find: /^@elizaos\/ui\/components\/(.+)\/([^/]+)$/,
-            replacement: `${uiPkgRoot}/src/components/$1/$2.tsx`,
-            resolve: resolveExistingUiSourceModule,
-          },
-          {
-            find: /^@elizaos\/ui\/platform\/(.+)$/,
-            replacement: `${uiPkgRoot}/src/platform/$1.ts`,
-            resolve: resolveExistingUiSourceModule,
-          },
-          {
-            find: /^@elizaos\/ui\/state\/(.+)$/,
-            replacement: `${uiPkgRoot}/src/state/$1.ts`,
-            resolve: resolveExistingUiSourceModule,
-          },
-          {
-            find: /^@elizaos\/ui\/(.+)$/,
-            replacement: `${uiPkgRoot}/src/$1.ts`,
-            resolve: resolveExistingUiSourceModule,
-          },
-        );
-      }
-
-      if (appCoreSrcRoot && uiPkgRoot) {
-        specs.push(
-          {
-            find: /^@elizaos\/app-core\/components\/(.+)$/,
-            replacement: `${path.join(uiPkgRoot, "src")}/components/$1`,
-            resolve: resolveExistingUiSourceModule,
-          },
-          {
-            find: /^@elizaos\/app-core\/state\/(.+)$/,
-            replacement: `${path.join(uiPkgRoot, "src")}/state/$1.ts`,
-            resolve: resolveExistingUiSourceModule,
-          },
-          {
-            find: /^@elizaos\/app-core\/utils\/(.+)$/,
-            replacement: `${path.join(uiPkgRoot, "src")}/utils/$1.ts`,
-            resolve: resolveExistingUiSourceModule,
-          },
-          {
-            find: /^@elizaos\/app-core\/widgets\/(.+)$/,
-            replacement: `${path.join(uiPkgRoot, "src")}/widgets/$1.ts`,
-            resolve: resolveExistingUiSourceModule,
-          },
-        );
-      }
-
-      if (appCoreSrcRoot) {
-        specs.push({
-          find: /^@elizaos\/app-core\/(.+)$/,
-          replacement: `${appCoreSrcRoot}/$1`,
-          resolve: resolveAppCoreWithUiFallback,
-        });
-      }
-
-      for (const spec of specs) {
-        const replaced = applyRegexReplacement(
-          source,
-          spec.find,
-          spec.replacement,
-        );
-        if (!replaced) continue;
-        const resolved = spec.resolve(replaced);
-        if (isExistingFile(resolved)) return resolved;
-      }
-
-      return null;
+      return resolveLocalSourceAliasFallback(source);
     },
   };
 }
