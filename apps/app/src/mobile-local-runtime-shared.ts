@@ -37,6 +37,9 @@ export async function loadBunRuntimePlugin<T extends BunRuntimePluginBase>(
   logPrefix: string,
 ): Promise<T | null> {
   try {
+    // Deliberately variable and optional: mobile shells provide this Capacitor
+    // package, while web/desktop builds may not. Keep @vite-ignore unless this
+    // becomes a static dependency in every renderer target.
     const mod = await import(/* @vite-ignore */ LOCAL_RUNTIME_CAPACITOR_PACKAGE);
     const plugin = (mod as unknown as { ElizaBunRuntime?: T }).ElizaBunRuntime;
     if (!plugin) {

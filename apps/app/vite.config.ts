@@ -237,6 +237,9 @@ function isKnownToleratedBuildWarning(message: unknown): boolean {
     text.includes("Import `tslFn`") &&
     text.includes("three.webgpu")
   ) {
+    // Deliberate suppression, not a real fix: @pixiv/three-vrm still references
+    // the old three.webgpu `tslFn` export. Remove this only after upgrading or
+    // patching the VRM/WebGPU dependency path and smoke-testing avatar loading.
     return true;
   }
   if (
@@ -257,6 +260,10 @@ function isKnownToleratedBuildWarning(message: unknown): boolean {
     );
   }
   return (
+    // Deliberate suppression, not a real fix: these modules are both lazy-loaded
+    // by elizaOS route/view registries and statically reachable through UI
+    // barrels or desktop shell imports. The real cleanup is to untangle those
+    // barrels/ownership paths so route modules have a single import path.
     text.includes("../../eliza/packages/ui/src/") ||
     text.includes("../../eliza/packages/app-core/src/browser.ts") ||
     text.includes("src/optional-eliza-app-stub.tsx") ||
@@ -3096,8 +3103,9 @@ export default defineConfig({
     // chunk is the merged workspace surface (app-core + companion +
     // steward + task-coordinator + vincent + screenshare); splitting
     // them via manual chunks reintroduces circular-chunk + empty-chunk
-    // warnings without measurable benefit. If a true cold-start budget
-    // matters later, lift owner-of-route lazy() boundaries at the call
+    // warnings without measurable benefit. This is a deliberate warning
+    // baseline, not a bundle-size fix. If a true cold-start budget matters
+    // later, lift owner-of-route lazy() boundaries at the call
     // sites that own a single import path (route-level splits land in
     // their own chunks naturally — see AppsPageView / AutomationsView /
     // SettingsView / StreamView / etc. above).
