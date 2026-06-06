@@ -103,6 +103,11 @@ const optionalAppExternal = /^@elizaos\/app-/;
 // of them — always external; rolldown can't bundle the .node binary.
 const nodeRsExternal = /^@node-rs\//;
 const napiRsExternal = /^@napi-rs\//;
+// Capacitor packages are native/mobile runtime bridges. App-core can import
+// them from iOS-only helpers, but the Node release bundle should resolve them
+// from the installed package graph instead of trying to inline browser/native
+// shims during the Electrobun release contract build.
+const capacitorExternal = /^@capacitor\//;
 // @elizaos/vault is a runtime-loaded workspace service (secrets manager),
 // declared as a workspace:* dependency and resolved from node_modules at
 // runtime. Unlike @elizaos/core / @elizaos/shared (intentionally inlined into
@@ -126,6 +131,7 @@ const allExternals = [
   optionalAppExternal,
   nodeRsExternal,
   napiRsExternal,
+  capacitorExternal,
 ];
 
 export default [
