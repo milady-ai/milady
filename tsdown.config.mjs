@@ -110,9 +110,18 @@ const napiRsExternal = /^@napi-rs\//;
 // implicitly externalized with an UNRESOLVED_IMPORT warning. List it explicitly
 // so the externalization is intentional and the warning goes away.
 const vaultExternal = "@elizaos/vault";
+// app-core auth storage imports drizzle at runtime; package-mode release
+// contract builds should keep it as a package dependency instead of trying to
+// inline drizzle's broad optional-driver surface.
+const drizzleOrmExternal = "drizzle-orm";
+// app-core sandbox registry uses Upstash as a runtime integration. It is
+// app-core's dependency, not something the Milady bundle should inline.
+const upstashRedisExternal = "@upstash/redis";
 const allExternals = [
   ...nativeExternals,
   vaultExternal,
+  drizzleOrmExternal,
+  upstashRedisExternal,
   pluginExternal,
   optionalAppExternal,
   nodeRsExternal,
