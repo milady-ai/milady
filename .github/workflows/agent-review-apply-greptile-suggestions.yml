@@ -227,7 +227,7 @@ jobs:
         id: claude-apply
         if: steps.collect.outputs.findings_found == 'true'
         continue-on-error: true
-        uses: anthropics/claude-code-action@70a6e5256e9e2366a1ed5c041904a982ba3a328f
+        uses: anthropics/claude-code-action@eee73e2ae5399c561de4ff038aa7b36a7aa991a7
         env:
           NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org'
         with:
