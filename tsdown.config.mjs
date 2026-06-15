@@ -98,10 +98,6 @@ const nativeExternals = [
 // Runtime-loaded @elizaos/plugin-* packages must stay external.
 const pluginExternal = /^@elizaos\/plugin-/;
 const optionalAppExternal = /^@elizaos\/app-/;
-// Capacitor bridge packages are runtime/mobile dependencies of app-core. They
-// should remain package imports in the Node bundle; bundling them from Milady's
-// release contract makes package-mode installs depend on hoisting shape.
-const capacitorExternal = /^@capacitor\//;
 // @node-rs/* ships native .node bindings per platform (argon2 + arch
 // variants like @node-rs/argon2-darwin-arm64). Single regex covers all
 // of them — always external; rolldown can't bundle the .node binary.
