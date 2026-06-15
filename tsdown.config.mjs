@@ -134,15 +134,21 @@ const allExternals = [
   napiRsExternal,
 ];
 
+const toleratedServerDynamicImportMarkers = [
+  "ensure-text-to-speech-handler.ts",
+  "api/server.ts",
+  "runtime/eliza.ts",
+];
+
 function isToleratedServerDynamicImportLog(log) {
   const code = log && typeof log === "object" ? log.code : null;
   const rawMessage = log && typeof log === "object" ? log.message : "";
   const message = String(rawMessage ?? "");
   return (
     code === "INEFFECTIVE_DYNAMIC_IMPORT" &&
-    message.includes("ensure-text-to-speech-handler.ts") &&
-    message.includes("api/server.ts") &&
-    message.includes("runtime/eliza.ts")
+    toleratedServerDynamicImportMarkers.every((marker) =>
+      message.includes(marker),
+    )
   );
 }
 
