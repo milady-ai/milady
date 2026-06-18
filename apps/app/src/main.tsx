@@ -680,6 +680,13 @@ function initializeAppLifecycle(): void {
     CapacitorApp.addListener("appStateChange", ({ isActive }) => {
       if (isActive) {
         dispatchAppEvent(APP_RESUME_EVENT);
+        // Re-drive the iOS local-runtime boot whenever the app becomes active.
+        // The initial fire-and-forget at startup can stall mid-`await` if the
+        // WebView's JS was suspended on a background/headless launch (the queued
+        // continuation never drains until the app foregrounds). This is
+        // idempotent: bootIosLocalRuntimeIfApplicable() no-ops once ready and
+        // returns the in-flight promise while starting.
+        if (isIOS) void bootIosLocalRuntimeIfApplicable();
       } else {
         dispatchAppEvent(APP_PAUSE_EVENT);
       }

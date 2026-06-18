@@ -2,7 +2,13 @@
  * Shared types and utilities for iOS and Android local runtime boot modules.
  */
 
-export const LOCAL_RUNTIME_CAPACITOR_PACKAGE = "@elizaos/capacitor-bun-runtime";
+import { registerPlugin } from "@capacitor/core";
+
+/**
+ * JS-facing Capacitor plugin name for the on-device Bun runtime. Matches the
+ * native `jsName` (`ElizaBunRuntimePlugin` declares `jsName = "ElizaBunRuntime"`).
+ */
+export const ELIZA_BUN_RUNTIME_PLUGIN_NAME = "ElizaBunRuntime";
 
 export interface LocalAgentStatus {
   ready: boolean;
@@ -37,15 +43,16 @@ export async function loadBunRuntimePlugin<T extends BunRuntimePluginBase>(
   logPrefix: string,
 ): Promise<T | null> {
   try {
-    const mod = await import(LOCAL_RUNTIME_CAPACITOR_PACKAGE);
-    const plugin = (mod as unknown as { ElizaBunRuntime?: T }).ElizaBunRuntime;
-    if (!plugin) {
-      console.warn(
-        `${logPrefix} plugin module loaded but ElizaBunRuntime export missing`,
-      );
-      return null;
-    }
-    return plugin;
+    // Resolve the native bridge via Capacitor's `registerPlugin` instead of a
+    // dynamic `import("@elizaos/capacitor-bun-runtime")`. The package's
+    // `ElizaBunRuntime` export is itself just `registerPlugin("ElizaBunRuntime",
+    // …)`; importing it dynamically is fragile in the WebView build — a bare
+    // specifier is unresolvable at runtime, and even when bundled the named
+    // binding is only reached through the dynamic namespace, so Rollup
+    // tree-shakes it out (the symptom: "plugin module loaded but ElizaBunRuntime
+    // export missing"). `registerPlugin` returns the same native-bound proxy and
+    // is bundling-safe. The native plugin declares `jsName = "ElizaBunRuntime"`.
+    return registerPlugin<T>(ELIZA_BUN_RUNTIME_PLUGIN_NAME);
   } catch (error) {
     console.warn(
       `${logPrefix} plugin not available:`,

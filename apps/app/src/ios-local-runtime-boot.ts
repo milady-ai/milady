@@ -39,6 +39,37 @@ export type { LocalAgentReply, LocalAgentStatus };
 
 const LOG_PREFIX = `${APP_LOG_PREFIX} [ios-local-runtime]`;
 
+// Canonical full-Bun start args. MUST match @elizaos/app-core's
+// ios-local-agent-transport IOS_FULL_BUN_ARGV / IOS_FULL_BUN_ENV so this eager
+// warmup and the lazy chat-request path start the SAME runtime in the SAME
+// `ios-bridge --stdio` IPC mode (the native start is idempotent via
+// ensureRuntime, so whichever fires first wins and the other no-ops). Starting
+// with an empty `{}` here would boot the agent bundle WITHOUT the bridge entry
+// mode the chat transport then talks to over the host IPC — a silent mismatch.
+const IOS_FULL_BUN_ARGV = [
+  "bun",
+  "--no-install",
+  "public/agent/agent-bundle.js",
+  "ios-bridge",
+  "--stdio",
+];
+const IOS_FULL_BUN_ENV: Record<string, string> = {
+  ELIZA_PLATFORM: "ios",
+  ELIZA_MOBILE_PLATFORM: "ios",
+  ELIZA_RUNTIME_MODE: "local-safe",
+  RUNTIME_MODE: "local-safe",
+  LOCAL_RUNTIME_MODE: "local-safe",
+  ELIZA_IOS_LOCAL_BACKEND: "1",
+  ELIZA_IOS_BUN_STARTUP_TIMEOUT_MS: "300000",
+  ELIZA_PGLITE_DISABLE_EXTENSIONS: "0",
+  ELIZA_VAULT_BACKEND: "file",
+  ELIZA_DISABLE_VAULT_PROFILE_RESOLVER: "1",
+  ELIZA_DISABLE_AGENT_WALLET_BOOTSTRAP: "1",
+  ELIZA_HEADLESS: "1",
+  ELIZA_IOS_BRIDGE_TRANSPORT: "bun-host-ipc",
+  LOG_LEVEL: "error",
+};
+
 // Custom event names dispatched on `document` for chat UI consumers. We
 // use `document.dispatchEvent` directly (not the typed `dispatchAppEvent`
 // helper) because the typed helper accepts only the existing
@@ -55,6 +86,9 @@ interface BunRuntimeListenerHandle {
 interface BunRuntimePlugin extends BunRuntimePluginBase {
   start(opts: {
     bundlePath?: string;
+    engine?: string;
+    argv?: string[];
+    env?: Record<string, string>;
   }): Promise<{ ok: boolean; error?: string }>;
   addListener(
     eventName: string,
@@ -71,9 +105,13 @@ type RuntimeState =
 let runtimeState: RuntimeState = { kind: "idle" };
 
 function isApplicable(): boolean {
-  if (Capacitor.getPlatform() !== "ios") return false;
+  const platform = Capacitor.getPlatform();
   const config = resolveIosRuntimeConfig(import.meta.env);
-  return config.mode === "local";
+  const applicable = platform === "ios" && config.mode === "local";
+  console.log(
+    `${LOG_PREFIX} isApplicable: platform=${platform} mode=${config.mode ?? "(unset)"} -> ${applicable}`,
+  );
+  return applicable;
 }
 
 async function subscribePluginEvents(plugin: BunRuntimePlugin): Promise<void> {
@@ -106,14 +144,22 @@ async function subscribePluginEvents(plugin: BunRuntimePlugin): Promise<void> {
 }
 
 async function startRuntime(): Promise<boolean> {
+  console.log(`${LOG_PREFIX} startRuntime: resolving bun runtime plugin`);
   const plugin = await loadBunRuntimePlugin<BunRuntimePlugin>(LOG_PREFIX);
   if (!plugin) {
+    console.warn(`${LOG_PREFIX} startRuntime: plugin not loaded`);
     runtimeState = { kind: "unavailable", reason: "plugin-not-loaded" };
     return false;
   }
 
   try {
-    const result = await plugin.start({});
+    console.log(`${LOG_PREFIX} startRuntime: calling ElizaBunRuntime.start (ios-bridge)`);
+    const result = await plugin.start({
+      engine: "bun",
+      argv: IOS_FULL_BUN_ARGV,
+      env: IOS_FULL_BUN_ENV,
+    });
+    console.log(`${LOG_PREFIX} startRuntime: start() resolved ok=${result.ok}`);
     if (!result.ok) {
       const reason = result.error ?? "start-returned-not-ok";
       console.warn(`${LOG_PREFIX} start() rejected: ${reason}`);
