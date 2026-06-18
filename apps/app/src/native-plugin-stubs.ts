@@ -32,6 +32,71 @@ export const Desktop = {
   async setTrayMenu(_options: { menu: readonly unknown[] }): Promise<void> {},
 };
 
+// `@elizaos/capacitor-camera` is a native Capacitor bridge. Like every other
+// native plugin, it is stubbed in the renderer bundle (web/desktop, and mobile
+// targets that don't compile the native ElizaCamera plugin). `CameraPageView`
+// imports these three symbols; the stub reports the camera as denied so the
+// surface renders its unavailable state instead of a dead preview.
+export type CameraDirection = "front" | "back" | "external";
+
+export interface PhotoResult {
+  base64: string;
+  format: string;
+  width: number;
+  height: number;
+  path?: string;
+  exif?: Record<string, string | number>;
+}
+
+interface CameraPermissionStatus {
+  camera: "granted" | "denied" | "prompt";
+  microphone: "granted" | "denied" | "prompt";
+  photos: "granted" | "denied" | "prompt" | "limited";
+}
+
+interface CameraPreviewResult {
+  width: number;
+  height: number;
+  deviceId: string;
+}
+
+const CAMERA_UNAVAILABLE = "Camera is not available on this platform.";
+
+const deniedPermissions = (): CameraPermissionStatus => ({
+  camera: "denied",
+  microphone: "denied",
+  photos: "denied",
+});
+
+export const Camera = {
+  async checkPermissions(): Promise<CameraPermissionStatus> {
+    return deniedPermissions();
+  },
+  async requestPermissions(): Promise<CameraPermissionStatus> {
+    return deniedPermissions();
+  },
+  async startPreview(_options: {
+    element: HTMLElement;
+    direction?: CameraDirection;
+    mirror?: boolean;
+  }): Promise<CameraPreviewResult> {
+    throw new Error(CAMERA_UNAVAILABLE);
+  },
+  async stopPreview(): Promise<void> {},
+  async switchCamera(_options: {
+    deviceId?: string;
+    direction?: CameraDirection;
+  }): Promise<CameraPreviewResult> {
+    throw new Error(CAMERA_UNAVAILABLE);
+  },
+  async capturePhoto(_options?: {
+    quality?: number;
+    format?: "jpeg" | "png" | "webp";
+  }): Promise<PhotoResult> {
+    throw new Error(CAMERA_UNAVAILABLE);
+  },
+};
+
 export type MobileSignalsPlatform = "android" | "ios" | "web";
 
 export type MobileSignalsSource = "mobile_device" | "mobile_health";
