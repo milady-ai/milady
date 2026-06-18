@@ -190,7 +190,7 @@
     "pino": "^10.3.1",
     "puppeteer-core": "^24.39.1",
     "qrcode": "^1.5.4",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.1",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.0.0",
     "telegraf": "^4.16.3",
