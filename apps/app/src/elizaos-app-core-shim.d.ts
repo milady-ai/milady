@@ -199,6 +199,11 @@ declare module "@elizaos/app-core" {
     [key: string]: unknown;
   }
   export const client: ElizaApiClient;
+
+  // App context hook — MiladyHomeScreen reads wallet state from it and casts to
+  // the precise shape, so a loose return keeps the published-stub typecheck green
+  // while the real (clone) build supplies the full AppContextValue.
+  export function useApp(): Record<string, unknown>;
 }
 
 declare module "@elizaos/app-core/platform" {
@@ -252,6 +257,30 @@ declare module "@elizaos/shared/dist/index.js" {
   // `import { ELIZA_DEFAULT_THEME } from "@elizaos/shared/dist/index.js"`
   // typechecks until the upstream beta publish lifts the export.
   export const ELIZA_DEFAULT_THEME: unknown;
+}
+
+declare module "@elizaos/ui/App" {
+  // Upstream PR #8721 moved the full app shell to the explicit @elizaos/ui/App
+  // entry; the published `alpha` @elizaos/ui stub doesn't surface it yet, so
+  // shim it (the real component comes from the local clone at build time).
+  import type * as React from "react";
+  export const App: React.ComponentType<Record<string, unknown>>;
+}
+
+declare module "@elizaos/ui" {
+  // Home-screen surface consumed by MiladyHomeScreen. These landed on develop
+  // (the host-overridable home slot + clock accessory) but post-date the
+  // published `alpha` @elizaos/ui stub; augment until the publish catches up.
+  import type * as React from "react";
+  export type HomeTileTarget =
+    | { kind: "tab"; tab: string }
+    | { kind: "view"; path: string };
+  export interface HomeScreenProps {
+    onOpenTile: (target: HomeTileTarget) => void;
+    showNativeOsTiles?: boolean;
+    clockAccessory?: React.ReactNode;
+  }
+  export const HomeScreen: React.ComponentType<HomeScreenProps>;
 }
 
 declare module "@elizaos/ui/voice" {

@@ -295,7 +295,9 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: ios-ipa
-          path: apps/app/ios/build/Eliza.ipa
+          # run-mobile-build names the IPA from the app name (e.g. Milady.ipa);
+          # glob so any brand name is collected.
+          path: apps/app/ios/build/*.ipa
           retention-days: 90
           if-no-files-found: error
 
