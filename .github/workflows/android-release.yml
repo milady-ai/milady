@@ -221,8 +221,8 @@ jobs:
             exit 1
           fi
           cp apps/app/android/app/build/outputs/bundle/release/app-release.aab \
-             "Eliza-${VERSION}.aab"
-          gh release upload "$TAG" "Eliza-${VERSION}.aab" --clobber
+             "Milady-${VERSION}.aab"
+          gh release upload "$TAG" "Milady-${VERSION}.aab" --clobber
 
       - name: Attach APK to GitHub Release
         if: steps.android_signing.outputs.ready == 'true'
@@ -289,7 +289,7 @@ jobs:
             --aab ../../../aab/app-release.aab \
             --track "${{ steps.track.outputs.track }}" \
             --json_key "$PLAY_STORE_JSON_KEY" \
-            --package_name "ai.elizaos.app"
+            --package_name "ai.milady.milady"
 
       - name: Clean up credentials
         if: always()

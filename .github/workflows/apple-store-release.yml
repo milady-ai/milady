@@ -506,7 +506,7 @@ jobs:
         run: |
           APP_PATH=$(find build -name "*.app" -maxdepth 2 | head -1)
           VERSION="${{ needs.prepare.outputs.version }}"
-          PKG_NAME="Eliza-${VERSION}-mas.pkg"
+          PKG_NAME="Milady-${VERSION}-mas.pkg"
 
           productbuild --sign "$INSTALLER_IDENTITY" \
             --component "$APP_PATH" /Applications \
