@@ -1,0 +1,1056 @@
+diff --git a/packages/app-core/scripts/run-mobile-build.mjs b/packages/app-core/scripts/run-mobile-build.mjs
+index e2ffd7ab7d..c41c07b615 100644
+--- a/packages/app-core/scripts/run-mobile-build.mjs
++++ b/packages/app-core/scripts/run-mobile-build.mjs
+@@ -88,7 +88,6 @@ const repoRoot = process.env.ELIZA_MOBILE_REPO_ROOT?.trim()
+       fallbackToCwd: true,
+     });
+ const appCoreRoot = path.resolve(__dirname, "..");
+-const elizaCheckoutRoot = path.resolve(appCoreRoot, "..", "..");
+ const packagesRoot = path.resolve(appCoreRoot, "..");
+ const elizaRepoRoot = path.resolve(packagesRoot, "..");
+ const appDir = resolveMainAppDir(repoRoot, "app");
+@@ -514,32 +513,21 @@ function resolvePackageAbsolutePath(
+   pkgName,
+   { appDirValue = appDir, repoRootValue = repoRoot } = {},
+ ) {
+-  const candidates = resolvePackageAbsolutePathCandidates(pkgName, {
++  const appPackage = path.join(
+     appDirValue,
++    "node_modules",
++    ...pkgName.split("/"),
++  );
++  const rootNodeModulesPackage = path.join(
+     repoRootValue,
+-  });
+-  const linked = candidates.find((candidate) => fs.existsSync(candidate));
+-  if (!linked) return null;
+-  return fs.realpathSync(linked);
+-}
+-
+-function resolvePackageAbsolutePathCandidates(
+-  pkgName,
+-  { appDirValue = appDir, repoRootValue = repoRoot } = {},
+-) {
+-  const roots = [
+-    ...new Set(
+-      [appDirValue, repoRootValue, elizaCheckoutRoot].map((root) =>
+-        path.resolve(root),
+-      ),
+-    ),
+-  ];
+-  const candidates = roots.map((root) =>
+-    path.join(root, "node_modules", ...pkgName.split("/")),
++    "node_modules",
++    ...pkgName.split("/"),
+   );
+-  for (const bunStore of roots.map((root) =>
+-    path.join(root, "node_modules", ".bun"),
+-  )) {
++  const candidates = [appPackage, rootNodeModulesPackage];
++  for (const bunStore of [
++    path.join(appDirValue, "node_modules", ".bun"),
++    path.join(repoRootValue, "node_modules", ".bun"),
++  ]) {
+     if (!fs.existsSync(bunStore)) continue;
+     for (const entry of fs.readdirSync(bunStore, { withFileTypes: true })) {
+       if (!entry.isDirectory()) continue;
+@@ -548,13 +536,9 @@ function resolvePackageAbsolutePathCandidates(
+       );
+     }
+   }
+-  return [
+-    ...new Set(
+-      candidates
+-        .filter((candidate) => fs.existsSync(candidate))
+-        .map((candidate) => fs.realpathSync(candidate)),
+-    ),
+-  ];
++  const linked = candidates.find((candidate) => fs.existsSync(candidate));
++  if (!linked) return null;
++  return fs.realpathSync(linked);
+ }
+ 
+ function resolveNativePluginPackagePath(pkgName, relativeTo) {
+@@ -1868,12 +1852,12 @@ const ANDROID_OFFICIAL_CAPACITOR_PACKAGES = [
+ ];
+ 
+ function patchInstalledCapacitorPluginGradleForAgp9(pkgName) {
+-  for (const pkgRoot of resolvePackageAbsolutePathCandidates(pkgName)) {
+-    patchGradleFileForAgp9(
+-      path.join(pkgRoot, "android", "build.gradle"),
+-      pkgName,
+-    );
+-  }
++  const pkgRel = resolvePackagePath(pkgName, androidDir);
++  if (!pkgRel) return;
++  patchGradleFileForAgp9(
++    path.resolve(androidDir, pkgRel, "android", "build.gradle"),
++    pkgName,
++  );
+ }
+ 
+ function patchOfficialCapacitorGradleForAgp9() {
+@@ -1883,14 +1867,12 @@ function patchOfficialCapacitorGradleForAgp9() {
+ }
+ 
+ function patchLlamaCppCapacitorGradle() {
+-  for (const pkgRoot of resolvePackageAbsolutePathCandidates(
++  const pkgRel = resolvePackagePath("llama-cpp-capacitor", androidDir);
++  if (!pkgRel) return;
++  patchGradleFileForAgp9(
++    path.resolve(androidDir, pkgRel, "android", "build.gradle"),
+     "llama-cpp-capacitor",
+-  )) {
+-    patchGradleFileForAgp9(
+-      path.join(pkgRoot, "android", "build.gradle"),
+-      "llama-cpp-capacitor",
+-    );
+-  }
++  );
+ }
+ 
+ export function injectAndroidBackgroundRunnerAarFlatDir(content) {
+@@ -2033,57 +2015,6 @@ function removeXmlCommentsContaining(xml, markers) {
+   return patched;
+ }
+ 
+-function ensureManifestToolsNamespace(xml) {
+-  if (/\bxmlns:tools=/.test(xml)) return xml;
+-  return xml.replace(
+-    /<manifest\b([^>]*)>/,
+-    '<manifest$1 xmlns:tools="http://schemas.android.com/tools">',
+-  );
+-}
+-
+-function hasAndroidPermissionRequest(xml, fullPermissionName) {
+-  const escaped = escapeRegExp(fullPermissionName);
+-  const re = new RegExp(
+-    `<uses-permission\\b(?=[^>]*android:name="${escaped}")[^>]*>`,
+-    "g",
+-  );
+-  for (const match of xml.matchAll(re)) {
+-    if (!/\btools:node\s*=\s*"remove"/.test(match[0])) return true;
+-  }
+-  return false;
+-}
+-
+-function removeAndroidPermissionRequests(xml, permissions) {
+-  let patched = xml;
+-  for (const perm of permissions) {
+-    const escaped = escapeRegExp(`android.permission.${perm}`);
+-    const re = new RegExp(
+-      `\\n\\s*<uses-permission\\b(?=[^>]*android:name="${escaped}")(?![^>]*tools:node="remove")[^>]*/>\\s*`,
+-      "g",
+-    );
+-    patched = patched.replace(re, "\n");
+-  }
+-  return patched;
+-}
+-
+-function ensureAndroidPermissionRemovalMarkers(xml, permissions) {
+-  let patched = ensureManifestToolsNamespace(xml);
+-  for (const perm of permissions) {
+-    const full = `android.permission.${perm}`;
+-    const escaped = escapeRegExp(full);
+-    const removalRe = new RegExp(
+-      `<uses-permission\\b(?=[^>]*android:name="${escaped}")(?=[^>]*tools:node="remove")[^>]*/>`,
+-      "m",
+-    );
+-    if (removalRe.test(patched)) continue;
+-    patched = patched.replace(
+-      "</manifest>",
+-      `    <uses-permission android:name="${full}" tools:node="remove" />\n</manifest>`,
+-    );
+-  }
+-  return patched;
+-}
+-
+ function ensureManifestApplicationClosedBeforeTopLevelEntries(xml) {
+   if (xml.includes("</application>")) return xml;
+   const appStart = xml.indexOf("<application");
+@@ -2440,11 +2371,7 @@ function syncAndroidAppActionsResources() {
+   const targetResDir = path.join(androidDir, "app", "src", "main", "res");
+   const resourceFiles = [
+     path.join("xml", "shortcuts.xml"),
+-    path.join("xml", "eliza_quick_actions_widget.xml"),
+     path.join("xml", "eliza_accessibility_service.xml"),
+-    path.join("layout", "eliza_quick_actions_widget.xml"),
+-    path.join("drawable", "eliza_widget_background.xml"),
+-    path.join("drawable", "eliza_widget_button_background.xml"),
+     path.join("values", "android_app_actions.xml"),
+   ];
+   for (const relPath of resourceFiles) {
+@@ -2623,9 +2550,6 @@ function overlayAndroid({ includeAospRoleLaunchers = false } = {}) {
+       "MainActivity.java",
+       "ElizaAgentService.java",
+       "ElizaAssistActivity.java",
+-      "ElizaQuickActionsWidgetProvider.java",
+-      "ElizaShareActivity.java",
+-      "ElizaVoiceTileService.java",
+       "ElizaAccessibilityService.java",
+       "ElizaBootReceiver.java",
+       "ElizaNotificationListenerService.java",
+@@ -2793,9 +2717,6 @@ function overlayAndroid({ includeAospRoleLaunchers = false } = {}) {
+     for (const component of [
+       "ElizaDialActivity",
+       "ElizaAssistActivity",
+-      "ElizaQuickActionsWidgetProvider",
+-      "ElizaShareActivity",
+-      "ElizaVoiceTileService",
+       "ElizaAccessibilityService",
+       "ElizaInCallService",
+       "ElizaNotificationListenerService",
+@@ -2823,9 +2744,6 @@ function overlayAndroid({ includeAospRoleLaunchers = false } = {}) {
+     for (const component of [
+       "ElizaDialActivity",
+       "ElizaAssistActivity",
+-      "ElizaQuickActionsWidgetProvider",
+-      "ElizaShareActivity",
+-      "ElizaVoiceTileService",
+       "ElizaAccessibilityService",
+       "ElizaInCallService",
+       "ElizaNotificationListenerService",
+@@ -2892,60 +2810,6 @@ function overlayAndroid({ includeAospRoleLaunchers = false } = {}) {
+             </intent-filter>
+         </activity>`,
+     );
+-    xml = appendMissingApplicationBlock(
+-      xml,
+-      `${androidPackage}.ElizaShareActivity`,
+-      `
+-        <activity
+-            android:name="${androidPackage}.ElizaShareActivity"
+-            android:exported="true"
+-            android:label="@string/app_action_smart_reply_long"
+-            android:theme="@style/AppTheme.NoActionBar">
+-            <intent-filter>
+-                <action android:name="android.intent.action.SEND" />
+-                <category android:name="android.intent.category.DEFAULT" />
+-                <data android:mimeType="text/plain" />
+-            </intent-filter>
+-            <intent-filter>
+-                <action android:name="android.intent.action.PROCESS_TEXT" />
+-                <category android:name="android.intent.category.DEFAULT" />
+-                <data android:mimeType="text/plain" />
+-            </intent-filter>
+-        </activity>`,
+-    );
+-    xml = appendMissingApplicationBlock(
+-      xml,
+-      `${androidPackage}.ElizaVoiceTileService`,
+-      `
+-        <service
+-            android:name="${androidPackage}.ElizaVoiceTileService"
+-            android:exported="true"
+-            android:icon="@mipmap/ic_launcher_monochrome"
+-            android:label="@string/app_action_voice_long"
+-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+-            <intent-filter>
+-                <action android:name="android.service.quicksettings.action.QS_TILE" />
+-            </intent-filter>
+-            <meta-data
+-                android:name="android.service.quicksettings.TOGGLEABLE_TILE"
+-                android:value="false" />
+-        </service>`,
+-    );
+-    xml = appendMissingApplicationBlock(
+-      xml,
+-      `${androidPackage}.ElizaQuickActionsWidgetProvider`,
+-      `
+-        <receiver
+-            android:name="${androidPackage}.ElizaQuickActionsWidgetProvider"
+-            android:exported="true">
+-            <intent-filter>
+-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+-            </intent-filter>
+-            <meta-data
+-                android:name="android.appwidget.provider"
+-                android:resource="@xml/eliza_quick_actions_widget" />
+-        </receiver>`,
+-    );
+     xml = appendMissingApplicationBlock(
+       xml,
+       `${androidPackage}.ElizaAccessibilityService`,
+@@ -3340,7 +3204,7 @@ const IOS_PERMISSION_KEYS = [
+   ],
+   [
+     "NSLocalNetworkUsageDescription",
+-    "This app discovers and connects to your elizaOS gateway on the local network.",
++    `This app discovers and connects to your ${APP.appName} gateway on the local network.`,
+   ],
+ ];
+ 
+@@ -4088,9 +3952,6 @@ function sanitizeAndroidManifestWhenPlatformTemplatesMissing() {
+     "ElizaAgentService",
+     "ElizaDialActivity",
+     "ElizaAssistActivity",
+-    "ElizaQuickActionsWidgetProvider",
+-    "ElizaShareActivity",
+-    "ElizaVoiceTileService",
+     "ElizaInCallService",
+     "ElizaSmsReceiver",
+     "ElizaMmsReceiver",
+@@ -5109,14 +4970,6 @@ export const ANDROID_CLOUD_STRIPPED_PERMISSIONS = [
+   "BIND_DEVICE_ADMIN",
+ ];
+ 
+-// Some kept Capacitor plugins can reintroduce source-stripped permissions via
+-// library manifest merge. Add removal markers only for verified merge offenders;
+-// the artifact audit below still fails if any other stripped permission leaks.
+-export const ANDROID_CLOUD_MANIFEST_MERGER_REMOVED_PERMISSIONS = [
+-  "ACCESS_BACKGROUND_LOCATION",
+-  "RECEIVE_BOOT_COMPLETED",
+-];
+-
+ // Java sources removed from the merged sources tree so they don't
+ // reference manifest-stripped classes and break compilation.
+ export const ANDROID_CLOUD_STRIPPED_JAVA_FILES = [
+@@ -5741,7 +5594,7 @@ function auditAndroidCloudSource(phase) {
+     }
+     for (const perm of ANDROID_CLOUD_STRIPPED_PERMISSIONS) {
+       const full = `android.permission.${perm}`;
+-      if (hasAndroidPermissionRequest(xml, full)) {
++      if (xml.includes(full)) {
+         failures.push(`AndroidManifest.xml still requests ${full}`);
+       }
+     }
+@@ -6038,14 +5891,14 @@ function stripAndroidForCloud() {
+     xml = removeXmlCommentsContaining(xml, ANDROID_CLOUD_STRIPPED_COMPONENTS);
+     xml = ensureManifestApplicationClosedBeforeTopLevelEntries(xml);
+ 
+-    xml = removeAndroidPermissionRequests(
+-      xml,
+-      ANDROID_CLOUD_STRIPPED_PERMISSIONS,
+-    );
+-    xml = ensureAndroidPermissionRemovalMarkers(
+-      xml,
+-      ANDROID_CLOUD_MANIFEST_MERGER_REMOVED_PERMISSIONS,
+-    );
++    for (const perm of ANDROID_CLOUD_STRIPPED_PERMISSIONS) {
++      const escaped = escapeRegExp(`android.permission.${perm}`);
++      const re = new RegExp(
++        `\\n\\s*<uses-permission\\b[^>]*android:name="${escaped}"[^>]*/>\\s*`,
++        "g",
++      );
++      xml = xml.replace(re, "\n");
++    }
+     xml = applyAndroidCleartextPolicy(xml, { allowCleartext: false });
+ 
+     if (xml !== original) {
+@@ -6154,16 +6007,14 @@ function stripAndroidForSmsGateway() {
+       xml = removeApplicationComponentClassBlock(xml, component);
+     }
+ 
+-    xml = removeAndroidPermissionRequests(
+-      xml,
+-      ANDROID_SMS_GATEWAY_STRIPPED_PERMISSIONS,
+-    );
+-    xml = ensureAndroidPermissionRemovalMarkers(
+-      xml,
+-      ANDROID_CLOUD_MANIFEST_MERGER_REMOVED_PERMISSIONS.filter((permission) =>
+-        ANDROID_SMS_GATEWAY_STRIPPED_PERMISSIONS.includes(permission),
+-      ),
+-    );
++    for (const perm of ANDROID_SMS_GATEWAY_STRIPPED_PERMISSIONS) {
++      const escaped = escapeRegExp(`android.permission.${perm}`);
++      const re = new RegExp(
++        `\\n\\s*<uses-permission\\b[^>]*android:name="${escaped}"[^>]*/>\\s*`,
++        "g",
++      );
++      xml = xml.replace(re, "\n");
++    }
+     xml = applyAndroidCleartextPolicy(xml, { allowCleartext: false });
+ 
+     if (xml !== original) {
+@@ -6516,25 +6367,6 @@ function auditAndroidCloudArtifact({ debug = false, javaHome } = {}) {
+         offenders.map((entry) => `  - ${entry}`).join("\n"),
+     );
+   }
+-  const aapt = resolveAndroidBuildTool(resolveAndroidSdkRoot(), "aapt");
+-  if (!aapt) {
+-    throw new Error(
+-      "[mobile-build] Could not find aapt under Android SDK build-tools for android-cloud artifact audit.",
+-    );
+-  }
+-  const badging = dumpAndroidArtifactBadging(aapt, artifact);
+-  const permissionOffenders = ANDROID_CLOUD_STRIPPED_PERMISSIONS.filter(
+-    (perm) =>
+-      badging.includes(`uses-permission: name='android.permission.${perm}'`),
+-  );
+-  if (permissionOffenders.length > 0) {
+-    throw new Error(
+-      "[mobile-build] android-cloud artifact still requests stripped permissions:\n" +
+-        permissionOffenders
+-          .map((perm) => `  - android.permission.${perm}`)
+-          .join("\n"),
+-    );
+-  }
+   // Cloud is a thin client (no on-device agent), but it must still ship the
+   // renderer — a web-less cloud APK is just as broken as a web-less sideload.
+   assertAndroidArtifactShipsWebPayload(artifact, entries, {
+diff --git a/packages/ui/src/App.tsx b/packages/ui/src/App.tsx
+index 8261f6bc18..797bb39f74 100644
+--- a/packages/ui/src/App.tsx
++++ b/packages/ui/src/App.tsx
+@@ -6,15 +6,14 @@ import { X } from "lucide-react";
+ import "./components/chat/chat-source-registration";
+ import {
+   type ComponentType,
+-  lazy,
+   type LazyExoticComponent,
++  lazy,
+   type ReactNode,
+   Suspense,
+   useCallback,
+   useEffect,
+   useMemo,
+   useState,
+-  useSyncExternalStore,
+ } from "react";
+ import {
+   type ActiveViewLayout,
+@@ -80,7 +79,6 @@ import {
+   shouldUseHashNavigation,
+ } from "./navigation";
+ import { isIOS, isNative } from "./platform/init";
+-import { RetainedLazyComponent } from "./retained-lazy";
+ import { type ActionNotice, useApp } from "./state";
+ import { isShellPaintable } from "./state/startup-coordinator";
+ import { VoiceSelfTestShell } from "./voice/voice-selftest/VoiceSelfTestShell";
+@@ -121,11 +119,8 @@ import { fetchWithCsrf } from "./api/csrf-client";
+ // `app-shell-components` barrel — that barrel statically re-exports every page
+ // view, so importing through it folds all of them back into the main chunk.
+ import {
+-  type AppShellPageLoader,
+   type AppShellPageRegistration,
+-  getAppShellPageRegistrySnapshot,
+   listAppShellPages,
+-  subscribeAppShellPages,
+ } from "./app-shell-registry";
+ // CharacterEditor, DesktopTabBar, and FineTuningView stay static: they are
+ // already pulled eagerly elsewhere in the app graph (main.tsx / plugin-loader /
+@@ -230,74 +225,13 @@ const TrajectoriesView = lazyNamedView(
+   "TrajectoriesView",
+ );
+ 
+-const ROUTE_PREFETCH_MAX_CHUNKS = 4;
+-
+-function shouldWarmRouteViewChunks(): boolean {
+-  if (typeof window === "undefined" || typeof document === "undefined") {
+-    return false;
+-  }
+-  if (document.visibilityState === "hidden") return false;
+-  const navigatorWithHints = navigator as Navigator & {
+-    connection?: { effectiveType?: string; saveData?: boolean };
+-    deviceMemory?: number;
+-  };
+-  if (navigatorWithHints.connection?.saveData) return false;
+-  if (
+-    navigatorWithHints.connection?.effectiveType === "slow-2g" ||
+-    navigatorWithHints.connection?.effectiveType === "2g"
+-  ) {
+-    return false;
+-  }
+-  if (
+-    typeof navigatorWithHints.deviceMemory === "number" &&
+-    navigatorWithHints.deviceMemory <= 4
+-  ) {
+-    return false;
+-  }
+-  return true;
+-}
+-
+-// Once the shell is interactive, warm a small number of lazy route chunks
+-// during idle time on capable devices. Full views still stay lazy by default:
+-// this is a bounded best-effort path, not an eager import of the whole shell.
+-function scheduleRouteViewChunkPrefetch(): () => void {
+-  if (!shouldWarmRouteViewChunks()) return () => {};
+-  const loaders = [...routeViewLoaders].slice(0, ROUTE_PREFETCH_MAX_CHUNKS);
+-  if (loaders.length === 0) return () => {};
+-  let cancelled = false;
+-  let scheduledId: number | null = null;
+-  const w = window as Window & {
+-    requestIdleCallback?: (
+-      cb: () => void,
+-      options?: { timeout?: number },
+-    ) => number;
+-    cancelIdleCallback?: (id: number) => void;
+-  };
+-
+-  const scheduleNext = () => {
+-    if (cancelled || loaders.length === 0) return;
+-    const run = () => {
+-      scheduledId = null;
+-      if (cancelled) return;
+-      const load = loaders.shift();
+-      if (load) void load().catch(() => {});
+-      scheduleNext();
+-    };
+-    scheduledId =
+-      w.requestIdleCallback?.(run, { timeout: 2_000 }) ??
+-      window.setTimeout(run, 750);
+-  };
+-
+-  scheduleNext();
+-  return () => {
+-    cancelled = true;
+-    if (scheduledId === null) return;
+-    if (w.cancelIdleCallback) {
+-      w.cancelIdleCallback(scheduledId);
+-    } else {
+-      window.clearTimeout(scheduledId);
+-    }
+-  };
++// Once the shell is interactive, warm the lazy route chunks during idle time so
++// the first navigation to each view is instant instead of waiting on a chunk
++// fetch. Iterates the loaders registered by lazyNamedView() above — the same
++// thunks the lazy() boundaries use, so the bundler reuses the same chunks and
++// the list can't drift. Failures are ignored — this is best-effort warming.
++function prefetchRouteViewChunks(): void {
++  for (const load of routeViewLoaders) void load().catch(() => {});
+ }
+ 
+ function LazyViewBoundary({ children }: { children: ReactNode }) {
+@@ -471,14 +405,6 @@ interface ResolvedDynamicPage {
+   componentExport?: string;
+ }
+ 
+-function useAppShellPageRegistryVersion(): number {
+-  return useSyncExternalStore(
+-    subscribeAppShellPages,
+-    getAppShellPageRegistrySnapshot,
+-    getAppShellPageRegistrySnapshot,
+-  );
+-}
+-
+ /**
+  * Resolve a tab id against the dynamic registry: first the in-process
+  * `registerAppShellPage` registrations, then any loaded plugin's
+@@ -486,7 +412,6 @@ function useAppShellPageRegistryVersion(): number {
+  */
+ function useResolvedDynamicPage(tab: string): ResolvedDynamicPage | null {
+   const { plugins } = useApp();
+-  const registryVersion = useAppShellPageRegistryVersion();
+   return useMemo(() => {
+     const registrations = listAppShellPages();
+     const registered = registrations.find((entry) => entry.id === tab);
+@@ -517,7 +442,7 @@ function useResolvedDynamicPage(tab: string): ResolvedDynamicPage | null {
+       }
+     }
+     return null;
+-  }, [plugins, registryVersion, tab]);
++  }, [plugins, tab]);
+ }
+ 
+ /**
+@@ -530,43 +455,10 @@ function useResolvedDynamicPage(tab: string): ResolvedDynamicPage | null {
+  * a small loading fallback until the import resolves. Plugins can avoid this
+  * path by self-registering with `registerAppShellPage` at boot.
+  */
+-function RegisteredAppShellPage({
+-  registration,
+-}: {
+-  registration: AppShellPageRegistration;
+-}) {
+-  if (registration.Component) {
+-    const Component = registration.Component;
+-    return <Component />;
+-  }
+-  if (registration.loader) {
+-    return (
+-      <RetainedLazyComponent
+-        loader={registration.loader}
+-        componentProps={{}}
+-        fallback={
+-          <div className="flex flex-1 min-h-0 min-w-0 items-center justify-center text-sm text-muted">
+-            Loading {registration.label}…
+-          </div>
+-        }
+-        onError={(error) => (
+-          <div className="flex flex-1 min-h-0 min-w-0 items-center justify-center px-4 text-center text-sm text-destructive">
+-            Failed to load {registration.label}: {error.message}
+-          </div>
+-        )}
+-      />
+-    );
+-  }
+-  return (
+-    <div className="flex flex-1 min-h-0 min-w-0 items-center justify-center text-sm text-muted">
+-      {registration.label} is not available in this build.
+-    </div>
+-  );
+-}
+-
+ function DynamicPluginPage({ resolved }: { resolved: ResolvedDynamicPage }) {
+   if (resolved.registration) {
+-    return <RegisteredAppShellPage registration={resolved.registration} />;
++    const Component = resolved.registration.Component;
++    return <Component />;
+   }
+   // No bundled registration — display a lightweight loading fallback
+   // so the shell stays responsive. Plugins that ship bundled components
+@@ -589,7 +481,8 @@ function WalletInventoryPage() {
+       </div>
+     );
+   }
+-  return <RegisteredAppShellPage registration={registration} />;
++  const Component = registration.Component;
++  return <Component />;
+ }
+ 
+ function visibleDynamicPage(
+@@ -606,13 +499,12 @@ function visibleDynamicPage(
+  * keep the normal chrome.
+  */
+ function useTabIsFullBleed(tab: string): boolean {
+-  const registryVersion = useAppShellPageRegistryVersion();
+   return useMemo(
+     () =>
+       listAppShellPages().some(
+         (entry) => entry.id === tab && entry.fullBleed === true,
+       ),
+-    [registryVersion, tab],
++    [tab],
+   );
+ }
+ 
+@@ -1259,6 +1151,9 @@ function ContinuousChatOverlayMount(): ReactNode {
+  */
+ function HomeScreenMount(): ReactNode {
+   const { setTab } = useApp();
++  // Host apps can override the home screen via the `homeScreen` boot-config slot
++  // (whitelabel seam); fall back to the built-in HomeScreen.
++  const { homeScreen: HomeScreenOverride } = useBootConfig();
+   const onOpenTile = useCallback(
+     (target: HomeTileTarget) => {
+       if (target.kind === "tab") {
+@@ -1273,11 +1168,9 @@ function HomeScreenMount(): ReactNode {
+     },
+     [setTab],
+   );
++  const Home = HomeScreenOverride ?? HomeScreen;
+   return (
+-    <HomeScreen
+-      onOpenTile={onOpenTile}
+-      showNativeOsTiles={isAospShellEnabled()}
+-    />
++    <Home onOpenTile={onOpenTile} showNativeOsTiles={isAospShellEnabled()} />
+   );
+ }
+ 
+@@ -1330,13 +1223,22 @@ export function App() {
+ 
+   useSecretsManagerShortcut();
+ 
+-  // Warm a small, device-aware subset of lazy route chunks once the shell is
+-  // ready. The scheduler itself skips hidden/low-memory/save-data sessions.
++  // Warm lazy route chunks during idle once the shell is ready, so the first
++  // navigation to a code-split view is instant rather than waiting on a fetch.
+   useEffect(() => {
+     if (startupCoordinator.phase !== "ready" || typeof window === "undefined") {
+       return;
+     }
+-    return scheduleRouteViewChunkPrefetch();
++    const w = window as Window & {
++      requestIdleCallback?: (cb: () => void) => number;
++      cancelIdleCallback?: (id: number) => void;
++    };
++    const schedule =
++      w.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 200));
++    const cancel =
++      w.cancelIdleCallback ?? ((id: number) => window.clearTimeout(id));
++    const id = schedule(() => prefetchRouteViewChunks());
++    return () => cancel(id);
+   }, [startupCoordinator.phase]);
+ 
+   useEffect(() => {
+@@ -1376,29 +1278,27 @@ export function App() {
+     if (startupCoordinator.phase !== "ready") return;
+     if (backendConnection?.state !== "connected") return;
+ 
+-    const report = (appName: string | null) => {
++    const report = () => {
+       void fetchWithCsrf("/api/apps/overlay-presence", {
+         method: "POST",
+         headers: { "Content-Type": "application/json" },
+-        body: JSON.stringify({ appName }),
++        body: JSON.stringify({ appName: activeOverlayApp }),
+       }).catch(() => {
+         /* ignore */
+       });
+     };
+ 
+-    if (activeOverlayApp === null) {
+-      report(null);
+-      return;
+-    }
+-
+-    report(activeOverlayApp);
+-    const intervalId = window.setInterval(
+-      () => report(activeOverlayApp),
+-      25_000,
+-    );
++    report();
++    const intervalId = window.setInterval(report, 25_000);
+     return () => {
+       window.clearInterval(intervalId);
+-      report(null);
++      void fetchWithCsrf("/api/apps/overlay-presence", {
++        method: "POST",
++        headers: { "Content-Type": "application/json" },
++        body: JSON.stringify({ appName: null }),
++      }).catch(() => {
++        /* ignore */
++      });
+     };
+   }, [activeOverlayApp, backendConnection?.state, startupCoordinator.phase]);
+ 
+diff --git a/packages/ui/src/components/shell/ChatSurface.tsx b/packages/ui/src/components/shell/ChatSurface.tsx
+index c7a6033caf..079153a277 100644
+--- a/packages/ui/src/components/shell/ChatSurface.tsx
++++ b/packages/ui/src/components/shell/ChatSurface.tsx
+@@ -50,7 +50,7 @@ export function ChatSurface({
+           <p className="text-sm text-muted">
+             {greeting ??
+               t("chatsurface.greeting", {
+-                defaultValue: "Ask Eliza anything.",
++                defaultValue: "Ask {{appName}} anything.",
+               })}
+           </p>
+         ) : (
+@@ -79,7 +79,7 @@ export function ChatSurface({
+                     <span
+                       role="status"
+                       aria-label={t("chatsurface.typing", {
+-                        defaultValue: "Eliza is typing",
++                        defaultValue: "{{appName}} is typing",
+                       })}
+                       className="inline-flex gap-0.5"
+                     >
+@@ -110,11 +110,11 @@ export function ChatSurface({
+             }
+           }}
+           placeholder={t("chatsurface.inputPlaceholder", {
+-            defaultValue: "Ask Eliza…",
++            defaultValue: "Ask {{appName}}…",
+           })}
+           disabled={!canSend}
+           aria-label={t("chatsurface.messageLabel", {
+-            defaultValue: "Message Eliza",
++            defaultValue: "Message {{appName}}",
+           })}
+           className="min-w-0 flex-1 border-0 bg-transparent px-2 py-1.5 text-sm text-txt placeholder:text-txt/50 focus-visible:outline-none focus-visible:ring-0 disabled:opacity-50"
+         />
+diff --git a/packages/ui/src/components/shell/HomeScreen.tsx b/packages/ui/src/components/shell/HomeScreen.tsx
+index d5279e42d9..f45a16a3e0 100644
+--- a/packages/ui/src/components/shell/HomeScreen.tsx
++++ b/packages/ui/src/components/shell/HomeScreen.tsx
+@@ -313,6 +313,12 @@ export interface HomeScreenProps {
+   onOpenTile: (target: HomeTileTarget) => void;
+   /** Render the AOSP-only phone/contacts tiles (native OS surfaces). */
+   showNativeOsTiles?: boolean;
++  /**
++   * Optional content rendered to the right of the clock (e.g. a brand wallet
++   * widget). Whitelabel seam: a host can inject a brand-specific accessory via
++   * the `homeScreen` boot-config slot without forking the whole home screen.
++   */
++  clockAccessory?: React.ReactNode;
+ }
+ 
+ /**
+@@ -324,6 +330,7 @@ export interface HomeScreenProps {
+ export function HomeScreen({
+   onOpenTile,
+   showNativeOsTiles = false,
++  clockAccessory,
+ }: HomeScreenProps): React.JSX.Element {
+   // Gate tiles on what actually resolves: native-OS tiles need an AOSP build,
+   // and view tiles need their path registered (from /api/views) so a tap never
+@@ -357,8 +364,11 @@ export function HomeScreen({
+     >
+       <style>{HOME_ENTER_CSS}</style>
+       <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
+-        <div className="home-enter">
++        <div className="home-enter flex items-start justify-between gap-3">
+           <ClockBlock />
++          {clockAccessory ? (
++            <div className="shrink-0">{clockAccessory}</div>
++          ) : null}
+         </div>
+ 
+         {recentActivity.length > 0 ? (
+diff --git a/packages/ui/src/config/boot-config-store.ts b/packages/ui/src/config/boot-config-store.ts
+index f92d5e7f3e..0599186269 100644
+--- a/packages/ui/src/config/boot-config-store.ts
++++ b/packages/ui/src/config/boot-config-store.ts
+@@ -79,6 +79,19 @@ export interface CompanionShellComponentProps {
+   actionNotice: ActionNotice | null;
+ }
+ 
++/** Where a home tile sends you. Mirrors HomeTileTarget in shell/HomeScreen. */
++export type HomeScreenNavTarget =
++  | { kind: "tab"; tab: string }
++  | { kind: "view"; path: string };
++
++/** Props the shell passes to a host-provided home screen (boot-config slot). */
++export interface HomeScreenComponentProps {
++  /** Open a pinned tab/view from a home tile. */
++  onOpenTile: (target: HomeScreenNavTarget) => void;
++  /** Render the AOSP-only native-OS tiles (phone/contacts/messages). */
++  showNativeOsTiles?: boolean;
++}
++
+ export type CompanionInferenceNotice =
+   | { kind: "cloud"; variant: "danger" | "warn"; tooltip: string }
+   | { kind: "settings"; variant: "warn"; tooltip: string };
+@@ -224,6 +237,13 @@ export interface AppBootConfig {
+   firstRunStyles?: unknown[];
+   /** Character editor component — replaces window.__ELIZAOS_CHARACTER_EDITOR__. */
+   characterEditor?: ComponentType<Record<string, unknown>>;
++  /**
++   * Home screen override provided by the host app. When set, the shell renders
++   * this instead of the stock HomeScreen on the /chat home (whitelabel seam for
++   * a brand-specific home, e.g. a gold home with a wallet widget). Falls back to
++   * the built-in HomeScreen when absent.
++   */
++  homeScreen?: ComponentType<HomeScreenComponentProps>;
+   /** Companion shell implementation provided by the host app. */
+   companionShell?: ComponentType<CompanionShellComponentProps>;
+   /** Companion cloud/settings warning resolver provided by the host app. */
+diff --git a/packages/ui/src/first-run/CompactOnboarding.tsx b/packages/ui/src/first-run/CompactOnboarding.tsx
+index b5d5283b4e..6b1e4c3d71 100644
+--- a/packages/ui/src/first-run/CompactOnboarding.tsx
++++ b/packages/ui/src/first-run/CompactOnboarding.tsx
+@@ -2,14 +2,13 @@ import {
+   ArrowRight,
+   ChevronLeft,
+   Cloud,
+-  Cpu,
+   Loader2,
+   MailCheck,
+   Settings2,
+   ShieldCheck,
+ } from "lucide-react";
+ import * as React from "react";
+-import { ElizaMark } from "../components/brand/eliza-mark";
++import { getBootConfig } from "../config/boot-config-store";
+ import { TRAY_ACTION_EVENT } from "../events";
+ import { openExternalUrl } from "../utils/openExternalUrl";
+ import { trayActionToOnboardingChoice } from "./onboarding-intent";
+@@ -19,6 +18,9 @@ export function CompactOnboarding(): React.ReactElement {
+   const c = useFirstRunController();
+   const { busyText, cloudError, error, submitting, step, draft, cloudOnly } = c;
+   const busy = submitting;
++  // Brand wordmark from the active branding (whitelabel seam) — falls back to
++  // the elizaOS name when no host branding is configured.
++  const appName = getBootConfig().branding?.appName ?? "elizaOS";
+ 
+   // Detect whether this component is running inside the onboarding overlay
+   // shell (a separate transparent NSWindow). If so, closing the window after
+@@ -46,24 +48,8 @@ export function CompactOnboarding(): React.ReactElement {
+     void finishAndMaybeClose();
+   }, [c, finishAndMaybeClose]);
+ 
+-  // Local runtime needs an inference sub-choice (cloud vs on-device) before it
+-  // can finish — advance to that step instead of provisioning immediately.
+   const chooseLocal = React.useCallback(() => {
+     c.updateDraft("runtime", "local");
+-    c.setStep("inference");
+-  }, [c]);
+-
+-  // Local + cloud inference (recommended): the agent runs on this device but
+-  // routes inference through Eliza Cloud, so finishing kicks off the cloud
+-  // sign-in handoff when the account is not yet connected.
+-  const chooseCloudInference = React.useCallback(() => {
+-    c.updateDraft("localInference", "cloud-inference");
+-    void finishAndMaybeClose();
+-  }, [c, finishAndMaybeClose]);
+-
+-  // Fully on-device inference: enabled everywhere, but slow/limited on phones.
+-  const chooseLocalInference = React.useCallback(() => {
+-    c.updateDraft("localInference", "all-local");
+     void finishAndMaybeClose();
+   }, [c, finishAndMaybeClose]);
+ 
+@@ -104,7 +90,6 @@ export function CompactOnboarding(): React.ReactElement {
+     : (error ?? (cloudLoginUrl ? null : cloudError));
+ 
+   const onRemote = step === "remote" && !cloudOnly;
+-  const onInference = step === "inference" && !cloudOnly;
+ 
+   return (
+     <div className="first-run-screen pointer-events-none fixed inset-0 p-6 text-white">
+@@ -116,9 +101,8 @@ export function CompactOnboarding(): React.ReactElement {
+           <div className="flex w-full flex-col items-center gap-8 motion-safe:animate-[shell-overlay-in_220ms_ease-out]">
+             {/* Brand lockup — matches the loading screen for visual continuity. */}
+             <div className="flex items-center justify-center gap-3">
+-              <ElizaMark className="h-11 w-11" />
+               <span className="text-3xl font-medium leading-none tracking-normal">
+-                elizaOS
++                {appName}
+               </span>
+             </div>
+ 
+@@ -218,92 +202,13 @@ export function CompactOnboarding(): React.ReactElement {
+                   <ArrowRight className="h-4 w-4" />
+                 </button>
+               </div>
+-            ) : onInference ? (
+-              // INFERENCE — after picking the on-device agent, choose where it
+-              // thinks: Eliza Cloud (recommended — fast, best models) or fully
+-              // on-device (kept for privacy/offline, but slow and limited on
+-              // phones). Picking cloud finishes via the sign-in handoff above.
+-              <div className="flex w-full flex-col gap-5">
+-                <div className="flex flex-col gap-1.5">
+-                  <h1 className="text-[22px] font-semibold leading-tight tracking-[-0.01em]">
+-                    Where should it think?
+-                  </h1>
+-                  <p className="text-[13px] leading-snug text-white/70">
+-                    Your agent runs on this device. Choose where it runs its AI.
+-                  </p>
+-                </div>
+-                <div className="flex w-full flex-col gap-3">
+-                  {/* PRIMARY — cloud inference (recommended). */}
+-                  <button
+-                    type="button"
+-                    data-testid="onboarding-inference-cloud"
+-                    disabled={busy}
+-                    onClick={chooseCloudInference}
+-                    className="group flex w-full items-center gap-3.5 rounded-2xl bg-white px-5 py-4 text-left shadow-[0_8px_24px_-8px_rgba(0,0,0,0.35)] transition-[transform,box-shadow,opacity] duration-200 ease-out hover:shadow-[0_12px_30px_-8px_rgba(0,0,0,0.45)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100"
+-                  >
+-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#FF5800]/10">
+-                      <Cloud className="h-5 w-5 text-[#FF5800]" />
+-                    </span>
+-                    <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+-                      <span className="flex items-center gap-2">
+-                        <span className="text-[16px] font-semibold leading-tight text-[#FF5800]">
+-                          Cloud inference
+-                        </span>
+-                        <span className="rounded-full bg-[#FF5800]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#FF5800]">
+-                          Recommended
+-                        </span>
+-                      </span>
+-                      <span className="text-[12px] leading-snug text-black/55">
+-                        Fast, runs the best models. Sign in to Eliza Cloud.
+-                      </span>
+-                    </span>
+-                    <ArrowRight className="h-5 w-5 shrink-0 text-[#FF5800]/60 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none" />
+-                  </button>
+-
+-                  {/* SECONDARY — fully on-device inference. */}
+-                  <button
+-                    type="button"
+-                    data-testid="onboarding-inference-local"
+-                    disabled={busy}
+-                    onClick={chooseLocalInference}
+-                    className="group flex w-full items-center gap-3.5 rounded-2xl border border-white/20 bg-white/[0.08] px-5 py-4 text-left backdrop-blur-sm transition-colors duration-200 hover:bg-white/[0.14] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:active:scale-100"
+-                  >
+-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/[0.12]">
+-                      <Cpu className="h-5 w-5 text-white/90" />
+-                    </span>
+-                    <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+-                      <span className="flex items-center gap-2">
+-                        <span className="text-[15px] font-semibold leading-tight">
+-                          On-device inference
+-                        </span>
+-                        <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white/60">
+-                          Offline
+-                        </span>
+-                      </span>
+-                      <span className="text-[12px] leading-snug text-white/55">
+-                        Private and offline. Slower, and limited on phones.
+-                      </span>
+-                    </span>
+-                    <ArrowRight className="h-4 w-4 shrink-0 text-white/40 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" />
+-                  </button>
+-                </div>
+-                <button
+-                  type="button"
+-                  disabled={busy}
+-                  onClick={() => c.setStep("runtime")}
+-                  className="mx-auto inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-white/85 transition-colors hover:bg-white/10 disabled:opacity-50"
+-                >
+-                  <ChevronLeft className="h-4 w-4" />
+-                  Back
+-                </button>
+-              </div>
+             ) : (
+               // WELCOME / CHOICE — one warm headline, one obvious primary action,
+               // a clear private alternative, and the technical path demoted to a
+               // quiet link so a first-timer never sees jargon.
+               <>
+                 <h1 className="text-[22px] font-semibold leading-tight tracking-[-0.01em]">
+-                  How should Eliza run?
++                  How should {appName} run?
+                 </h1>
+                 <div className="mt-1 flex w-full flex-col gap-3">
+                   {/* PRIMARY — the simplest "just start" path (cloud). */}
+diff --git a/packages/ui/src/i18n/locales/en.json b/packages/ui/src/i18n/locales/en.json
+index 297e8b5aa6..9ecd15b9f7 100644
+--- a/packages/ui/src/i18n/locales/en.json
++++ b/packages/ui/src/i18n/locales/en.json
+@@ -4666,8 +4666,8 @@
+   "homeview.orb.stop": "Stop voice input",
+   "homeview.composer.listening": "Listening",
+   "homeview.composer.notListening": "Not listening",
+-  "homeview.composer.placeholder": "Ask Eliza...",
+-  "homeview.composer.messageLabel": "Message Eliza",
++  "homeview.composer.placeholder": "Ask {{appName}}...",
++  "homeview.composer.messageLabel": "Message {{appName}}",
+   "homeview.composer.send": "Send message",
+   "elizaosapps.phone.heading": "Phone",
+   "elizaosapps.phone.subheading": "ElizaOS Android phone workspace",
+@@ -5483,7 +5483,7 @@
+   "automationsfeed.taskOption": "Task (simple prompt)",
+   "automationsfeed.taskOptionDesc": "One prompt, run once or on a schedule. Pick this if you're not sure.",
+   "automationsfeed.workflowOption": "Workflow (node graph)",
+-  "automationsfeed.workflowOptionDesc": "Multi-step. Draft in chat, then review the graph, run it, and inspect logs.",
++  "automationsfeed.workflowOptionDesc": "Multi-step. Trigger → actions → integrations. Edit JSON or generate from a prompt.",
+   "automationsfeed.workflowLoadError": "Failed to load workflow.",
+   "automationsfeed.back": "Back",
+   "bootstrapstep.errorRateLimited": "Too many attempts — wait a minute and try again.",
+@@ -5579,15 +5579,15 @@
+   "firstrunshell.useAsRemote": "Use as remote",
+   "firstrunshell.useAsRemoteDetail": "Connect from another device.",
+   "firstrunshell.back": "Back",
+-  "chatsurface.greeting": "Ask Eliza anything.",
++  "chatsurface.greeting": "Ask {{appName}} anything.",
+   "chatsurface.conversation": "Conversation",
+-  "chatsurface.typing": "Eliza is typing",
++  "chatsurface.typing": "{{appName}} is typing",
+   "chatsurface.stopVoice": "Stop voice input",
+   "chatsurface.startVoice": "Start voice input",
+   "chatsurface.listening": "Listening",
+   "chatsurface.notListening": "Not listening",
+-  "chatsurface.inputPlaceholder": "Ask Eliza…",
+-  "chatsurface.messageLabel": "Message Eliza",
++  "chatsurface.inputPlaceholder": "Ask {{appName}}…",
++  "chatsurface.messageLabel": "Message {{appName}}",
+   "chatsurface.send": "Send message",
+   "walletkeys.loadFailed": "load failed",
+   "walletkeys.revealFailed": "reveal failed",
+diff --git a/packages/ui/src/index.ts b/packages/ui/src/index.ts
+index 5464dd1ca9..0fc2030f4b 100644
+--- a/packages/ui/src/index.ts
++++ b/packages/ui/src/index.ts
+@@ -44,7 +44,6 @@ export * from "./app-shell-registry";
+ export { registerAppShellPage } from "./app-shell-registry";
+ export * from "./backgrounds/index";
+ export * from "./bridge/index";
+-export * from "./cache-telemetry";
+ export {
+   invokeDesktopBridgeRequest,
+   isElectrobunRuntime,
+@@ -255,6 +254,11 @@ export {
+   type ChatSurfaceProps,
+ } from "./components/shell/ChatSurface";
+ export { HomePill, type HomePillProps } from "./components/shell/HomePill";
++export {
++  HomeScreen,
++  type HomeScreenProps,
++  type HomeTileTarget,
++} from "./components/shell/HomeScreen";
+ export type {
+   ShellMessage,
+   ShellPhase,
