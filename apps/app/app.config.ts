@@ -16,6 +16,9 @@ interface AppWebConfig {
   themeColor: string;
   backgroundColor: string;
   shareImagePath: string;
+  /** Opaque brand color the app-icon mark is flattened onto (iOS icon, Android
+   * legacy launcher + adaptive-icon background). Read by run-mobile-build.mjs. */
+  iconBackgroundColor: string;
 }
 
 // AospVariantConfig does not yet include propertyPrefix (Milady-specific
@@ -60,6 +63,9 @@ const config = {
     themeColor: "#08080a",
     backgroundColor: "#0a0a0a",
     shareImagePath: "/og-image.png",
+    // Milady brand gold (matches --classic-gold in brand-gold.css). The dark
+    // chibi mark in public/brand/app-icon.png is flattened onto this.
+    iconBackgroundColor: "#f0b90b",
   },
 
   android: {
