@@ -146,6 +146,7 @@ import {
 } from "./app-config";
 import { APP_ENV_ALIASES, APP_ENV_PREFIX } from "./brand-env";
 import { APP_CHARACTER_CATALOG } from "./character-catalog";
+import { MiladyHomeScreen } from "./MiladyHomeScreen";
 import { bootIosLocalRuntimeIfApplicable } from "./ios-local-runtime-boot";
 import { bootAndroidLocalRuntimeIfApplicable } from "./android-local-runtime-boot";
 import {
@@ -348,6 +349,13 @@ const appBootConfig: AppBootConfig = {
     desktopPermissions: isDesktopPlatform(),
   },
 };
+
+// Milady brand home screen — rendered by the shell's HomeScreenMount via the
+// `homeScreen` boot-config slot (gold home + wallet widget beside the clock).
+// Assigned through a widened view because the published @elizaos/app-core types
+// may pre-date the slot; the local runtime + the milady app-core patch honor it.
+(appBootConfig as { homeScreen?: typeof MiladyHomeScreen }).homeScreen =
+  MiladyHomeScreen;
 
 // Self-hosted bot bootstrap. The token is read from the URL fragment
 // (#token=...), so it never reaches the server, access log, or Referer
