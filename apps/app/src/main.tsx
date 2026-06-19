@@ -1,4 +1,8 @@
-import { App, ErrorBoundary } from "@elizaos/app-core";
+import { ErrorBoundary } from "@elizaos/app-core";
+// Upstream's app-shell refactor (#8721) moved the full shell to the explicit
+// @elizaos/ui/App entry (app-core no longer re-exports it), matching how the
+// stock eliza app imports it.
+import { App } from "@elizaos/ui/App";
 import "@elizaos/app-core/styles/styles.css";
 import "@elizaos/app-core/styles/brand-gold.css";
 
