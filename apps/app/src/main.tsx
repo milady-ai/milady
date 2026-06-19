@@ -147,6 +147,7 @@ import {
 import { APP_ENV_ALIASES, APP_ENV_PREFIX } from "./brand-env";
 import { APP_CHARACTER_CATALOG } from "./character-catalog";
 import { MiladyHomeScreen } from "./MiladyHomeScreen";
+import { MiladyMark } from "./MiladyMark";
 import { bootIosLocalRuntimeIfApplicable } from "./ios-local-runtime-boot";
 import { bootAndroidLocalRuntimeIfApplicable } from "./android-local-runtime-boot";
 import {
@@ -356,6 +357,9 @@ const appBootConfig: AppBootConfig = {
 // may pre-date the slot; the local runtime + the milady app-core patch honor it.
 (appBootConfig as { homeScreen?: typeof MiladyHomeScreen }).homeScreen =
   MiladyHomeScreen;
+// Milady brand glyph for the startup splash + first-run lockup (replaces the
+// built-in elizaOS mark via the `brandMark` boot-config slot).
+(appBootConfig as { brandMark?: typeof MiladyMark }).brandMark = MiladyMark;
 
 // Self-hosted bot bootstrap. The token is read from the URL fragment
 // (#token=...), so it never reaches the server, access log, or Referer

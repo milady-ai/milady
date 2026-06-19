@@ -26,7 +26,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 APP_DIR="$REPO_ROOT/apps/app"
-BUNDLE_ID="ai.milady.milady"
+BUNDLE_ID="ai.milady.app"
 DEVICE="iPhone 15"
 
 while [[ $# -gt 0 ]]; do

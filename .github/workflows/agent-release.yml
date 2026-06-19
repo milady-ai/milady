@@ -851,7 +851,7 @@ jobs:
         run: |
           if [ -d apps/app/ios/App ]; then
             xcodebuild -project apps/app/ios/App/App.xcodeproj -scheme App -configuration Release -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" -showBuildSettings > /tmp/milady-xcodebuild-settings.txt
-            grep -q "PRODUCT_BUNDLE_IDENTIFIER = ai.milady.milady" /tmp/milady-xcodebuild-settings.txt
+            grep -q "PRODUCT_BUNDLE_IDENTIFIER = ai.milady.app" /tmp/milady-xcodebuild-settings.txt
           else
             echo "::error::apps/app/ios/App directory not found"
             exit 1

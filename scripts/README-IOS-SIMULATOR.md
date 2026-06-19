@@ -43,7 +43,7 @@ Equivalent to `node scripts/run-ios-simulator.mjs`.
     fine) and brings the Simulator app forward.
 11. Locates the freshly built `App.app` in DerivedData, installs it
     via `simctl install booted`, then launches with `simctl launch
-    --console-pty booted com.miladyai.milady`. Ctrl-C tears down the
+    --console-pty booted ai.milady.app`. Ctrl-C tears down the
     launch session.
 
 Every step fails loud with a clear `[ios-sim] FAIL: ...` line and a
@@ -70,7 +70,7 @@ On a fresh Mac, do these once:
 | Variable                    | Default                              | Purpose                                                                                          |
 | --------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------ |
 | `MILADY_IOS_SIM_DEVICE`     | `iPhone 15 Pro`                      | Simulator device name passed to `xcodebuild -destination` and `simctl boot`.                     |
-| `MILADY_IOS_APP_ID`         | `com.miladyai.milady`                | Bundle ID used for `simctl install` / `launch`.                                                  |
+| `MILADY_IOS_APP_ID`         | `ai.milady.app`                | Bundle ID used for `simctl install` / `launch`.                                                  |
 | `MILADY_IOS_SCHEME`         | `App`                                | Xcode scheme name.                                                                               |
 | `MILADY_MODEL_NAME`         | `qwen2.5-0.5b-instruct-q4_k_m.gguf`  | Expected GGUF filename under `apps/app/ios/App/App/agent/models/`.                               |
 | `MILADY_SKIP_MODEL_CHECK`   | unset                                | Set to `1` to bypass the model check (useful for cloud-only smoke tests).                        |

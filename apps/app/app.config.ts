@@ -44,7 +44,7 @@ type AppConfigWithAospPropertyPrefix = Omit<AppConfig, "aosp"> & {
 
 const config = {
   appName: "Milady",
-  appId: "ai.milady.milady",
+  appId: "ai.milady.app",
   orgName: "milady-ai",
   repoName: "milady",
   cliName: "milady",
@@ -54,7 +54,7 @@ const config = {
   defaultApps: [],
 
   desktop: {
-    bundleId: "ai.milady.milady",
+    bundleId: "ai.milady.app",
     urlScheme: "milady",
   },
 
@@ -94,7 +94,7 @@ const config = {
     propertyPrefix: "miladyos",
     variantName: "MiladyOS",
     productName: "milady",
-    packageName: "ai.milady.milady",
+    packageName: "ai.milady.app",
     appName: "Milady",
     commonMk: "vendor/milady/milady_common.mk",
     modelSourceLabel: "milady-download",

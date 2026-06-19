@@ -289,7 +289,7 @@ jobs:
             --aab ../../../aab/app-release.aab \
             --track "${{ steps.track.outputs.track }}" \
             --json_key "$PLAY_STORE_JSON_KEY" \
-            --package_name "ai.milady.milady"
+            --package_name "ai.milady.app"
 
       - name: Clean up credentials
         if: always()

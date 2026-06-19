@@ -461,7 +461,7 @@ const patches = [
       next = next.replace(
         rootMatch[0],
         `$selfExtractionRoots = @(
-  (Join-Path $env:LOCALAPPDATA "com.miladyai.milady"),
+  (Join-Path $env:LOCALAPPDATA "ai.milady.app"),
   (Join-Path $env:LOCALAPPDATA "${rootMatch[1]}"),
   (Join-Path $env:LOCALAPPDATA "com.elizaai.eliza"),
   (Join-Path $env:LOCALAPPDATA "ai.elizaos.app"),

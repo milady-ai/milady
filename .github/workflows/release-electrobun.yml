@@ -34,11 +34,11 @@ name: Build & Release (Electrobun)
 
 # Milady whitelabel identity for the desktop bundle + Inno installer. Without
 # these, desktop-build.mjs / build-inno.ps1 default to elizaOS (app name
-# "elizaOS App", bundle id ai.elizaos.Eliza, installer "Milady-Setup"). With
+# "elizaOS App", bundle id ai.milady.app, installer "Milady-Setup"). With
 # them, the produced app + installer are Milady (installer "Milady-Setup-*.exe").
 env:
   ELIZA_APP_NAME: Milady
-  ELIZA_APP_ID: ai.milady.milady
+  ELIZA_APP_ID: ai.milady.app
   ELIZA_URL_SCHEME: milady
   ELIZA_NAMESPACE: milady
 
@@ -1071,7 +1071,7 @@ jobs:
           ENV_NAME="${{ needs.prepare.outputs.env }}"
           find -L "$build_dir" -type d -name "Resources" | while read -r res_dir; do
             dest="$res_dir/version.json"
-            printf '{"identifier":"ai.elizaos.Eliza","channel":"%s","name":"eliza","version":"%s"}' \
+            printf '{"identifier":"ai.milady.app","channel":"%s","name":"milady","version":"%s"}' \
               "$ENV_NAME" "$VERSION" > "$dest"
             echo "Wrote fallback $dest"
           done
@@ -1148,7 +1148,7 @@ jobs:
 
           Get-ChildItem -Path $buildRoot -Recurse -Directory -Filter "Resources" | ForEach-Object {
             $versionJson = @{
-              identifier = "ai.elizaos.Eliza"
+              identifier = "ai.milady.app"
               channel = $envName
               name = "eliza"
               version = $version
@@ -1167,7 +1167,7 @@ jobs:
           if [ -d "$build_root" ]; then
             find -L "$build_root" -type d -name "Resources" | while read -r res_dir; do
               dest="$res_dir/version.json"
-              printf '{"identifier":"ai.elizaos.Eliza","channel":"%s","name":"eliza","version":"%s"}' \
+              printf '{"identifier":"ai.milady.app","channel":"%s","name":"milady","version":"%s"}' \
                 "$ENV_NAME" "$VERSION" > "$dest"
               echo "Wrote $dest"
             done
@@ -1742,7 +1742,7 @@ jobs:
           $diagnosticsDir = Join-Path $PWD "eliza/packages/app-core/platforms/electrobun/artifacts/windows-smoke-diagnostics"
           $appDataRoot = if ($env:MILADY_TEST_WINDOWS_APPDATA_PATH) { $env:MILADY_TEST_WINDOWS_APPDATA_PATH } elseif ($env:ELIZA_TEST_WINDOWS_APPDATA_PATH) { $env:ELIZA_TEST_WINDOWS_APPDATA_PATH } else { $env:APPDATA }
           $localAppDataRoot = if ($env:MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH) { $env:MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH } elseif ($env:ELIZA_TEST_WINDOWS_LOCALAPPDATA_PATH) { $env:ELIZA_TEST_WINDOWS_LOCALAPPDATA_PATH } else { $env:LOCALAPPDATA }
-          $wrapperRoot = Join-Path $localAppDataRoot "ai.elizaos.Eliza"
+          $wrapperRoot = Join-Path $localAppDataRoot "ai.milady.app"
 
           Write-Host "Diagnostics roots:"
           Write-Host "  appDataRoot      = $appDataRoot"

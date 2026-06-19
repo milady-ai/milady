@@ -55,7 +55,7 @@ const STEPS_TOTAL = 11;
 let stepIndex = 0;
 
 const SIMULATOR_DEVICE = process.env.MILADY_IOS_SIM_DEVICE ?? "iPhone 15 Pro";
-const APP_BUNDLE_ID = process.env.MILADY_IOS_APP_ID ?? "com.miladyai.milady";
+const APP_BUNDLE_ID = process.env.MILADY_IOS_APP_ID ?? "ai.milady.app";
 const XCODE_SCHEME = process.env.MILADY_IOS_SCHEME ?? "App";
 
 const AGENT_DIR = path.join(REPO_ROOT, "eliza/packages/agent");

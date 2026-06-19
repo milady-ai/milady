@@ -1,7 +1,7 @@
 # Milady whitelabel
 
 Milady is a whitelabel wrapper over elizaOS (`@elizaos/*`). Product identity is
-driven by **`apps/app/app.config.ts`** (appName, appId `ai.milady.milady`,
+driven by **`apps/app/app.config.ts`** (appName, appId `ai.milady.app`,
 urlScheme `milady`, `web.iconBackgroundColor`, `branding`). The brand accent is
 classic-gold **`#f0b90b`** (see `@elizaos/ui` `styles/brand-gold.css`).
 
@@ -42,7 +42,7 @@ To rebrand a fork: change `app.config.ts`, point `BRAND_MARK` at a new mark, set
   (real external service / model names).
 - **Release artifacts** — `release-electrobun` produces `Milady-Setup-*.exe` +
   Milady bundle id / updater archives; `android-release` ships `Milady-*.aab` to
-  Play `ai.milady.milady`; `apple-store-release` ships `Milady-*-mas.pkg`.
+  Play `ai.milady.app`; `apple-store-release` ships `Milady-*-mas.pkg`.
 
 ## elizaOS-side delivery (IMPORTANT)
 
@@ -62,7 +62,7 @@ elizaOS before it applies cleanly.)
 ## Known follow-ups
 
 - Apply/rebase `eliza-whitelabel.patch` into the milady eliza-patch pipeline.
-- iOS bundle id is `com.miladyai.milady` (pbxproj) vs `ai.milady.milady`
+- iOS bundle id is `ai.milady.app` (pbxproj) vs `ai.milady.app`
   elsewhere — reconcile (App Store identity decision).
 - iOS IPA artifact name is `Eliza.ipa` (from the fastlane scheme) — rename the
   iOS scheme/Fastfile output.

@@ -27,7 +27,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 APP_DIR="$REPO_ROOT/apps/app"
-PKG_ID="ai.milady.milady"
+PKG_ID="ai.milady.app"
 AVD=""
 
 while [[ $# -gt 0 ]]; do
