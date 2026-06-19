@@ -44,28 +44,37 @@ To rebrand a fork: change `app.config.ts`, point `BRAND_MARK` at a new mark, set
   Milady bundle id / updater archives; `android-release` ships `Milady-*.aab` to
   Play `ai.milady.app`; `apple-store-release` ships `Milady-*-mas.pkg`.
 
-## elizaOS-side delivery (IMPORTANT)
+## elizaOS-side delivery — UPSTREAMED
 
-Several whitelabel changes live in `@elizaos/ui` / `@elizaos/app-core` (the home
-slot, gold theme, appName wordmarks, config-driven icon background). They are
-committed to the **local** `eliza/` clone (so local dev/build wear them) and
-captured in **`docs/whitelabel/eliza-whitelabel.patch`**.
+The generic whitelabel seams (host-overridable `homeScreen` + `brandMark`
+boot-config slots, `clockAccessory` on HomeScreen, gold first-run tokens, the
+`{{appName}}` naming seam, the config-driven app-icon background) are **merged to
+`elizaos/eliza` develop**, not carried as a milady patch. Milady CI releases
+clone upstream develop, so they ship automatically — no `apply-eliza-ci-patches`
+step required. `docs/whitelabel/eliza-whitelabel.patch` remains as a reference
+snapshot only.
 
-Milady CI releases clone **fresh upstream elizaOS** at a pinned ref, so those
-changes are NOT in a release build until they are either upstreamed to elizaOS or
-applied as a milady eliza-patch (the `scripts/apply-eliza-ci-patches.mjs`
-mechanism). **Productionizing this patch is the remaining step** for the home
-screen / theme / naming to appear in shipped builds. (Note: upstream has since
-added an `ElizaMark` brand component; the patch may need a rebase against current
-elizaOS before it applies cleanly.)
+The milady side then just injects its brand into those slots from
+`apps/app/src/main.tsx`: `homeScreen: MiladyHomeScreen`, `brandMark: MiladyMark`,
+`branding.appName: "Milady"`, `web.iconBackgroundColor: "#f0b90b"`.
+
+### npm-stub vs clone typecheck note
+
+Milady builds against the local `eliza/` clone (via Vite aliases) but its pinned
+npm `@elizaos/*` is `alpha.537`, which lags develop. Symbols newer than alpha.537
+(e.g. `@elizaos/ui/App` after the app-shell refactor, the home/brand slots) are
+declared in `apps/app/src/elizaos-app-core-shim.d.ts` so packages-mode typecheck
+stays green; the real implementations come from the clone at build time. Drop the
+matching shim entries once milady bumps `@elizaos/*` to a build that includes them.
 
 ## Known follow-ups
 
-- Apply/rebase `eliza-whitelabel.patch` into the milady eliza-patch pipeline.
-- iOS bundle id is `ai.milady.app` (pbxproj) vs `ai.milady.app`
-  elsewhere — reconcile (App Store identity decision).
-- iOS IPA artifact name is `Eliza.ipa` (from the fastlane scheme) — rename the
-  iOS scheme/Fastfile output.
+- iOS bundle id unified to `ai.milady.app` everywhere (app.config →
+  run-mobile-build derives the iOS bundle, app group, extension ids, fastlane id,
+  and android package). Confirm no live App Store / Play listing used the old id.
+- iOS IPA internal filename is still `Eliza.ipa` (the eliza Fastfile
+  `output_name`); the release workflow now collects `build/*.ipa` so any name is
+  uploaded, but rename the Fastfile output for full polish.
 - Broader `en.json` long-tail (non-first-screen "elizaOS"/"Eliza" strings).
 - Verify the release pipeline end-to-end on CI (desktop/mobile/store builds were
   not runnable locally).
