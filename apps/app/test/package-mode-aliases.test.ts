@@ -38,18 +38,20 @@ describe("package mode aliases", () => {
     ]);
   });
 
-  it("imports packaged app-core style exports instead of private ui dist paths", () => {
+  it("imports the consolidated @elizaos/ui stylesheet, not app-core style subpaths", () => {
     const mainText = fs.readFileSync(
       path.join(appRoot, "src/main.tsx"),
       "utf8",
     );
 
-    expect(mainText).toContain("@elizaos/app-core/styles/styles.css");
-    expect(mainText).toContain("@elizaos/app-core/styles/brand-gold.css");
+    // Upstream's app-shell refactor moved the stylesheet (base + brand-gold)
+    // into @elizaos/ui; app-core no longer ships a styles subpath.
+    expect(mainText).toContain('import "@elizaos/ui/styles"');
+    expect(mainText).not.toContain("@elizaos/app-core/styles/");
     expect(mainText).not.toContain("@elizaos/ui/dist/styles/");
   });
 
-  it("imports packaged app-core component and state exports instead of private ui source paths", () => {
+  it("imports app-shell component + state/api types from @elizaos/ui and @elizaos/shared", () => {
     const mainText = fs.readFileSync(
       path.join(appRoot, "src/main.tsx"),
       "utf8",
@@ -59,16 +61,16 @@ describe("package mode aliases", () => {
       "utf8",
     );
 
+    // CharacterEditor + state/widget/api types moved out of @elizaos/app-core
+    // into @elizaos/ui (and the drop contracts into @elizaos/shared).
     expect(mainText).toContain(
-      "@elizaos/app-core/components/character/CharacterEditor",
+      "@elizaos/ui/components/character/CharacterEditor",
     );
-    expect(stubText).toContain("@elizaos/app-core/state/types");
-    expect(stubText).toContain(
-      "@elizaos/app-core/components/chat/widgets/types",
-    );
-    expect(mainText).not.toContain("@elizaos/ui/components/");
-    expect(stubText).not.toContain("@elizaos/ui/state/");
-    expect(stubText).not.toContain("@elizaos/ui/components/");
+    expect(stubText).toContain('from "@elizaos/ui/api"');
+    expect(stubText).toContain('from "@elizaos/shared"');
+    expect(mainText).not.toContain("@elizaos/app-core/components/");
+    expect(stubText).not.toContain("@elizaos/app-core/state/");
+    expect(stubText).not.toContain("@elizaos/app-core/api");
   });
 
   it("patches all Bun-installed app-core stylesheet copies", () => {

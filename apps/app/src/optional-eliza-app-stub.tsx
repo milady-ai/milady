@@ -1,17 +1,18 @@
 import type {
   CompanionSceneStatus,
   CompanionShellComponentProps,
-  VincentStateHookArgs,
-  VincentStateHookResult,
-} from "@elizaos/app-core";
+  InventoryChainFilters,
+} from "@elizaos/ui";
 import type {
-  DropStatus,
-  MintResult,
   RegistryStatus,
   WalletExportResult,
   WhitelistStatus,
-} from "@elizaos/app-core/api";
-import type { InventoryChainFilters } from "@elizaos/app-core/state/types";
+} from "@elizaos/ui/api";
+import type { DropStatus, MintResult } from "@elizaos/shared";
+
+// No upstream elizaOS export; local types for this stub's hook signature.
+type VincentStateHookArgs = Record<string, unknown>;
+type VincentStateHookResult = unknown;
 import type {
   WalletAddresses,
   WalletBalancesResponse,
@@ -202,7 +203,7 @@ export function useInventoryData(): {
 
 // Wallet sidebar widget. Component prop type comes from app-core so the seed
 // registry accepts this stub as a valid ChatSidebarWidgetDefinition.
-import type { ChatSidebarWidgetDefinition } from "@elizaos/app-core/components/chat/widgets/types";
+import type { ChatSidebarWidgetDefinition } from "@elizaos/ui";
 export const WALLET_STATUS_WIDGET: ChatSidebarWidgetDefinition = {
   id: "wallet.status",
   pluginId: "wallet",

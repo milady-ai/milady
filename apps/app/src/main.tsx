@@ -3,8 +3,9 @@ import { ErrorBoundary } from "@elizaos/app-core";
 // @elizaos/ui/App entry (app-core no longer re-exports it), matching how the
 // stock eliza app imports it.
 import { App } from "@elizaos/ui/App";
-import "@elizaos/app-core/styles/styles.css";
-import "@elizaos/app-core/styles/brand-gold.css";
+// @elizaos/ui/styles bundles the base + brand-gold layers (same entry the stock
+// eliza app uses); app-core no longer ships a styles subpath.
+import "@elizaos/ui/styles";
 
 import { App as CapacitorApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
@@ -70,7 +71,7 @@ import {
 } from "./pill-stubs";
 import { AppWindowRenderer } from "@elizaos/app-core";
 import { dispatchQueuedLifeOpsGithubCallbackFromUrl } from "@elizaos/app-lifeops/platform";
-import type { ShareTargetPayload } from "@elizaos/app-core/platform";
+import type { ShareTargetPayload } from "@elizaos/ui";
 import {
   DESKTOP_TRAY_MENU_ITEMS,
   DesktopSurfaceNavigationRuntime,
@@ -160,7 +161,7 @@ import {
   type IosRuntimeMode,
   resolveIosRuntimeConfig,
 } from "@elizaos/app-core";
-import { CharacterEditor } from "@elizaos/app-core/components/character/CharacterEditor";
+import { CharacterEditor } from "@elizaos/ui/components/character/CharacterEditor";
 
 declare global {
   interface Window {

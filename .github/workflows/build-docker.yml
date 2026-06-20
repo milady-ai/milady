@@ -78,7 +78,7 @@ concurrency:
 env:
   # Pin the canonical elizaOS/eliza checkout to an exact verified upstream SHA.
   # Prefer a develop SHA after the matching elizaOS PR merges.
-  MILADY_ELIZA_REF: "f2f6970becc7fdcf6136d939207434c22a1506d8"
+  MILADY_ELIZA_REF: "v2.0.11-beta.5"
   REGISTRY: ghcr.io
   IMAGE_NAME: milady-ai/agent
 

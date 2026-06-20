@@ -54,7 +54,7 @@ permissions:
 env:
   # Pin the canonical elizaOS/eliza checkout to the latest verified develop SHA.
   # Override with MILADY_ELIZA_REF only for a specific upstream release test.
-  MILADY_ELIZA_REF: "f4991bc6059514f10a0fc1a8ec3f199478c415ae"
+  MILADY_ELIZA_REF: "v2.0.11-beta.5"
   BUN_VERSION: "1.3.14"
   MILADY_SKIP_LOCAL_UPSTREAMS: "1"
   # Runner selection: all jobs use ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}.
