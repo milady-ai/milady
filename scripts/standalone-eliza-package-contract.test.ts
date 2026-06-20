@@ -47,6 +47,18 @@ test("Milady no longer tracks eliza as a submodule", () => {
   assert.deepEqual(rootPackage.workspaces, ["apps/*"]);
   assert.equal(rootPackage.scripts.preinstall, "node scripts/preinstall.mjs");
   assert.equal(
+    rootPackage.scripts["eliza:local"],
+    "node scripts/eliza-source-mode.mjs local --install",
+  );
+  assert.equal(
+    rootPackage.scripts["eliza:packages"],
+    "node scripts/eliza-source-mode.mjs packages --install",
+  );
+  assert.equal(
+    rootPackage.scripts["eliza:packages:alpha"],
+    "node scripts/eliza-source-mode.mjs packages --tag alpha --install",
+  );
+  assert.equal(
     rootPackage.scripts["setup:upstreams"],
     "node scripts/eliza-source-mode.mjs local --install",
   );
@@ -142,6 +154,7 @@ test("root build resolves app-core entries from packages by default", () => {
   assert.match(resolver, /preferLocal && existsSync/);
   assert.match(tsdownConfig, /"packages"/);
   assert.match(tsdownConfig, /require\.resolve\(packageSubpath\)/);
+  assert.match(tsdownConfig, /capacitorExternal = \/^@capacitor\\\//);
   assert.doesNotMatch(tsdownConfig, /entry:\s*["']eliza\/packages\/app-core/);
 });
 

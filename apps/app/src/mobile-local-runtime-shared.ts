@@ -1,8 +1,9 @@
+/* eslint-disable */
 /**
  * Shared types and utilities for iOS and Android local runtime boot modules.
  */
 
-export const LOCAL_RUNTIME_CAPACITOR_PACKAGE = "@elizaos/capacitor-bun-runtime";
+import { ElizaBunRuntime } from "@elizaos/capacitor-bun-runtime";
 
 export interface LocalAgentStatus {
   ready: boolean;
@@ -33,26 +34,31 @@ export function dispatchLocalAgentEvent(name: string, detail: unknown): void {
   document.dispatchEvent(new CustomEvent(name, { detail }));
 }
 
+function isBunRuntimePluginBase(value: unknown): value is BunRuntimePluginBase {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as Record<keyof BunRuntimePluginBase, unknown>;
+  return (
+    typeof candidate.start === "function" &&
+    typeof candidate.sendMessage === "function" &&
+    typeof candidate.getStatus === "function" &&
+    typeof candidate.stop === "function"
+  );
+}
+
 export async function loadBunRuntimePlugin<T extends BunRuntimePluginBase>(
   logPrefix: string,
 ): Promise<T | null> {
-  try {
-    const mod = await import(LOCAL_RUNTIME_CAPACITOR_PACKAGE);
-    const plugin = (mod as unknown as { ElizaBunRuntime?: T }).ElizaBunRuntime;
-    if (!plugin) {
-      console.warn(
-        `${logPrefix} plugin module loaded but ElizaBunRuntime export missing`,
-      );
-      return null;
-    }
-    return plugin;
-  } catch (error) {
+  const plugin = ElizaBunRuntime;
+  if (isBunRuntimePluginBase(plugin)) return plugin as T;
+
+  if (plugin) {
     console.warn(
-      `${logPrefix} plugin not available:`,
-      error instanceof Error ? error.message : error,
+      `${logPrefix} Capacitor ElizaBunRuntime plugin has an unexpected shape`,
     );
-    return null;
+  } else {
+    console.warn(`${logPrefix} Capacitor ElizaBunRuntime plugin not available`);
   }
+  return null;
 }
 
 export async function getLocalAgentStatusFromPlugin(

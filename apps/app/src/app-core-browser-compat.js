@@ -1,4 +1,5 @@
 export * from "../../../eliza/packages/app-core/src/browser.ts";
+export { App } from "../../../eliza/packages/ui/src/App.tsx";
 export {
   getWindowNavigationPath,
   isAppWindowRoute,

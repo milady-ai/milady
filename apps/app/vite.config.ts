@@ -116,6 +116,10 @@ const hasLocalElizaWorkspace =
   shouldUseLocalElizaSource() &&
   fs.existsSync(path.join(localElizaRoot, "package.json"));
 const nativePluginsRoot = path.join(localElizaRoot, "packages/native-plugins");
+const nativeBunRuntimePluginEntry = path.join(
+  localElizaRoot,
+  "plugins/plugin-native-bun-runtime/src/index.ts",
+);
 const appCoreSrcRoot = hasLocalElizaWorkspace
   ? path.join(localElizaRoot, "packages/app-core/src")
   : null;
@@ -215,13 +219,100 @@ function isExpectedWsProxySocketError(
   );
 }
 
+function stringifyBuildLogMessage(message: unknown): string {
+  if (!message || typeof message !== "object") {
+    return typeof message === "string" ? message : String(message ?? "");
+  }
+  const record = message as {
+    code?: unknown;
+    id?: unknown;
+    message?: unknown;
+    plugin?: unknown;
+  };
+  return [record.code, record.message, record.id, record.plugin]
+    .filter((value): value is string => typeof value === "string")
+    .join("\n");
+}
+
+function isThreeVrmWebGpuExportWarning(text: string): boolean {
+  return (
+    text.includes("IMPORT_IS_UNDEFINED") &&
+    text.includes("Import `tslFn`") &&
+    text.includes("three.webgpu")
+  );
+}
+
+function isPgliteEvalWarning(text: string): boolean {
+  return (
+    text.includes("Use of direct eval") && text.includes("@electric-sql/pglite")
+  );
+}
+
+function isStaticLazyImportCollisionWarning(text: string): boolean {
+  if (text.includes("INEFFECTIVE_DYNAMIC_IMPORT")) return false;
+  return (
+    text.includes("dynamically imported") &&
+    (text.includes("@capacitor/core") ||
+      text.includes("@capacitor/preferences") ||
+      text.includes("components/views/view-interact-registry.ts"))
+  );
+}
+
+const INEFFECTIVE_DYNAMIC_IMPORT_TOLERATED_MARKERS = [
+  "../../eliza/packages/ui/src/",
+  "../../eliza/packages/app-core/src/browser.ts",
+  "src/optional-eliza-app-stub.tsx",
+  "src/native-plugin-stubs.ts",
+  "native-stub:node:fs/promises",
+] as const;
+
+function isToleratedIneffectiveDynamicImportWarning(text: string): boolean {
+  if (!text.includes("INEFFECTIVE_DYNAMIC_IMPORT")) return false;
+  // Deliberate suppression, not a real fix: these modules are both lazy-loaded
+  // by elizaOS route/view registries and statically reachable through UI
+  // barrels or desktop shell imports. The real cleanup is to untangle those
+  // barrels/ownership paths so route modules have a single import path.
+  return INEFFECTIVE_DYNAMIC_IMPORT_TOLERATED_MARKERS.some((marker) =>
+    text.includes(marker),
+  );
+}
+
+function isKnownToleratedBuildWarning(message: unknown): boolean {
+  const text = stringifyBuildLogMessage(message);
+  if (isThreeVrmWebGpuExportWarning(text)) {
+    // Deliberate suppression, not a real fix: @pixiv/three-vrm still references
+    // the old three.webgpu `tslFn` export. Remove this only after upgrading or
+    // patching the VRM/WebGPU dependency path and smoke-testing avatar loading.
+    return true;
+  }
+  return (
+    isPgliteEvalWarning(text) ||
+    isStaticLazyImportCollisionWarning(text) ||
+    isToleratedIneffectiveDynamicImportWarning(text)
+  );
+}
+
 const viteLogger = createLogger();
 const viteLoggerError = viteLogger.error;
+const viteLoggerWarn = viteLogger.warn;
+const viteLoggerWarnOnce = viteLogger.warnOnce;
 viteLogger.error = (message, options) => {
   if (isExpectedWsProxySocketError(message, options?.error)) {
     return;
   }
   viteLoggerError(message, options);
+};
+viteLogger.warn = (message, options) => {
+  if (isKnownToleratedBuildWarning(message)) {
+    return;
+  }
+  viteLoggerWarn(message, options);
+};
+viteLogger.warnOnce = (message, options) => {
+  if (isKnownToleratedBuildWarning(message)) {
+    return;
+  }
+  viteLoggerWarnOnce(message, options);
 };
 
 function ensureTrailingSlash(value: string): string {
@@ -245,22 +336,33 @@ function escapeRegExp(value: string): string {
 }
 
 function resolveNativePluginAliasEntries(): Alias[] {
-  if (!hasLocalElizaWorkspace || !fs.existsSync(nativePluginsRoot)) return [];
+  const aliases: Alias[] = [];
+  if (hasLocalElizaWorkspace && fs.existsSync(nativeBunRuntimePluginEntry)) {
+    aliases.push({
+      find: /^@elizaos\/capacitor-bun-runtime$/,
+      replacement: nativeBunRuntimePluginEntry,
+    });
+  }
+  if (!hasLocalElizaWorkspace || !fs.existsSync(nativePluginsRoot)) {
+    return aliases;
+  }
 
-  return fs
-    .readdirSync(nativePluginsRoot, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name)
-    .filter(
-      (name) =>
-        fs.existsSync(path.join(nativePluginsRoot, name, "package.json")) &&
-        fs.existsSync(path.join(nativePluginsRoot, name, "src/index.ts")),
-    )
-    .sort((a, b) => a.localeCompare(b))
-    .map((name) => ({
-      find: new RegExp(`^@elizaos/capacitor-${escapeRegExp(name)}$`),
-      replacement: path.join(nativePluginsRoot, `${name}/src/index.ts`),
-    }));
+  return aliases.concat(
+    fs
+      .readdirSync(nativePluginsRoot, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .filter(
+        (name) =>
+          fs.existsSync(path.join(nativePluginsRoot, name, "package.json")) &&
+          fs.existsSync(path.join(nativePluginsRoot, name, "src/index.ts")),
+      )
+      .sort((a, b) => a.localeCompare(b))
+      .map((name) => ({
+        find: new RegExp(`^@elizaos/capacitor-${escapeRegExp(name)}$`),
+        replacement: path.join(nativePluginsRoot, `${name}/src/index.ts`),
+      })),
+  );
 }
 
 function resolveLocalUiAliases(): Alias[] {
@@ -287,8 +389,7 @@ function resolveLocalUiAliases(): Alias[] {
     },
     {
       find: /^@elizaos\/ui\/api\/(.+)$/,
-      replacement: `${uiPkgRoot}/src/api/$1.ts`,
-      customResolver: resolveExistingUiSourceModule,
+      replacement: `${uiPkgRoot}/src/api/$1`,
     },
     {
       find: /^@elizaos\/ui\/platform$/,
@@ -296,8 +397,7 @@ function resolveLocalUiAliases(): Alias[] {
     },
     {
       find: /^@elizaos\/ui\/platform\/(.*)$/,
-      replacement: `${uiPkgRoot}/src/platform/$1.ts`,
-      customResolver: resolveExistingUiSourceModule,
+      replacement: `${uiPkgRoot}/src/platform/$1`,
     },
     {
       find: /^@elizaos\/ui\/voice$/,
@@ -305,13 +405,11 @@ function resolveLocalUiAliases(): Alias[] {
     },
     {
       find: /^@elizaos\/ui\/voice\/(.*)$/,
-      replacement: `${uiPkgRoot}/src/voice/$1.ts`,
-      customResolver: resolveExistingUiSourceModule,
+      replacement: `${uiPkgRoot}/src/voice/$1`,
     },
     {
       find: /^@elizaos\/ui\/components\/ui\/(.*)$/,
-      replacement: `${uiPkgRoot}/src/components/ui/$1.tsx`,
-      customResolver: resolveExistingUiSourceModule,
+      replacement: `${uiPkgRoot}/src/components/ui/$1`,
     },
     {
       find: /^@elizaos\/ui\/components\/composites\/([^/]+)$/,
@@ -319,13 +417,11 @@ function resolveLocalUiAliases(): Alias[] {
     },
     {
       find: /^@elizaos\/ui\/components\/composites\/(.+)\/([^/]+)$/,
-      replacement: `${uiPkgRoot}/src/components/composites/$1/$2.tsx`,
-      customResolver: resolveExistingUiSourceModule,
+      replacement: `${uiPkgRoot}/src/components/composites/$1/$2`,
     },
     {
       find: /^@elizaos\/ui\/components\/(.+)\/([^/]+)$/,
-      replacement: `${uiPkgRoot}/src/components/$1/$2.tsx`,
-      customResolver: resolveExistingUiSourceModule,
+      replacement: `${uiPkgRoot}/src/components/$1/$2`,
     },
     {
       find: /^@elizaos\/ui\/hooks$/,
@@ -353,8 +449,7 @@ function resolveLocalUiAliases(): Alias[] {
     },
     {
       find: /^@elizaos\/ui\/platform\/(.+)$/,
-      replacement: `${uiPkgRoot}/src/platform/$1.ts`,
-      customResolver: resolveExistingUiSourceModule,
+      replacement: `${uiPkgRoot}/src/platform/$1`,
     },
     {
       find: /^@elizaos\/ui\/state$/,
@@ -362,8 +457,7 @@ function resolveLocalUiAliases(): Alias[] {
     },
     {
       find: /^@elizaos\/ui\/state\/(.+)$/,
-      replacement: `${uiPkgRoot}/src/state/$1.ts`,
-      customResolver: resolveExistingUiSourceModule,
+      replacement: `${uiPkgRoot}/src/state/$1`,
     },
     {
       find: /^@elizaos\/ui\/lib\/(.*)$/,
@@ -371,8 +465,7 @@ function resolveLocalUiAliases(): Alias[] {
     },
     {
       find: /^@elizaos\/ui\/(.+)$/,
-      replacement: `${uiPkgRoot}/src/$1.ts`,
-      customResolver: resolveExistingUiSourceModule,
+      replacement: `${uiPkgRoot}/src/$1`,
     },
   ];
 }
@@ -726,7 +819,6 @@ function resolveLocalAppCoreAliases(): Alias[] {
         {
           find: /^@elizaos\/app-core\/components\/(.+)$/,
           replacement: `${uiPkgSrcRoot}/components/$1`,
-          customResolver: resolveExistingUiSourceModule,
         },
         {
           find: /^@elizaos\/app-core\/platform$/,
@@ -734,8 +826,7 @@ function resolveLocalAppCoreAliases(): Alias[] {
         },
         {
           find: /^@elizaos\/app-core\/state\/(.+)$/,
-          replacement: `${uiPkgSrcRoot}/state/$1.ts`,
-          customResolver: resolveExistingUiSourceModule,
+          replacement: `${uiPkgSrcRoot}/state/$1`,
         },
         {
           find: /^@elizaos\/app-core\/utils$/,
@@ -743,55 +834,14 @@ function resolveLocalAppCoreAliases(): Alias[] {
         },
         {
           find: /^@elizaos\/app-core\/utils\/(.+)$/,
-          replacement: `${uiPkgSrcRoot}/utils/$1.ts`,
-          customResolver: resolveExistingUiSourceModule,
+          replacement: `${uiPkgSrcRoot}/utils/$1`,
         },
         {
           find: /^@elizaos\/app-core\/widgets\/(.+)$/,
-          replacement: `${uiPkgSrcRoot}/widgets/$1.ts`,
-          customResolver: resolveExistingUiSourceModule,
+          replacement: `${uiPkgSrcRoot}/widgets/$1`,
         },
       ]
     : [];
-
-  // Wave A moved several components/types from @elizaos/app-core to @elizaos/ui.
-  // The catch-all maps to app-core/src/* which may not have them. Use a custom
-  // resolver to fall back to the ui source when the app-core path doesn't exist.
-  const uiComponentsSourceDir = uiPkgRoot ? path.join(uiPkgRoot, "src") : null;
-
-  function resolveAppCoreWithUiFallback(id: string): string {
-    if (fs.existsSync(id)) {
-      // A subpath like `@elizaos/app-core/api/auth` can map to a directory when
-      // eliza refactors a single file into a folder (api/auth.ts -> api/auth/index.ts).
-      // fs.existsSync() is true for directories, so resolve the directory's index
-      // instead of returning the dir itself (which vite tries to read -> EISDIR).
-      if (fs.statSync(id).isDirectory()) {
-        for (const idx of [`${id}/index.ts`, `${id}/index.tsx`]) {
-          if (fs.existsSync(idx)) return idx;
-        }
-      } else {
-        return id;
-      }
-    }
-    const withTsx = id.endsWith(".tsx") ? id : `${id}.tsx`;
-    if (fs.existsSync(withTsx)) return withTsx;
-    const withTs = id.endsWith(".ts") ? id : `${id}.ts`;
-    if (fs.existsSync(withTs)) return withTs;
-    if (uiComponentsSourceDir && appCoreSrcRoot) {
-      const relativeToSrc = id.includes(`${appCoreSrcRoot}/`)
-        ? id.slice(appCoreSrcRoot.length + 1)
-        : null;
-      if (relativeToSrc) {
-        const uiEquiv = path.join(uiComponentsSourceDir, relativeToSrc);
-        if (fs.existsSync(uiEquiv)) return uiEquiv;
-        const uiEquivTsx = `${uiEquiv}.tsx`;
-        if (fs.existsSync(uiEquivTsx)) return uiEquivTsx;
-        const uiEquivTs = `${uiEquiv}.ts`;
-        if (fs.existsSync(uiEquivTs)) return uiEquivTs;
-      }
-    }
-    return id;
-  }
 
   return [
     ...generatedAliases,
@@ -799,7 +849,6 @@ function resolveLocalAppCoreAliases(): Alias[] {
     {
       find: /^@elizaos\/app-core\/(.+)$/,
       replacement: `${appCoreSrcRoot}/$1`,
-      customResolver: resolveAppCoreWithUiFallback,
     },
     {
       find: /^@miladyai\/ui$/,
@@ -912,7 +961,7 @@ const CAPACITOR_BUILD_TARGET =
 const IS_CAPACITOR_MOBILE_BUILD =
   CAPACITOR_BUILD_TARGET === "ios" || CAPACITOR_BUILD_TARGET === "android";
 const ELIZA_CAPACITOR_PLUGIN_STUB_PATTERN = IS_CAPACITOR_MOBILE_BUILD
-  ? /^@elizaos\/capacitor-(?!(agent|llama)(?:$|\/)).+$/
+  ? /^@elizaos\/capacitor-(?!(agent|bun-runtime|llama)(?:$|\/)).+$/
   : /^@elizaos\/capacitor-.+$/;
 
 function appShellMetadataPlugin(): Plugin {
@@ -1059,6 +1108,190 @@ function resolveExistingUiSourceModule(id: string) {
   }
 
   return id;
+}
+
+function isExistingFile(id: string): boolean {
+  return fs.existsSync(id) && fs.statSync(id).isFile();
+}
+
+function applyRegexReplacement(
+  source: string,
+  find: RegExp,
+  replacement: string,
+): string | null {
+  const match = source.match(find);
+  if (!match) return null;
+  return replacement.replace(/\$(\d+)/g, (_token, indexText: string) => {
+    const index = Number(indexText);
+    return match[index] ?? "";
+  });
+}
+
+type LocalSourceAliasSpec = {
+  find: RegExp;
+  replacement: string;
+  resolve: (id: string) => string;
+};
+
+function resolveAppCoreWithUiFallback(id: string): string {
+  if (fs.existsSync(id)) {
+    // A subpath like `@elizaos/app-core/api/auth` can map to a directory when
+    // eliza refactors a single file into a folder (api/auth.ts -> api/auth/index.ts).
+    // fs.existsSync() is true for directories, so resolve the directory's index
+    // instead of returning the dir itself (which vite tries to read -> EISDIR).
+    if (fs.statSync(id).isDirectory()) {
+      for (const idx of [`${id}/index.ts`, `${id}/index.tsx`]) {
+        if (fs.existsSync(idx)) return idx;
+      }
+    } else {
+      return id;
+    }
+  }
+  const withTsx = id.endsWith(".tsx") ? id : `${id}.tsx`;
+  if (fs.existsSync(withTsx)) return withTsx;
+  const withTs = id.endsWith(".ts") ? id : `${id}.ts`;
+  if (fs.existsSync(withTs)) return withTs;
+  if (uiPkgRoot && appCoreSrcRoot) {
+    const uiComponentsSourceDir = path.join(uiPkgRoot, "src");
+    const relativeToSrc = id.includes(`${appCoreSrcRoot}/`)
+      ? id.slice(appCoreSrcRoot.length + 1)
+      : null;
+    if (relativeToSrc) {
+      const uiEquiv = path.join(uiComponentsSourceDir, relativeToSrc);
+      if (fs.existsSync(uiEquiv)) return uiEquiv;
+      const uiEquivTsx = `${uiEquiv}.tsx`;
+      if (fs.existsSync(uiEquivTsx)) return uiEquivTsx;
+      const uiEquivTs = `${uiEquiv}.ts`;
+      if (fs.existsSync(uiEquivTs)) return uiEquivTs;
+    }
+  }
+  return id;
+}
+
+function getUiAliasFallbackSpecs(): LocalSourceAliasSpec[] {
+  if (!uiPkgRoot || !fs.existsSync(path.join(uiPkgRoot, "package.json"))) {
+    return [];
+  }
+  return [
+    {
+      find: /^@elizaos\/ui\/api\/(.+)$/,
+      replacement: `${uiPkgRoot}/src/api/$1.ts`,
+      resolve: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/platform\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/platform/$1.ts`,
+      resolve: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/voice\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/voice/$1.ts`,
+      resolve: resolveExistingUiSourceModule,
+    },
+    ...getUiComponentAliasFallbackSpecs(),
+    {
+      find: /^@elizaos\/ui\/platform\/(.+)$/,
+      replacement: `${uiPkgRoot}/src/platform/$1.ts`,
+      resolve: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/state\/(.+)$/,
+      replacement: `${uiPkgRoot}/src/state/$1.ts`,
+      resolve: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/(.+)$/,
+      replacement: `${uiPkgRoot}/src/$1.ts`,
+      resolve: resolveExistingUiSourceModule,
+    },
+  ];
+}
+
+function getUiComponentAliasFallbackSpecs(): LocalSourceAliasSpec[] {
+  if (!uiPkgRoot) return [];
+  return [
+    {
+      find: /^@elizaos\/ui\/components\/ui\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/components/ui/$1.tsx`,
+      resolve: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/components\/composites\/(.+)\/([^/]+)$/,
+      replacement: `${uiPkgRoot}/src/components/composites/$1/$2.tsx`,
+      resolve: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/components\/(.+)\/([^/]+)$/,
+      replacement: `${uiPkgRoot}/src/components/$1/$2.tsx`,
+      resolve: resolveExistingUiSourceModule,
+    },
+  ];
+}
+
+function getAppCoreUiFallbackSpecs(): LocalSourceAliasSpec[] {
+  if (!appCoreSrcRoot || !uiPkgRoot) return [];
+  const uiSrcRoot = path.join(uiPkgRoot, "src");
+  return [
+    {
+      find: /^@elizaos\/app-core\/components\/(.+)$/,
+      replacement: `${uiSrcRoot}/components/$1`,
+      resolve: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/app-core\/state\/(.+)$/,
+      replacement: `${uiSrcRoot}/state/$1.ts`,
+      resolve: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/app-core\/utils\/(.+)$/,
+      replacement: `${uiSrcRoot}/utils/$1.ts`,
+      resolve: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/app-core\/widgets\/(.+)$/,
+      replacement: `${uiSrcRoot}/widgets/$1.ts`,
+      resolve: resolveExistingUiSourceModule,
+    },
+  ];
+}
+
+function getAppCoreAliasFallbackSpecs(): LocalSourceAliasSpec[] {
+  if (!appCoreSrcRoot) return [];
+  return [
+    {
+      find: /^@elizaos\/app-core\/(.+)$/,
+      replacement: `${appCoreSrcRoot}/$1`,
+      resolve: resolveAppCoreWithUiFallback,
+    },
+  ];
+}
+
+function getLocalSourceAliasFallbackSpecs(): LocalSourceAliasSpec[] {
+  return [
+    ...getUiAliasFallbackSpecs(),
+    ...getAppCoreUiFallbackSpecs(),
+    ...getAppCoreAliasFallbackSpecs(),
+  ];
+}
+
+function resolveLocalSourceAliasFallback(source: string): string | null {
+  for (const spec of getLocalSourceAliasFallbackSpecs()) {
+    const replaced = applyRegexReplacement(source, spec.find, spec.replacement);
+    if (!replaced) continue;
+    const resolved = spec.resolve(replaced);
+    if (isExistingFile(resolved)) return resolved;
+  }
+  return null;
+}
+
+function localSourceAliasFallbackPlugin(): Plugin {
+  return {
+    name: "milady-local-source-alias-fallback",
+    enforce: "pre",
+    resolveId(source) {
+      return resolveLocalSourceAliasFallback(source);
+    },
+  };
 }
 
 /**
@@ -2741,6 +2974,7 @@ export default defineConfig({
     appShellMetadataPlugin(),
     companionAssetsPlugin(),
     elizaCoreBrowserEntryFallbackPlugin(),
+    localSourceAliasFallbackPlugin(),
     nativeModuleStubPlugin(),
     asyncLocalStoragePatchPlugin(),
     watchWorkspacePackagesPlugin(),
@@ -2750,12 +2984,6 @@ export default defineConfig({
     desktopCorsPlugin(),
     appDevSettingsBannerPlugin(),
   ],
-  esbuild: {
-    // Override tsconfig target — some extended configs use ES2024 which older
-    // esbuild does not recognize; this avoids "Unrecognized target environment"
-    // warnings regardless of tsconfig resolution.
-    target: "es2022",
-  },
   resolve: {
     // Force vite to pick the "node" condition over "browser" for package
     // exports. Many upstream eliza plugins ship hand-curated browser
@@ -2882,84 +3110,6 @@ export default defineConfig({
       "three/examples/jsm/loaders/GLTFLoader.js",
       "three/examples/jsm/loaders/FBXLoader.js",
     ],
-    // Remap node: builtins to npm polyfills during dep optimization so
-    // esbuild doesn't externalize them as "browser-external:node:*".
-    esbuildOptions: {
-      // Must match build/esbuild targets: Vite's dep optimizer otherwise
-      // defaults to legacy browser targets (chrome87, safari14, …) and
-      // esbuild fails with "Transforming destructuring … is not supported yet"
-      // across modern node_modules (Radix, three, zod, etc.).
-      target: "es2022",
-      plugins: [
-        {
-          name: "workspace-jsx-in-js",
-          setup(build) {
-            const normalizedAppCoreSrcRoot = appCoreSrcRoot
-              ? appCoreSrcRoot.split(path.sep).join("/")
-              : null;
-
-            build.onLoad({ filter: /\.js$/ }, (args) => {
-              const normalizedPath = args.path.split(path.sep).join("/");
-              if (!normalizedAppCoreSrcRoot) {
-                return null;
-              }
-              if (!normalizedPath.startsWith(`${normalizedAppCoreSrcRoot}/`)) {
-                return null;
-              }
-
-              return {
-                contents: fs.readFileSync(args.path, "utf8"),
-                loader: "jsx",
-              };
-            });
-          },
-        },
-        {
-          name: "node-builtins-polyfill",
-          setup(build) {
-            // Map node: builtins to their npm polyfill packages.
-            // require.resolve("events") returns the bare name on Node 22+, so
-            // we resolve via the polyfill's package.json to get an absolute path.
-            const polyfills: Record<string, string> = {};
-            for (const [nodeId, pkg, entry] of [
-              ["node:events", "events", "events.js"],
-              ["events", "events", "events.js"],
-              ["node:buffer", "buffer", "index.js"],
-              ["buffer", "buffer", "index.js"],
-              ["node:util", "util", "util.js"],
-              ["util", "util", "util.js"],
-              ["node:process", "process", "browser.js"],
-              ["process", "process", "browser.js"],
-              ["node:stream", "stream-browserify", "index.js"],
-              ["stream", "stream-browserify", "index.js"],
-            ] as const) {
-              try {
-                const pkgDir = path.dirname(
-                  _require.resolve(`${pkg}/package.json`),
-                );
-                polyfills[nodeId] = path.join(pkgDir, entry);
-              } catch {
-                // polyfill not installed
-              }
-            }
-            for (const [nodeId, absPath] of Object.entries(polyfills)) {
-              const re = new RegExp(`^${nodeId.replace(":", "\\:")}$`);
-              build.onResolve({ filter: re }, () => ({ path: absPath }));
-            }
-            // For all OTHER node: builtins, provide empty stubs via
-            // generateNodeBuiltinStub so esbuild doesn't externalize them.
-            build.onResolve({ filter: /^node:/ }, (args) => ({
-              path: args.path,
-              namespace: "node-stub",
-            }));
-            build.onLoad({ filter: /.*/, namespace: "node-stub" }, (args) => ({
-              contents: generateNodeBuiltinStub(args.path),
-              loader: "js",
-            }));
-          },
-        },
-      ],
-    },
     exclude: [
       "node-llama-cpp",
       "@node-llama-cpp/mac-arm64-metal",
@@ -3002,19 +3152,34 @@ export default defineConfig({
     // Keep warnings tight enough to catch regressions while allowing the
     // current largest workspace chunks to build without noise.
     // Electrobun ships the bundle with the desktop app — there is no
-    // first-paint network cost for the user. The remaining ~4MB main
+    // first-paint network cost for the user. The remaining ~5.6MB main
     // chunk is the merged workspace surface (app-core + companion +
     // steward + task-coordinator + vincent + screenshare); splitting
     // them via manual chunks reintroduces circular-chunk + empty-chunk
-    // warnings without measurable benefit. If a true cold-start budget
-    // matters later, lift owner-of-route lazy() boundaries at the call
+    // warnings without measurable benefit. This is a deliberate warning
+    // baseline, not a bundle-size fix. If a true cold-start budget matters
+    // later, lift owner-of-route lazy() boundaries at the call
     // sites that own a single import path (route-level splits land in
     // their own chunks naturally — see AppsPageView / AutomationsView /
     // SettingsView / StreamView / etc. above).
-    chunkSizeWarningLimit: 5000,
+    chunkSizeWarningLimit: 6000,
     minify: desktopFastDist ? false : undefined,
     cssMinify: desktopFastDist ? false : undefined,
     reportCompressedSize: !desktopFastDist,
+    rolldownOptions: {
+      onLog(level, log, defaultHandler) {
+        if (level === "warn" && isKnownToleratedBuildWarning(log)) {
+          return;
+        }
+        defaultHandler(level, log);
+      },
+      onwarn(warning, warn) {
+        if (isKnownToleratedBuildWarning(warning)) {
+          return;
+        }
+        warn(warning);
+      },
+    },
     rollupOptions: {
       // Native-only deps that must not be resolved during the browser build.
       // Node built-ins (node:fs, fs, path, etc.) are NOT externalized here —
@@ -3070,6 +3235,7 @@ export default defineConfig({
         const where = warning.id ?? warning.loc?.file ?? message;
         // @electric-sql/pglite ships Emscripten/WASM glue that uses eval().
         if (warning.code === "EVAL" && /pglite/i.test(where)) return;
+        if (isKnownToleratedBuildWarning(warning)) return;
         // Modules imported both dynamically and statically: the dynamic imports
         // are intentional (the @elizaos/ui DynamicViewLoader string-keyed module
         // registry and plugin-browser lazy-loading), and the modules stay

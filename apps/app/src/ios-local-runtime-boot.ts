@@ -6,7 +6,7 @@
  *   - Capacitor platform === "ios" AND
  *   - The renderer's IOS_RUNTIME_MODE resolves to "local".
  *
- * On detect: dynamically imports the plugin, calls `start({})` once, wires
+ * On detect: resolves the Capacitor plugin, calls `start({})` once, wires
  * `agent-ready` / `agent-error` / `agent-log` events onto the existing
  * window event bus (`dispatchAppEvent`) and exposes a thin `sendMessage` +
  * `getStatus` API the chat UI can call without taking a direct dep on the

@@ -401,6 +401,22 @@ function patchIosRuntimeTypes(source) {
     );
 }
 
+function patchDevUiViteCommand(source) {
+  let next = source;
+
+  next = next.replace(
+    'const viteCmd = hasBun ? "bunx" : "npx";',
+    'const viteCmd = hasBun ? "bun" : "npx";',
+  );
+
+  next = next.replace(
+    '  const viteArgs = viteForce\n    ? ["vite", "--force", "--port", String(UI_PORT)]\n    : ["vite", "--port", String(UI_PORT)];',
+    '  const viteArgs = hasBun\n    ? viteForce\n      ? ["x", "vite", "--force", "--port", String(UI_PORT)]\n      : ["x", "vite", "--port", String(UI_PORT)]\n    : viteForce\n      ? ["vite", "--force", "--port", String(UI_PORT)]\n      : ["vite", "--port", String(UI_PORT)];',
+  );
+
+  return next;
+}
+
 const openExternalUrlPath = path.join(
   appCoreDir,
   "packages/app-core/src/utils/openExternalUrl.js",
@@ -589,6 +605,12 @@ for (const packageDir of appCorePackageDirs) {
     patchFile(
       appCorePackageSourcePath(packageDir, "platform/window-shell.d.ts"),
       patchWindowShellTypes,
+    ) || changed;
+
+  changed =
+    patchFile(
+      path.join(packageDir, "scripts/dev-ui.mjs"),
+      patchDevUiViteCommand,
     ) || changed;
 }
 

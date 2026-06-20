@@ -78,7 +78,7 @@ describe("mobile local runtime shared helpers", () => {
     await expect(loadBunRuntimePlugin("[test]")).resolves.toBeNull();
 
     expect(warn).toHaveBeenCalledWith(
-      "[test] plugin module loaded but ElizaBunRuntime export missing",
+      "[test] Capacitor ElizaBunRuntime plugin not available",
     );
   });
 });

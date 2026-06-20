@@ -103,6 +103,11 @@ const optionalAppExternal = /^@elizaos\/app-/;
 // of them — always external; rolldown can't bundle the .node binary.
 const nodeRsExternal = /^@node-rs\//;
 const napiRsExternal = /^@napi-rs\//;
+// Capacitor packages are native/mobile runtime bridges. App-core can import
+// them from iOS-only helpers, but the Node release bundle should resolve them
+// from the installed package graph instead of trying to inline browser/native
+// shims during the Electrobun release contract build.
+const capacitorExternal = /^@capacitor\//;
 // @elizaos/vault is a runtime-loaded workspace service (secrets manager),
 // declared as a workspace:* dependency and resolved from node_modules at
 // runtime. Unlike @elizaos/core / @elizaos/shared (intentionally inlined into
@@ -110,20 +115,58 @@ const napiRsExternal = /^@napi-rs\//;
 // implicitly externalized with an UNRESOLVED_IMPORT warning. List it explicitly
 // so the externalization is intentional and the warning goes away.
 const vaultExternal = "@elizaos/vault";
+// app-core auth storage imports drizzle at runtime; package-mode release
+// contract builds should keep it as a package dependency instead of trying to
+// inline drizzle's broad optional-driver surface.
+const drizzleOrmExternal = "drizzle-orm";
+// app-core sandbox registry uses Upstash as a runtime integration. It is
+// app-core's dependency, not something the Milady bundle should inline.
+const upstashRedisExternal = "@upstash/redis";
 const allExternals = [
   ...nativeExternals,
   vaultExternal,
+  drizzleOrmExternal,
+  upstashRedisExternal,
   pluginExternal,
   optionalAppExternal,
+  capacitorExternal,
   nodeRsExternal,
   napiRsExternal,
 ];
+
+const toleratedServerDynamicImportMarkers = [
+  "ensure-text-to-speech-handler.ts",
+  "api/server.ts",
+  "runtime/eliza.ts",
+];
+
+function isToleratedServerDynamicImportLog(log) {
+  const code = log && typeof log === "object" ? log.code : null;
+  const rawMessage = log && typeof log === "object" ? log.message : "";
+  const message = String(rawMessage ?? "");
+  return (
+    code === "INEFFECTIVE_DYNAMIC_IMPORT" &&
+    toleratedServerDynamicImportMarkers.every((marker) =>
+      message.includes(marker),
+    )
+  );
+}
+
+const inputOptions = {
+  onLog(level, log, defaultHandler) {
+    const code = log && typeof log === "object" ? log.code : null;
+    if (code === "MIXED_EXPORT") return;
+    if (isToleratedServerDynamicImportLog(log)) return;
+    defaultHandler(level, log);
+  },
+};
 
 export default [
   {
     entry: appCoreEntry(".", "src/index.ts"),
     env,
     fixedExtension: false,
+    inputOptions,
     platform: "node",
     deps: { neverBundle: allExternals, onlyBundle: false },
   },
@@ -131,6 +174,7 @@ export default [
     entry: appCoreEntry("entry", "src/entry.ts"),
     env,
     fixedExtension: false,
+    inputOptions,
     platform: "node",
     deps: { neverBundle: allExternals, onlyBundle: false },
     outputOptions: { codeSplitting: false },
@@ -139,6 +183,7 @@ export default [
     entry: appCoreEntry("runtime/eliza", "src/runtime/eliza.ts"),
     env,
     fixedExtension: false,
+    inputOptions,
     platform: "node",
     deps: { neverBundle: allExternals, onlyBundle: false },
     outputOptions: { codeSplitting: false },
@@ -147,6 +192,7 @@ export default [
     entry: appCoreEntry("api/server", "src/api/server.ts"),
     env,
     fixedExtension: false,
+    inputOptions,
     platform: "node",
     deps: { neverBundle: allExternals, onlyBundle: false },
     // Disable code splitting to avoid circular imports in server.js.
