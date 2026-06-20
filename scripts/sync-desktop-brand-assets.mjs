@@ -18,7 +18,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const repoRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+);
 const srcDir = path.join(repoRoot, "apps/app/public/brand/desktop");
 const destDir = path.join(
   repoRoot,

@@ -7,13 +7,14 @@
  * through to the wallet/inventory view. Identical to the elizaOS home today, just
  * Milady-gold with the wallet — the rest of the brand customization lands here.
  */
+
+import { useApp } from "@elizaos/app-core";
+import type { WalletAddresses, WalletBalancesResponse } from "@elizaos/shared";
 import {
   HomeScreen,
   type HomeScreenProps,
   type HomeTileTarget,
 } from "@elizaos/ui";
-import { useApp } from "@elizaos/app-core";
-import type { WalletAddresses, WalletBalancesResponse } from "@elizaos/shared";
 import * as React from "react";
 
 const GOLD = "#f0b90b";
@@ -63,8 +64,10 @@ function WalletGlyph(): React.JSX.Element {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      aria-hidden
+      role="img"
+      aria-label="Wallet"
     >
+      <title>Wallet</title>
       <path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5" />
       <path d="M16 12h.01" />
     </svg>

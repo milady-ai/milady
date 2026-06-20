@@ -32,16 +32,6 @@
 #   RELEASE_HOST_FINGERPRINT     – pinned SSH host key entry for releases host
 name: Build & Release (Electrobun)
 
-# Milady whitelabel identity for the desktop bundle + Inno installer. Without
-# these, desktop-build.mjs / build-inno.ps1 default to elizaOS (app name
-# "elizaOS App", bundle id ai.milady.app, installer "Milady-Setup"). With
-# them, the produced app + installer are Milady (installer "Milady-Setup-*.exe").
-env:
-  ELIZA_APP_NAME: Milady
-  ELIZA_APP_ID: ai.milady.app
-  ELIZA_URL_SCHEME: milady
-  ELIZA_NAMESPACE: milady
-
 on:
   push:
     tags:
@@ -119,6 +109,15 @@ env:
   CI: "true"
   BUN_VERSION: "1.3.14" # 1.3.14 desktop packaging runtime (bumped 2026-05-28 for the repo-wide 1.3.14 upgrade); 1.3.11 trips Electrobun bundle creation in CI.
   MILADY_SKIP_CLOUD_SUBMODULE: "1"
+  # Milady whitelabel identity for the desktop bundle + Inno installer. Without
+  # these, desktop-build.mjs / build-inno.ps1 default to elizaOS (app name
+  # "elizaOS App"). With them, the produced app + installer are Milady. (Merged
+  # here from a second top-level `env:` — duplicate top-level keys made GHA
+  # reject the workflow with a 0-job startup_failure on every run.)
+  ELIZA_APP_NAME: Milady
+  ELIZA_APP_ID: ai.milady.app
+  ELIZA_URL_SCHEME: milady
+  ELIZA_NAMESPACE: milady
 
 jobs:
   prepare:
