@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import mdx from "@mdx-js/rollup";
@@ -13,6 +14,7 @@ import { defineConfig } from "vite";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "../..");
+const requireFromHere = createRequire(import.meta.url);
 
 function shouldUseLocalElizaSource() {
   const mode = (
@@ -29,6 +31,30 @@ function shouldUseLocalElizaSource() {
 const localUiSourceRoot = shouldUseLocalElizaSource()
   ? path.join(repoRoot, "eliza", "packages", "ui", "src")
   : null;
+
+// The shared base stylesheet moved upstream from @elizaos/app-core (alpha /
+// published-package mode) to @elizaos/ui (beta / local-source mode). Resolve it
+// from whichever package actually ships it so both the local-source build (CI)
+// and the published-package build (Deploy Web) import a real stylesheet rather
+// than a missing export.
+function resolveElizaBaseCss() {
+  if (localUiSourceRoot) {
+    return path.join(localUiSourceRoot, "styles", "base.css");
+  }
+  for (const specifier of [
+    "@elizaos/app-core/styles/base.css",
+    "@elizaos/ui/styles/base.css",
+  ]) {
+    try {
+      return requireFromHere.resolve(specifier);
+    } catch {
+      // Try the next package.
+    }
+  }
+  throw new Error(
+    "Unable to resolve @elizaos base.css for the homepage build (checked @elizaos/app-core and @elizaos/ui).",
+  );
+}
 
 // Build-time Shiki highlighter shared across all MDX code blocks. Creating the
 // highlighter once and passing it into rehype keeps the Vite config hot-reload
@@ -93,18 +119,26 @@ export default defineConfig({
     react(),
   ],
   resolve: {
-    alias: localUiSourceRoot
-      ? [
-          {
-            find: /^@elizaos\/ui\//,
-            replacement: `${localUiSourceRoot}/`,
-          },
-          {
-            find: /^@elizaos\/ui$/,
-            replacement: path.join(localUiSourceRoot, "index.ts"),
-          },
-        ]
-      : [],
+    alias: [
+      // Most specific first: pin base.css to the package that ships it in the
+      // active mode (app-core when published, ui source when local).
+      {
+        find: /^@elizaos\/ui\/styles\/base\.css$/,
+        replacement: resolveElizaBaseCss(),
+      },
+      ...(localUiSourceRoot
+        ? [
+            {
+              find: /^@elizaos\/ui\//,
+              replacement: `${localUiSourceRoot}/`,
+            },
+            {
+              find: /^@elizaos\/ui$/,
+              replacement: path.join(localUiSourceRoot, "index.ts"),
+            },
+          ]
+        : []),
+    ],
   },
   build: {
     outDir: path.resolve(here, "dist"),
