@@ -1,7 +1,7 @@
 import {
   dispatchAppEvent,
   MOBILE_RUNTIME_MODE_CHANGED_EVENT,
-} from "@elizaos/app-core";
+} from "@elizaos/ui";
 import { DEFAULT_DESKTOP_API_PORT } from "@elizaos/shared";
 
 /**

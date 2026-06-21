@@ -1,4 +1,4 @@
-import { ErrorBoundary } from "@elizaos/app-core";
+import { ErrorBoundary } from "@elizaos/ui";
 // Upstream's app-shell refactor (#8721) moved the full shell to the explicit
 // @elizaos/ui/App entry (app-core no longer re-exports it), matching how the
 // stock eliza app imports it.
@@ -17,13 +17,9 @@ import {
   subscribeDesktopBridgeEvent,
   initializeStorageBridge,
   isElectrobunRuntime,
-} from "@elizaos/app-core";
-import type { BrandingConfig } from "@elizaos/app-core";
-import {
-  type AppBootConfig,
-  getBootConfig,
-  setBootConfig,
-} from "@elizaos/app-core";
+} from "@elizaos/ui";
+import type { BrandingConfig } from "@elizaos/ui";
+import { type AppBootConfig, getBootConfig, setBootConfig } from "@elizaos/ui";
 import {
   AGENT_READY_EVENT,
   APP_PAUSE_EVENT,
@@ -34,31 +30,30 @@ import {
   MOBILE_RUNTIME_MODE_CHANGED_EVENT,
   SHARE_TARGET_EVENT,
   TRAY_ACTION_EVENT,
-} from "@elizaos/app-core";
+} from "@elizaos/ui";
 import {
   ANDROID_LOCAL_AGENT_API_BASE,
   MOBILE_RUNTIME_MODE_STORAGE_KEY,
   normalizeMobileRuntimeMode,
   preSeedAndroidLocalRuntimeIfFresh,
 } from "./first-run/mobile-runtime-mode";
-// Navigation + platform helpers are re-exported from the published
-// @elizaos/app-core barrel (which bridges @elizaos/ui). Importing them from
-// app-core keeps package-mode builds green; the granular @elizaos/ui/* subpaths
-// these symbols live under are not published on the `alpha` dist-tag.
+// Navigation + platform helpers live in @elizaos/ui (the app-shell refactor
+// moved them out of app-core); the force-fresh-first-run helpers were also
+// renamed Onboarding → FirstRun upstream.
 import {
-  applyForceFreshOnboardingReset,
+  applyForceFreshFirstRunReset,
   applyLaunchConnection,
   applyLaunchConnectionFromUrl,
   getWindowNavigationPath,
   installDesktopPermissionsClientPatch,
-  installForceFreshOnboardingClientPatch,
+  installForceFreshFirstRunClientPatch,
   installLocalProviderCloudPreferencePatch,
   isAppWindowRoute,
   isDetachedWindowShell,
   resolveWindowShellRoute,
-  shouldInstallMainWindowOnboardingPatches,
+  shouldInstallMainWindowFirstRunPatches,
   syncDetachedShellLocation,
-} from "@elizaos/app-core";
+} from "@elizaos/ui";
 import {
   type ConversationMessage,
   createVoiceCapture,
@@ -78,8 +73,8 @@ import {
   DesktopTrayRuntime,
   DetachedShellRoot,
 } from "@elizaos/app-core";
-import { AppProvider } from "@elizaos/app-core";
-import { applyUiTheme, loadUiTheme } from "@elizaos/app-core";
+import { AppProvider } from "@elizaos/ui";
+import { applyUiTheme, loadUiTheme } from "@elizaos/ui";
 import { Agent } from "@elizaos/capacitor-agent";
 import { Desktop } from "@elizaos/capacitor-desktop";
 import {
@@ -115,7 +110,6 @@ import "@clawville/app-clawville/ui";
 import {
   AppBlockerSettingsCard,
   LifeOpsBrowserSetupPanel as BrowserBridgeSetupPanel,
-  LifeOpsPageView,
   WebsiteBlockerSettingsCard,
 } from "@elizaos/app-lifeops/ui";
 import { LifeOpsActivitySignalsEffect } from "@elizaos/app-lifeops/components/LifeOpsActivitySignalsEffect";
@@ -137,11 +131,10 @@ import "@elizaos/app-hyperliquid/register";
 import "@elizaos/app-polymarket/client";
 import "@elizaos/app-polymarket/register";
 import "@elizaos/app-vincent/client";
-import { useVincentState } from "@elizaos/app-vincent/ui";
 import "@elizaos/app-vincent/register";
 import "@elizaos/app-wallet/register";
 import "@elizaos/app-workflow-builder/register";
-import { shouldUseCloudOnlyBranding } from "@elizaos/app-core";
+import { shouldUseCloudOnlyBranding } from "@elizaos/ui";
 import {
   APP_BRANDING_BASE,
   APP_CONFIG,
@@ -160,7 +153,7 @@ import {
   type IosRuntimeConfig,
   type IosRuntimeMode,
   resolveIosRuntimeConfig,
-} from "@elizaos/app-core";
+} from "@elizaos/ui";
 import { CharacterEditor } from "@elizaos/ui/components/character/CharacterEditor";
 
 declare global {
@@ -293,9 +286,9 @@ if (shouldEnableElectrobunMacWindowDrag()) {
 
 // Dev escape hatch: ?reset forces a truly fresh onboarding session by clearing
 // persisted state and temporarily suppressing stale backend resume config.
-if (shouldInstallMainWindowOnboardingPatches(windowShellRoute)) {
-  applyForceFreshOnboardingReset();
-  installForceFreshOnboardingClientPatch(client);
+if (shouldInstallMainWindowFirstRunPatches(windowShellRoute)) {
+  applyForceFreshFirstRunReset();
+  installForceFreshFirstRunClientPatch(client);
 }
 installLocalProviderCloudPreferencePatch(client);
 installDesktopPermissionsClientPatch(client);
@@ -322,7 +315,7 @@ const appBootConfig: AppBootConfig = {
     undefined,
   cloudApiBase: IOS_RUNTIME_ENV_CONFIG.cloudApiBase,
   vrmAssets: APP_VRM_ASSETS,
-  onboardingStyles: APP_STYLE_PRESETS,
+  firstRunStyles: APP_STYLE_PRESETS,
   characterEditor: CharacterEditor,
   companionShell: CompanionShell,
   resolveCompanionInferenceNotice,
@@ -338,19 +331,17 @@ const appBootConfig: AppBootConfig = {
   codingAgentControlChip: CodingAgentControlChip,
   ptyConsoleDrawer: PtyConsoleDrawer,
   fineTuningView: FineTuningView,
-  useVincentState,
   stewardLogo: StewardLogo,
   stewardApprovalQueue: ApprovalQueue,
   stewardTransactionHistory: TransactionHistory,
   characterCatalog: APP_CHARACTER_CATALOG,
   envAliases: APP_ENV_ALIASES,
-  lifeOpsPageView: LifeOpsPageView,
   lifeOpsBrowserSetupPanel: BrowserBridgeSetupPanel,
   appBlockerSettingsCard: AppBlockerSettingsCard,
   websiteBlockerSettingsCard: WebsiteBlockerSettingsCard,
   clientMiddleware: {
-    forceFreshOnboarding:
-      shouldInstallMainWindowOnboardingPatches(windowShellRoute),
+    forceFreshFirstRun:
+      shouldInstallMainWindowFirstRunPatches(windowShellRoute),
     preferLocalProvider: true,
     desktopPermissions: isDesktopPlatform(),
   },

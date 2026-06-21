@@ -1,4 +1,4 @@
-import type { CharacterCatalogData } from "@elizaos/app-core";
+import type { CharacterCatalogData } from "@elizaos/ui";
 import {
   buildElizaCharacterCatalog,
   setDefaultAgentName,

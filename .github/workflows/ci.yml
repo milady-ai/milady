@@ -208,6 +208,10 @@ jobs:
             (cd eliza/packages/skills && bun run build)
           fi
 
+      - name: Link local @elizaos workspace packages
+        if: ${{ hashFiles('eliza/packages/app-core/package.json') != '' }}
+        run: node eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs
+
       - name: Run type checker
         run: bun run verify:typecheck
 
@@ -272,11 +276,22 @@ jobs:
       - name: Align nested eliza package resolution
         run: node scripts/align-eliza-ci-node-modules.mjs
 
-      - name: Build eliza packages required for typecheck
+      - name: Build eliza packages required for the project build
         if: ${{ hashFiles('eliza/packages/core/package.json') != '' }}
         run: |
           if [ ! -f eliza/packages/core/dist/index.node.js ] || [ ! -f eliza/packages/core/dist/index.d.ts ]; then
             (cd eliza/packages/core && bun run build)
+          fi
+          # apps/app resolves @elizaos/{shared,ui,app-core} through node_modules
+          # → dist; build them (in dependency order) for the project build.
+          if [ ! -f eliza/packages/shared/dist/index.d.ts ]; then
+            (cd eliza/packages/shared && bun run build)
+          fi
+          if [ ! -f eliza/packages/ui/dist/index.d.ts ]; then
+            (cd eliza/packages/ui && bun run build)
+          fi
+          if [ ! -f eliza/packages/app-core/dist/index.d.ts ]; then
+            (cd eliza/packages/app-core && bun run build)
           fi
           if [ ! -f eliza/packages/skills/dist/index.js ]; then
             (cd eliza/packages/skills && bun run build)
@@ -284,18 +299,14 @@ jobs:
           if [ ! -f eliza/packages/cloud-routing/dist/index.js ]; then
             (cd eliza/packages/cloud-routing && bun run build)
           fi
-          if [ -f eliza/plugins/plugin-agent-skills/package.json ] && [ ! -f eliza/plugins/plugin-agent-skills/dist/index.d.ts ]; then
-            (cd eliza/plugins/plugin-agent-skills && bun run build)
-          fi
-          if [ -f eliza/plugins/plugin-pdf/package.json ] && [ ! -f eliza/plugins/plugin-pdf/dist/index.d.ts ]; then
-            (cd eliza/plugins/plugin-pdf && bun run build)
-          fi
-          if [ -f eliza/plugins/plugin-sql/package.json ] && [ ! -f eliza/plugins/plugin-sql/src/dist/index.d.ts ]; then
-            (cd eliza/plugins/plugin-sql && bun run build)
-          fi
-          if [ ! -f eliza/plugins/plugin-streaming/dist/index.d.ts ]; then
-            (cd eliza/plugins/plugin-streaming && bun run build)
-          fi
+          # The eliza-source plugin dists are NOT required for the apps/app vite
+          # build (it resolves @elizaos/* to source via MILADY_FORCE_LOCAL_UPSTREAMS),
+          # and building them needs the eliza workspace's own dependency install
+          # (not done here). Best-effort only — never fail the build on them.
+          (cd eliza/plugins/plugin-agent-skills && bun run build) || echo "skip plugin-agent-skills"
+          (cd eliza/plugins/plugin-pdf && bun run build) || echo "skip plugin-pdf"
+          (cd eliza/plugins/plugin-sql && bun run build) || echo "skip plugin-sql"
+          (cd eliza/plugins/plugin-streaming && bun run build) || echo "skip plugin-streaming"
 
       - name: Link local @elizaos workspace packages
         if: ${{ hashFiles('eliza/packages/app-core/package.json') != '' }}
