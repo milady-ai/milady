@@ -266,7 +266,11 @@ jobs:
 
           case "$CHANNEL" in
             canary)
-              PRE_ID="beta"
+              # Canary rides the alpha train (milady ships 2.0.0-alpha.N; the
+              # assertion below requires -alpha.N). PRE_ID must be "alpha" or the
+              # version compute picks the highest beta tag and fails the canary
+              # check ("canary releases must use an alpha version").
+              PRE_ID="alpha"
               NPM_DIST_TAG="canary"
               ANDROID_TRACK="internal"
               APPLE_TRACK="testflight"
