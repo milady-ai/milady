@@ -192,6 +192,18 @@ jobs:
           if [ ! -f eliza/packages/core/dist/index.node.js ] || [ ! -f eliza/packages/core/dist/index.d.ts ]; then
             (cd eliza/packages/core && bun run build)
           fi
+          # apps/app/tsconfig.json resolves @elizaos/{shared,ui,app-core} through
+          # node_modules → the package's exports "." → dist/index.d.ts, so these
+          # must be built (not just core/skills) for the local-mode typecheck.
+          if [ ! -f eliza/packages/shared/dist/index.d.ts ]; then
+            (cd eliza/packages/shared && bun run build)
+          fi
+          if [ ! -f eliza/packages/ui/dist/index.d.ts ]; then
+            (cd eliza/packages/ui && bun run build)
+          fi
+          if [ ! -f eliza/packages/app-core/dist/index.d.ts ]; then
+            (cd eliza/packages/app-core && bun run build)
+          fi
           if [ ! -f eliza/packages/skills/dist/index.js ]; then
             (cd eliza/packages/skills && bun run build)
           fi
