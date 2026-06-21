@@ -470,6 +470,13 @@ jobs:
       - name: Align package-mode agent pins
         run: node scripts/align-eliza-agent-package-pins.mjs
 
+      # The release build rebuilds dist assets (with the resolved release
+      # version), so the committed static-asset manifest is stale relative to
+      # the freshly built tree. Regenerate it before release:check, matching
+      # run-release-contract-suite.mjs.
+      - name: Refresh static asset manifest
+        run: node scripts/generate-static-asset-manifest.mjs
+
       - name: Release readiness checks
         env:
           ELIZA_RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
