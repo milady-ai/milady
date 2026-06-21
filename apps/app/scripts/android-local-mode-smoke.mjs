@@ -4,7 +4,6 @@ import path from "node:path";
 import {
   adbDevice,
   adbForward,
-  adbTry as adbTryRaw,
   resolveAdb,
   resolveSerial as resolveSerialLib,
 } from "./lib/android-sdk.mjs";
@@ -31,10 +30,6 @@ const shouldInstall = !hasArg("--no-install");
 
 function adbRun(serial, args, options) {
   return adbDevice(adb, serial, args, options);
-}
-
-function adbTry(serial, args, options = {}) {
-  return adbTryRaw(adb, ["-s", serial, ...args], options);
 }
 
 function resolveSerial() {

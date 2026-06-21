@@ -83,7 +83,8 @@ function run(command, args, cwd = repoRoot) {
       cwd,
       env: {
         ...process.env,
-        MILADY_REPO_ROOT: process.env.MILADY_REPO_ROOT?.trim() || repoRoot,
+        ELIZA_REGRESSION_MATRIX_REPO_ROOT:
+          process.env.ELIZA_REGRESSION_MATRIX_REPO_ROOT?.trim() || repoRoot,
       },
       stdio: "inherit",
       shell: false,

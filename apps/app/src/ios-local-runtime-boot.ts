@@ -22,7 +22,7 @@ import {
   AGENT_READY_EVENT,
   dispatchAppEvent,
   resolveIosRuntimeConfig,
-} from "@elizaos/app-core";
+} from "@elizaos/ui";
 import { APP_LOG_PREFIX } from "./app-config";
 import {
   type BunRuntimePluginBase,

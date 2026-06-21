@@ -1,6 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:wght@400;500;600&display=swap");
 @import "tailwindcss";
-@import "@elizaos/app-core/styles/base.css";
+@import "@elizaos/ui/styles/base.css";
 
 /* @tailwindcss/typography — provides prose utilities for long-form MDX content
    under /docs. Consumer docs use `prose prose-invert` with DM Sans body + JetBrains

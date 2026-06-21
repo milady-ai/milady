@@ -80,11 +80,13 @@ const child = spawn(
     // `git rev-parse --show-toplevel`, which points at the nested eliza/
     // checkout in CI rather than this milady workspace. Anchor them to the
     // milady root so the regression-matrix contract validates milady's
-    // workflows and resolves the milady base SHA. Only this script reads the
-    // var, so setting it for every app-core invocation has no other effect.
+    // workflows and resolves the milady base SHA. validate-regression-matrix
+    // reads ELIZA_REGRESSION_MATRIX_REPO_ROOT for this override; only it reads
+    // the var, so setting it for every app-core invocation has no other effect.
     env: {
       ...process.env,
-      MILADY_REPO_ROOT: process.env.MILADY_REPO_ROOT?.trim() || repoRoot,
+      ELIZA_REGRESSION_MATRIX_REPO_ROOT:
+        process.env.ELIZA_REGRESSION_MATRIX_REPO_ROOT?.trim() || repoRoot,
       // Milady renames the runtime entry `eliza.mjs` -> `milady.mjs`. Upstream
       // run-node.mjs (elizaOS/eliza#8126) honors ELIZA_ENTRY_FILE to spawn the
       // fork's entry instead of the hardcoded `eliza.mjs`; without this, `doctor`

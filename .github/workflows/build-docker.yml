@@ -78,7 +78,7 @@ concurrency:
 env:
   # Pin the canonical elizaOS/eliza checkout to an exact verified upstream SHA.
   # Prefer a develop SHA after the matching elizaOS PR merges.
-  MILADY_ELIZA_REF: "f2f6970becc7fdcf6136d939207434c22a1506d8"
+  MILADY_ELIZA_REF: "v2.0.11-beta.7"
   REGISTRY: ghcr.io
   IMAGE_NAME: milady-ai/agent
 
@@ -318,7 +318,24 @@ jobs:
           fi
           ls -la eliza/packages/core/src/types/generated/eliza/v1 2>/dev/null || echo "WARN: proto generated dir still missing"
 
-      # ── 6.5. Build eliza runtime packages needed by the agent image ─────────
+      # ── 6.5. Build leaf @elizaos packages consumed with default (dist) types ─
+      # @elizaos/core imports @elizaos/logger and @elizaos/shared imports
+      # @elizaos/contracts. Both packages default their "." export "types" to
+      # ./dist/index.d.ts and only expose ./src under the "eliza-source"
+      # condition, which is NOT active in these per-package `tsc` builds — so
+      # their dist must exist before core/shared typecheck or it fails with
+      # TS2307 "Cannot find module". Both are leaf packages (no @elizaos/* deps).
+      - name: Build @elizaos/logger
+        run: |
+          cd eliza/packages/logger
+          bun run build
+
+      - name: Build @elizaos/contracts
+        run: |
+          cd eliza/packages/contracts
+          bun run build
+
+      # ── 6.6. Build eliza runtime packages needed by the agent image ─────────
       - name: Build @elizaos/core
         run: |
           cd eliza/packages/core

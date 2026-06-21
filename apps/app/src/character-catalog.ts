@@ -1,8 +1,8 @@
-import type { CharacterCatalogData } from "@elizaos/app-core";
 import {
   buildElizaCharacterCatalog,
   setDefaultAgentName,
 } from "@elizaos/shared";
+import type { CharacterCatalogData } from "@elizaos/ui";
 import { APP_CONFIG } from "./app-config";
 
 // Rebrand the default agent ("eliza") to this app's name (e.g. "Milady") before

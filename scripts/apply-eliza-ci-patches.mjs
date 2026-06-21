@@ -558,38 +558,41 @@ const requiredElectrobunConfigSnippets`,
       "eliza/packages/app-core/platforms/electrobun/scripts/stage-macos-release-artifacts.sh",
     ],
     [
-      'Get-ChildItem -Path "packages/app-core/platforms/electrobun/artifacts" -File -Filter "ElizaOSApp-Setup-*.exe"',
-      'Get-ChildItem -Path "eliza/packages/app-core/platforms/electrobun/artifacts" -File -Filter "ElizaOSApp-Setup-*.exe"',
+      'Get-ChildItem -Path "packages/app-core/platforms/electrobun/artifacts" -File -Filter "Milady-Setup-*.exe"',
+      'Get-ChildItem -Path "eliza/packages/app-core/platforms/electrobun/artifacts" -File -Filter "Milady-Setup-*.exe"',
     ],
     [
       'Get-ChildItem -Path "packages/app-core/platforms/electrobun/artifacts" -File -Filter "*-Setup-*.exe"',
-      'Get-ChildItem -Path "eliza/packages/app-core/platforms/electrobun/artifacts" -File -Filter "ElizaOSApp-Setup-*.exe"',
+      'Get-ChildItem -Path "eliza/packages/app-core/platforms/electrobun/artifacts" -File -Filter "Milady-Setup-*.exe"',
     ],
     [
       '$canonicalInstallers = Get-ChildItem -Path $artifactsDir -File -Filter "*-Setup-*.exe"',
-      '$canonicalInstallers = Get-ChildItem -Path $artifactsDir -File -Filter "ElizaOSApp-Setup-*.exe"',
+      '$canonicalInstallers = Get-ChildItem -Path $artifactsDir -File -Filter "Milady-Setup-*.exe"',
     ],
     [
       '$canonicalInstallerZips = Get-ChildItem -Path $artifactsDir -File -Filter "*-Setup-*.exe.zip"',
-      '$canonicalInstallerZips = Get-ChildItem -Path $artifactsDir -File -Filter "ElizaOSApp-Setup-*.exe.zip"',
+      '$canonicalInstallerZips = Get-ChildItem -Path $artifactsDir -File -Filter "Milady-Setup-*.exe.zip"',
     ],
     [
       "packages/app-core/platforms/electrobun/artifacts/*.exe",
       "eliza/packages/app-core/platforms/electrobun/artifacts/*.exe",
     ],
     [
-      "path: packages/app-core/platforms/electrobun/artifacts/public-canary-installer/ElizaOSApp-Setup-*.exe",
-      "path: eliza/packages/app-core/platforms/electrobun/artifacts/public-canary-installer/ElizaOSApp-Setup-*.exe",
+      "path: packages/app-core/platforms/electrobun/artifacts/public-canary-installer/Milady-Setup-*.exe",
+      "path: eliza/packages/app-core/platforms/electrobun/artifacts/public-canary-installer/Milady-Setup-*.exe",
     ],
     [
       "path: packages/app-core/platforms/electrobun/artifacts/public-canary-installer/*-Setup-*.exe",
-      "path: eliza/packages/app-core/platforms/electrobun/artifacts/public-canary-installer/ElizaOSApp-Setup-*.exe",
+      "path: eliza/packages/app-core/platforms/electrobun/artifacts/public-canary-installer/Milady-Setup-*.exe",
     ],
-    ['-name "*-Setup-*.exe" -o \\\\', '-name "ElizaOSApp-Setup-*.exe" -o \\\\'],
+    ['-name "*-Setup-*.exe" -o \\\\', '-name "Milady-Setup-*.exe" -o \\\\'],
     [
       '-name "*-Setup-*.exe.zip" -o \\\\',
-      '-name "ElizaOSApp-Setup-*.exe.zip" -o \\\\',
+      '-name "Milady-Setup-*.exe.zip" -o \\\\',
     ],
+    // Milady rebrands the macOS bundle identifier; the upstream release-check
+    // requires the eliza identifier, so rewrite the needle to milady's.
+    ['"identifier":"ai.elizaos.Eliza"', '"identifier":"ai.milady.app"'],
     [
       'const workspacePackageJson = path.resolve("packages/app-core/platforms/electrobun/package.json");',
       'const workspacePackageJson = path.resolve("eliza/packages/app-core/platforms/electrobun/package.json");',
