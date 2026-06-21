@@ -276,7 +276,7 @@ jobs:
       - name: Align nested eliza package resolution
         run: node scripts/align-eliza-ci-node-modules.mjs
 
-      - name: Build eliza packages required for the project build
+      - name: Build eliza packages required for typecheck
         if: ${{ hashFiles('eliza/packages/core/package.json') != '' }}
         run: |
           if [ ! -f eliza/packages/core/dist/index.node.js ] || [ ! -f eliza/packages/core/dist/index.d.ts ]; then

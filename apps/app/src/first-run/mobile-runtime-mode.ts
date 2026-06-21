@@ -1,8 +1,8 @@
+import { DEFAULT_DESKTOP_API_PORT } from "@elizaos/shared";
 import {
   dispatchAppEvent,
   MOBILE_RUNTIME_MODE_CHANGED_EVENT,
 } from "@elizaos/ui";
-import { DEFAULT_DESKTOP_API_PORT } from "@elizaos/shared";
 
 /**
  * Local-source copy of the mobile runtime-mode helpers `apps/app/src/main.tsx`

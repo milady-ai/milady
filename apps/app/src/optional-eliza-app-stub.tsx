@@ -1,3 +1,4 @@
+import type { DropStatus, MintResult } from "@elizaos/shared";
 import type {
   CompanionSceneStatus,
   CompanionShellComponentProps,
@@ -8,11 +9,11 @@ import type {
   WalletExportResult,
   WhitelistStatus,
 } from "@elizaos/ui/api";
-import type { DropStatus, MintResult } from "@elizaos/shared";
 
 // No upstream elizaOS export; local types for this stub's hook signature.
 type VincentStateHookArgs = Record<string, unknown>;
 type VincentStateHookResult = unknown;
+
 import type {
   WalletAddresses,
   WalletBalancesResponse,
