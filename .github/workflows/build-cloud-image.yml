@@ -163,6 +163,17 @@ jobs:
           cd eliza/packages/agent
           bun run build:docker-dist
 
+      - name: Build @elizaos/logger and @elizaos/contracts
+        run: |
+          # core (src/logger.ts) and shared (src/contracts/*) import
+          # @elizaos/logger and @elizaos/contracts (workspace:*). Both packages
+          # default their "." export "types" to ./dist and only expose ./src
+          # under the eliza-source condition, which is not active in these
+          # per-package tsc builds — so their dist must exist first or the build
+          # fails with TS2307. (Same fix as build-docker.yml.)
+          (cd eliza/packages/logger && bun run build)
+          (cd eliza/packages/contracts && bun run build)
+
       - name: Build @elizaos/core (includes agent-orchestrator)
         run: |
           export PATH="$GITHUB_WORKSPACE/eliza/node_modules/.bin:$GITHUB_WORKSPACE/eliza/packages/schemas/node_modules/.bin:$PATH"
