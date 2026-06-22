@@ -2739,6 +2739,15 @@ export default defineConfig({
   publicDir: path.resolve(here, "public"),
   define: {
     global: "globalThis",
+    // Build variant baked into the renderer so @elizaos/ui/build-variant's
+    // isStoreBuild()/getBuildVariant() resolve at runtime (they read ONLY this
+    // define — no env fallback). Without it the iOS build is always detected as
+    // "direct": store CSP is skipped and isNativeIosStoreBuild() is false, so
+    // the embedded on-device agent is never used. Mirrors eliza
+    // packages/app/vite.config.ts.
+    __ELIZA_BUILD_VARIANT__: JSON.stringify(
+      process.env.ELIZA_BUILD_VARIANT === "store" ? "store" : "direct",
+    ),
     // Mirror the branded TTS debug env into the client bundle so one env
     // enables UI + server TTS logs in dev.
     [`import.meta.env.${BRANDED_ENV.ttsDebug}`]: JSON.stringify(
