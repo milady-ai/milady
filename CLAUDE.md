@@ -70,6 +70,25 @@ bun run eliza:local        # clone ./eliza, link @elizaos/*, swap tsconfig
 bun run eliza:packages     # restore npm packages mode
 ```
 
+### Which app do you build/run? — follow the cwd
+
+- **At the Milady root (`/home/shaw/milady`), always build, run, test, and verify
+  the Milady (white-label) app.** That is the product here — its scripts set the
+  Milady brand (`ELIZA_NAMESPACE=milady`, `ELIZA_APP_ID=ai.milady.app`,
+  `ELIZA_URL_SCHEME=milady`).
+- **If the cwd is the eliza checkout (`/home/shaw/milady/eliza`), build, run,
+  test, and verify eliza itself — NOT Milady.** Use eliza's own scripts
+  (`ELIZA_NAMESPACE=eliza`); never invoke Milady's branded build from inside
+  eliza. Running a branded build against the shared eliza tree pollutes app
+  id / Android tree / desktop brand assets / state and boots the wrong product
+  (old UI, wrong identity, corrupted build). The brand guard
+  (`ELIZA_ANDROID_USE_APP_DIR`, `assertSharedTreeOnlyForEliza` in
+  `eliza/packages/app-core/scripts/run-mobile-build.mjs`) exists for this.
+
+The rule is simply: **the repo your cwd is in is the app you build** — Milady at
+the Milady root, eliza inside `eliza/`. The matching note lives in
+`eliza/CLAUDE.md` / `eliza/AGENTS.md`.
+
 ## Build & test
 
 ```bash
