@@ -45,6 +45,39 @@ const {
   _require.resolve("@elizaos/shared/runtime-env")
 )) as typeof import("@elizaos/shared/runtime-env");
 
+// Renderer build-manifest (issue #9309): emit `dist/eliza-renderer-build.json`
+// at the end of the production renderer build so the mobile/desktop
+// orchestrators in @elizaos/app-core can assert a FRESH (non-stale) renderer
+// was staged — otherwise the build fails loudly rather than shipping old UI.
+// The fingerprint logic lives in @elizaos/app-core's shared lib; reuse it (no
+// duplicate) by resolving the package dir and loading the plain-ESM `.mjs`
+// from either the local-mode source layout or the published dist layout. The
+// computed specifier + dynamic import keeps esbuild's config bundler from
+// statically rewriting it, and the guard makes it optional for packages-mode
+// web builds that never run the on-device staleness assertion.
+let writeRendererBuildManifest:
+  | ((distDir: string, meta?: Record<string, unknown>) => unknown)
+  | null = null;
+try {
+  const appCorePkgDir = path.dirname(
+    _require.resolve("@elizaos/app-core/package.json"),
+  );
+  const manifestLib = [
+    path.join(appCorePkgDir, "scripts/lib/renderer-build-manifest.mjs"),
+    path.join(appCorePkgDir, "dist/scripts/lib/renderer-build-manifest.mjs"),
+  ].find((candidate) => fs.existsSync(candidate));
+  if (manifestLib) {
+    const mod = (await import(manifestLib)) as {
+      writeRendererBuildManifest: NonNullable<typeof writeRendererBuildManifest>;
+    };
+    writeRendererBuildManifest = mod.writeRendererBuildManifest;
+  }
+} catch {
+  // Optional: a build without the shared lib (e.g. packages mode, no eliza/
+  // clone) simply skips the stamp; mobile builds run in local mode where it
+  // always resolves.
+}
+
 const here = path.dirname(fileURLToPath(import.meta.url));
 const miladyRoot = path.resolve(here, "../..");
 const capacitorCoreEntry = _require.resolve("@capacitor/core");
@@ -934,6 +967,52 @@ const IS_CAPACITOR_MOBILE_BUILD =
 const ELIZA_CAPACITOR_PLUGIN_STUB_PATTERN = IS_CAPACITOR_MOBILE_BUILD
   ? /^@elizaos\/capacitor-(?!(agent|llama)(?:$|\/)).+$/
   : /^@elizaos\/capacitor-.+$/;
+
+function rendererBuildManifestPlugin(): Plugin {
+  let outDir = "dist";
+  return {
+    name: "renderer-build-manifest",
+    apply: "build",
+    configResolved(config) {
+      outDir = config.build.outDir;
+    },
+    closeBundle() {
+      if (!writeRendererBuildManifest) return;
+      let commit =
+        process.env.GIT_COMMIT?.trim() || process.env.GIT_SHA?.trim() || null;
+      if (!commit) {
+        try {
+          const { execSync } = _require("node:child_process");
+          commit = execSync("git rev-parse HEAD", {
+            stdio: ["ignore", "pipe", "ignore"],
+          })
+            .toString()
+            .trim();
+        } catch {
+          commit = null;
+        }
+      }
+      try {
+        writeRendererBuildManifest(outDir, {
+          commit,
+          variant: process.env.ELIZA_BUILD_VARIANT ?? null,
+          capacitorTarget: process.env.ELIZA_CAPACITOR_BUILD_TARGET ?? null,
+          runtimeMode:
+            process.env.VITE_ELIZA_IOS_RUNTIME_MODE ??
+            process.env.VITE_ELIZA_ANDROID_RUNTIME_MODE ??
+            process.env.ELIZA_RUNTIME_MODE ??
+            null,
+        });
+      } catch (err) {
+        // Secondary single-file builds (e.g. model-tester) emit no index.html;
+        // those are non-app outputs and are skipped, not failed.
+        const message = err instanceof Error ? err.message : String(err);
+        if (message.includes("not a built renderer")) return;
+        throw err;
+      }
+    },
+  };
+}
 
 function appShellMetadataPlugin(): Plugin {
   const manifest = `${JSON.stringify(
@@ -2766,6 +2845,7 @@ export default defineConfig({
     ),
   },
   plugins: [
+    rendererBuildManifestPlugin(),
     appShellMetadataPlugin(),
     companionAssetsPlugin(),
     elizaCoreBrowserEntryFallbackPlugin(),
