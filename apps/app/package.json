@@ -33,14 +33,14 @@
     "build:web": "vite build"
   },
   "dependencies": {
-    "@capacitor/android": "8.4.0",
+    "@capacitor/android": "8.4.1",
     "@capacitor/app": "8.1.0",
     "@capacitor/background-runner": "^3.0.0",
     "@capacitor/barcode-scanner": "3.0.2",
     "@capacitor/browser": "8.0.3",
-    "@capacitor/core": "8.4.0",
+    "@capacitor/core": "8.4.1",
     "@capacitor/haptics": "8.0.2",
-    "@capacitor/ios": "8.4.0",
+    "@capacitor/ios": "8.4.1",
     "@capacitor/keyboard": "8.0.5",
     "@capacitor/preferences": "8.0.1",
     "@capacitor/push-notifications": "8.1.1",
