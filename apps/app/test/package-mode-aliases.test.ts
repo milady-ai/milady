@@ -98,6 +98,23 @@ describe("package mode aliases", () => {
     expect(macWindowCssText).toContain("--eliza-macos-frame-left-inset");
   });
 
+  it("wraps cloud connectors settings section with cloud providers", () => {
+    const connectorsIndexText = fs.readFileSync(
+      path.resolve(
+        appRoot,
+        "../../eliza/packages/ui/src/cloud/connectors/index.ts",
+      ),
+      "utf8",
+    );
+
+    expect(connectorsIndexText).toContain("CloudSettingsSectionShell");
+    expect(connectorsIndexText).toContain("CloudConnectorsSettingsSection");
+    expect(connectorsIndexText).toContain(
+      "Component: CloudConnectorsSettingsSection",
+    );
+    expect(connectorsIndexText).toContain("element: CloudConnectorsSection");
+  });
+
   it("imports app-shell component + state/api types from @elizaos/ui and @elizaos/shared", () => {
     const mainText = fs.readFileSync(
       path.join(appRoot, "src/main.tsx"),
