@@ -87,6 +87,9 @@ describe("package mode aliases", () => {
     expect(macWindowCssText).toContain(
       "html.eliza-electrobun-macos-titlebar .eliza-content-layout",
     );
+    expect(macWindowCssText).toContain(
+      'html.eliza-electrobun-macos-titlebar [data-testid="ui-shell-toggle"]',
+    );
     expect(macWindowCssText).toContain("--eliza-macos-frame-left-inset");
   });
 
