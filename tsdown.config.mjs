@@ -129,16 +129,44 @@ const allExternals = [
   upstashRedisExternal,
   pluginExternal,
   optionalAppExternal,
+  capacitorExternal,
   nodeRsExternal,
   napiRsExternal,
-  capacitorExternal,
 ];
+
+const toleratedServerDynamicImportMarkers = [
+  "ensure-text-to-speech-handler.ts",
+  "api/server.ts",
+  "runtime/eliza.ts",
+];
+
+function isToleratedServerDynamicImportLog(log) {
+  const code = log && typeof log === "object" ? log.code : null;
+  const rawMessage = log && typeof log === "object" ? log.message : "";
+  const message = String(rawMessage ?? "");
+  return (
+    code === "INEFFECTIVE_DYNAMIC_IMPORT" &&
+    toleratedServerDynamicImportMarkers.every((marker) =>
+      message.includes(marker),
+    )
+  );
+}
+
+const inputOptions = {
+  onLog(level, log, defaultHandler) {
+    const code = log && typeof log === "object" ? log.code : null;
+    if (code === "MIXED_EXPORT") return;
+    if (isToleratedServerDynamicImportLog(log)) return;
+    defaultHandler(level, log);
+  },
+};
 
 export default [
   {
     entry: appCoreEntry(".", "src/index.ts"),
     env,
     fixedExtension: false,
+    inputOptions,
     platform: "node",
     deps: { neverBundle: allExternals, onlyBundle: false },
   },
@@ -146,6 +174,7 @@ export default [
     entry: appCoreEntry("entry", "src/entry.ts"),
     env,
     fixedExtension: false,
+    inputOptions,
     platform: "node",
     deps: { neverBundle: allExternals, onlyBundle: false },
     outputOptions: { codeSplitting: false },
@@ -154,6 +183,7 @@ export default [
     entry: appCoreEntry("runtime/eliza", "src/runtime/eliza.ts"),
     env,
     fixedExtension: false,
+    inputOptions,
     platform: "node",
     deps: { neverBundle: allExternals, onlyBundle: false },
     outputOptions: { codeSplitting: false },
@@ -162,6 +192,7 @@ export default [
     entry: appCoreEntry("api/server", "src/api/server.ts"),
     env,
     fixedExtension: false,
+    inputOptions,
     platform: "node",
     deps: { neverBundle: allExternals, onlyBundle: false },
     // Disable code splitting to avoid circular imports in server.js.
