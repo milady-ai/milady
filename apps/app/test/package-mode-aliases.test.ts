@@ -62,6 +62,34 @@ describe("package mode aliases", () => {
     expect(mainText).not.toContain("@elizaos/ui/dist/styles/");
   });
 
+  it("marks macOS Electrobun shells for traffic-light-safe layout", () => {
+    const mainText = fs.readFileSync(
+      path.join(appRoot, "src/main.tsx"),
+      "utf8",
+    );
+    const contentLayoutText = fs.readFileSync(
+      path.resolve(
+        appRoot,
+        "../../eliza/packages/ui/src/layouts/content-layout/content-layout.tsx",
+      ),
+      "utf8",
+    );
+    const macWindowCssText = fs.readFileSync(
+      path.resolve(
+        appRoot,
+        "../../eliza/packages/ui/src/styles/electrobun-mac-window-drag.css",
+      ),
+      "utf8",
+    );
+
+    expect(mainText).toContain("eliza-electrobun-macos-titlebar");
+    expect(contentLayoutText).toContain("eliza-content-layout");
+    expect(macWindowCssText).toContain(
+      "html.eliza-electrobun-macos-titlebar .eliza-content-layout",
+    );
+    expect(macWindowCssText).toContain("--eliza-macos-frame-left-inset");
+  });
+
   it("imports app-shell component + state/api types from @elizaos/ui and @elizaos/shared", () => {
     const mainText = fs.readFileSync(
       path.join(appRoot, "src/main.tsx"),

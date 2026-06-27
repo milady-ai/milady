@@ -61,6 +61,7 @@ test("desktop titlebar keeps navigation clickable and title area draggable", asy
 
   const html = page.locator("html");
   await expect(html).toHaveClass(/eliza-electrobun-frameless/);
+  await expect(html).toHaveClass(/eliza-electrobun-macos-titlebar/);
   await expect(html).toHaveClass(/eliza-electrobun-custom-titlebar/);
 
   const titlebar = page.getByTestId("desktop-window-titlebar");
@@ -99,4 +100,29 @@ test("desktop titlebar keeps navigation clickable and title area draggable", asy
   await page.mouse.up();
 
   await expect(page).toHaveURL(/\/chat$/);
+});
+
+test("settings content clears macOS traffic lights", async ({ page }) => {
+  await openAppPath(page, "/settings");
+
+  const html = page.locator("html");
+  await expect(html).toHaveClass(/eliza-electrobun-macos-titlebar/);
+
+  const settingsHeading = page.getByRole("heading", {
+    exact: true,
+    name: "Settings",
+  });
+  await expect(settingsHeading).toBeVisible();
+
+  const leftInset = await page.evaluate(() => {
+    const value = getComputedStyle(document.documentElement)
+      .getPropertyValue("--eliza-macos-frame-left-inset")
+      .trim();
+    return Number.parseFloat(value);
+  });
+  const headingBox = await settingsHeading.boundingBox();
+  expect(headingBox, "Expected Settings heading bounds").not.toBeNull();
+  if (!headingBox) return;
+
+  expect(headingBox.x).toBeGreaterThanOrEqual(leftInset);
 });

@@ -268,7 +268,8 @@ function isPillWindowShellRoute(route: unknown): boolean {
 }
 
 /**
- * Adds `eliza-electrobun-frameless` for CSS `-webkit-app-region` (Chromium/CEF).
+ * Adds macOS Electrobun classes for CSS `-webkit-app-region` (Chromium/CEF)
+ * and traffic-light-safe content insets.
  * macOS WKWebView move/resize are still driven by native overlays in
  * window-effects.mm; this class mainly marks the shell and helps non-WK engines.
  */
@@ -282,6 +283,7 @@ function shouldEnableElectrobunMacWindowDrag(): boolean {
 
 if (shouldEnableElectrobunMacWindowDrag()) {
   document.documentElement.classList.add("eliza-electrobun-frameless");
+  document.documentElement.classList.add("eliza-electrobun-macos-titlebar");
 }
 
 // Dev escape hatch: ?reset forces a truly fresh onboarding session by clearing
