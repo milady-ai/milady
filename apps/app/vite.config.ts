@@ -162,9 +162,9 @@ function tryResolve(id: string): string | undefined {
 const capacitorKeyboardEntry = tryResolve("@capacitor/keyboard");
 const capacitorPreferencesEntry = tryResolve("@capacitor/preferences");
 const capacitorAppEntry = tryResolve("@capacitor/app");
-// `@elizaos/app-core` is always real. `@elizaos/app-wallet` is required by
-// onboarding callbacks + AppContext (useWalletState), so resolve it real
-// when present. `app-hyperscape` is real when its package is present.
+// `@elizaos/app-core` is always real. `app-hyperscape` is real when its package
+// is present. Wallet UI is the plugin package (`@elizaos/plugin-wallet-ui`);
+// `@elizaos/app-wallet` is a compatibility stub in Milady package mode.
 // Auto-detect by walking node_modules/@elizaos/* directly (don't follow
 // symlinks via require.resolve — those land at the real source path,
 // which can be in eliza/packages/ instead of eliza/plugins/, missing
@@ -192,11 +192,9 @@ function elizaAppPackageExists(name: string): boolean {
   return tryResolve(`@elizaos/${name}/package.json`) !== undefined;
 }
 const shouldResolveRealHyperscapeApp = elizaAppPackageExists("app-hyperscape");
-const shouldResolveRealWalletApp = elizaAppPackageExists("app-wallet");
 const optionalElizaAppAliasPattern = (() => {
   const realApps = ["core"];
   if (shouldResolveRealHyperscapeApp) realApps.push("hyperscape");
-  if (shouldResolveRealWalletApp) realApps.push("wallet");
   return new RegExp(`^@elizaos\\/app-(?!(${realApps.join("|")})(\\/|$)).+$`);
 })();
 
@@ -538,6 +536,7 @@ function resolveLocalElizaAppAliases(): Alias[] {
   }
 
   const aliases: Alias[] = [];
+  const pluginUiPackagesUsedByMiladyShell = new Set(["plugin-wallet-ui"]);
   const packageRoots = [
     { dir: path.join(localElizaRoot, "plugins"), appPrefixOnly: true },
     { dir: path.join(localElizaRoot, "apps"), appPrefixOnly: false },
@@ -550,7 +549,11 @@ function resolveLocalElizaAppAliases(): Alias[] {
       withFileTypes: true,
     })) {
       if (!entry.isDirectory()) continue;
-      if (packageRoot.appPrefixOnly && !entry.name.startsWith("app-")) {
+      if (
+        packageRoot.appPrefixOnly &&
+        !entry.name.startsWith("app-") &&
+        !pluginUiPackagesUsedByMiladyShell.has(entry.name)
+      ) {
         continue;
       }
       const pkgPath = path.join(packageRoot.dir, entry.name, "package.json");

@@ -17,15 +17,26 @@ describe("package mode aliases", () => {
     ]);
   });
 
-  it("keeps local wallet source real when available because it is enabled by default", () => {
+  it("keeps the wallet UI plugin real because it is enabled by default", () => {
     const viteConfigText = fs.readFileSync(
       path.join(appRoot, "vite.config.ts"),
       "utf8",
     );
+    const mainText = fs.readFileSync(
+      path.join(appRoot, "src/main.tsx"),
+      "utf8",
+    );
+    const walletShimText = fs.readFileSync(
+      path.join(appRoot, "src/types/elizaos-plugin-wallet-ui-register.d.ts"),
+      "utf8",
+    );
 
-    expect(viteConfigText).toContain("shouldResolveRealWalletApp");
-    expect(viteConfigText).toContain('elizaAppPackageExists("app-wallet")');
-    expect(viteConfigText).toContain('"plugins"');
+    expect(mainText).toContain('import "@elizaos/plugin-wallet-ui/register"');
+    expect(viteConfigText).toContain("pluginUiPackagesUsedByMiladyShell");
+    expect(viteConfigText).toContain('"plugin-wallet-ui"');
+    expect(walletShimText).toContain(
+      'declare module "@elizaos/plugin-wallet-ui/register"',
+    );
   });
 
   it("stubs unpublished native plugin packages", () => {
