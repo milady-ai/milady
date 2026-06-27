@@ -30,7 +30,8 @@
     "cap:sync:android": "node ../../scripts/run-eliza-app-core-script.mjs ensure-capacitor-platform.mjs android && capacitor sync android",
     "cap:open:ios": "capacitor open ios",
     "cap:open:android": "capacitor open android",
-    "build:web": "vite build"
+    "build:web": "vite build",
+    "brand:assets": "node scripts/generate-brand-assets.mjs"
   },
   "dependencies": {
     "@capacitor/android": "8.4.0",

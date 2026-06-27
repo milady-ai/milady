@@ -67,6 +67,34 @@ function log(message, level = "info") {
  * filesystem path it would resolve to under tsconfig path aliases.
  * Returns null for non-workspace specifiers we shouldn't try to resolve.
  */
+function resolveFromPackageExports(pkgRoot, subpath) {
+  const pkgJsonPath = path.join(pkgRoot, "package.json");
+  if (!fs.existsSync(pkgJsonPath)) return null;
+  let pkg;
+  try {
+    pkg = JSON.parse(fs.readFileSync(pkgJsonPath, "utf8"));
+  } catch {
+    return null;
+  }
+  const exports = pkg.exports;
+  if (!exports || typeof exports !== "object") return null;
+
+  const entry = exports[`./${subpath}`];
+  if (!entry) return null;
+
+  const pick =
+    typeof entry === "string"
+      ? entry
+      : (entry["eliza-source"]?.import ??
+        entry["eliza-source"]?.default ??
+        entry.import ??
+        entry.default);
+  if (typeof pick !== "string") return null;
+
+  const resolved = path.join(pkgRoot, pick);
+  return fs.existsSync(resolved) ? resolved : null;
+}
+
 function resolveBareSpecifier(specifier) {
   const match = specifier.match(/^@elizaos\/([^/]+)\/(.+)$/);
   if (!match) return null;
@@ -76,6 +104,10 @@ function resolveBareSpecifier(specifier) {
   // but the resolver maps back to source.
   const pkgRoot = path.join(PACKAGES_DIR, pkgName);
   if (!fs.existsSync(pkgRoot)) return null;
+
+  const exportPath = resolveFromPackageExports(pkgRoot, subpath);
+  if (exportPath) return { ok: true, path: exportPath };
+
   const srcRoot = path.join(pkgRoot, "src");
   const candidates = [
     `${subpath}.ts`,

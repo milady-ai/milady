@@ -10,8 +10,49 @@ const repoRoot = path.resolve(__dirname, "..");
 const optionalChecks = [
   "cleanup-desktop-orphans.mjs",
   "check-eliza-git-freshness.mjs",
+  "ensure-required-eliza-plugin-builds.mjs",
   "check-plugin-dist-staleness.mjs",
 ];
+
+if (process.platform === "darwin") {
+  const brandAssetsScript = path.join(
+    repoRoot,
+    "apps/app/scripts/generate-brand-assets.mjs",
+  );
+  if (existsSync(brandAssetsScript)) {
+    await new Promise((resolve, reject) => {
+      const child = spawn(process.execPath, [brandAssetsScript], {
+        cwd: path.join(repoRoot, "apps/app"),
+        env: process.env,
+        stdio: "inherit",
+      });
+      child.on("error", (error) => {
+        reject(
+          new Error(`generate-brand-assets.mjs failed to spawn: ${error.message}`),
+        );
+      });
+      child.on("exit", (code, signal) => {
+        if (signal) {
+          reject(
+            new Error(
+              `generate-brand-assets.mjs exited due to signal ${signal}`,
+            ),
+          );
+          return;
+        }
+        if ((code ?? 1) !== 0) {
+          reject(
+            new Error(
+              `generate-brand-assets.mjs exited with code ${code ?? 1}`,
+            ),
+          );
+          return;
+        }
+        resolve();
+      });
+    });
+  }
+}
 
 for (const checkName of optionalChecks) {
   const checkPath = path.join(repoRoot, "scripts", checkName);

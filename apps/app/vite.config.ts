@@ -277,6 +277,19 @@ function isToleratedIneffectiveDynamicImportWarning(text: string): boolean {
   );
 }
 
+function isViteDynamicImportAnalysisWarning(text: string): boolean {
+  if (!text.includes("dynamic import cannot be analyzed by Vite")) {
+    return false;
+  }
+  // Fallback path only: dist/node dynamic imports (plugin loader, AI providers).
+  // Primary renderer bundle uses index.browser.ts — these should not appear in dev.
+  return (
+    text.includes("@elizaos/core") ||
+    text.includes("index.node.js") ||
+    text.includes("index.browser.js")
+  );
+}
+
 function isKnownToleratedBuildWarning(message: unknown): boolean {
   const text = stringifyBuildLogMessage(message);
   if (isThreeVrmWebGpuExportWarning(text)) {
@@ -288,7 +301,8 @@ function isKnownToleratedBuildWarning(message: unknown): boolean {
   return (
     isPgliteEvalWarning(text) ||
     isStaticLazyImportCollisionWarning(text) ||
-    isToleratedIneffectiveDynamicImportWarning(text)
+    isToleratedIneffectiveDynamicImportWarning(text) ||
+    isViteDynamicImportAnalysisWarning(text)
   );
 }
 
@@ -684,6 +698,10 @@ function resolveLocalAppCoreAliases(): Alias[] {
       replacement: resolveElizaCoreBundlePath(),
     },
     {
+      find: /^@elizaos\/core\/node$/,
+      replacement: resolveElizaCoreBundlePath(),
+    },
+    {
       find: /^@elizaos\/shared\/character-presets$/,
       replacement: publishedSharedCharacterPresetsEntry,
     },
@@ -883,12 +901,6 @@ function resolveAppBrandingForViteConfig() {
     appName: appConfig.appName,
     orgName: appConfig.orgName,
     repoName: appConfig.repoName,
-    docsUrl: "https://docs.elizaos.ai",
-    appUrl: "https://app.elizaos.ai",
-    bugReportUrl: "https://github.com/elizaOS/eliza/issues/new",
-    hashtag: "#elizaOS",
-    fileExtension: ".eliza-agent",
-    packageScope: "elizaos",
     ...appConfig.branding,
   };
 }
@@ -1378,70 +1390,59 @@ function isElizaCoreBrowserDistId(id: string | undefined): boolean {
 
 /**
  * Resolved file path for bundling `@elizaos/core` in the renderer.
- * Linked eliza checkouts sometimes omit `dist/` until `bun run build`;
- * prefer the source browser entry when present, otherwise fall back to
- * built artifacts and then the bun install cache copy.
+ * Always prefer the browser entry (source → dist → bun cache). The node
+ * bundle is server-only; shipping it to the client pulls in runtime
+ * dynamic imports Vite cannot analyze and bloats the renderer chunk.
+ * nativeModuleStubPlugin + missing-export stubs cover gaps in the browser entry.
  */
 function resolveElizaCoreBundlePath(): string {
   const pkgDir = tryResolveElizaCorePkgDir();
-  // Prefer the Node entry for the renderer bundle when running against a
-  // linked eliza checkout. Upstream's hand-curated index.browser.ts misses
-  // many symbols that server-side modules (statically reachable from the
-  // renderer's dep graph) re-export — fixing each one is whack-a-mole. The
-  // Node entry has the full surface; nativeModuleStubPlugin + the rollup
-  // externals already neutralize the Node-only API surface, and tree-shaking
-  // drops unused code.
-  if (pkgDir) {
-    const nodeEntry = path.join(pkgDir, "dist/node/index.node.js");
-    if (fs.existsSync(nodeEntry)) return nodeEntry;
-  }
+
   const sourceBrowserEntry = resolveElizaCoreSourceBrowserPath();
   if (sourceBrowserEntry) return sourceBrowserEntry;
+
   if (pkgDir) {
     const browserEntry = path.join(pkgDir, "dist/browser/index.browser.js");
-    const nodeEntry = path.join(pkgDir, "dist/node/index.node.js");
     const rootBrowserEntry = path.join(pkgDir, "dist/index.browser.js");
-    const rootNodeEntry = path.join(pkgDir, "dist/index.node.js");
-    const hasBrowserShimTarget = fs.existsSync(browserEntry);
-    const hasNodeShimTarget = fs.existsSync(nodeEntry);
     if (fs.existsSync(browserEntry)) return browserEntry;
-    if (fs.existsSync(rootBrowserEntry) && hasBrowserShimTarget)
+    if (fs.existsSync(rootBrowserEntry) && fs.existsSync(browserEntry)) {
       return rootBrowserEntry;
+    }
+  }
+
+  const bunBrowser = findElizaCoreBundleInBunStore("browser");
+  if (bunBrowser) return bunBrowser;
+
+  if (pkgDir) {
+    const nodeEntry = path.join(pkgDir, "dist/node/index.node.js");
+    const rootNodeEntry = path.join(pkgDir, "dist/index.node.js");
     if (fs.existsSync(nodeEntry)) {
       console.warn(
-        "[milady][vite] @elizaos/core dist/browser is missing; using dist/node for the client bundle. " +
-          "For a linked eliza workspace, run `bun run build` in that checkout (e.g. packages/core). " +
-          "Or reinstall with ELIZA_SKIP_LOCAL_ELIZA=1 to use the published npm package.",
+        "[milady][vite] @elizaos/core browser entry unavailable; falling back to dist/node for the client bundle. " +
+          "Run `bun run build` in packages/core (or the eliza checkout) to emit dist/browser.",
       );
       return nodeEntry;
     }
-    if (fs.existsSync(rootNodeEntry) && hasNodeShimTarget) {
+    if (fs.existsSync(rootNodeEntry)) {
       console.warn(
-        "[milady][vite] @elizaos/core dist/browser is missing; using dist/index.node.js for the client bundle. " +
-          "This usually means the local core workspace only has a flat dist/ build artifact.",
+        "[milady][vite] @elizaos/core browser entry unavailable; using dist/index.node.js for the client bundle.",
       );
       return rootNodeEntry;
     }
   }
-  const bunBrowser = findElizaCoreBundleInBunStore("browser");
-  if (bunBrowser) {
-    console.warn(
-      `[milady][vite] @elizaos/core not resolvable from apps/app${pkgDir ? ` (pkgDir=${pkgDir} has no dist/)` : ""}; using bun cache build at ${bunBrowser}. ` +
-        "Run `bun run build` in your eliza checkout or ELIZA_SKIP_LOCAL_ELIZA=1 bun install to align versions.",
-    );
-    return bunBrowser;
-  }
+
   const bunNode = findElizaCoreBundleInBunStore("node");
   if (bunNode) {
     console.warn(
-      `[milady][vite] @elizaos/core not resolvable from apps/app${pkgDir ? ` (pkgDir=${pkgDir})` : ""}; using bun cache node bundle at ${bunNode}.`,
+      `[milady][vite] @elizaos/core browser entry unavailable; using bun cache node bundle at ${bunNode}.`,
     );
     return bunNode;
   }
+
   throw new Error(
-    `[milady][vite] @elizaos/core has no built artifacts${pkgDir ? ` under ${pkgDir}` : " (not resolvable from apps/app)"} and none in node_modules/.bun. ` +
-      "Expected src/index.browser.ts, dist/browser/index.browser.js, dist/index.browser.js, dist/node/index.node.js, or dist/index.node.js. " +
-      "Build your local eliza workspace or run `ELIZA_SKIP_LOCAL_ELIZA=1 bun install`.",
+    `[milady][vite] @elizaos/core has no browser artifacts${pkgDir ? ` under ${pkgDir}` : " (not resolvable from apps/app)"} and none in node_modules/.bun. ` +
+      "Expected src/index.browser.ts or dist/browser/index.browser.js. " +
+      "Build packages/core in your eliza checkout or run `ELIZA_SKIP_LOCAL_ELIZA=1 bun install`.",
   );
 }
 
@@ -3246,18 +3247,6 @@ export default defineConfig({
           /dynamically imported by[\s\S]*but also statically imported by/.test(
             message,
           )
-        )
-          return;
-        // @elizaos/core's importAiProvider (features/documents/llm.ts) lazy-loads
-        // AI SDK providers by string specifier: `import(/* @vite-ignore */ spec)`.
-        // The /* @vite-ignore */ is present in source but Bun.build strips it when
-        // minifying dist/browser/index.browser.js, so vite:import-analysis re-warns
-        // (only in local mode — the symlinked core realpath has no node_modules
-        // segment so Vite's auto-suppression misses it). The import is intentional
-        // and resolves correctly at runtime.
-        if (
-          warning.plugin === "vite:import-analysis" &&
-          /dynamic import cannot be analyzed by Vite/.test(message)
         )
           return;
         defaultHandler(warning);

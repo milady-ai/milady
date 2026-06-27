@@ -272,7 +272,9 @@
     "dompurify": "3.4.0",
     "@solana/web3.js": "1.98.4",
     "@rollup/wasm-node": "4.60.3",
-    "rollup": "npm:@rollup/wasm-node@4.60.3"
+    "rollup": "npm:@rollup/wasm-node@4.60.3",
+    "@elizaos/plugin-agent-skills": "alpha",
+    "@elizaos/app-core": "alpha"
   },
   "patchedDependencies": {
     "@noble/curves@2.0.1": "patches/@noble%2Fcurves@2.0.1.patch",

@@ -43,6 +43,18 @@ declare module "@elizaos/app-core" {
     [key: string]: unknown;
   }
   export interface BrandingConfig {
+    appName?: string;
+    frameworkName?: string;
+    splashBrandImage?: string;
+    orgName?: string;
+    repoName?: string;
+    docsUrl?: string;
+    appUrl?: string;
+    bugReportUrl?: string;
+    hashtag?: string;
+    fileExtension?: string;
+    packageScope?: string;
+    cloudOnly?: boolean;
     [key: string]: unknown;
   }
   export interface CharacterCatalogData {

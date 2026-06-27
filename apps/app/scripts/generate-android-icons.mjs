@@ -1,8 +1,9 @@
 /**
- * Generate Android launcher icons from the source icon in public/.
+ * Generate Android launcher icons from public/android-chrome-512x512.png.
  *
- * Run after `cap sync android` to replace the default Capacitor icons
- * with the Milady branding. Requires `sharp` (already a project dep).
+ * Run `bun run brand:assets` first so that file comes from
+ * public/brand/icons/milady-icon-*.png, not upstream elizaOS assets.
+ * Then run after `cap sync android`. Requires `sharp` (root dep).
  *
  * Usage: node apps/app/scripts/generate-android-icons.mjs
  */

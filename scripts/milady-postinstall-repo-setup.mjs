@@ -58,6 +58,7 @@ const packageSafeBridgePatchScripts = [
   "patch-elizaos-app-core-native-browser-package.mjs",
   "patch-noble-curves-hashes-v2.mjs",
   "patch-elizaos-app-core-windows-shell.mjs",
+  "patch-elizaos-splash-branding.mjs",
   "patch-elizaos-plugin-browser-bridge-package.mjs",
   // milady-only fix for claude.ai OAuth tier — see script header.
   "patch-coding-agent-adapters-tools-flag.mjs",

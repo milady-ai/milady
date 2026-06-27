@@ -85,6 +85,15 @@ export const ELIZA_BUILD_STEPS = [
     label: "@elizaos/skills",
   },
   {
+    // plugin-browser and other runtime-staged plugins import @elizaos/vault
+    // from workspace symlinks; without dist/index.js Bun cannot resolve the
+    // package when plugins are copied into ~/.local/state/milady/plugins/.
+    check: path.join("packages", "vault", "dist", "index.js"),
+    cwd: path.join("packages", "vault"),
+    args: ["run", "build"],
+    label: "@elizaos/vault",
+  },
+  {
     // plugin-elizacloud imports types from @elizaos/cloud-sdk; fresh CI
     // checkouts need the SDK declarations before plugin builds run.
     // The eliza/cloud/ tree is sourced from a separate peer repo and is
@@ -254,11 +263,30 @@ const ELIZA_LOCAL_EMBEDDING_PLUGIN_BUILD = {
   ),
   args: ["run", "build"],
 };
+// plugin-lifeops imports @elizaos/plugin-elizacloud/cloud/lifeops-schedule-sync-contracts
+// at runtime. That subpath only exists after plugin-elizacloud's build.ts emits dist/.
+// setup-upstreams skips plugin-elizacloud in ensurePluginBuildOutputs when the peer
+// cloud-sdk source tree is absent, so we rebuild this artifact explicitly.
+const ELIZA_ELIZACLOUD_PLUGIN_BUILD = {
+  label: "@elizaos/plugin-elizacloud",
+  cwd: path.join("eliza", "plugins", "plugin-elizacloud"),
+  manifest: path.join("eliza", "plugins", "plugin-elizacloud", "package.json"),
+  artifact: path.join(
+    "eliza",
+    "plugins",
+    "plugin-elizacloud",
+    "dist",
+    "cloud",
+    "lifeops-schedule-sync-contracts.js",
+  ),
+  args: ["run", "build"],
+};
 const ELIZA_REQUIRED_PLUGIN_BUILDS = [
   ELIZA_AGENT_SKILLS_PLUGIN_BUILD,
   ELIZA_TELEGRAM_PLUGIN_BUILD,
   ELIZA_EDGE_TTS_PLUGIN_BUILD,
   ELIZA_LOCAL_EMBEDDING_PLUGIN_BUILD,
+  ELIZA_ELIZACLOUD_PLUGIN_BUILD,
 ];
 
 function toDisplayPath(targetPath) {
@@ -1990,6 +2018,7 @@ export async function setupUpstreams(repoRoot = DEFAULT_REPO_ROOT) {
 
   await ensureElizaDependencies(elizaRoot);
   await ensureElizaBuildOutputs(elizaRoot);
+  await ensureRequiredElizaPluginBuilds(repoRoot);
 
   ensurePluginDependencyLinks(repoRoot, pluginsRoot, {
     excludedPackageNames: unavailablePluginPackageNames,

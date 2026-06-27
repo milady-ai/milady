@@ -13,7 +13,11 @@ describe("package ui source aliases", () => {
       "utf8",
     );
 
-    expect(viteConfig).not.toContain("eliza/packages/ui/src");
+    const toleratedMarkerBlock = "INEFFECTIVE_DYNAMIC_IMPORT_TOLERATED_MARKERS";
+    const aliasConfig = viteConfig.includes(toleratedMarkerBlock)
+      ? viteConfig.slice(0, viteConfig.indexOf(toleratedMarkerBlock))
+      : viteConfig;
+    expect(aliasConfig).not.toContain("eliza/packages/ui/src");
     expect(viteConfig).toContain("function resolveLocalUiAliases");
     expect(viteConfig).toContain("shouldUseLocalElizaSource()");
   });

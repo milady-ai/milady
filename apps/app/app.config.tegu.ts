@@ -57,8 +57,8 @@ const config = {
 
   web: {
     shortName: "Milady",
-    themeColor: "#08080a",
-    backgroundColor: "#0a0a0a",
+    themeColor: "#F0B90B",
+    backgroundColor: "#000000",
     shareImagePath: "/og-image.png",
   },
 
@@ -97,6 +97,8 @@ const config = {
 
   branding: {
     appName: "Milady",
+    frameworkName: "elizaOS",
+    splashBrandImage: "/splash-brand.webp",
     orgName: "milady-ai",
     repoName: "milady",
     docsUrl: "https://docs.milady.ai",

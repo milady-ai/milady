@@ -57,10 +57,101 @@ function findBunStorePackage(scope, packageName) {
     .map((entry) =>
       path.join(bunStoreDir, entry.name, "node_modules", scope, packageName),
     )
-    .filter((candidate) => pathExists(path.join(candidate, "package.json")))
-    .sort((left, right) => right.localeCompare(left));
+    .filter((candidate) => pathExists(path.join(candidate, "package.json")));
 
-  return candidates[0] ?? null;
+  return pickPreferredStorePackage(candidates);
+}
+
+function readPackageVersion(packageDir) {
+  try {
+    const manifest = JSON.parse(
+      fs.readFileSync(path.join(packageDir, "package.json"), "utf8"),
+    );
+    return typeof manifest.version === "string" ? manifest.version : "";
+  } catch {
+    return "";
+  }
+}
+
+function pickPreferredStorePackage(candidates) {
+  if (candidates.length === 0) return null;
+  const scored = candidates.map((candidate) => {
+    const version = readPackageVersion(candidate);
+    return {
+      candidate,
+      version,
+      preferred: version.includes("alpha"),
+    };
+  });
+  scored.sort((left, right) => {
+    if (left.preferred !== right.preferred) {
+      return left.preferred ? -1 : 1;
+    }
+    return right.version.localeCompare(left.version);
+  });
+  return scored[0]?.candidate ?? null;
+}
+
+function repairNestedAgentDependencies() {
+  if (!pathExists(bunStoreDir)) return 0;
+
+  const nestedPackages = [
+    "plugin-agent-skills",
+    "core",
+    "shared",
+    "plugin-sql",
+    "vault",
+  ];
+  let relinked = 0;
+
+  for (const entry of fs.readdirSync(bunStoreDir, { withFileTypes: true })) {
+    if (!entry.isDirectory() || !entry.name.startsWith("@elizaos+agent@")) {
+      continue;
+    }
+
+    const nestedScopeDir = path.join(
+      bunStoreDir,
+      entry.name,
+      "node_modules",
+      "@elizaos",
+    );
+    if (!pathExists(nestedScopeDir)) continue;
+
+    for (const packageName of nestedPackages) {
+      const linkPath = path.join(nestedScopeDir, packageName);
+      let stat;
+      try {
+        stat = fs.lstatSync(linkPath);
+      } catch {
+        continue;
+      }
+      if (!stat.isSymbolicLink()) continue;
+
+      const preferred = findBunStorePackage("@elizaos", packageName);
+      if (!preferred) continue;
+
+      let currentReal;
+      try {
+        currentReal = fs.realpathSync(linkPath);
+      } catch {
+        continue;
+      }
+      if (currentReal === preferred) continue;
+
+      const currentVersion = readPackageVersion(currentReal);
+      const preferredVersion = readPackageVersion(preferred);
+      const shouldRelink =
+        currentVersion.includes("beta") && preferredVersion.includes("alpha");
+      if (!shouldRelink) continue;
+
+      fs.unlinkSync(linkPath);
+      const nextTarget = path.relative(path.dirname(linkPath), preferred);
+      symlinkPackageDir(nextTarget, linkPath);
+      relinked += 1;
+    }
+  }
+
+  return relinked;
 }
 
 function symlinkPackageDir(target, linkPath) {
@@ -218,6 +309,7 @@ for (const nodeModulesDir of collectNodeModulesDirs()) {
   }
 }
 relinked += ensureDeclaredPackageLinks();
+relinked += repairNestedAgentDependencies();
 
 if (relinked === 0 && removed === 0) {
   console.log(`${LOG_PREFIX} no stale local package links found.`);

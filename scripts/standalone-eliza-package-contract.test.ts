@@ -268,6 +268,22 @@ test("local eliza source clone target remains explicit and configurable", () => 
   assert.match(helper, /MILADY_ELIZA_GIT_URL/);
 });
 
+test("setup-upstreams builds @elizaos/vault for runtime-staged plugins", () => {
+  const setupScript = read("scripts/setup-upstreams.mjs");
+  assert.match(setupScript, /packages",\s*"vault",\s*"dist",\s*"index\.js"/);
+  assert.match(setupScript, /label:\s*"@elizaos\/vault"/);
+});
+
+test("setup-upstreams builds plugin-elizacloud lifeops contract subpath", () => {
+  const setupScript = read("scripts/setup-upstreams.mjs");
+  assert.match(
+    setupScript,
+    /lifeops-schedule-sync-contracts\.js/,
+    "plugin-lifeops needs @elizaos/plugin-elizacloud/cloud/lifeops-schedule-sync-contracts at runtime",
+  );
+  assert.match(setupScript, /ensureRequiredElizaPluginBuilds\(repoRoot\)/);
+});
+
 test("package-mode install repairs stale local node_modules links", () => {
   const sourceModeScript = read("scripts/eliza-source-mode.mjs");
   const postinstallScript = read("scripts/milady-postinstall-repo-setup.mjs");
