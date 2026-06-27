@@ -74,6 +74,13 @@ describe("package mode aliases", () => {
       ),
       "utf8",
     );
+    const shellHeaderControlsText = fs.readFileSync(
+      path.resolve(
+        appRoot,
+        "../../eliza/packages/ui/src/components/shell/ShellHeaderControls.tsx",
+      ),
+      "utf8",
+    );
     const macWindowCssText = fs.readFileSync(
       path.resolve(
         appRoot,
@@ -84,11 +91,9 @@ describe("package mode aliases", () => {
 
     expect(mainText).toContain("eliza-electrobun-macos-titlebar");
     expect(contentLayoutText).toContain("eliza-content-layout");
+    expect(shellHeaderControlsText).toContain("data-window-titlebar-padding");
     expect(macWindowCssText).toContain(
       "html.eliza-electrobun-macos-titlebar .eliza-content-layout",
-    );
-    expect(macWindowCssText).toContain(
-      'html.eliza-electrobun-macos-titlebar [data-testid="ui-shell-toggle"]',
     );
     expect(macWindowCssText).toContain("--eliza-macos-frame-left-inset");
   });
