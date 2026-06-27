@@ -138,23 +138,33 @@ function patchDevPlatform(devPlatformPath) {
   next = replaceIfPresent(
     next,
     'const viteWatch =\n  process.env.ELIZA_DESKTOP_VITE_WATCH === "1" ||\n  process.env.ELIZA_DESKTOP_VITE_WATCH === "1";',
+    'const viteWatch = process.env.ELIZA_DESKTOP_VITE_WATCH === "1";',
+  );
+  next = replaceIfPresent(
+    next,
     'const viteWatch =\n  process.env.ELIZA_DESKTOP_VITE_WATCH === "1" ||\n  process.env.MILADY_DESKTOP_VITE_WATCH === "1";',
+    'const viteWatch = process.env.ELIZA_DESKTOP_VITE_WATCH === "1";',
   );
 
   next = replaceIfPresent(
     next,
     'const viteRollupWatch =\n  viteWatch &&\n  (viteRollupWatchCli ||\n    process.env.ELIZA_DESKTOP_VITE_BUILD_WATCH === "1" ||\n    process.env.ELIZA_DESKTOP_VITE_BUILD_WATCH === "1");',
+    'const viteRollupWatch =\n  viteWatch &&\n  (viteRollupWatchCli ||\n    process.env.ELIZA_DESKTOP_VITE_BUILD_WATCH === "1");',
+  );
+  next = replaceIfPresent(
+    next,
     'const viteRollupWatch =\n  viteWatch &&\n  (viteRollupWatchCli ||\n    process.env.ELIZA_DESKTOP_VITE_BUILD_WATCH === "1" ||\n    process.env.MILADY_DESKTOP_VITE_BUILD_WATCH === "1");',
+    'const viteRollupWatch =\n  viteWatch &&\n  (viteRollupWatchCli ||\n    process.env.ELIZA_DESKTOP_VITE_BUILD_WATCH === "1");',
   );
 
   ensureContains(
     next,
-    'process.env.MILADY_DESKTOP_VITE_WATCH === "1"',
+    'const viteWatch = process.env.ELIZA_DESKTOP_VITE_WATCH === "1";',
     devPlatformPath,
   );
   ensureContains(
     next,
-    'process.env.MILADY_DESKTOP_VITE_BUILD_WATCH === "1"',
+    'process.env.ELIZA_DESKTOP_VITE_BUILD_WATCH === "1"',
     devPlatformPath,
   );
 
