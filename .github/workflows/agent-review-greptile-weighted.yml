@@ -191,7 +191,7 @@ jobs:
       - name: Run Claude weighted review
         id: claude-weight
         continue-on-error: true
-        uses: anthropics/claude-code-action@70a6e5256e9e2366a1ed5c041904a982ba3a328f
+        uses: anthropics/claude-code-action@806af32823ef69c8ef357086c573a902af641307
         env:
           NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org'
         with:

@@ -1,10 +1,14 @@
 #!/usr/bin/env node
-import { execFileSync } from "node:child_process";
 import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
+import {
+  adbDevice,
+  adbForward,
+  resolveAdb,
+  resolveSerial as resolveSerialLib,
+} from "./lib/android-sdk.mjs";
 
-const appId = "ai.milady.milady";
+const appId = "ai.milady.app";
 const defaultApk = path.resolve(
   "apps/app/android/app/build/outputs/apk/debug/app-debug.apk",
 );
@@ -18,44 +22,18 @@ function hasArg(name) {
   return process.argv.includes(name);
 }
 
-const adb =
-  process.env.ADB ??
-  path.join(os.homedir(), "Library/Android/sdk/platform-tools/adb");
+const adb = resolveAdb();
 const apk = path.resolve(argValue("--apk") ?? defaultApk);
 const serialArg = argValue("--serial");
 const timeoutMs = Number(argValue("--timeout-ms") ?? 600_000);
 const shouldInstall = !hasArg("--no-install");
 
-function run(args, options = {}) {
-  return execFileSync(args[0], args.slice(1), {
-    encoding: "utf8",
-    stdio: options.stdio ?? ["ignore", "pipe", "pipe"],
-    ...options,
-  });
-}
-
 function adbRun(serial, args, options) {
-  return run([adb, "-s", serial, ...args], options);
-}
-
-function adbTry(serial, args, options = {}) {
-  try {
-    return adbRun(serial, args, options);
-  } catch {
-    return "";
-  }
+  return adbDevice(adb, serial, args, options);
 }
 
 function resolveSerial() {
-  if (serialArg) return serialArg;
-  const output = run([adb, "devices"]);
-  const line = output
-    .split("\n")
-    .find((entry) => /^emulator-\d+\s+device$/.test(entry.trim()));
-  if (!line) {
-    throw new Error("No running Android emulator found. Pass --serial.");
-  }
-  return line.trim().split(/\s+/)[0];
+  return resolveSerialLib(adb, serialArg);
 }
 
 async function delay(ms) {
@@ -116,7 +94,6 @@ async function cdpEvaluate(webSocketDebuggerUrl, expression, evalTimeoutMs) {
 }
 
 async function main() {
-  if (!fs.existsSync(adb)) throw new Error(`adb not found: ${adb}`);
   if (shouldInstall && !fs.existsSync(apk)) {
     throw new Error(`APK not found: ${apk}. Run bun run build:android first.`);
   }
@@ -144,17 +121,8 @@ async function main() {
 
   const pid = adbRun(serial, ["shell", "pidof", appId]).trim();
   if (!pid) throw new Error("App process did not start");
-  adbTry(serial, ["forward", "--remove", "tcp:9223"], { stdio: "ignore" });
-  run([
-    adb,
-    "-s",
-    serial,
-    "forward",
-    "tcp:9223",
-    `localabstract:webview_devtools_remote_${pid}`,
-  ]);
-  adbTry(serial, ["forward", "--remove", "tcp:31337"], { stdio: "ignore" });
-  run([adb, "-s", serial, "forward", "tcp:31337", "tcp:31337"]);
+  adbForward(adb, serial, 9223, `localabstract:webview_devtools_remote_${pid}`);
+  adbForward(adb, serial, 31337, "tcp:31337");
 
   const targets = await fetch("http://127.0.0.1:9223/json").then((res) =>
     res.json(),

@@ -65,7 +65,7 @@ jobs:
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
 
       - name: Setup Java
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654
+        uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287
         with:
           distribution: "temurin"
           java-version: ${{ env.JAVA_VERSION }}
@@ -221,8 +221,8 @@ jobs:
             exit 1
           fi
           cp apps/app/android/app/build/outputs/bundle/release/app-release.aab \
-             "Eliza-${VERSION}.aab"
-          gh release upload "$TAG" "Eliza-${VERSION}.aab" --clobber
+             "Milady-${VERSION}.aab"
+          gh release upload "$TAG" "Milady-${VERSION}.aab" --clobber
 
       - name: Attach APK to GitHub Release
         if: steps.android_signing.outputs.ready == 'true'
@@ -259,7 +259,7 @@ jobs:
           path: aab/
 
       - name: Setup Ruby
-        uses: ruby/setup-ruby@afeafc3d1ab54a631816aba4c914a0081c12ff2f
+        uses: ruby/setup-ruby@89f90524b88a01fe6e0b732220432cc6142926af
         with:
           ruby-version: "4.0.3"
           bundler-cache: true
@@ -289,7 +289,7 @@ jobs:
             --aab ../../../aab/app-release.aab \
             --track "${{ steps.track.outputs.track }}" \
             --json_key "$PLAY_STORE_JSON_KEY" \
-            --package_name "ai.elizaos.app"
+            --package_name "ai.milady.app"
 
       - name: Clean up credentials
         if: always()

@@ -105,10 +105,19 @@ permissions:
 env:
   # Pin the canonical elizaOS/eliza checkout to the latest verified develop SHA.
   # Override with MILADY_ELIZA_REF only for a specific upstream release test.
-  MILADY_ELIZA_REF: "f4991bc6059514f10a0fc1a8ec3f199478c415ae"
+  MILADY_ELIZA_REF: "v2.0.11-beta.7"
   CI: "true"
   BUN_VERSION: "1.3.14" # 1.3.14 desktop packaging runtime (bumped 2026-05-28 for the repo-wide 1.3.14 upgrade); 1.3.11 trips Electrobun bundle creation in CI.
   MILADY_SKIP_CLOUD_SUBMODULE: "1"
+  # Milady whitelabel identity for the desktop bundle + Inno installer. Without
+  # these, desktop-build.mjs / build-inno.ps1 default to elizaOS (app name
+  # "elizaOS App"). With them, the produced app + installer are Milady. (Merged
+  # here from a second top-level `env:` — duplicate top-level keys made GHA
+  # reject the workflow with a 0-job startup_failure on every run.)
+  ELIZA_APP_NAME: Milady
+  ELIZA_APP_ID: ai.milady.app
+  ELIZA_URL_SCHEME: milady
+  ELIZA_NAMESPACE: milady
 
 jobs:
   prepare:
@@ -461,6 +470,13 @@ jobs:
       - name: Align package-mode agent pins
         run: node scripts/align-eliza-agent-package-pins.mjs
 
+      # The release build rebuilds dist assets (with the resolved release
+      # version), so the committed static-asset manifest is stale relative to
+      # the freshly built tree. Regenerate it before release:check, matching
+      # run-release-contract-suite.mjs.
+      - name: Refresh static asset manifest
+        run: node scripts/generate-static-asset-manifest.mjs
+
       - name: Release readiness checks
         env:
           ELIZA_RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
@@ -785,6 +801,8 @@ jobs:
       # the freshly-linked eliza/ checkout as the source of truth for the
       # @elizaos/* aliases. Without this, the config falls back to its
       # auto-detect heuristic and may resolve @elizaos/ui from npm.
+      - name: Apply Milady desktop icon
+        run: node scripts/sync-desktop-brand-assets.mjs
       - name: Stage desktop bundle inputs
         env:
           MILADY_FORCE_LOCAL_UPSTREAMS: "1"
@@ -1029,6 +1047,8 @@ jobs:
           Write-Host "=== Disk after cleanup ==="
           Get-Volume | Where-Object { $_.DriveLetter } | Format-Table DriveLetter, @{N='FreeGB';E={[math]::Round($_.SizeRemaining/1GB,1)}}, @{N='TotalGB';E={[math]::Round($_.Size/1GB,1)}}
 
+      - name: Apply Milady desktop icon
+        run: node scripts/sync-desktop-brand-assets.mjs
       - name: Build Electrobun app
         id: build-electrobun-app
         run: |
@@ -1057,7 +1077,7 @@ jobs:
           ENV_NAME="${{ needs.prepare.outputs.env }}"
           find -L "$build_dir" -type d -name "Resources" | while read -r res_dir; do
             dest="$res_dir/version.json"
-            printf '{"identifier":"ai.elizaos.Eliza","channel":"%s","name":"eliza","version":"%s"}' \
+            printf '{"identifier":"ai.milady.app","channel":"%s","name":"milady","version":"%s"}' \
               "$ENV_NAME" "$VERSION" > "$dest"
             echo "Wrote fallback $dest"
           done
@@ -1065,13 +1085,13 @@ jobs:
           mkdir -p "$artifact_root"
           case "${{ matrix.platform.os }}" in
             linux)
-              tar --zstd -cf "$artifact_root/eliza-${{ needs.prepare.outputs.env }}-${{ matrix.platform.artifact-name }}.tar.zst" -C "$build_root" "$(basename "$build_dir")"
+              tar --zstd -cf "$artifact_root/milady-${{ needs.prepare.outputs.env }}-${{ matrix.platform.artifact-name }}.tar.zst" -C "$build_root" "$(basename "$build_dir")"
               ;;
             macos)
-              tar -czf "$artifact_root/eliza-${{ needs.prepare.outputs.env }}-${{ matrix.platform.artifact-name }}.app.tar.gz" -C "$build_root" "$(basename "$build_dir")"
+              tar -czf "$artifact_root/milady-${{ needs.prepare.outputs.env }}-${{ matrix.platform.artifact-name }}.app.tar.gz" -C "$build_root" "$(basename "$build_dir")"
               ;;
             windows)
-              powershell -NoProfile -Command "Compress-Archive -Path '$build_dir' -DestinationPath '$artifact_root/eliza-${{ needs.prepare.outputs.env }}-${{ matrix.platform.artifact-name }}.exe.zip' -Force"
+              powershell -NoProfile -Command "Compress-Archive -Path '$build_dir' -DestinationPath '$artifact_root/milady-${{ needs.prepare.outputs.env }}-${{ matrix.platform.artifact-name }}.exe.zip' -Force"
               ;;
           esac
           echo "fallback=true" >> "$GITHUB_OUTPUT"
@@ -1134,7 +1154,7 @@ jobs:
 
           Get-ChildItem -Path $buildRoot -Recurse -Directory -Filter "Resources" | ForEach-Object {
             $versionJson = @{
-              identifier = "ai.elizaos.Eliza"
+              identifier = "ai.milady.app"
               channel = $envName
               name = "eliza"
               version = $version
@@ -1153,7 +1173,7 @@ jobs:
           if [ -d "$build_root" ]; then
             find -L "$build_root" -type d -name "Resources" | while read -r res_dir; do
               dest="$res_dir/version.json"
-              printf '{"identifier":"ai.elizaos.Eliza","channel":"%s","name":"eliza","version":"%s"}' \
+              printf '{"identifier":"ai.milady.app","channel":"%s","name":"milady","version":"%s"}' \
                 "$ENV_NAME" "$VERSION" > "$dest"
               echo "Wrote $dest"
             done
@@ -1289,7 +1309,7 @@ jobs:
         if: matrix.platform.os == 'windows' && steps.build-electrobun-app.outputs.fallback != 'true'
         shell: pwsh
         run: |
-          $installer = Get-ChildItem -Path "eliza/packages/app-core/platforms/electrobun/artifacts" -File -Filter "ElizaOSApp-Setup-*.exe" -ErrorAction SilentlyContinue |
+          $installer = Get-ChildItem -Path "eliza/packages/app-core/platforms/electrobun/artifacts" -File -Filter "Milady-Setup-*.exe" -ErrorAction SilentlyContinue |
             Sort-Object LastWriteTime -Descending |
             Select-Object -First 1
 
@@ -1496,7 +1516,7 @@ jobs:
             exit 1
           }
           New-Item -ItemType Directory -Force -Path $artifactsDir | Out-Null
-          $publicInstaller = Get-ChildItem -Path $artifactsDir -File -Filter "ElizaOSApp-Setup-*.exe" -ErrorAction SilentlyContinue |
+          $publicInstaller = Get-ChildItem -Path $artifactsDir -File -Filter "Milady-Setup-*.exe" -ErrorAction SilentlyContinue |
             Sort-Object LastWriteTime -Descending |
             Select-Object -First 1
           foreach ($setupExecutable in $setupExecutables) {
@@ -1562,7 +1582,7 @@ jobs:
         if: matrix.platform.os == 'windows' && steps.build-electrobun-app.outputs.fallback != 'true'
         shell: pwsh
         run: |
-          $installer = Get-ChildItem -Path "eliza/packages/app-core/platforms/electrobun/artifacts" -File -Filter "ElizaOSApp-Setup-*.exe" -ErrorAction SilentlyContinue |
+          $installer = Get-ChildItem -Path "eliza/packages/app-core/platforms/electrobun/artifacts" -File -Filter "Milady-Setup-*.exe" -ErrorAction SilentlyContinue |
             Sort-Object LastWriteTime -Descending |
             Select-Object -First 1
 
@@ -1728,7 +1748,7 @@ jobs:
           $diagnosticsDir = Join-Path $PWD "eliza/packages/app-core/platforms/electrobun/artifacts/windows-smoke-diagnostics"
           $appDataRoot = if ($env:MILADY_TEST_WINDOWS_APPDATA_PATH) { $env:MILADY_TEST_WINDOWS_APPDATA_PATH } elseif ($env:ELIZA_TEST_WINDOWS_APPDATA_PATH) { $env:ELIZA_TEST_WINDOWS_APPDATA_PATH } else { $env:APPDATA }
           $localAppDataRoot = if ($env:MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH) { $env:MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH } elseif ($env:ELIZA_TEST_WINDOWS_LOCALAPPDATA_PATH) { $env:ELIZA_TEST_WINDOWS_LOCALAPPDATA_PATH } else { $env:LOCALAPPDATA }
-          $wrapperRoot = Join-Path $localAppDataRoot "ai.elizaos.Eliza"
+          $wrapperRoot = Join-Path $localAppDataRoot "ai.milady.app"
 
           Write-Host "Diagnostics roots:"
           Write-Host "  appDataRoot      = $appDataRoot"
@@ -1846,7 +1866,7 @@ jobs:
         shell: pwsh
         run: |
           $artifactsDir = Join-Path $PWD "eliza/packages/app-core/platforms/electrobun/artifacts"
-          $canonicalInstallers = Get-ChildItem -Path $artifactsDir -File -Filter "ElizaOSApp-Setup-*.exe" -ErrorAction SilentlyContinue |
+          $canonicalInstallers = Get-ChildItem -Path $artifactsDir -File -Filter "Milady-Setup-*.exe" -ErrorAction SilentlyContinue |
             Sort-Object LastWriteTime -Descending
           if (-not $canonicalInstallers) {
             Write-Error "No canonical Windows installer found before compression."
@@ -1890,7 +1910,7 @@ jobs:
           Remove-Item $publicCanaryDir -Recurse -Force -ErrorAction SilentlyContinue
           New-Item -ItemType Directory -Force -Path $publicCanaryDir | Out-Null
 
-          $canonicalInstallers = Get-ChildItem -Path $artifactsDir -File -Filter "ElizaOSApp-Setup-*.exe" -ErrorAction SilentlyContinue |
+          $canonicalInstallers = Get-ChildItem -Path $artifactsDir -File -Filter "Milady-Setup-*.exe" -ErrorAction SilentlyContinue |
             Sort-Object LastWriteTime -Descending
           if ($canonicalInstallers) {
             if ($canonicalInstallers.Count -gt 1) {
@@ -1901,7 +1921,7 @@ jobs:
             $canonicalInstaller = $canonicalInstallers | Select-Object -First 1
             Copy-Item $canonicalInstaller.FullName -Destination $publicCanaryDir -Force
           } else {
-            $canonicalInstallerZips = Get-ChildItem -Path $artifactsDir -File -Filter "ElizaOSApp-Setup-*.exe.zip" -ErrorAction SilentlyContinue |
+            $canonicalInstallerZips = Get-ChildItem -Path $artifactsDir -File -Filter "Milady-Setup-*.exe.zip" -ErrorAction SilentlyContinue |
               Sort-Object LastWriteTime -Descending
             if (-not $canonicalInstallerZips) {
               Write-Error "No canonical Windows installer (or zip fallback) found for canary artifact publishing."
@@ -1917,7 +1937,7 @@ jobs:
             Expand-Archive -Path $canonicalInstallerZip.FullName -DestinationPath $publicCanaryDir -Force
           }
 
-          $publicInstallers = Get-ChildItem -Path $publicCanaryDir -File -Filter "ElizaOSApp-Setup-*.exe" -ErrorAction SilentlyContinue |
+          $publicInstallers = Get-ChildItem -Path $publicCanaryDir -File -Filter "Milady-Setup-*.exe" -ErrorAction SilentlyContinue |
             Sort-Object LastWriteTime -Descending
           if (-not $publicInstallers) {
             Write-Error "Failed to stage a public Windows installer under $publicCanaryDir"
@@ -1937,7 +1957,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: electrobun-${{ matrix.platform.artifact-name }}-public-installer
-          path: eliza/packages/app-core/platforms/electrobun/artifacts/public-canary-installer/ElizaOSApp-Setup-*.exe
+          path: eliza/packages/app-core/platforms/electrobun/artifacts/public-canary-installer/Milady-Setup-*.exe
           if-no-files-found: error
           retention-days: 30
           compression-level: 0
@@ -1991,9 +2011,10 @@ jobs:
             -name "*.dmg" -o \
             -name "*.app.tar.gz" -o \
             -name "*.tar.zst" -o \
-            -name "ElizaOSApp-Setup-*.exe" -o \
-            -name "ElizaOSApp-Setup-*.exe.zip" -o \
+            -name "Milady-Setup-*.exe" -o \
+            -name "Milady-Setup-*.exe.zip" -o \
             -name "eliza-*.exe.zip" -o \
+            -name "milady-*.exe.zip" -o \
             -name "*Setup*.tar.gz" \
           \) -exec cp {} release-files/ \; 2>/dev/null || true
 
@@ -2005,7 +2026,7 @@ jobs:
             cd release-files && unzip -o "$(basename "$f")" && rm "$(basename "$f")" && cd ..
           done
           find release-files -mindepth 2 -type f \( \
-            -name "ElizaOSApp-Setup-*.exe" -o \
+            -name "Milady-Setup-*.exe" -o \
             -name "*.dmg" -o \
             -name "*.app.tar.gz" -o \
             -name "*.tar.zst" \

@@ -16,6 +16,9 @@ interface AppWebConfig {
   themeColor: string;
   backgroundColor: string;
   shareImagePath: string;
+  /** Opaque brand color the app-icon mark is flattened onto (iOS icon, Android
+   * legacy launcher + adaptive-icon background). Read by run-mobile-build.mjs. */
+  iconBackgroundColor: string;
 }
 
 // AospVariantConfig does not yet include propertyPrefix (Milady-specific
@@ -41,7 +44,7 @@ type AppConfigWithAospPropertyPrefix = Omit<AppConfig, "aosp"> & {
 
 const config = {
   appName: "Milady",
-  appId: "ai.milady.milady",
+  appId: "ai.milady.app",
   orgName: "milady-ai",
   repoName: "milady",
   cliName: "milady",
@@ -51,7 +54,7 @@ const config = {
   defaultApps: [],
 
   desktop: {
-    bundleId: "ai.milady.milady",
+    bundleId: "ai.milady.app",
     urlScheme: "milady",
   },
 
@@ -61,6 +64,9 @@ const config = {
     themeColor: "#F0B90B",
     backgroundColor: "#000000",
     shareImagePath: "/og-image.png",
+    // Milady brand gold (matches --classic-gold in brand-gold.css). The dark
+    // chibi mark in public/brand/app-icon.png is flattened onto this.
+    iconBackgroundColor: "#f0b90b",
   },
 
   android: {
@@ -89,7 +95,7 @@ const config = {
     propertyPrefix: "miladyos",
     variantName: "MiladyOS",
     productName: "milady",
-    packageName: "ai.milady.milady",
+    packageName: "ai.milady.app",
     appName: "Milady",
     commonMk: "vendor/milady/milady_common.mk",
     modelSourceLabel: "milady-download",

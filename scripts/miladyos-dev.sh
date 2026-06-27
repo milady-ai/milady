@@ -7,10 +7,10 @@
 # Commands:
 #   status            Show what's running (cvd, adb device, agent, web UI port)
 #   web               Print the WebRTC URL(s) for browser + LAN access
-#   logs              Tail logcat for ai.milady.milady (Ctrl-C to stop)
+#   logs              Tail logcat for ai.milady.app (Ctrl-C to stop)
 #   agent-logs        Tail just the ElizaAgent JS logs
 #   shell             Open an adb shell on the cuttlefish device
-#   restart-app       Force-stop ai.milady.milady and re-launch the activity
+#   restart-app       Force-stop ai.milady.app and re-launch the activity
 #   push-agent        Rebuild only the on-device agent bundle and push it (no APK rebuild)
 #   rebuild-apk       Rebuild the privileged APK from source
 #   reflash           Re-stage APK in vendor/, run AOSP m -j6, restart cvd
@@ -91,9 +91,9 @@ cmd_agent_logs() { adb -s "$CVD_DEVICE" logcat -v time ElizaAgent:V '*:S'; }
 cmd_shell()      { adb -s "$CVD_DEVICE" shell; }
 
 cmd_restart_app() {
-  say "force-stopping + re-launching ai.milady.milady"
-  adb -s "$CVD_DEVICE" shell am force-stop ai.milady.milady
-  adb -s "$CVD_DEVICE" shell am start -W -n ai.milady.milady/.MainActivity
+  say "force-stopping + re-launching ai.milady.app"
+  adb -s "$CVD_DEVICE" shell am force-stop ai.milady.app
+  adb -s "$CVD_DEVICE" shell am start -W -n ai.milady.app/.MainActivity
 }
 
 cmd_push_agent() {
@@ -108,7 +108,7 @@ cmd_push_agent() {
   # cuttlefish userdebug has root-via-adb available.
   adb -s "$CVD_DEVICE" root >/dev/null 2>&1 || true
   adb -s "$CVD_DEVICE" wait-for-device
-  adb -s "$CVD_DEVICE" shell "cp /data/local/tmp/agent-bundle.js /data/data/ai.milady.milady/files/agent/agent-bundle.js && chown u0_a36:u0_a36 /data/data/ai.milady.milady/files/agent/agent-bundle.js"
+  adb -s "$CVD_DEVICE" shell "cp /data/local/tmp/agent-bundle.js /data/data/ai.milady.app/files/agent/agent-bundle.js && chown u0_a36:u0_a36 /data/data/ai.milady.app/files/agent/agent-bundle.js"
   cmd_restart_app
 }
 

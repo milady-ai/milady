@@ -4,7 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-const appId = "ai.milady.milady";
+const appId = "ai.milady.app";
 const defaultCloudApiBase = "https://api.elizacloud.ai";
 const defaultAndroidApk = path.resolve(
   "android/app/build/outputs/apk/debug/app-debug.apk",

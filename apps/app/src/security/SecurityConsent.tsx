@@ -17,6 +17,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import appConfig from "../../app.config";
 import type { VisionConsentStore, VisionProvider } from "./vision-consent.js";
 
 interface SecurityConsentProps {
@@ -72,8 +73,9 @@ export function SecurityConsent({
     <div data-testid="security-consent-prompt" className="security-consent">
       <h3>Allow screen capture?</h3>
       <p>
-        Eliza never captures your screen automatically. Granting access lets the
-        agent see what you choose to share while this session is active.
+        {appConfig.appName} never captures your screen automatically. Granting
+        access lets the agent see what you choose to share while this session is
+        active.
       </p>
       {provider === "remote" ? (
         <p data-testid="security-consent-cost-warning">

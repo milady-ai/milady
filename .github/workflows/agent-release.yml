@@ -54,7 +54,7 @@ permissions:
 env:
   # Pin the canonical elizaOS/eliza checkout to the latest verified develop SHA.
   # Override with MILADY_ELIZA_REF only for a specific upstream release test.
-  MILADY_ELIZA_REF: "f4991bc6059514f10a0fc1a8ec3f199478c415ae"
+  MILADY_ELIZA_REF: "v2.0.11-beta.7"
   BUN_VERSION: "1.3.14"
   MILADY_SKIP_LOCAL_UPSTREAMS: "1"
   # Runner selection: all jobs use ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}.
@@ -266,7 +266,11 @@ jobs:
 
           case "$CHANNEL" in
             canary)
-              PRE_ID="beta"
+              # Canary rides the alpha train (milady ships 2.0.0-alpha.N; the
+              # assertion below requires -alpha.N). PRE_ID must be "alpha" or the
+              # version compute picks the highest beta tag and fails the canary
+              # check ("canary releases must use an alpha version").
+              PRE_ID="alpha"
               NPM_DIST_TAG="canary"
               ANDROID_TRACK="internal"
               APPLE_TRACK="testflight"
@@ -498,7 +502,7 @@ jobs:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
         with:
           submodules: false
-      - uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654
+      - uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287
         with:
           distribution: temurin
           java-version: 21
@@ -851,7 +855,7 @@ jobs:
         run: |
           if [ -d apps/app/ios/App ]; then
             xcodebuild -project apps/app/ios/App/App.xcodeproj -scheme App -configuration Release -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" -showBuildSettings > /tmp/milady-xcodebuild-settings.txt
-            grep -q "PRODUCT_BUNDLE_IDENTIFIER = ai.milady.milady" /tmp/milady-xcodebuild-settings.txt
+            grep -q "PRODUCT_BUNDLE_IDENTIFIER = ai.milady.app" /tmp/milady-xcodebuild-settings.txt
           else
             echo "::error::apps/app/ios/App directory not found"
             exit 1

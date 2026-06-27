@@ -144,6 +144,16 @@ runs:
           case "${GITHUB_WORKFLOW:-}:${GITHUB_JOB:-}" in
             "Agent Review:test-auth")
               ;;
+            # Build apps/app against local eliza source. milady's apps/app tracks
+            # the upstream app-shell ahead of what the published @elizaos/* dist-
+            # tags can offer: the npm beta channel is an inconsistent partial
+            # publish (published packages reference unpublished/private siblings),
+            # so packages-mode typecheck/build cannot resolve a coherent graph.
+            # Cloning eliza here resolves @elizaos/* from the internally-consistent
+            # develop source. Revert to published-only once the @elizaos/* beta
+            # channel publishes a complete, self-consistent set.
+            "CI:typecheck"|"CI:build")
+              ;;
             *)
               echo "local eliza runtime checkout not needed for ${GITHUB_WORKFLOW:-unknown}:${GITHUB_JOB:-unknown}; skipping."
               exit 0

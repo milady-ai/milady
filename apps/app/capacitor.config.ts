@@ -48,6 +48,17 @@ const allowNavigation: CapacitorAllowNavigation = [
 const liveReloadUrl = process.env.MILADY_LIVE_RELOAD_URL?.trim();
 const liveReloadEnabled = !!liveReloadUrl;
 
+// E2E/test builds opt into WebView remote debugging WITHOUT pointing the
+// WebView at a remote Vite dev server: MILADY_WEBVIEW_DEBUG=1 keeps the
+// bundled APK assets (offline, real on-device agent) but makes the on-device
+// System WebView CDP-attachable so chrome://inspect and Playwright's Android
+// driver can drive it for end-to-end tests. Production builds leave this unset
+// → DevTools stays off. Live-reload dev mode implies it.
+const isFlagEnabled = (value: string | undefined): boolean =>
+  /^(1|true|yes|on)$/i.test((value ?? "").trim());
+const webViewDebuggingEnabled =
+  liveReloadEnabled || isFlagEnabled(process.env.MILADY_WEBVIEW_DEBUG);
+
 const config: CapacitorConfig = {
   appId: appConfig.appId,
   appName: appConfig.appName,
@@ -90,9 +101,10 @@ const config: CapacitorConfig = {
     // warnings. Production builds keep mixed-content off.
     allowMixedContent: liveReloadEnabled,
     captureInput: true,
-    // WebView Chrome DevTools enabled in live-reload mode so we can
-    // chrome://inspect into the device WebView during dev iterations.
-    webContentsDebuggingEnabled: liveReloadEnabled,
+    // WebView Chrome DevTools enabled in live-reload mode (dev iterations) and
+    // in e2e/test builds via MILADY_WEBVIEW_DEBUG=1 (Playwright Android driver
+    // attaches over CDP). Off for production builds.
+    webContentsDebuggingEnabled: webViewDebuggingEnabled,
   },
 };
 

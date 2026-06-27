@@ -133,8 +133,27 @@ jobs:
     needs: prepare
     if: needs.prepare.outputs.build_ios == 'true'
     runs-on: macos-15
-    timeout-minutes: 60
+    # The full-Bun engine + agent bundle + CocoaPods make this heavier than a
+    # thin cloud-only client, so allow more headroom than the bare-IPA budget.
+    timeout-minutes: 90
     env:
+      # Make this split build (web + cap sync + ios-overlay + fastlane) ship a
+      # working on-device agent, mirroring eliza's apple-store-release.yml /
+      # configureIosAppStoreBuildDefaults. Without these the IPA is a cloud-only
+      # thin client whose "start local agent" hard-fails ("the JSContext
+      # compatibility transport is disabled outside iOS development builds").
+      #   - ELIZA_BUILD_VARIANT/RELEASE_AUTHORITY: bake __ELIZA_BUILD_VARIANT__
+      #     ="store" (store CSP + isNativeIosStoreBuild()) and embed the engine.
+      #   - ELIZA_IOS_FULL_BUN_ENGINE=1: force the engine pod into the IPA.
+      #   - VITE_ELIZA_IOS_FULL_BUN_AVAILABLE=1: renderer uses the engine
+      #     (isFullBunRuntimeBuiltIn).
+      #   - VITE_ELIZA_IOS_RUNTIME_MODE=cloud-hybrid: App Store default; the user
+      #     switching to "local" persists to localStorage and wins.
+      ELIZA_BUILD_VARIANT: store
+      ELIZA_RELEASE_AUTHORITY: apple-app-store
+      ELIZA_IOS_FULL_BUN_ENGINE: "1"
+      VITE_ELIZA_IOS_FULL_BUN_AVAILABLE: "1"
+      VITE_ELIZA_IOS_RUNTIME_MODE: cloud-hybrid
       APPLE_ID: ${{ secrets.APPLE_ID }}
       APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       ITC_TEAM_ID: ${{ secrets.ITC_TEAM_ID }}
@@ -225,6 +244,14 @@ jobs:
         env:
           LANG: en_US.UTF-8
 
+      # Build the on-device agent bundle the embedded Bun engine executes, then
+      # the ios-overlay step below stages eliza/packages/agent/dist-mobile-ios
+      # into the app's public/agent. buildIos() does this via
+      # buildMobileAgentBundle(); this split workflow must run it explicitly.
+      - name: Build iOS agent bundle
+        if: steps.validate_ios.outputs.ready == 'true'
+        run: bun run --cwd eliza/packages/agent build:ios-bun
+
       - name: Overlay iOS native files (Fastlane, AppDelegate, entitlements)
         if: steps.validate_ios.outputs.ready == 'true'
         run: node eliza/packages/app-core/scripts/run-mobile-build.mjs ios-overlay
@@ -247,7 +274,7 @@ jobs:
 
       - name: Setup Ruby
         if: steps.validate_ios.outputs.ready == 'true'
-        uses: ruby/setup-ruby@afeafc3d1ab54a631816aba4c914a0081c12ff2f
+        uses: ruby/setup-ruby@89f90524b88a01fe6e0b732220432cc6142926af
         with:
           ruby-version: "4.0.3"
           bundler-cache: true
@@ -295,7 +322,9 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: ios-ipa
-          path: apps/app/ios/build/Eliza.ipa
+          # run-mobile-build names the IPA from the app name (e.g. Milady.ipa);
+          # glob so any brand name is collected.
+          path: apps/app/ios/build/*.ipa
           retention-days: 90
           if-no-files-found: error
 
@@ -506,7 +535,7 @@ jobs:
         run: |
           APP_PATH=$(find build -name "*.app" -maxdepth 2 | head -1)
           VERSION="${{ needs.prepare.outputs.version }}"
-          PKG_NAME="Eliza-${VERSION}-mas.pkg"
+          PKG_NAME="Milady-${VERSION}-mas.pkg"
 
           productbuild --sign "$INSTALLER_IDENTITY" \
             --component "$APP_PATH" /Applications \

@@ -62,7 +62,7 @@ concurrency:
 env:
   # Pin the canonical elizaOS/eliza checkout to the latest verified develop SHA.
   # Override with MILADY_ELIZA_REF only for a specific upstream release test.
-  MILADY_ELIZA_REF: "f4991bc6059514f10a0fc1a8ec3f199478c415ae"
+  MILADY_ELIZA_REF: "v2.0.11-beta.7"
   REGISTRY: ghcr.io
   IMAGE_NAME: milady-ai/milady/agent
   MILADY_SKIP_LOCAL_UPSTREAMS: "1"
@@ -162,6 +162,17 @@ jobs:
         run: |
           cd eliza/packages/agent
           bun run build:docker-dist
+
+      - name: Build @elizaos/logger and @elizaos/contracts
+        run: |
+          # core (src/logger.ts) and shared (src/contracts/*) import
+          # @elizaos/logger and @elizaos/contracts (workspace:*). Both packages
+          # default their "." export "types" to ./dist and only expose ./src
+          # under the eliza-source condition, which is not active in these
+          # per-package tsc builds — so their dist must exist first or the build
+          # fails with TS2307. (Same fix as build-docker.yml.)
+          (cd eliza/packages/logger && bun run build)
+          (cd eliza/packages/contracts && bun run build)
 
       - name: Build @elizaos/core (includes agent-orchestrator)
         run: |
