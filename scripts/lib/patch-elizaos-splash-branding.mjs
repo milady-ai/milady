@@ -62,32 +62,30 @@ export function patchBrandingConfigFile(filePath) {
     return false;
   }
 
-  const frameworkNeedle = "    frameworkName?: string;";
-  const interfaceNeedle = "    cloudOnly?: boolean;";
+  const cloudOnlyFieldPattern = /^(\s*)cloudOnly\?: boolean;/m;
   let next = original;
 
   if (
     !original.includes("frameworkName") &&
-    original.includes(interfaceNeedle)
+    cloudOnlyFieldPattern.test(original)
   ) {
-    next = next.replace(
-      interfaceNeedle,
-      `    /** Framework credit on splash (default "${DEFAULT_FRAMEWORK_NAME}"). */\n    frameworkName?: string;\n    cloudOnly?: boolean;`,
+    next = next.replace(cloudOnlyFieldPattern, (match, indent) =>
+      `${indent}/** Framework credit on splash (default "${DEFAULT_FRAMEWORK_NAME}"). */\n${indent}frameworkName?: string;\n${match}`,
     );
   }
 
   if (!next.includes("splashBrandImage")) {
-    const splashImageNeedle = next.includes(frameworkNeedle)
-      ? frameworkNeedle
-      : interfaceNeedle;
-    if (!next.includes(splashImageNeedle)) {
+    const frameworkFieldPattern = /^(\s*)frameworkName\?: string;/m;
+    const splashImageFieldPattern = next.includes("frameworkName")
+      ? frameworkFieldPattern
+      : cloudOnlyFieldPattern;
+    if (!splashImageFieldPattern.test(next)) {
       throw new Error(
         `expected BrandingConfig anchor field not found in ${filePath}`,
       );
     }
-    next = next.replace(
-      splashImageNeedle,
-      `${splashImageNeedle}\n    /** Centered brand image on the startup splash (app public asset path). */\n    splashBrandImage?: string;`,
+    next = next.replace(splashImageFieldPattern, (match, indent) =>
+      `${match}\n${indent}/** Centered brand image on the startup splash (app public asset path). */\n${indent}splashBrandImage?: string;`,
     );
   }
 
