@@ -159,6 +159,30 @@ describe("package mode aliases", () => {
     expect(settingsSectionsText).toContain("group: CLOUD_SETTINGS_GROUP_ID");
   });
 
+  it("makes drawer grab handles read as clickable on hover", () => {
+    const configUiRendererText = fs.readFileSync(
+      path.resolve(
+        appRoot,
+        "../../eliza/packages/ui/src/components/config-ui/ui-renderer.tsx",
+      ),
+      "utf8",
+    );
+    const cloudDrawerText = fs.readFileSync(
+      path.resolve(
+        appRoot,
+        "../../eliza/packages/ui/src/cloud-ui/components/drawer.tsx",
+      ),
+      "utf8",
+    );
+
+    expect(configUiRendererText).toContain('aria-label="Close drawer"');
+    expect(configUiRendererText).toContain("group-hover:w-14");
+    expect(configUiRendererText).toContain("focus-visible:ring-accent");
+    expect(cloudDrawerText).toContain("<DrawerClose asChild>");
+    expect(cloudDrawerText).toContain("group-hover:w-[112px]");
+    expect(cloudDrawerText).toContain("focus-visible:ring-white");
+  });
+
   it("falls back to the local runtime agent for Discord Gateway characters", () => {
     const discordGatewayText = fs.readFileSync(
       path.resolve(
