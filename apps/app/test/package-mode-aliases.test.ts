@@ -115,6 +115,40 @@ describe("package mode aliases", () => {
     expect(connectorsIndexText).toContain("element: CloudConnectorsSection");
   });
 
+  it("keeps Cloud settings registration out of the local Settings mount path", () => {
+    const settingsViewText = fs.readFileSync(
+      path.resolve(
+        appRoot,
+        "../../eliza/packages/ui/src/components/pages/SettingsView.tsx",
+      ),
+      "utf8",
+    );
+    const cloudSettingsIndexText = fs.readFileSync(
+      path.resolve(
+        appRoot,
+        "../../eliza/packages/ui/src/cloud/settings/index.ts",
+      ),
+      "utf8",
+    );
+    const registerAllText = fs.readFileSync(
+      path.resolve(
+        appRoot,
+        "../../eliza/packages/ui/src/cloud/register-all.ts",
+      ),
+      "utf8",
+    );
+
+    expect(settingsViewText).toContain(
+      "../../cloud/settings/cloud-settings-group",
+    );
+    expect(settingsViewText).not.toContain('../../cloud/settings";');
+    expect(cloudSettingsIndexText).not.toContain(
+      'import "./register-cloud-settings"',
+    );
+    expect(cloudSettingsIndexText).toContain("registerCloudSettingsSections");
+    expect(registerAllText).toContain("registerCloudSettingsSections()");
+  });
+
   it("falls back to the local runtime agent for Discord Gateway characters", () => {
     const discordGatewayText = fs.readFileSync(
       path.resolve(
