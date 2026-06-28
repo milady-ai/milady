@@ -137,6 +137,13 @@ describe("package mode aliases", () => {
       ),
       "utf8",
     );
+    const settingsSectionsText = fs.readFileSync(
+      path.resolve(
+        appRoot,
+        "../../eliza/packages/ui/src/components/settings/settings-sections.ts",
+      ),
+      "utf8",
+    );
 
     expect(settingsViewText).toContain(
       "../../cloud/settings/cloud-settings-group",
@@ -147,6 +154,9 @@ describe("package mode aliases", () => {
     );
     expect(cloudSettingsIndexText).toContain("registerCloudSettingsSections");
     expect(registerAllText).toContain("registerCloudSettingsSections()");
+    expect(settingsSectionsText).toContain("CloudOverviewSection");
+    expect(settingsSectionsText).toContain("cloud-overview");
+    expect(settingsSectionsText).toContain("group: CLOUD_SETTINGS_GROUP_ID");
   });
 
   it("falls back to the local runtime agent for Discord Gateway characters", () => {
