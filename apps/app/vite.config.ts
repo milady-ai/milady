@@ -1,3 +1,4 @@
+import type { Dirent } from "node:fs";
 import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
@@ -498,42 +499,108 @@ function resolveLocalVaultAliases(): Alias[] {
   ];
 }
 
-function resolveLocalElizaAppAliases(): Alias[] {
-  if (!hasLocalElizaWorkspace) return [];
-
-  function resolveExportTarget(value: unknown): string | null {
-    if (typeof value === "string") return value;
-    if (!value || typeof value !== "object" || Array.isArray(value)) {
-      return null;
-    }
-    const record = value as Record<string, unknown>;
-    for (const condition of ["source", "import", "default", "types"]) {
-      const target = record[condition];
-      if (typeof target === "string") return target;
-    }
+function resolvePackageExportTarget(value: unknown): string | null {
+  if (typeof value === "string") return value;
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
     return null;
   }
-
-  function resolveRuntimeTarget(pkgDir: string, exportTarget: string): string {
-    if (exportTarget.startsWith("./dist/")) {
-      const sourceTarget = exportTarget
-        .replace(/^\.\/dist\//, "./src/")
-        .replace(/\.js$/, ".ts");
-      const sourcePath = resolveExistingUiSourceModule(
-        path.resolve(pkgDir, sourceTarget),
-      );
-      if (fs.existsSync(sourcePath)) {
-        return sourcePath;
-      }
-    }
-
-    const distPath = path.resolve(pkgDir, exportTarget);
-    if (fs.existsSync(distPath)) {
-      return distPath;
-    }
-
-    return distPath;
+  const record = value as Record<string, unknown>;
+  for (const condition of ["source", "import", "default", "types"]) {
+    const target = record[condition];
+    if (typeof target === "string") return target;
   }
+  return null;
+}
+
+function resolveLocalElizaRuntimeTarget(
+  pkgDir: string,
+  exportTarget: string,
+): string {
+  if (exportTarget.startsWith("./dist/")) {
+    const sourceTarget = exportTarget
+      .replace(/^\.\/dist\//, "./src/")
+      .replace(/\.js$/, ".ts");
+    const sourcePath = resolveExistingUiSourceModule(
+      path.resolve(pkgDir, sourceTarget),
+    );
+    if (fs.existsSync(sourcePath)) {
+      return sourcePath;
+    }
+  }
+
+  return path.resolve(pkgDir, exportTarget);
+}
+
+function shouldScanLocalElizaPackage(
+  packageRoot: { appPrefixOnly: boolean },
+  entry: Dirent,
+  pluginUiPackagesUsedByMiladyShell: Set<string>,
+): boolean {
+  if (!entry.isDirectory()) return false;
+  return (
+    !packageRoot.appPrefixOnly ||
+    entry.name.startsWith("app-") ||
+    pluginUiPackagesUsedByMiladyShell.has(entry.name)
+  );
+}
+
+function createLocalElizaExportAliases(
+  pkgDir: string,
+  pkgName: string,
+  exportsMap: Record<string, unknown>,
+): Alias[] {
+  const aliases: Alias[] = [];
+  for (const [key, value] of Object.entries(exportsMap)) {
+    const exportTarget = resolvePackageExportTarget(value);
+    if (!exportTarget) continue;
+
+    const resolvedTarget = path.resolve(pkgDir, exportTarget);
+    // Only create an alias when the target file actually exists on disk.
+    // In a fresh local clone, dist/ may not be built yet. Skipping the
+    // alias lets the import fall through to the stub or npm package.
+    if (!fs.existsSync(resolvedTarget)) continue;
+
+    const aliasKey =
+      key === "." ? pkgName : `${pkgName}/${key.replace(/^\.\//, "")}`;
+    aliases.push({
+      find: new RegExp(`^${escapeRegExp(aliasKey)}$`),
+      replacement: resolveLocalElizaRuntimeTarget(pkgDir, exportTarget),
+    });
+  }
+  return aliases;
+}
+
+function createLocalElizaPackageAliases(pkgPath: string): Alias[] {
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8")) as {
+    name?: string;
+    exports?: Record<string, unknown>;
+  };
+  if (!pkg.name) return [];
+
+  const pkgDir = path.dirname(pkgPath);
+  const exportAliases = createLocalElizaExportAliases(
+    pkgDir,
+    pkg.name,
+    pkg.exports || {},
+  );
+  if (!fs.existsSync(path.join(pkgDir, "src")) || exportAliases.length === 0) {
+    return exportAliases;
+  }
+
+  // Only add the src catch-all if at least one export target exists (i.e.
+  // the package has been built). Otherwise skip to avoid resolving src/
+  // imports for packages that are stubs or not yet compiled.
+  return [
+    ...exportAliases,
+    {
+      find: new RegExp(`^${escapeRegExp(pkg.name)}/(.*)`),
+      replacement: path.resolve(pkgDir, "src/$1"),
+    },
+  ];
+}
+
+function resolveLocalElizaAppAliases(): Alias[] {
+  if (!hasLocalElizaWorkspace) return [];
 
   const aliases: Alias[] = [];
   const pluginUiPackagesUsedByMiladyShell = new Set(["plugin-wallet-ui"]);
@@ -548,54 +615,18 @@ function resolveLocalElizaAppAliases(): Alias[] {
     for (const entry of fs.readdirSync(packageRoot.dir, {
       withFileTypes: true,
     })) {
-      if (!entry.isDirectory()) continue;
       if (
-        packageRoot.appPrefixOnly &&
-        !entry.name.startsWith("app-") &&
-        !pluginUiPackagesUsedByMiladyShell.has(entry.name)
+        !shouldScanLocalElizaPackage(
+          packageRoot,
+          entry,
+          pluginUiPackagesUsedByMiladyShell,
+        )
       ) {
         continue;
       }
       const pkgPath = path.join(packageRoot.dir, entry.name, "package.json");
       if (!fs.existsSync(pkgPath)) continue;
-      const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8")) as {
-        name?: string;
-        exports?: Record<string, unknown>;
-      };
-      const pkgName = pkg.name;
-      if (!pkgName) continue;
-      const pkgDir = path.dirname(pkgPath);
-
-      for (const [key, value] of Object.entries(pkg.exports || {})) {
-        const exportTarget = resolveExportTarget(value);
-        if (!exportTarget) continue;
-        const resolvedTarget = path.resolve(pkgDir, exportTarget);
-        // Only create an alias when the target file actually exists on disk.
-        // In a fresh local clone, dist/ may not be built yet. Skipping the
-        // alias lets the import fall through to the stub or npm package.
-        if (!fs.existsSync(resolvedTarget)) continue;
-        const aliasKey =
-          key === "." ? pkgName : `${pkgName}/${key.replace(/^\.\//, "")}`;
-        aliases.push({
-          find: new RegExp(`^${escapeRegExp(aliasKey)}$`),
-          replacement: resolveRuntimeTarget(pkgDir, exportTarget),
-        });
-      }
-
-      // Only add the src catch-all if at least one export target exists (i.e.
-      // the package has been built). Otherwise skip to avoid resolving src/
-      // imports for packages that are stubs or not yet compiled.
-      const hasSrcDir = fs.existsSync(path.join(pkgDir, "src"));
-      const hasBuiltExport = aliases.some((a) => {
-        const re = a.find;
-        return re instanceof RegExp && re.test(pkgName);
-      });
-      if (hasSrcDir && hasBuiltExport) {
-        aliases.push({
-          find: new RegExp(`^${escapeRegExp(pkgName)}/(.*)`),
-          replacement: path.resolve(pkgDir, "src/$1"),
-        });
-      }
+      aliases.push(...createLocalElizaPackageAliases(pkgPath));
     }
   }
 
@@ -617,22 +648,9 @@ function resolveLocalSharedAliases(): Alias[] {
   };
   const aliases: Alias[] = [];
 
-  function resolveSharedExportTarget(value: unknown): string | null {
-    if (typeof value === "string") return value;
-    if (!value || typeof value !== "object" || Array.isArray(value)) {
-      return null;
-    }
-    const record = value as Record<string, unknown>;
-    for (const condition of ["source", "import", "default", "types"]) {
-      const target = record[condition];
-      if (typeof target === "string") return target;
-    }
-    return null;
-  }
-
   for (const [key, value] of Object.entries(sharedPkg.exports || {})) {
     if (key.includes("*")) continue;
-    const exportTarget = resolveSharedExportTarget(value);
+    const exportTarget = resolvePackageExportTarget(value);
     if (!exportTarget) continue;
     const aliasKey =
       key === "."
@@ -682,7 +700,7 @@ function resolveBuiltLocalSharedAliases(): Alias[] {
   ];
 }
 
-function resolveLocalAppCoreAliases(): Alias[] {
+function resolvePackageAgnosticAppCoreAliases(): Alias[] {
   // Map @elizaos/agent's root import to its real source so static named
   // imports from compiled app-core code (e.g. account-pool.js's
   // ACCOUNT_CREDENTIAL_PROVIDER_IDS) resolve. Server-only runtime branches
@@ -691,7 +709,7 @@ function resolveLocalAppCoreAliases(): Alias[] {
   const agentRootEntry = appCoreSrcRoot
     ? path.join(localElizaRoot, "packages/agent/src/index.ts")
     : emptyNodeModuleEntry;
-  const packageAgnosticAliases: Alias[] = [
+  return [
     {
       find: /^@elizaos\/agent$/,
       replacement: agentRootEntry,
@@ -713,6 +731,161 @@ function resolveLocalAppCoreAliases(): Alias[] {
     // may lag behind and miss exports added in the local workspace.
     ...resolveBuiltLocalSharedAliases(),
   ];
+}
+
+function resolveAppCoreCssAlias(
+  appCorePkgDir: string,
+  aliasKey: string,
+  resolvedValue: string,
+): Alias | null {
+  const distCssPath = path.resolve(appCorePkgDir, resolvedValue);
+  const baseName = path.basename(resolvedValue);
+  const uiCssPath = uiPkgRoot
+    ? path.join(uiPkgRoot, "src/styles", baseName)
+    : null;
+  const resolvedPath = fs.existsSync(distCssPath)
+    ? distCssPath
+    : uiCssPath && fs.existsSync(uiCssPath)
+      ? uiCssPath
+      : null;
+
+  return resolvedPath
+    ? {
+        find: new RegExp(`^${escapeRegExp(aliasKey)}$`),
+        replacement: resolvedPath,
+      }
+    : null;
+}
+
+function createAppCoreExportAlias(
+  appCorePkgDir: string,
+  key: string,
+  value: unknown,
+): Alias[] {
+  if (key === ".") return [];
+
+  const aliasKey = `@elizaos/app-core/${key.replace(/^\.\//, "")}`;
+  const resolvedValue = resolvePackageExportTarget(value);
+  if (aliasKey.endsWith(".css") && resolvedValue) {
+    const cssAlias = resolveAppCoreCssAlias(
+      appCorePkgDir,
+      aliasKey,
+      resolvedValue,
+    );
+    return cssAlias ? [cssAlias] : [];
+  }
+
+  const targetPath = resolvedValue
+    ? path.resolve(appCorePkgDir, resolvedValue)
+    : null;
+  if (!targetPath) return [];
+
+  const aliases: Alias[] = [
+    {
+      find: new RegExp(`^${escapeRegExp(aliasKey)}$`),
+      replacement: targetPath,
+    },
+  ];
+  if (!aliasKey.endsWith(".js")) {
+    aliases.push({
+      find: new RegExp(`^${escapeRegExp(aliasKey)}\\.js$`),
+      replacement: targetPath,
+    });
+  }
+  return aliases;
+}
+
+function resolveGeneratedAppCoreAliases(
+  appCorePkgDir: string,
+  appCoreBrowserEntry: string,
+  exportsMap: Record<string, unknown>,
+): Alias[] {
+  return [
+    {
+      find: /^@elizaos\/app-core$/,
+      replacement: appCoreBrowserEntry,
+    },
+    ...Object.entries(exportsMap).flatMap(([key, value]) =>
+      createAppCoreExportAlias(appCorePkgDir, key, value),
+    ),
+  ];
+}
+
+function resolveLegacyAppCoreUiAliases(appCoreBrowserEntry: string): Alias[] {
+  const uiPkgSrcRoot = uiPkgRoot ? path.join(uiPkgRoot, "src") : null;
+  if (!uiPkgSrcRoot) return [];
+
+  return [
+    {
+      find: /^@elizaos\/app-core$/,
+      replacement: appCoreBrowserEntry,
+    },
+    {
+      find: /^@elizaos\/app-core\.js$/,
+      replacement: appCoreBrowserEntry,
+    },
+    {
+      find: /^@elizaos\/app-core\/styles\/(.*)$/,
+      replacement: `${uiPkgSrcRoot}/styles/$1`,
+    },
+    {
+      find: /^@elizaos\/app-core\/api$/,
+      replacement: path.join(uiPkgSrcRoot, "api/index.ts"),
+    },
+    {
+      find: /^@elizaos\/app-core\/components\/character\/CharacterEditor$/,
+      replacement: path.join(
+        uiPkgSrcRoot,
+        "components/character/CharacterEditor.tsx",
+      ),
+    },
+    {
+      find: /^@elizaos\/app-core\/components\/chat\/widgets\/types$/,
+      replacement: path.join(uiPkgSrcRoot, "components/chat/widgets/types.ts"),
+    },
+    {
+      find: /^@elizaos\/app-core\/components\/(.+)$/,
+      replacement: `${uiPkgSrcRoot}/components/$1`,
+    },
+    {
+      find: /^@elizaos\/app-core\/platform$/,
+      replacement: path.join(uiPkgSrcRoot, "platform/index.ts"),
+    },
+    {
+      find: /^@elizaos\/app-core\/state\/(.+)$/,
+      replacement: `${uiPkgSrcRoot}/state/$1`,
+    },
+    {
+      find: /^@elizaos\/app-core\/utils$/,
+      replacement: path.join(uiPkgSrcRoot, "utils/index.ts"),
+    },
+    {
+      find: /^@elizaos\/app-core\/utils\/(.+)$/,
+      replacement: `${uiPkgSrcRoot}/utils/$1`,
+    },
+    {
+      find: /^@elizaos\/app-core\/widgets\/(.+)$/,
+      replacement: `${uiPkgSrcRoot}/widgets/$1`,
+    },
+  ];
+}
+
+function resolveSecurityAliases(): Alias[] {
+  if (!securityPkgSrcRoot) return [];
+  return [
+    {
+      find: /^@elizaos\/security$/,
+      replacement: path.join(securityPkgSrcRoot, "index.ts"),
+    },
+    {
+      find: /^@elizaos\/security\/(.+)$/,
+      replacement: `${securityPkgSrcRoot}/$1`,
+    },
+  ];
+}
+
+function resolveLocalAppCoreAliases(): Alias[] {
+  const packageAgnosticAliases = resolvePackageAgnosticAppCoreAliases();
 
   const appCorePkgPath = path.join(
     localElizaRoot,
@@ -728,145 +901,15 @@ function resolveLocalAppCoreAliases(): Alias[] {
     exports?: Record<string, unknown>;
   };
 
-  const generatedAliases: Alias[] = [];
-
-  // Bare `@elizaos/app-core` resolves to `src/browser.ts` which now
-  // re-exports the full `dist/index.js` surface (so milady's `main.tsx`
-  // sees `DesktopOnboardingRuntime`, `AppProvider`, etc.) plus the
-  // hand-written browser shims on top. The server-only re-exports
-  // inside dist (account-pool, onboarding-routes, …) are kept
-  // renderer-safe by aliasing the underlying `@elizaos/agent` and
-  // `@elizaos/plugin-elizacloud` server packages to their browser-side
-  // stubs in `nativeModuleStubPlugin` + the empty-node-module bake-in.
-  generatedAliases.push({
-    find: /^@elizaos\/app-core$/,
-    replacement: appCoreBrowserEntry,
-  });
-
-  for (const [key, value] of Object.entries(appCorePkg.exports || {})) {
-    if (key === ".") continue; // handled by the explicit bare alias above
-    const aliasKey =
-      key === "."
-        ? "@elizaos/app-core"
-        : `@elizaos/app-core/${key.replace(/^\.\//, "")}`;
-
-    // Resolve the string value, handling both plain strings and conditional exports.
-    const resolvedValue: string | null =
-      typeof value === "string"
-        ? value
-        : typeof value === "object" && value !== null
-          ? ((value as Record<string, string>).import ??
-            (value as Record<string, string>).default ??
-            null)
-          : null;
-
-    // CSS files in app-core exports point to dist paths (e.g. ./styles/styles.css).
-    // In Wave A these moved to @elizaos/ui. If the dist path doesn't exist locally,
-    // redirect to the UI source CSS so a fresh local clone builds without errors.
-    if (aliasKey.endsWith(".css") && resolvedValue) {
-      const distCssPath = path.resolve(appCorePkgDir, resolvedValue);
-      const baseName = path.basename(resolvedValue);
-      const uiCssPath = uiPkgRoot
-        ? path.join(uiPkgRoot, "src/styles", baseName)
-        : null;
-      const resolvedPath = fs.existsSync(distCssPath)
-        ? distCssPath
-        : uiCssPath && fs.existsSync(uiCssPath)
-          ? uiCssPath
-          : null;
-      if (resolvedPath) {
-        generatedAliases.push({
-          find: new RegExp(`^${escapeRegExp(aliasKey)}$`),
-          replacement: resolvedPath,
-        });
-      }
-      continue;
-    }
-
-    const targetPath =
-      key === "."
-        ? appCoreBrowserEntry
-        : resolvedValue
-          ? path.resolve(appCorePkgDir, resolvedValue)
-          : null;
-    if (!targetPath) continue;
-
-    generatedAliases.push({
-      find: new RegExp(`^${escapeRegExp(aliasKey)}$`),
-      replacement: targetPath,
-    });
-    if (!aliasKey.endsWith(".js")) {
-      generatedAliases.push({
-        find: new RegExp(`^${escapeRegExp(aliasKey)}\\.js$`),
-        replacement: targetPath,
-      });
-    }
-  }
-
   const uiSource = path.join(appCoreSrcRoot, "ui");
-  const uiPkgSrcRoot = uiPkgRoot ? path.join(uiPkgRoot, "src") : null;
-  const legacyAppCoreUiAliases: Alias[] = uiPkgSrcRoot
-    ? [
-        {
-          find: /^@elizaos\/app-core$/,
-          replacement: appCoreBrowserEntry,
-        },
-        {
-          find: /^@elizaos\/app-core\.js$/,
-          replacement: appCoreBrowserEntry,
-        },
-        {
-          find: /^@elizaos\/app-core\/styles\/(.*)$/,
-          replacement: `${uiPkgSrcRoot}/styles/$1`,
-        },
-        {
-          find: /^@elizaos\/app-core\/api$/,
-          replacement: path.join(uiPkgSrcRoot, "api/index.ts"),
-        },
-        {
-          find: /^@elizaos\/app-core\/components\/character\/CharacterEditor$/,
-          replacement: path.join(
-            uiPkgSrcRoot,
-            "components/character/CharacterEditor.tsx",
-          ),
-        },
-        {
-          find: /^@elizaos\/app-core\/components\/chat\/widgets\/types$/,
-          replacement: path.join(
-            uiPkgSrcRoot,
-            "components/chat/widgets/types.ts",
-          ),
-        },
-        {
-          find: /^@elizaos\/app-core\/components\/(.+)$/,
-          replacement: `${uiPkgSrcRoot}/components/$1`,
-        },
-        {
-          find: /^@elizaos\/app-core\/platform$/,
-          replacement: path.join(uiPkgSrcRoot, "platform/index.ts"),
-        },
-        {
-          find: /^@elizaos\/app-core\/state\/(.+)$/,
-          replacement: `${uiPkgSrcRoot}/state/$1`,
-        },
-        {
-          find: /^@elizaos\/app-core\/utils$/,
-          replacement: path.join(uiPkgSrcRoot, "utils/index.ts"),
-        },
-        {
-          find: /^@elizaos\/app-core\/utils\/(.+)$/,
-          replacement: `${uiPkgSrcRoot}/utils/$1`,
-        },
-        {
-          find: /^@elizaos\/app-core\/widgets\/(.+)$/,
-          replacement: `${uiPkgSrcRoot}/widgets/$1`,
-        },
-      ]
-    : [];
 
   return [
-    ...generatedAliases,
-    ...legacyAppCoreUiAliases,
+    ...resolveGeneratedAppCoreAliases(
+      appCorePkgDir,
+      appCoreBrowserEntry,
+      appCorePkg.exports || {},
+    ),
+    ...resolveLegacyAppCoreUiAliases(appCoreBrowserEntry),
     {
       find: /^@elizaos\/app-core\/(.+)$/,
       replacement: `${appCoreSrcRoot}/$1`,
@@ -883,18 +926,7 @@ function resolveLocalAppCoreAliases(): Alias[] {
       find: /^@elizaos\/agent\/(.+)$/,
       replacement: path.join(localElizaRoot, "packages/agent/src/$1"),
     },
-    ...(securityPkgSrcRoot
-      ? [
-          {
-            find: /^@elizaos\/security$/,
-            replacement: path.join(securityPkgSrcRoot, "index.ts"),
-          },
-          {
-            find: /^@elizaos\/security\/(.+)$/,
-            replacement: `${securityPkgSrcRoot}/$1`,
-          },
-        ]
-      : []),
+    ...resolveSecurityAliases(),
     ...packageAgnosticAliases,
   ];
 }
@@ -1148,39 +1180,45 @@ type LocalSourceAliasSpec = {
   resolve: (id: string) => string;
 };
 
-function resolveAppCoreWithUiFallback(id: string): string {
+function resolveExistingDirectoryIndex(id: string): string | null {
+  for (const idx of [`${id}/index.ts`, `${id}/index.tsx`]) {
+    if (fs.existsSync(idx)) return idx;
+  }
+  return null;
+}
+
+function resolveExistingModuleVariant(id: string): string | null {
   if (fs.existsSync(id)) {
-    // A subpath like `@elizaos/app-core/api/auth` can map to a directory when
-    // eliza refactors a single file into a folder (api/auth.ts -> api/auth/index.ts).
-    // fs.existsSync() is true for directories, so resolve the directory's index
-    // instead of returning the dir itself (which vite tries to read -> EISDIR).
-    if (fs.statSync(id).isDirectory()) {
-      for (const idx of [`${id}/index.ts`, `${id}/index.tsx`]) {
-        if (fs.existsSync(idx)) return idx;
-      }
-    } else {
-      return id;
-    }
+    return fs.statSync(id).isDirectory()
+      ? resolveExistingDirectoryIndex(id)
+      : id;
   }
   const withTsx = id.endsWith(".tsx") ? id : `${id}.tsx`;
   if (fs.existsSync(withTsx)) return withTsx;
   const withTs = id.endsWith(".ts") ? id : `${id}.ts`;
-  if (fs.existsSync(withTs)) return withTs;
-  if (uiPkgRoot && appCoreSrcRoot) {
-    const uiComponentsSourceDir = path.join(uiPkgRoot, "src");
-    const relativeToSrc = id.includes(`${appCoreSrcRoot}/`)
-      ? id.slice(appCoreSrcRoot.length + 1)
-      : null;
-    if (relativeToSrc) {
-      const uiEquiv = path.join(uiComponentsSourceDir, relativeToSrc);
-      if (fs.existsSync(uiEquiv)) return uiEquiv;
-      const uiEquivTsx = `${uiEquiv}.tsx`;
-      if (fs.existsSync(uiEquivTsx)) return uiEquivTsx;
-      const uiEquivTs = `${uiEquiv}.ts`;
-      if (fs.existsSync(uiEquivTs)) return uiEquivTs;
-    }
-  }
-  return id;
+  return fs.existsSync(withTs) ? withTs : null;
+}
+
+function resolveUiEquivalentModule(id: string): string | null {
+  if (!uiPkgRoot || !appCoreSrcRoot) return null;
+
+  const relativeToSrc = id.includes(`${appCoreSrcRoot}/`)
+    ? id.slice(appCoreSrcRoot.length + 1)
+    : null;
+  if (!relativeToSrc) return null;
+
+  return resolveExistingModuleVariant(
+    path.join(uiPkgRoot, "src", relativeToSrc),
+  );
+}
+
+function resolveAppCoreWithUiFallback(id: string): string {
+  // A subpath like `@elizaos/app-core/api/auth` can map to a directory when
+  // eliza refactors a single file into a folder (api/auth.ts -> api/auth/index.ts).
+  // Resolve the directory's index instead of returning the dir itself.
+  return (
+    resolveExistingModuleVariant(id) ?? resolveUiEquivalentModule(id) ?? id
+  );
 }
 
 function getUiAliasFallbackSpecs(): LocalSourceAliasSpec[] {
@@ -2512,6 +2550,113 @@ function generateNativeModuleStub(
  * the resolveId stage and returns an empty virtual module so Vite never
  * touches the real CJS files (which fail ESM named-export checks).
  */
+const NODE_BUILTINS = new Set([
+  "module",
+  "crypto",
+  "fs",
+  "path",
+  "os",
+  "url",
+  "util",
+  "stream",
+  "http",
+  "https",
+  "net",
+  "tls",
+  "zlib",
+  "child_process",
+  "worker_threads",
+  "perf_hooks",
+  "async_hooks",
+  "dns",
+  "dgram",
+  "readline",
+  "tty",
+  "cluster",
+  "v8",
+  "vm",
+  "assert",
+  "buffer",
+  "string_decoder",
+  "querystring",
+  "punycode",
+]);
+
+type NativeModuleResolverContext = {
+  virtualPrefix: string;
+  nativePackages: Set<string>;
+  nativeScopeRe: RegExp;
+  napiRsKeyringScopeRe: RegExp;
+  snazzahDaveyScopeRe: RegExp;
+  capacitorNativeScopeRe: RegExp;
+};
+
+function resolveElizaNativeStubId(
+  id: string,
+  context: NativeModuleResolverContext,
+): string | null {
+  const normalizedId = id.replace(/\\/g, "/");
+  if (normalizedId.includes("/packages/agent/src/")) {
+    return context.virtualPrefix + id;
+  }
+  if (id === "@elizaos/agent") return context.virtualPrefix + id;
+  if (id === "@elizaos/plugin-elizacloud") {
+    return appCoreSrcRoot
+      ? path.join(
+          appCoreSrcRoot,
+          "platform/elizaos-plugin-elizacloud-browser-stub.ts",
+        )
+      : context.virtualPrefix + id;
+  }
+  if (id === "@elizaos/app-core/ui-compat" && appCoreSrcRoot) {
+    return path.join(appCoreSrcRoot, "ui-compat.ts");
+  }
+  return null;
+}
+
+function resolveNodeBuiltinStubId(id: string, virtualPrefix: string) {
+  if (id.startsWith("node:")) return virtualPrefix + id;
+  const rootSpecifier = id.split("/")[0];
+  return NODE_BUILTINS.has(id) || NODE_BUILTINS.has(rootSpecifier)
+    ? `${virtualPrefix}node:${id}`
+    : null;
+}
+
+function resolveScopedNativeStubId(
+  id: string,
+  context: NativeModuleResolverContext,
+): string | null {
+  if (context.nativeScopeRe.test(id)) return context.virtualPrefix + id;
+  if (context.napiRsKeyringScopeRe.test(id)) return context.virtualPrefix + id;
+  if (context.snazzahDaveyScopeRe.test(id)) return context.virtualPrefix + id;
+  if (/\.node(\?.*)?$/.test(id)) return context.virtualPrefix + id;
+  if (context.capacitorNativeScopeRe.test(id) && !IS_CAPACITOR_MOBILE_BUILD) {
+    return context.virtualPrefix + id;
+  }
+  if (
+    id.startsWith("@img/sharp") ||
+    id.replace(/\\/g, "/").includes("/@img/sharp")
+  ) {
+    return context.virtualPrefix + id;
+  }
+  return null;
+}
+
+function getBarePackageName(id: string): string {
+  return id.startsWith("@")
+    ? id.split("/").slice(0, 2).join("/")
+    : id.split("/")[0];
+}
+
+function resolveNativePackageStubId(
+  id: string,
+  context: NativeModuleResolverContext,
+): string | null {
+  const bare = getBarePackageName(id);
+  if (bare.startsWith("@elizaos/plugin-")) return context.virtualPrefix + id;
+  return context.nativePackages.has(bare) ? context.virtualPrefix + id : null;
+}
+
 function nativeModuleStubPlugin(): Plugin {
   const VIRTUAL_PREFIX = "\0native-stub:";
   // Packages that only run on the server / desktop and must never be
@@ -2591,107 +2736,52 @@ function nativeModuleStubPlugin(): Plugin {
   // Capacitor native plugins — mobile-only, must never run in the browser.
   // Stubbing prevents Rollup from failing when bun workspaces don't hoist them.
   const capacitorNativeScopeRe = /^@capacitor\/(?!core)(.+)$/;
+  const resolverContext = {
+    virtualPrefix: VIRTUAL_PREFIX,
+    nativePackages,
+    nativeScopeRe,
+    napiRsKeyringScopeRe,
+    snazzahDaveyScopeRe,
+    capacitorNativeScopeRe,
+  };
 
   return {
     name: "native-module-stub",
     enforce: "pre",
     resolveId(id) {
-      const normalizedId = id.replace(/\\/g, "/");
-      if (normalizedId.includes("/packages/agent/src/")) {
-        return VIRTUAL_PREFIX + id;
-      }
+      const elizaStub = resolveElizaNativeStubId(id, resolverContext);
+      if (elizaStub) return elizaStub;
       // Server-only `@elizaos/agent` is aliased via packageAgnosticAliases
       // to `elizaos-agent-browser-stub.ts`. The resolve.alias step runs
       // AFTER `commonjs--resolver` in some rollup paths, which causes
       // dist-side static-named-import scans to fail before the alias
       // fires. Intercept it here with enforce:"pre" so Rollup gets the
       // stub from the start.
-      if (id === "@elizaos/agent") {
-        return VIRTUAL_PREFIX + id;
-      }
       // Plugin-elizacloud is server-only (cloud secrets, TTS routing).
       // The renderer reaches it transitively through `dist/api/onboarding-routes.js`
       // re-exports; stub the entire surface so static named-import scans pass.
-      if (id === "@elizaos/plugin-elizacloud") {
-        return appCoreSrcRoot
-          ? path.join(
-              appCoreSrcRoot,
-              "platform/elizaos-plugin-elizacloud-browser-stub.ts",
-            )
-          : VIRTUAL_PREFIX + id;
-      }
       // Some published/browser-side packages still deep-import this app-core
       // compatibility module even though the local app-core export map does
       // not list it. Intercept before commonjs--resolver validates exports.
-      if (id === "@elizaos/app-core/ui-compat" && appCoreSrcRoot) {
-        return path.join(appCoreSrcRoot, "ui-compat.ts");
-      }
       // Intercept ALL node: builtins before Vite externalizes them.
       // The @elizaos/core node entry uses many Node APIs (crypto, fs, module,
       // etc.) at the top level.  Rather than stubbing each one individually,
       // we return a Proxy-based virtual module for any node: import.
-      if (id.startsWith("node:")) return VIRTUAL_PREFIX + id;
       // Also catch bare imports of Node builtins that get resolved differently
-      const nodeBuiltins = new Set([
-        "module",
-        "crypto",
-        "fs",
-        "path",
-        "os",
-        "url",
-        "util",
-        "stream",
-        "http",
-        "https",
-        "net",
-        "tls",
-        "zlib",
-        "child_process",
-        "worker_threads",
-        "perf_hooks",
-        "async_hooks",
-        "dns",
-        "dgram",
-        "readline",
-        "tty",
-        "cluster",
-        "v8",
-        "vm",
-        "assert",
-        "buffer",
-        "string_decoder",
-        "querystring",
-        "punycode",
-      ]);
-      if (nodeBuiltins.has(id) || nodeBuiltins.has(id.split("/")[0]))
-        return `${VIRTUAL_PREFIX}node:${id}`;
-      const bare = id.startsWith("@")
-        ? id.split("/").slice(0, 2).join("/")
-        : id.split("/")[0];
+      const nodeStub = resolveNodeBuiltinStubId(id, VIRTUAL_PREFIX);
+      if (nodeStub) return nodeStub;
       // Scoped: @node-llama-cpp/*
-      if (nativeScopeRe.test(id)) return VIRTUAL_PREFIX + id;
       // Scoped: @napi-rs/keyring + platform binaries
-      if (napiRsKeyringScopeRe.test(id)) return VIRTUAL_PREFIX + id;
       // Scoped: @snazzah/davey + platform binaries (Discord voice native bridge)
-      if (snazzahDaveyScopeRe.test(id)) return VIRTUAL_PREFIX + id;
       // Compiled Node native addons (.node binaries) — e.g. zlib-sync's
       // `build/Release/zlib_sync.node` pulled by @discordjs/ws. Browser
       // can never load these; stub so Rollup doesn't emit bare imports.
-      if (/\.node(\?.*)?$/.test(id)) return VIRTUAL_PREFIX + id;
       // Capacitor native plugins (@capacitor/* except @capacitor/core)
-      if (capacitorNativeScopeRe.test(id) && !IS_CAPACITOR_MOBILE_BUILD) {
-        return VIRTUAL_PREFIX + id;
-      }
       // sharp's optional platform packages (@img/sharp-wasm32, etc.)
-      if (
-        id.startsWith("@img/sharp") ||
-        id.replace(/\\/g, "/").includes("/@img/sharp")
-      )
-        return VIRTUAL_PREFIX + id;
+      const scopedStub = resolveScopedNativeStubId(id, resolverContext);
+      if (scopedStub) return scopedStub;
       // Exact or sub-path match against native packages
-      if (bare.startsWith("@elizaos/plugin-")) return VIRTUAL_PREFIX + id;
-      if (nativePackages.has(bare)) return VIRTUAL_PREFIX + id;
-      return null;
+      return resolveNativePackageStubId(id, resolverContext);
     },
     load(id) {
       if (!id.startsWith(VIRTUAL_PREFIX)) return null;

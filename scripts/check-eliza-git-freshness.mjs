@@ -225,35 +225,75 @@ function fetchOriginDevelop() {
   });
 }
 
+function shouldSkipFreshnessCheck() {
+  if (process.env.MILADY_SKIP_FRESHNESS_CHECK === "1") return true;
+  if (!isLocalMode()) return true;
+  // Local mode declared but no git repo (probably a tarball drop-in).
+  // Nothing reliable to compare against; skip.
+  return !fs.existsSync(path.join(ELIZA_ROOT, ".git"));
+}
+
+async function refreshOriginDevelopRef() {
+  if (process.env.MILADY_SKIP_FETCH === "1") {
+    log("step 1/2 — skipped fetch (MILADY_SKIP_FETCH=1); using cached ref");
+    return;
+  }
+  await fetchOriginDevelop();
+}
+
+function readFreshnessState() {
+  return {
+    branch: currentBranch(),
+    behind: commitsBehindOriginDevelop(),
+    ahead: commitsAheadOfOriginDevelop() ?? 0,
+    dirty: hasUncommittedChanges(),
+  };
+}
+
+function reportFeatureBranchFreshness({ branch, behind }) {
+  if (behind > 0) {
+    log(
+      `on '${branch}', ${behind} commits behind origin/develop. (Use 'cd eliza && git fetch && git rebase origin/develop' before opening a PR.)`,
+      "info",
+    );
+  }
+}
+
+function failWhenTooStale({ behind, ahead, dirty }) {
+  if (behind <= HARD_FAIL_THRESHOLD) return false;
+  const divergence = ahead > 0 ? ` (${ahead} ahead, branches diverged)` : "";
+  log(
+    `eliza/ is ${behind} commits behind origin/develop${divergence} — too stale to dev against reliably.`,
+    "error",
+  );
+  console.error(formatSyncInstructions({ behind, ahead, dirty }));
+  process.exit(1);
+}
+
+function warnWhenBehind({ behind, ahead, dirty }) {
+  if (behind <= 0) return;
+  const syncHint =
+    ahead > 0
+      ? "git rebase origin/develop"
+      : dirty
+        ? "git stash && git pull --ff-only origin develop && git stash pop"
+        : "git pull --ff-only origin develop";
+  log(
+    `eliza/ is ${behind} commits behind origin/develop${ahead > 0 ? ` (${ahead} ahead — rebase required)` : ""}. Consider 'cd eliza && ${syncHint}'.`,
+    "warn",
+  );
+}
+
 async function main() {
-  if (process.env.MILADY_SKIP_FRESHNESS_CHECK === "1") return;
-
-  if (!isLocalMode()) {
-    // Packages mode — nothing to check.
-    return;
-  }
-
-  if (!fs.existsSync(path.join(ELIZA_ROOT, ".git"))) {
-    // Local mode declared but no git repo (probably a tarball drop-in).
-    // Nothing reliable to compare against; skip.
-    return;
-  }
+  if (shouldSkipFreshnessCheck()) return;
 
   log("checking eliza/ checkout freshness against origin/develop…");
-
-  if (process.env.MILADY_SKIP_FETCH !== "1") {
-    await fetchOriginDevelop();
-  } else {
-    log("step 1/2 — skipped fetch (MILADY_SKIP_FETCH=1); using cached ref");
-  }
+  await refreshOriginDevelopRef();
 
   log("step 2/2 — comparing local HEAD to origin/develop…");
-  const branch = currentBranch();
-  const behind = commitsBehindOriginDevelop();
-  const ahead = commitsAheadOfOriginDevelop() ?? 0;
-  const dirty = hasUncommittedChanges();
+  const state = readFreshnessState();
 
-  if (behind === null) {
+  if (state.behind === null) {
     log(
       `could not compute commits-behind (missing origin/develop ref?). Skipping.`,
       "warn",
@@ -261,43 +301,15 @@ async function main() {
     return;
   }
 
-  if (branch && branch !== "develop") {
-    // On a feature/wip branch. The number is informational — being
-    // behind develop on a wip branch is normal and intentional.
-    if (behind > 0) {
-      log(
-        `on '${branch}', ${behind} commits behind origin/develop. (Use 'cd eliza && git fetch && git rebase origin/develop' before opening a PR.)`,
-        "info",
-      );
-    }
+  // On a feature/wip branch. The number is informational — being
+  // behind develop on a wip branch is normal and intentional.
+  if (state.branch && state.branch !== "develop") {
+    reportFeatureBranchFreshness(state);
     return;
   }
 
-  if (behind === 0) return; // silent happy path
-
-  if (behind > HARD_FAIL_THRESHOLD) {
-    const divergence = ahead > 0 ? ` (${ahead} ahead, branches diverged)` : "";
-    log(
-      `eliza/ is ${behind} commits behind origin/develop${divergence} — too stale to dev against reliably.`,
-      "error",
-    );
-    console.error(formatSyncInstructions({ behind, ahead, dirty }));
-    process.exit(1);
-  }
-
-  if (behind > 0) {
-    const syncHint =
-      ahead > 0
-        ? "git rebase origin/develop"
-        : dirty
-          ? "git stash && git pull --ff-only origin develop && git stash pop"
-          : "git pull --ff-only origin develop";
-    log(
-      `eliza/ is ${behind} commits behind origin/develop${ahead > 0 ? ` (${ahead} ahead — rebase required)` : ""}. Consider 'cd eliza && ${syncHint}'.`,
-      "warn",
-    );
-    return;
-  }
+  failWhenTooStale(state);
+  warnWhenBehind(state);
 }
 
 main().catch((error) => {
