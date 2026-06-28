@@ -70,8 +70,9 @@ let next = fs.readFileSync(devUiPath, "utf8");
 const original = next;
 
 if (next.includes(brokenFallbackStart)) {
-  const brokenEnd =
-    "  throw new Error(\n    `[dev-ui] dev-server.ts not found under ${devCwd}. Expected eliza/packages/app-core/... (Eliza-style checkout) or packages/app-core/... (eliza repo root).`,\n  );";
+  const brokenEnd = `  throw new Error(
+    \`[dev-ui] dev-server.ts not found under \${devCwd}. Expected eliza/packages/app-core/... (Eliza-style checkout) or packages/app-core/... (eliza repo root).\`,
+  );`;
   const startIdx = next.indexOf(brokenFallbackStart);
   const endIdx = next.indexOf(brokenEnd, startIdx);
   if (endIdx === -1) {

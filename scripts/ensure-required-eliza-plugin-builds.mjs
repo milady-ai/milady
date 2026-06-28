@@ -11,7 +11,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { ensureRequiredElizaPluginBuilds } from "./setup-upstreams.mjs";
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const repoRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+);
 
 if (process.env.MILADY_SKIP_REQUIRED_ELIZA_PLUGIN_BUILDS === "1") {
   process.exit(0);

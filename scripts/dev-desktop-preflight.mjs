@@ -28,7 +28,9 @@ if (process.platform === "darwin") {
       });
       child.on("error", (error) => {
         reject(
-          new Error(`generate-brand-assets.mjs failed to spawn: ${error.message}`),
+          new Error(
+            `generate-brand-assets.mjs failed to spawn: ${error.message}`,
+          ),
         );
       });
       child.on("exit", (code, signal) => {

@@ -41,8 +41,6 @@ const TRIM_THRESHOLD = 10;
 const ARTWORK_PAD = 4;
 /** Gold silhouette span as a fraction of the legacy .icns master. */
 const GOLD_COVERAGE = 0.94;
-/** Foreground span for Liquid Glass (fill the compositor canvas). */
-const GOLD_COVERAGE_LIQUID_GLASS = 1;
 /**
  * Liquid Glass layer scale. 1.32 was ~15% undersized; 1.75 overshot and
  * cropped the face. ~1.48 targets parity with standard dock icons on Tahoe.
@@ -101,11 +99,7 @@ function writeIco(targetPath, entries) {
 
   fs.writeFileSync(
     targetPath,
-    Buffer.concat([
-      header,
-      directory,
-      ...entries.map((entry) => entry.buffer),
-    ]),
+    Buffer.concat([header, directory, ...entries.map((entry) => entry.buffer)]),
   );
 }
 
@@ -119,8 +113,7 @@ function goldBoundsFromRaw(data, width, height, channels = 4) {
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const i = (y * width + x) * channels;
-      const luma =
-        0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+      const luma = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
       if (luma <= LUMA_THRESHOLD) continue;
       found = true;
       minX = Math.min(minX, x);
@@ -214,17 +207,11 @@ async function prepareNormalizedSource(inputPath, { trimFrame }) {
   const baseTop = Math.round((MASTER_SIZE - scaledHeight) / 2);
   const left = Math.max(
     0,
-    Math.min(
-      MASTER_SIZE - scaledWidth,
-      baseLeft + balance.x + OPTICAL_NUDGE_X,
-    ),
+    Math.min(MASTER_SIZE - scaledWidth, baseLeft + balance.x + OPTICAL_NUDGE_X),
   );
   const top = Math.max(
     0,
-    Math.min(
-      MASTER_SIZE - scaledHeight,
-      baseTop + balance.y + OPTICAL_NUDGE_Y,
-    ),
+    Math.min(MASTER_SIZE - scaledHeight, baseTop + balance.y + OPTICAL_NUDGE_Y),
   );
 
   let master;
@@ -307,142 +294,6 @@ async function prepareNormalizedSource(inputPath, { trimFrame }) {
   return master;
 }
 
-async function prepareGoldForeground(
-  inputPath,
-  { trimFrame, goldCoverage = GOLD_COVERAGE_LIQUID_GLASS },
-) {
-  let pipeline = sharp(inputPath).ensureAlpha();
-  if (trimFrame) {
-    pipeline = pipeline.trim({ threshold: TRIM_THRESHOLD });
-  }
-  const source = await pipeline.png().toBuffer();
-
-  const sourceBounds = await goldBounds(source);
-  const extractLeft = Math.max(0, sourceBounds.minX - ARTWORK_PAD);
-  const extractTop = Math.max(0, sourceBounds.minY - ARTWORK_PAD);
-  const extractWidth = Math.min(
-    sourceBounds.width - extractLeft,
-    sourceBounds.maxX - sourceBounds.minX + 1 + ARTWORK_PAD * 2,
-  );
-  const extractHeight = Math.min(
-    sourceBounds.height - extractTop,
-    sourceBounds.maxY - sourceBounds.minY + 1 + ARTWORK_PAD * 2,
-  );
-
-  const artwork = await sharp(source)
-    .extract({
-      left: extractLeft,
-      top: extractTop,
-      width: extractWidth,
-      height: extractHeight,
-    })
-    .png()
-    .toBuffer();
-
-  const artworkBounds = await goldBounds(artwork);
-  const goldWidth = artworkBounds.maxX - artworkBounds.minX + 1;
-  const goldHeight = artworkBounds.maxY - artworkBounds.minY + 1;
-  const goldSpan = Math.min(goldWidth, goldHeight);
-  const scale = (MASTER_SIZE * goldCoverage) / goldSpan;
-
-  const artworkMeta = await sharp(artwork).metadata();
-  const artworkWidth = artworkMeta.width ?? goldWidth;
-  const artworkHeight = artworkMeta.height ?? goldHeight;
-  const scaledWidth = Math.max(1, Math.round(artworkWidth * scale));
-  const scaledHeight = Math.max(1, Math.round(artworkHeight * scale));
-
-  const scaled = await sharp(artwork)
-    .resize(scaledWidth, scaledHeight, { fit: "fill" })
-    .ensureAlpha()
-    .png()
-    .toBuffer();
-
-  const scaledBounds = await goldBounds(scaled);
-  const balance = balanceOffsets(scaledBounds, scaledWidth);
-
-  const baseLeft = Math.round((MASTER_SIZE - scaledWidth) / 2);
-  const baseTop = Math.round((MASTER_SIZE - scaledHeight) / 2);
-  const left = Math.max(
-    0,
-    Math.min(
-      MASTER_SIZE - scaledWidth,
-      baseLeft + balance.x + OPTICAL_NUDGE_X,
-    ),
-  );
-  const top = Math.max(
-    0,
-    Math.min(
-      MASTER_SIZE - scaledHeight,
-      baseTop + balance.y + OPTICAL_NUDGE_Y,
-    ),
-  );
-
-  if (scaledWidth > MASTER_SIZE || scaledHeight > MASTER_SIZE) {
-    const padded =
-      scaledWidth < MASTER_SIZE || scaledHeight < MASTER_SIZE
-        ? await sharp({
-            create: {
-              width: Math.max(scaledWidth, MASTER_SIZE),
-              height: Math.max(scaledHeight, MASTER_SIZE),
-              channels: 4,
-              background: { r: 0, g: 0, b: 0, alpha: 0 },
-            },
-          })
-            .composite([
-              {
-                input: scaled,
-                left: Math.round(
-                  (Math.max(scaledWidth, MASTER_SIZE) - scaledWidth) / 2,
-                ),
-                top: Math.round(
-                  (Math.max(scaledHeight, MASTER_SIZE) - scaledHeight) / 2,
-                ),
-              },
-            ])
-            .png()
-            .toBuffer()
-        : scaled;
-    const paddedMeta = await sharp(padded).metadata();
-    const padW = paddedMeta.width ?? MASTER_SIZE;
-    const padH = paddedMeta.height ?? MASTER_SIZE;
-    const cropLeft = Math.max(
-      0,
-      Math.min(
-        padW - MASTER_SIZE,
-        Math.round((padW - MASTER_SIZE) / 2 + balance.x + OPTICAL_NUDGE_X),
-      ),
-    );
-    const cropTop = Math.max(
-      0,
-      Math.min(
-        padH - MASTER_SIZE,
-        Math.round((padH - MASTER_SIZE) / 2 + balance.y + OPTICAL_NUDGE_Y),
-      ),
-    );
-    return sharp(padded)
-      .extract({
-        left: cropLeft,
-        top: cropTop,
-        width: MASTER_SIZE,
-        height: MASTER_SIZE,
-      })
-      .png()
-      .toBuffer();
-  }
-
-  return sharp({
-    create: {
-      width: MASTER_SIZE,
-      height: MASTER_SIZE,
-      channels: 4,
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
-    },
-  })
-    .composite([{ input: scaled, left, top }])
-    .png()
-    .toBuffer();
-}
-
 async function loadMiladyIconMaster() {
   if (fs.existsSync(iconTransparentPath)) {
     return prepareNormalizedSource(iconTransparentPath, { trimFrame: false });
@@ -468,10 +319,7 @@ function resolveSourceLabel() {
 }
 
 async function renderSquarePng(masterPng, size) {
-  return sharp(masterPng)
-    .resize(size, size, { fit: "fill" })
-    .png()
-    .toBuffer();
+  return sharp(masterPng).resize(size, size, { fit: "fill" }).png().toBuffer();
 }
 
 async function writePng(masterPng, outputPath, size) {
@@ -487,7 +335,10 @@ function writeFaviconSvg() {
 </svg>
 `;
   fs.writeFileSync(path.join(publicDir, "favicon.svg"), `${svg.trim()}\n`);
-  fs.writeFileSync(path.join(brandFaviconsDir, "favicon.svg"), `${svg.trim()}\n`);
+  fs.writeFileSync(
+    path.join(brandFaviconsDir, "favicon.svg"),
+    `${svg.trim()}\n`,
+  );
 }
 
 async function generateWebIcons(masterPng) {
@@ -665,11 +516,7 @@ async function generateIosOverrideIcons(masterPng) {
     const scale = Number.parseFloat(String(image.scale));
     const pixels = Math.round(Number.parseFloat(width) * scale);
     if (!Number.isFinite(pixels) || pixels <= 0) continue;
-    await writePng(
-      masterPng,
-      path.join(iosIconSetDir, image.filename),
-      pixels,
-    );
+    await writePng(masterPng, path.join(iosIconSetDir, image.filename), pixels);
   }
   console.log("[brand-assets] Updated iOS AppIcon.appiconset overrides.");
 }
@@ -684,7 +531,9 @@ async function main() {
   await generateWebIcons(masterPng);
   await generateDesktopIcons(masterPng);
   await generateIosOverrideIcons(masterPng);
-  console.log(`[brand-assets] Generated Milady icons from ${resolveSourceLabel()}`);
+  console.log(
+    `[brand-assets] Generated Milady icons from ${resolveSourceLabel()}`,
+  );
 }
 
 await main();

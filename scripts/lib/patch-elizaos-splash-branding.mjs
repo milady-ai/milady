@@ -14,7 +14,7 @@ const SPLASH_BRAND_MARK_IMAGE_ONLY =
 
 function splashBrandMarkImageWithPoweredByJsx() {
   return [
-    "return (_jsxs(\"div\", { className: \"mb-2 flex flex-col items-center gap-2 text-center\", children: [_jsx(\"img\", { src: resolveAppAssetUrl(splashBrandImage), alt: appName, className: \"mx-auto w-full max-w-[min(92vw,36rem)] object-contain\" }), showPoweredBy",
+    'return (_jsxs("div", { className: "mb-2 flex flex-col items-center gap-2 text-center", children: [_jsx("img", { src: resolveAppAssetUrl(splashBrandImage), alt: appName, className: "mx-auto w-full max-w-[min(92vw,36rem)] object-contain" }), showPoweredBy',
     '            ? _jsxs("span", { style: { fontFamily: FONT }, className: "text-3xs uppercase tracking-[0.18em] text-white/55", children: ["powered by ", frameworkName] })',
     "            : null] }));",
   ].join("\n        ");
@@ -69,8 +69,10 @@ export function patchBrandingConfigFile(filePath) {
     !original.includes("frameworkName") &&
     cloudOnlyFieldPattern.test(original)
   ) {
-    next = next.replace(cloudOnlyFieldPattern, (match, indent) =>
-      `${indent}/** Framework credit on splash (default "${DEFAULT_FRAMEWORK_NAME}"). */\n${indent}frameworkName?: string;\n${match}`,
+    next = next.replace(
+      cloudOnlyFieldPattern,
+      (match, indent) =>
+        `${indent}/** Framework credit on splash (default "${DEFAULT_FRAMEWORK_NAME}"). */\n${indent}frameworkName?: string;\n${match}`,
     );
   }
 
@@ -84,8 +86,10 @@ export function patchBrandingConfigFile(filePath) {
         `expected BrandingConfig anchor field not found in ${filePath}`,
       );
     }
-    next = next.replace(splashImageFieldPattern, (match, indent) =>
-      `${match}\n${indent}/** Centered brand image on the startup splash (app public asset path). */\n${indent}splashBrandImage?: string;`,
+    next = next.replace(
+      splashImageFieldPattern,
+      (match, indent) =>
+        `${match}\n${indent}/** Centered brand image on the startup splash (app public asset path). */\n${indent}splashBrandImage?: string;`,
     );
   }
 
@@ -147,6 +151,7 @@ function upgradeAppCoreStartupShellBrandImage(filePath, source) {
   ) {
     next = next.replace(
       'className: "mt-2 text-3xs text-black/50 uppercase animate-pulse", children: t(phaseToStatusKey(phase))',
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: this patches a generated template literal string.
       'className: `mt-2 text-3xs uppercase animate-pulse ${splashBrandImage ? "text-white/60" : "text-black/50"}`, children: t(phaseToStatusKey(phase))',
     );
   }
@@ -229,11 +234,12 @@ export function patchAppCoreStartupShell(filePath) {
 
   next = next.replace(
     'className: "flex items-center justify-center h-full w-full bg-[#ffe600] text-black overflow-hidden", children: [_jsx("img", { src: resolveAppAssetUrl("splash-bg.png"), alt: "", "aria-hidden": "true", className: "pointer-events-none absolute inset-0 h-full w-full object-cover" }), _jsx("div", { className: "relative z-10 flex flex-col items-center gap-5 px-6 text-center w-full", style: { maxWidth: 360 }',
-      `className: \`flex items-center justify-center h-full w-full overflow-hidden \${splashBrandImage ? "bg-[${DEFAULT_SPLASH_BACKGROUND}] text-white" : "bg-[#ffe600] text-black"}\`, children: [splashBrandImage ? null : _jsx("img", { src: resolveAppAssetUrl("splash-bg.png"), alt: "", "aria-hidden": "true", className: "pointer-events-none absolute inset-0 h-full w-full object-cover" }), _jsx("div", { className: "relative z-10 flex flex-col items-center gap-5 px-6 text-center w-full", style: { maxWidth: splashBrandImage ? 480 : 360 }`,
+    `className: \`flex items-center justify-center h-full w-full overflow-hidden \${splashBrandImage ? "bg-[${DEFAULT_SPLASH_BACKGROUND}] text-white" : "bg-[#ffe600] text-black"}\`, children: [splashBrandImage ? null : _jsx("img", { src: resolveAppAssetUrl("splash-bg.png"), alt: "", "aria-hidden": "true", className: "pointer-events-none absolute inset-0 h-full w-full object-cover" }), _jsx("div", { className: "relative z-10 flex flex-col items-center gap-5 px-6 text-center w-full", style: { maxWidth: splashBrandImage ? 480 : 360 }`,
   );
 
   next = next.replace(
     'className: "mt-2 text-3xs text-black/50 uppercase animate-pulse", children: t(phaseToStatusKey(phase))',
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: this patches a generated template literal string.
     'className: `mt-2 text-3xs uppercase animate-pulse ${splashBrandImage ? "text-white/60" : "text-black/50"}`, children: t(phaseToStatusKey(phase))',
   );
 

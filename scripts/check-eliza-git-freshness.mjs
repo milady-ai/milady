@@ -115,7 +115,9 @@ function formatSyncInstructions({ behind, ahead, dirty }) {
       "  Fast-forward won't work — use rebase:",
       "",
       "      cd eliza",
-      ...(dirty ? ["      git stash push -u -m \"wip before develop rebase\""] : []),
+      ...(dirty
+        ? ['      git stash push -u -m "wip before develop rebase"']
+        : []),
       "      git fetch origin develop",
       "      git rebase origin/develop",
       ...(dirty ? ["      git stash pop"] : []),
@@ -123,7 +125,7 @@ function formatSyncInstructions({ behind, ahead, dirty }) {
       "  To discard local commits and match upstream exactly (keeps uncommitted edits via stash):",
       "",
       "      cd eliza",
-      "      git stash push -u -m \"wip before develop reset\"",
+      '      git stash push -u -m "wip before develop reset"',
       "      git fetch origin develop",
       "      git reset --hard origin/develop",
       "      git stash pop",
@@ -135,7 +137,7 @@ function formatSyncInstructions({ behind, ahead, dirty }) {
             "  You have uncommitted changes — stash first:",
             "",
             "      cd eliza",
-            "      git stash push -u -m \"wip before develop sync\"",
+            '      git stash push -u -m "wip before develop sync"',
             "      git fetch origin develop",
             "      git pull --ff-only origin develop",
             "      git stash pop",
@@ -148,7 +150,11 @@ function formatSyncInstructions({ behind, ahead, dirty }) {
     );
   }
 
-  lines.push("", "  Bypass for this one run with MILADY_SKIP_FRESHNESS_CHECK=1.", "");
+  lines.push(
+    "",
+    "  Bypass for this one run with MILADY_SKIP_FRESHNESS_CHECK=1.",
+    "",
+  );
   return lines.join("\n");
 }
 
@@ -168,7 +174,9 @@ function fetchOriginDevelop() {
 
   const startedAt = Date.now();
   const heartbeat = setInterval(() => {
-    log(`still fetching origin/develop… (${formatElapsedMs(startedAt)} elapsed)`);
+    log(
+      `still fetching origin/develop… (${formatElapsedMs(startedAt)} elapsed)`,
+    );
   }, FETCH_HEARTBEAT_MS);
 
   return new Promise((resolve) => {
@@ -268,8 +276,7 @@ async function main() {
   if (behind === 0) return; // silent happy path
 
   if (behind > HARD_FAIL_THRESHOLD) {
-    const divergence =
-      ahead > 0 ? ` (${ahead} ahead, branches diverged)` : "";
+    const divergence = ahead > 0 ? ` (${ahead} ahead, branches diverged)` : "";
     log(
       `eliza/ is ${behind} commits behind origin/develop${divergence} — too stale to dev against reliably.`,
       "error",
