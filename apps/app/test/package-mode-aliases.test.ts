@@ -115,6 +115,21 @@ describe("package mode aliases", () => {
     expect(connectorsIndexText).toContain("element: CloudConnectorsSection");
   });
 
+  it("falls back to the local runtime agent for Discord Gateway characters", () => {
+    const discordGatewayText = fs.readFileSync(
+      path.resolve(
+        appRoot,
+        "../../eliza/packages/ui/src/cloud/connectors/discord-gateway-connection.tsx",
+      ),
+      "utf8",
+    );
+
+    expect(discordGatewayText).toContain("/api/v1/dashboard");
+    expect(discordGatewayText).toContain("/api/agents");
+    expect(discordGatewayText).toContain("fetchRuntimeCharacters");
+    expect(discordGatewayText).toContain("setCharacterId");
+  });
+
   it("imports app-shell component + state/api types from @elizaos/ui and @elizaos/shared", () => {
     const mainText = fs.readFileSync(
       path.join(appRoot, "src/main.tsx"),
