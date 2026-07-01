@@ -1,0 +1,19 @@
+---
+engines:
+  eslint-8:
+    exclude_paths:
+      - "apps/app/src/character-presets-shim.ts"
+  lizard:
+    exclude_paths:
+      - "apps/app/scripts/**"
+      - "scripts/**"
+  metric:
+    exclude_paths:
+      - "apps/app/scripts/**"
+      - "scripts/**"
+  opengrep:
+    exclude_paths:
+      - "apps/app/scripts/**"
+      - "scripts/**"
+exclude_paths:
+  - "apps/app/src/character-presets-shim.ts"
