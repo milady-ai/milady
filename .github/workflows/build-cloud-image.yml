@@ -80,7 +80,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 0
           ref: ${{ inputs.source_sha || github.sha }}
@@ -97,7 +97,7 @@ jobs:
           bun-version: "1.3.14"
 
       - name: Cache bun store
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         with:
           path: ~/.bun/install/cache
           key: bun-store-${{ runner.os }}-${{ hashFiles('bun.lock') }}
@@ -541,7 +541,7 @@ jobs:
             type=raw,value=cloud-app-${{ steps.version.outputs.version_clean }}
 
       - name: Build and push cloud app image
-        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a
         with:
           context: .
           file: eliza/packages/app-core/deploy/Dockerfile.cloud

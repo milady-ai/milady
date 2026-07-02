@@ -110,7 +110,7 @@ jobs:
       has_variant: ${{ steps.init.outputs.has_variant }}
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 1
           # The Tails source is vendored directly under the variant
@@ -194,7 +194,7 @@ jobs:
       )
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 1
           submodules: false
@@ -241,7 +241,7 @@ jobs:
       # handled by GitHub's 7-day cache eviction.
       - name: Restore apt-cacher-ng volume cache
         id: acng-cache
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         with:
           path: ~/acng-cache
           key: tails-acng-v1-${{ github.ref_name }}
@@ -324,7 +324,7 @@ jobs:
       && inputs.stage == 'build'
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 1
           submodules: false
