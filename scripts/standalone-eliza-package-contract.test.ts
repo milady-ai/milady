@@ -327,6 +327,20 @@ test("package-mode no longer carries migrated elizaOS package patches", () => {
   }
 });
 
+test("package-mode app-core production build patch tolerates stale Node exec paths", () => {
+  const patchScript = read("scripts/patch-elizaos-package-styles.mjs");
+  const appCoreRunner = read("scripts/run-eliza-app-core-script.mjs");
+
+  assert.match(patchScript, /function patchProductionBuildNodeResolution/);
+  assert.match(patchScript, /process\.env\.ELIZA_NODE_PATH\?\.trim\(\)/);
+  assert.match(patchScript, /process\.env\.MILADY_NODE_PATH\?\.trim\(\)/);
+  assert.match(patchScript, /fs\.existsSync\(candidate\)/);
+  assert.match(patchScript, /return "node"/);
+  assert.match(appCoreRunner, /ELIZA_NODE_PATH:/);
+  assert.match(appCoreRunner, /process\.env\.MILADY_NODE_PATH\?\.trim\(\)/);
+  assert.match(appCoreRunner, /"node"/);
+});
+
 test("root tsconfig.json is packages-mode-clean by default", () => {
   const tsconfigSource = read("tsconfig.json");
   assert.doesNotMatch(

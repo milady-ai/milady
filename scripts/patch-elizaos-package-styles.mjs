@@ -276,6 +276,86 @@ function patchProductionBuildViteResolution(appCoreDir) {
   return true;
 }
 
+function patchProductionBuildNodeResolution(appCoreDir) {
+  const scriptPath = path.join(appCoreDir, "scripts/run-production-build.mjs");
+  if (!fs.existsSync(scriptPath)) {
+    return false;
+  }
+
+  const original = fs.readFileSync(scriptPath, "utf8");
+  // GitHub-hosted runners can expose a stale absolute process.execPath through
+  // the Bun-launched script environment. Validate explicit and reported Node
+  // paths before using them, and fall back to PATH lookup so package-mode builds
+  // can still spawn tsdown/Vite when the setup-node shim moved.
+  const currentImplementation = `/** Real Node binary — when the script is started via \`bun run\`, process.execPath is Bun. */
+function resolveNodeExec() {
+  if (!process.versions.bun) {
+    return process.execPath;
+  }
+  const probe = spawnSync(
+    "node",
+    ["-e", "process.stdout.write(process.execPath)"],
+    {
+      encoding: "utf8",
+    },
+  );
+  const out = probe.stdout?.trim();
+  if (probe.status === 0 && out) {
+    return out;
+  }
+  throw new Error(
+    "Node.js is required to run this build (tsx + Vite CLI). Install Node 22+ or run: node scripts/run-production-build.mjs",
+  );
+}`;
+  const patchedImplementation = `/** Real Node binary — when the script is started via \`bun run\`, process.execPath is Bun. */
+function resolveNodeExec() {
+  const candidates = [
+    process.env.ELIZA_NODE_PATH?.trim(),
+    process.env.MILADY_NODE_PATH?.trim(),
+    !process.versions.bun ? process.execPath : null,
+  ].filter(Boolean);
+  for (const candidate of candidates) {
+    if (candidate === "node" || fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  const probe = spawnSync(
+    "node",
+    ["-e", "process.stdout.write(process.execPath)"],
+    {
+      encoding: "utf8",
+    },
+  );
+  const out = probe.stdout?.trim();
+  if (probe.status === 0 && out && fs.existsSync(out)) {
+    return out;
+  }
+  if (probe.status === 0) {
+    return "node";
+  }
+  throw new Error(
+    "Node.js is required to run this build (tsx + Vite CLI). Install Node 22+ or run: node scripts/run-production-build.mjs",
+  );
+}`;
+
+  if (original.includes(patchedImplementation)) {
+    return false;
+  }
+
+  if (!original.includes(currentImplementation)) {
+    return false;
+  }
+
+  fs.writeFileSync(
+    scriptPath,
+    original.replace(currentImplementation, patchedImplementation),
+  );
+  console.log(
+    `${LOG_PREFIX} patched ${path.relative(process.cwd(), scriptPath)}`,
+  );
+  return true;
+}
+
 const appCoreDirs = collectAppCorePackageDirs();
 if (appCoreDirs.length === 0) {
   console.warn(`${LOG_PREFIX} @elizaos/app-core is not installed; skipping.`);
@@ -297,6 +377,9 @@ for (const appCoreDir of appCoreDirs) {
     patched += 1;
   }
   if (patchProductionBuildViteResolution(appCoreDir)) {
+    patched += 1;
+  }
+  if (patchProductionBuildNodeResolution(appCoreDir)) {
     patched += 1;
   }
 }

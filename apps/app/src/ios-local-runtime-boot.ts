@@ -68,6 +68,11 @@ const IOS_FULL_BUN_ENV: Record<string, string> = {
   ELIZA_HEADLESS: "1",
   ELIZA_IOS_BRIDGE_TRANSPORT: "bun-host-ipc",
   LOG_LEVEL: "error",
+  // Opt-in on-device grind-all-models telemetry self-test. Built only when
+  // VITE_ELIZA_RUN_MODEL_GRIND is set at renderer build time; off for prod.
+  ...(import.meta.env.VITE_ELIZA_RUN_MODEL_GRIND
+    ? { ELIZA_IOS_RUN_MODEL_GRIND: "1", LOG_LEVEL: "info" }
+    : {}),
 };
 
 // Custom event names dispatched on `document` for chat UI consumers. We

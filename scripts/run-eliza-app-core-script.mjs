@@ -104,6 +104,13 @@ const child = spawn(
       // since this fork ships no eliza.mjs shim. No-op for app-core builds that
       // predate #8126 (they fall back to eliza.mjs); ignored by other scripts.
       ELIZA_ENTRY_FILE: process.env.ELIZA_ENTRY_FILE?.trim() || "milady.mjs",
+      // Prefer PATH lookup for nested Node spawns. Some CI images expose a
+      // stale absolute process.execPath through Bun-launched app-core scripts,
+      // while the `node` command used to start this wrapper is still valid.
+      ELIZA_NODE_PATH:
+        process.env.ELIZA_NODE_PATH?.trim() ||
+        process.env.MILADY_NODE_PATH?.trim() ||
+        "node",
     },
     stdio: "inherit",
   },
