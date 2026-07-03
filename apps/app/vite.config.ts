@@ -2322,6 +2322,16 @@ const NATIVE_MODULE_STUB_GENERATORS = new Map<
       "export const setErrorLevel = () => {};\n" +
       "export default { generate, setErrorLevel };\n",
   ],
+  [
+    "@elizaos/plugin-agent-orchestrator",
+    () =>
+      // The agent runtime's api/server-helpers-swarm.ts statically imports
+      // sanitizeCompletionRelay; the export must exist for Rollup's
+      // named-import scan even though the renderer never runs it.
+      "const noop = () => undefined;\n" +
+      "export const sanitizeCompletionRelay = (text) => (text ? String(text) : '');\n" +
+      "export default new Proxy(noop, { get: () => noop, apply: () => undefined });\n",
+  ],
 ]);
 
 function isSharpStubId(strippedId: string): boolean {
