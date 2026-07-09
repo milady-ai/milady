@@ -98,7 +98,7 @@ jobs:
       build_macos: ${{ steps.targets.outputs.macos }}
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
       - name: Determine version
         id: ver
@@ -164,7 +164,7 @@ jobs:
       FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
       - name: Setup Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
@@ -274,7 +274,7 @@ jobs:
 
       - name: Setup Ruby
         if: steps.validate_ios.outputs.ready == 'true'
-        uses: ruby/setup-ruby@89f90524b88a01fe6e0b732220432cc6142926af
+        uses: ruby/setup-ruby@d45b1a4e94b71acab930e56e79c6aa188764e7f9
         with:
           ruby-version: "4.0.3"
           bundler-cache: true
@@ -348,7 +348,7 @@ jobs:
       APP_STORE_API_KEY_P8: ${{ secrets.APP_STORE_API_KEY_P8 }}
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
       - name: Setup Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
