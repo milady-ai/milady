@@ -96,7 +96,7 @@ jobs:
     steps:
       # ── 1. Checkout ─────────────────────────────────────────────────────────
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 0
           ref: ${{ inputs.source_sha || github.event.release.tag_name || github.sha }}
@@ -118,7 +118,7 @@ jobs:
 
       # ── 2. Set up Node 22 ───────────────────────────────────────────────────
       - name: Setup Node.js 22
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: "22"
 
@@ -130,7 +130,7 @@ jobs:
 
       # ── 4. Restore cached bun store ─────────────────────────────────────────
       - name: Cache bun store
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         with:
           path: ~/.bun/install/cache
           key: bun-store-${{ runner.os }}-${{ hashFiles('bun.lock') }}
@@ -487,11 +487,11 @@ jobs:
         run: cp eliza/packages/app-core/deploy/.dockerignore.ci .dockerignore
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c
 
       # ── 13. Login to GHCR ───────────────────────────────────────────────────
       - name: Login to GHCR
-        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0
         if: ${{ github.event_name == 'push' || inputs.push_image != false }}
         with:
           registry: ${{ env.REGISTRY }}
@@ -501,7 +501,7 @@ jobs:
       # ── 14. Docker image metadata ───────────────────────────────────────────
       - name: Docker metadata
         id: meta
-        uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
@@ -511,7 +511,7 @@ jobs:
 
       # ── 15. Build and push Docker image ────────────────────────────────────
       - name: Build and push Docker image
-        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a
         with:
           context: .
           file: eliza/packages/app-core/deploy/Dockerfile.ci
