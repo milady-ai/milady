@@ -153,21 +153,36 @@ export async function runHydrating(
   void deps.loadPlugins();
   void deps.loadCharacter();
 
-  // Wallet addresses
-  try {
-    deps.setWalletAddresses(await client.getWalletAddresses());
-  } catch (e) {
-    warn("wallet addresses", e);
-  }
+  // ── Wallet addresses — DEFERRED, not awaited ───────────────────────
+  // Wallet addresses are only consumed by the Eliza Cloud dashboard and
+  // the wallets/inventory tab — never by the landing (chat/companion)
+  // view. getWalletAddresses() has been measured at 1.3–12 s on cloud
+  // containers (steward round-trip), so awaiting it here needlessly
+  // stalled time-to-interactive by multiple seconds. Fire-and-forget:
+  // the state populates when it resolves; the dashboard reads it lazily.
+  void (async () => {
+    try {
+      deps.setWalletAddresses(await client.getWalletAddresses());
+    } catch (e) {
+      warn("wallet addresses", e);
+    }
+  })();
 
-  // Avatar / VRM selection — resolve from server config, then stream
-  // settings, then localStorage.  Cloud containers that skip onboarding
-  // have their character defaults written server-side, so we must read
-  // the config to pick up the correct avatarIndex.
+  // ── Avatar / VRM selection ─────────────────────────────────────────
+  // Resolve from server config, then stream settings, then localStorage.
+  // Cloud containers that skip onboarding have their character defaults
+  // written server-side, so we must read the config to pick up the
+  // correct avatarIndex. config + streamSettings are INDEPENDENT reads —
+  // run them in parallel instead of serially (was ~2× the round-trip).
   let resolvedIdx = loadAvatarIndex();
-  try {
-    const cfg = await client.getConfig();
-    const cfgUi = cfg?.ui as Record<string, unknown> | undefined;
+  const [cfgResult, streamResult] = await Promise.allSettled([
+    client.getConfig(),
+    typeof client.getStreamSettings === "function"
+      ? client.getStreamSettings()
+      : Promise.resolve(null),
+  ]);
+  if (cfgResult.status === "fulfilled") {
+    const cfgUi = cfgResult.value?.ui as Record<string, unknown> | undefined;
     const cfgAvatarIdx = cfgUi?.avatarIndex;
     if (typeof cfgAvatarIdx === "number" && Number.isFinite(cfgAvatarIdx)) {
       const normalized = normalizeAvatarIndex(cfgAvatarIdx);
@@ -176,26 +191,29 @@ export async function runHydrating(
         deps.setSelectedVrmIndex(resolvedIdx);
       }
     }
-  } catch (e) {
-    warn("config avatar index", e);
+  } else {
+    warn("config avatar index", cfgResult.reason);
   }
-  try {
-    if (typeof client.getStreamSettings === "function") {
-      const stream = await client.getStreamSettings();
-      const si = stream.settings?.avatarIndex;
-      if (typeof si === "number" && Number.isFinite(si)) {
-        resolvedIdx = normalizeAvatarIndex(si);
-        deps.setSelectedVrmIndex(resolvedIdx);
-      }
+  // stream settings win over config when present
+  if (streamResult.status === "fulfilled" && streamResult.value) {
+    const si = streamResult.value.settings?.avatarIndex;
+    if (typeof si === "number" && Number.isFinite(si)) {
+      resolvedIdx = normalizeAvatarIndex(si);
+      deps.setSelectedVrmIndex(resolvedIdx);
     }
-  } catch (e) {
-    warn("stream settings avatar", e);
+  } else if (streamResult.status === "rejected") {
+    warn("stream settings avatar", streamResult.reason);
   }
   if (resolvedIdx === 0) {
-    if (await client.hasCustomVrm())
+    // custom vrm + custom background probes are independent — parallelize.
+    const [hasVrm, hasBg] = await Promise.all([
+      client.hasCustomVrm().catch(() => false),
+      client.hasCustomBackground().catch(() => false),
+    ]);
+    if (hasVrm)
       deps.setCustomVrmUrl(resolveApiUrl(`/api/avatar/vrm?t=${Date.now()}`));
     else deps.setSelectedVrmIndex(1);
-    if (await client.hasCustomBackground())
+    if (hasBg)
       deps.setCustomBackgroundUrl(
         resolveApiUrl(`/api/avatar/background?t=${Date.now()}`),
       );
@@ -209,33 +227,26 @@ export async function runHydrating(
   // noticeable in cloud containers where the CDN round-trip is the
   // bottleneck.
   //
-  // We await the active VRM prefetch (with a 15s timeout) rather than
-  // firing and forgetting. This ensures the in-memory buffer cache is
-  // populated *before* HYDRATION_COMPLETE, so the companion scene gets
-  // an instant cache hit instead of starting a duplicate network download.
-  //
-  // Additionally, fire-and-forget prefetches for ALL other VRM assets so
-  // navigating to the customize/character page doesn't trigger a full
-  // re-download of every character model.
+  // Previously this AWAITED the active VRM prefetch (with a 15 s timeout)
+  // before dispatching HYDRATION_COMPLETE — blocking the dashboard from
+  // becoming interactive for up to 15 s while 3D assets downloaded. That
+  // is the single largest post-login stall on cold cache. We now warm the
+  // cache in the BACKGROUND (fire-and-forget) and let hydration complete
+  // immediately: the companion scene renders as soon as its assets arrive,
+  // and because loadGltfAsset joins in-flight downloads via the inflight
+  // dedup map, the scene still gets the warmed buffer with no duplicate
+  // fetch — we simply no longer make the ENTIRE dashboard wait on it.
   if (COMPANION_ENABLED) {
     const vrmIdx = resolvedIdx > 0 ? resolvedIdx : 1;
-    const vrmPrefetch = prefetchVrmToCache(getVrmUrl(vrmIdx));
+    // Active companion VRM — warm in-memory buffer cache (background).
+    void prefetchVrmToCache(getVrmUrl(vrmIdx));
+    // Gaussian-splat world — warm the browser HTTP cache (background).
     const theme = loadUiTheme();
     const worldUrl =
       theme === "dark"
         ? resolveAppAssetUrl("worlds/companion-night.spz")
         : resolveAppAssetUrl("worlds/companion-day.spz");
-    const worldPrefetch = fetch(worldUrl, { cache: "force-cache" }).catch(
-      () => {},
-    );
-    // Wait for both but cap at 15s so hydration isn't blocked forever on
-    // slow networks. Even if the timeout fires, the in-flight prefetch
-    // continues in the background and loadGltfAsset will join it via the
-    // inflight dedup map.
-    await Promise.race([
-      Promise.all([vrmPrefetch, worldPrefetch]),
-      new Promise((resolve) => setTimeout(resolve, 15_000)),
-    ]);
+    void fetch(worldUrl, { cache: "force-cache" }).catch(() => {});
 
     // Fire-and-forget: warm the cache for all other VRM assets so the
     // customize page does not need to re-download them on first visit.
@@ -248,7 +259,8 @@ export async function runHydrating(
   }
 
   void deps.pollCloudCredits();
-  await deps.fetchAutonomyReplay();
+  // Autonomy replay is not needed for first paint — don't block on it.
+  void deps.fetchAutonomyReplay();
 
   // Tab routing
   const navPath = getNavigationPathFromWindow();
