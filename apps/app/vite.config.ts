@@ -2355,6 +2355,29 @@ function generateNativeModuleStub(
   ) {
     return generateElizaAgentStub();
   }
+  if (strippedId === "@elizaos/plugin-elizacloud") {
+    // Mirrors the upstream renderer stub (elizaOS packages/app
+    // native-module-stub-plugin): every server-only export the app-core dist
+    // barrel re-exports resolves to a noop so rollup's static named-import
+    // scan passes; the Proxy default swallows future property access.
+    return [
+      "const noop = () => undefined;",
+      "export const clearCloudSecrets = noop;",
+      "export const ensureCloudTtsApiKeyAlias = noop;",
+      "export const getCloudSecret = noop;",
+      "export const handleCloudTtsPreviewRoute = noop;",
+      "export const mirrorCompatHeaders = noop;",
+      "export const normalizeCloudSiteUrl = noop;",
+      "export const __resetCloudBaseUrlCache = noop;",
+      "export const resolveCloudTtsBaseUrl = noop;",
+      "export const resolveElevenLabsApiKeyForCloudMode = noop;",
+      "export const elizaOSCloudPlugin = { name: 'elizaOSCloud', description: 'browser stub' };",
+      "export const DEFAULT_CLOUD_CONFIG = { enabled: false };",
+      "export class CloudApiError extends Error {}",
+      "export class InsufficientCreditsError extends Error {}",
+      "export default new Proxy(noop, { get: () => noop, apply: () => undefined });",
+    ].join("\n");
+  }
 
   const modName = strippedId.startsWith("@")
     ? strippedId.split("/").slice(0, 2).join("/")
@@ -2489,13 +2512,12 @@ function nativeModuleStubPlugin(): Plugin {
       // Plugin-elizacloud is server-only (cloud secrets, TTS routing).
       // The renderer reaches it transitively through `dist/api/onboarding-routes.js`
       // re-exports; stub the entire surface so static named-import scans pass.
+      // Always the virtual stub: the app-core file this used to point at
+      // (`platform/elizaos-plugin-elizacloud-browser-stub.ts`) was removed
+      // upstream (elizaOS #16535), so reaching into app-core src here breaks
+      // local-mode builds.
       if (id === "@elizaos/plugin-elizacloud") {
-        return appCoreSrcRoot
-          ? path.join(
-              appCoreSrcRoot,
-              "platform/elizaos-plugin-elizacloud-browser-stub.ts",
-            )
-          : VIRTUAL_PREFIX + id;
+        return VIRTUAL_PREFIX + id;
       }
       // Some published/browser-side packages still deep-import this app-core
       // compatibility module even though the local app-core export map does
