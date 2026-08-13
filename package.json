@@ -142,7 +142,7 @@
     "desktop:stack-status": "node scripts/run-eliza-app-core-script.mjs desktop-stack-status.mjs"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.58",
+    "@ai-sdk/anthropic": "^4.0.36",
     "@bufbuild/protobuf": "^2.11.0",
     "@clack/prompts": "^1.1.0",
     "@electric-sql/pglite": "^0.5.1",
