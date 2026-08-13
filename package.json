@@ -173,7 +173,7 @@
     "@elizaos/app-core": "alpha",
     "@elizaos/css-color-cjs": "npm:@asamuzakjp/css-color@4.1.2",
     "@elizaos/schemas": "alpha",
-    "@noble/curves": "2.2.0",
+    "@noble/curves": "2.3.0",
     "@pixiv/three-vrm": "^3.5.1",
     "@radix-ui/react-checkbox": "^1.3.3",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -206,7 +206,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.7",
-    "@capacitor/core": "8.4.0",
+    "@capacitor/core": "8.5.0",
     "@testing-library/react": "^16.3.2",
     "@types/bun": "^1.3.10",
     "@types/cross-spawn": "^6.0.6",
@@ -236,7 +236,7 @@
   "overrides": {
     "@capacitor/android": "8.3.1",
     "@capacitor/app": "8.1.0",
-    "@capacitor/core": "8.4.0",
+    "@capacitor/core": "8.5.0",
     "@capacitor/haptics": "8.0.2",
     "@capacitor/ios": "8.3.1",
     "@capacitor/keyboard": "8.0.3",
