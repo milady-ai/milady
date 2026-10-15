@@ -132,7 +132,7 @@ jobs:
       desktop_matrix: ${{ steps.desktop-matrix.outputs.desktop_matrix }}
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           submodules: false
 
@@ -324,7 +324,7 @@ jobs:
         shell: bash -euo pipefail {0}
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           submodules: false
 
@@ -346,7 +346,7 @@ jobs:
         run: node scripts/apply-eliza-ci-patches.mjs
 
       - name: Setup Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: "24"
 
@@ -402,7 +402,7 @@ jobs:
           test -s "$ELIZA_WHISPER_MODEL_DIR/ggml-base.en.bin"
 
       - name: Upload Whisper model artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: whisper-model-base-en
           path: ${{ runner.temp }}/whisper-model/ggml-base.en.bin
@@ -498,7 +498,7 @@ jobs:
       ELIZA_RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           submodules: false
 
@@ -520,7 +520,7 @@ jobs:
         run: node scripts/apply-eliza-ci-patches.mjs
 
       - name: Setup Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: "24"
 
@@ -541,7 +541,7 @@ jobs:
 
       - name: Upload Agent Browser Bridge release artifacts
         if: steps.package-browser-bridge.outputs.packaged == 'true'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: browser-bridge-store-bundles
           path: |
@@ -561,7 +561,7 @@ jobs:
         shell: bash -euo pipefail {0}
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           submodules: false
 
@@ -582,7 +582,7 @@ jobs:
         run: bash eliza/packages/app-core/platforms/electrobun/scripts/ensure-whisper-gguf.sh base.en
 
       - name: Upload Whisper model artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: whisper-model-base-en
           path: ${{ runner.temp }}/whisper-model/ggml-base.en.bin
@@ -625,7 +625,7 @@ jobs:
           }
 
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           submodules: false
 
@@ -647,7 +647,7 @@ jobs:
         run: node scripts/apply-eliza-ci-patches.mjs
 
       - name: Setup Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: "24"
 
@@ -783,7 +783,7 @@ jobs:
 
       - name: Download Whisper model artifact
         if: ${{ needs.validate-release.result == 'success' }}
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           name: whisper-model-base-en
           path: ${{ runner.temp }}/whisper-model
@@ -987,7 +987,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Cache Electrobun CLI and core binaries
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         with:
           path: |
             ${{ steps.resolve-electrobun.outputs.cache-dir }}
@@ -1129,7 +1129,7 @@ jobs:
 
       - name: Upload Electrobun build diagnostics
         if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: electrobun-${{ matrix.platform.artifact-name }}-build-diagnostics
           path: |
@@ -1329,7 +1329,7 @@ jobs:
 
       - name: Cache Windows embedding model
         if: matrix.platform.os == 'windows' && steps.build-electrobun-app.outputs.fallback != 'true'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         with:
           path: ~/.eliza/models
           key: embedding-model-nomic-embed-text-v1.5-Q4_K_S
@@ -1451,7 +1451,7 @@ jobs:
 
       - name: Upload Windows installer proof artifact
         if: always() && matrix.platform.os == 'windows'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: electrobun-windows-installer-proof
           path: eliza/packages/app-core/platforms/electrobun/artifacts/windows-installer-proof/**
@@ -1460,7 +1460,7 @@ jobs:
 
       - name: Upload Windows installer .exe + Inno log on smoke failure
         if: failure() && matrix.platform.os == 'windows'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: electrobun-windows-installer-debug
           path: |
@@ -1496,7 +1496,7 @@ jobs:
 
       - name: Upload Windows Playwright UI diagnostics
         if: failure() && matrix.platform.os == 'windows'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: electrobun-windows-ui-playwright-diagnostics
           # TODO: confirm packaged-app Playwright result location in eliza
@@ -1843,7 +1843,7 @@ jobs:
 
       - name: Upload Windows smoke diagnostics
         if: failure() && matrix.platform.os == 'windows'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: electrobun-${{ matrix.platform.artifact-name }}-smoke-diagnostics
           path: eliza/packages/app-core/platforms/electrobun/artifacts/windows-smoke-diagnostics/**
@@ -1852,7 +1852,7 @@ jobs:
 
       - name: Upload macOS smoke diagnostics
         if: failure() && matrix.platform.os == 'macos'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: electrobun-${{ matrix.platform.artifact-name }}-smoke-diagnostics
           path: |
@@ -1954,7 +1954,7 @@ jobs:
 
       - name: Upload public canary installer artifact
         if: matrix.platform.os == 'windows' && needs.prepare.outputs.env == 'canary' && steps.build-electrobun-app.outputs.fallback != 'true'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: electrobun-${{ matrix.platform.artifact-name }}-public-installer
           path: eliza/packages/app-core/platforms/electrobun/artifacts/public-canary-installer/Milady-Setup-*.exe
@@ -1963,7 +1963,7 @@ jobs:
           compression-level: 0
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: electrobun-${{ matrix.platform.artifact-name }}
           path: |
@@ -1989,10 +1989,10 @@ jobs:
       packages: write
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Download all artifacts
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           path: release-artifacts
           pattern: electrobun-*
@@ -2060,7 +2060,7 @@ jobs:
           cat SHA256SUMS.txt
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64
         with:
           tag_name: ${{ needs.prepare.outputs.tag }}
           target_commitish: ${{ needs.prepare.outputs.source_sha }}
@@ -2116,7 +2116,7 @@ jobs:
       contents: write
     steps:
       - name: Download Agent Browser Bridge artifacts
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           path: browser-bridge-release
           pattern: browser-bridge-*
